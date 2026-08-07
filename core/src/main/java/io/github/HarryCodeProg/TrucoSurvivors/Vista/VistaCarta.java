@@ -184,7 +184,7 @@ public class VistaCarta implements Arrastrable{
     }
 
     /** Cambiar boca abajo ahora solo cambia la region, no crea/destruye texturas. */
-    public void cambiarBocaAbajo(TextureAtlas atlas){
+    public void ponerBocaArriba(TextureAtlas atlas){
         this.bocaAbajo = false;
         this.region = atlas.findRegion(carta.getNombreRegion());
     }

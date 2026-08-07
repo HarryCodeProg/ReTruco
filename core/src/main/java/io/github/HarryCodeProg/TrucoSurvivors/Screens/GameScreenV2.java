@@ -396,7 +396,7 @@ public class GameScreenV2 implements Screen {
     public void jugarCartaRival(VistaCarta vistaCarta) {
         vistaCarta.setTamaño(ANCHO_CARTA_MESA, ALTO_CARTA_MESA);
         cartasRival.remove(vistaCarta);
-        vistaCarta.cambiarBocaAbajo(game.getAtlasCartas());
+        vistaCarta.ponerBocaArriba(game.getAtlasCartas());
         cartasMesaRival.add(vistaCarta);
         juego.agregarCartaRival(vistaCarta.getCarta());
         organizarCartas();
