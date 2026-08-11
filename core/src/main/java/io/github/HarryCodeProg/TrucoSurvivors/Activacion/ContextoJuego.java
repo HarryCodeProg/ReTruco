@@ -27,6 +27,9 @@ public class ContextoJuego {
     // Flags para "primera carta que mata/no mata" durante la resolución actual
     private boolean primerCartaQueMataAplicada = false;
     private boolean primerCartaQueNoMataAplicada = false;
+    // Flags para "primera carta figura/no figura que puntua" durante la resolución actual
+    private boolean primerFiguraPuntuadaAplicada = false;
+    private boolean primerNoFiguraPuntuadaAplicada = false;
     private Carta cartaOponenteEnResolucion;
 
     public ContextoJuego(Jugador jugador, Jugador rival, Mazo mazo, Mesa mesa, Juego juego) {
@@ -115,6 +118,12 @@ public class ContextoJuego {
 
     public boolean isPrimerCartaQueNoMataAplicada() { return primerCartaQueNoMataAplicada; }
     public void marcarPrimerCartaQueNoMataAplicada() { this.primerCartaQueNoMataAplicada = true; }
+    public boolean isPrimerFiguraPuntuadaAplicada() { return primerFiguraPuntuadaAplicada; }
+    public void marcarPrimerFiguraPuntuadaAplicada() { this.primerFiguraPuntuadaAplicada = true; }
+
+    public boolean isPrimerNoFiguraPuntuadaAplicada() { return primerNoFiguraPuntuadaAplicada; }
+    public void marcarPrimerNoFiguraPuntuadaAplicada() { this.primerNoFiguraPuntuadaAplicada = true; }
+
     public Carta getCartaOponenteEnResolucion() { return cartaOponenteEnResolucion; }
     public void setCartaOponenteEnResolucion(Carta carta) { this.cartaOponenteEnResolucion = carta; }
 }
