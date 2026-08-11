@@ -167,6 +167,8 @@ public class Juego {
 
     public boolean hayDescartes(){ return this.descartesActuales > 0; }
 
+    public int getDescartesActuales(){ return this.descartesActuales; }
+
     public void restarUnDescarte(){ this.descartesActuales -= 1; }
 
     public int getMazoDisponible(){ return jugador.getMazo().getCantidadDisponibles(); }
