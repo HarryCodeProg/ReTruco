@@ -3,18 +3,29 @@ package io.github.HarryCodeProg.TrucoSurvivors.Cartas;
 public class Carta {
     private int numero;
     private Palo palo;
-    private int valorTrucoBase;
-    private int valorTrucoActual;
-    private int valorEnvidoBase;
-    private int valorEnvidoActual;
-    private int bonusTrucoPermanente = 0;
-    private int bonusEnvidoPermanente = 0;
-    // Multiplicador propio de la carta, separado en persistente (base) y no-persistente (temporal).
-    // Efectivo = base + temporal. El temporal se resetea en cada resetearValores().
-    private double multiplicadorTrucoPropioBase = 1.0;
-    private double multiplicadorTrucoPropioTemporal = 0.0;
-    private double multiplicadorEnvidoPropioBase = 1.0;
-    private double multiplicadorEnvidoPropioTemporal = 0.0;
+    // --- 1. JERARQUÍA / PODER DE LA CARTA (qué mata a qué) ---
+    private int valorTrucoPoderBase;
+    private int valorTrucoPoderActual;
+    private int bonusPoderTrucoPermanente = 0;
+    private double multiplicadorPoderTrucoBase = 1.0;
+    private double multiplicadorPoderTrucoTemporal = 0.0;
+    // --- 2. APORTE A LA PUNTUACIÓN (Puntos Truco / Chips) ---
+    private int puntosTrucoAporteBase;      // Ej: 10 para 7 de ORO
+    private int puntosTrucoAporteActual;    // Aporte actual (incluye permanentes)
+    private int bonusAporteTrucoPermanente = 0;
+    private double multiplicadorAporteTrucoBase = 1.0;
+    private double multiplicadorAporteTrucoTemporal = 0.0;
+    // --- 3. ENVIDO (poder/valor y aporte) ---
+    private int valorEnvidoPoderBase;
+    private int valorEnvidoPoderActual;
+    private int bonusPoderEnvidoPermanente = 0;
+    private double multiplicadorPoderEnvidoBase = 1.0;
+    private double multiplicadorPoderEnvidoTemporal = 0.0;
+    private int puntosEnvidoAporteBase;     // aporte numérico de la carta cuando participa en envido
+    private int puntosEnvidoAporteActual;
+    private int bonusAporteEnvidoPermanente = 0;
+    private double multiplicadorAporteEnvidoBase = 1.0;
+    private double multiplicadorAporteEnvidoTemporal = 0.0;
 
     public Carta(int numero, Palo palo){
         this.numero = numero;
@@ -23,145 +34,186 @@ public class Carta {
         resetearValores();
     }
 
-    public int getNumero(){
-        return this.numero;
+    // -------------------- GETTERS BÁSICOS --------------------
+
+    public int getNumero(){ return this.numero; }
+    public Palo getPalo(){ return this.palo; }
+
+    // Jerarquía / Poder (compatibilidad con API previa)
+    public int getValorTrucoBase() { return this.valorTrucoPoderBase; }
+    public int getValorTrucoActual() { return this.valorTrucoPoderActual; }
+
+    // Envido base/actual
+    public int getValorEnvidoBase() { return this.valorEnvidoPoderBase; }
+    public int getValorEnvidoActual() { return this.valorEnvidoPoderActual; }
+
+    // Puntos / Aporte
+    public int getPuntosTrucoAporteActual() { return this.puntosTrucoAporteActual; }
+    public int getPuntosEnvidoAporteActual() { return this.puntosEnvidoAporteActual; }
+
+    // ---------------- Multiplicadores efectivos ----------------
+
+    // Poder (jerarquía)
+    public double getMultiplicadorPoderTruco() {
+        return multiplicadorPoderTrucoBase + multiplicadorPoderTrucoTemporal;
+    }
+    public void sumarMultiplicadorTrucoTemporal(double cantidad) { this.multiplicadorPoderTrucoTemporal += cantidad; }
+    public void sumarMultiplicadorTrucoPermanente(double cantidad) { this.multiplicadorPoderTrucoBase += cantidad; }
+
+    // Aporte (chips) - truco
+    public double getMultiplicadorAporteTruco() {
+        return multiplicadorAporteTrucoBase + multiplicadorAporteTrucoTemporal;
+    }
+    public void sumarMultiplicadorTrucoAporteTemporal(double cantidad) { this.multiplicadorAporteTrucoTemporal += cantidad; }
+    public void sumarMultiplicadorTrucoAportePermanente(double cantidad) { this.multiplicadorAporteTrucoBase += cantidad; }
+
+    // Poder envido
+    public double getMultiplicadorPoderEnvido() {
+        return multiplicadorPoderEnvidoBase + multiplicadorPoderEnvidoTemporal;
+    }
+    public void sumarMultiplicadorPoderEnvidoTemporal(double cantidad) { this.multiplicadorPoderEnvidoTemporal += cantidad; }
+    public void sumarMultiplicadorPoderEnvidoPermanente(double cantidad) { this.multiplicadorPoderEnvidoBase += cantidad; }
+
+    // Aporte envido
+    public double getMultiplicadorAporteEnvido() {
+        return multiplicadorAporteEnvidoBase + multiplicadorAporteEnvidoTemporal;
+    }
+    public void sumarMultiplicadorAporteEnvidoTemporal(double cantidad) { this.multiplicadorAporteEnvidoTemporal += cantidad; }
+    public void sumarMultiplicadorAporteEnvidoPermanente(double cantidad) { this.multiplicadorAporteEnvidoBase += cantidad; }
+
+    // ---------------- Valores efectivos calculados ----------------
+
+    /** La jerarquía final que se usa para comparar contra otra carta (para "matar"). */
+    public int getValorTrucoPoderActual() {
+        return valorTrucoPoderActual;
     }
 
-    public Palo getPalo(){
-        return this.palo;
+    /** Valor de truco final usado en comparaciones (aplica multiplicador de poder). */
+    public int getValorTrucoEfectivo() {
+        return (int) Math.round(valorTrucoPoderActual * getMultiplicadorPoderTruco());
     }
 
-    public int getValorTrucoBase() {
-        return this.valorTrucoBase;
+    public int getValorEnvidoEfectivo() {
+        return (int) Math.round(valorEnvidoPoderActual * getMultiplicadorPoderEnvido());
     }
 
-    public int getValorEnvidoBase(){
-        return this.valorEnvidoBase;
+    /** La cantidad final de Chips que aporta esta carta al activarse en Truco. */
+    public int getPuntosTrucoAporteEfectivo() {
+        return (int) Math.round(puntosTrucoAporteActual * getMultiplicadorAporteTruco());
     }
 
-    public int getValorTrucoActual() {
-        return this.valorTrucoActual;
+    /** La cantidad final de Puntos Envido que aporta esta carta al participar en el envido. */
+    public int getPuntosEnvidoAporteEfectivo() {
+        return (int) Math.round(puntosEnvidoAporteActual * getMultiplicadorAporteEnvido());
     }
 
-    public int getValorEnvidoActual(){
-        return this.valorEnvidoActual;
+    // -------------------- MODIFICADORES --------------------
+
+    // ---------- PODER (jerarquía) ----------
+    /** No persiste: modifica poder jerárquico temporalmente (se resetea en resetearValores()). */
+    public void modificarValorTruco(int cantidad) { valorTrucoPoderActual += cantidad; }
+
+    /** Persiste: modifica poder jerárquico permanentemente. */
+    public void modificarValorTrucoPermanente(int cantidad) {
+        this.bonusPoderTrucoPermanente += cantidad;
+        this.valorTrucoPoderActual += cantidad;
     }
+
+    // ---------- APORTE (Puntos Truco / Chips) ----------
+    /** No persiste: modifica el aporte de puntos truco temporalmente (se resetea en resetearValores()). */
+    public void modificarPuntosTrucoAporte(int cantidad) { puntosTrucoAporteActual += cantidad; }
+
+    /** Persiste: modifica el aporte de puntos truco permanentemente. */
+    public void modificarPuntosTrucoAportePermanente(int cantidad) {
+        this.bonusAporteTrucoPermanente += cantidad;
+        this.puntosTrucoAporteActual += cantidad;
+    }
+
+    // ---------- ENVIDO ----------
+    /** No persiste: modifica valor de envido temporalmente. */
+    public void modificarValorEnvido(int cantidad) { valorEnvidoPoderActual += cantidad; }
+
+    /** Persiste: modifica valor de envido permanentemente. */
+    public void modificarValorEnvidoPermanente(int cantidad) {
+        this.bonusPoderEnvidoPermanente += cantidad;
+        this.valorEnvidoPoderActual += cantidad;
+    }
+
+    /** No persiste: modifica aporte de envido temporalmente. */
+    public void modificarPuntosEnvidoAporte(int cantidad) { puntosEnvidoAporteActual += cantidad; }
+
+    /** Persiste: modifica aporte de envido permanentemente. */
+    public void modificarPuntosEnvidoAportePermanente(int cantidad) {
+        this.bonusAporteEnvidoPermanente += cantidad;
+        this.puntosEnvidoAporteActual += cantidad;
+    }
+
+    // Wrappers / compatibilidad por si otras partes del código usan nombres anteriores:
+    public void modificarValorTrucoPermanenteAlias(int cantidad) { modificarValorTrucoPermanente(cantidad); }
+    public void modificarValorEnvidoPermanenteAlias(int cantidad) { modificarValorEnvidoPermanente(cantidad); }
+    public void modificarPuntosTruco(int cantidad) { modificarPuntosTrucoAporte(cantidad); }
+    public void modificarPuntosTrucoPermanente(int cantidad) { modificarPuntosTrucoAportePermanente(cantidad); }
+
+    // -------------------- Inicialización / reset --------------------
 
     public void calcularValoresBase() {
-        if (numero == 1 && palo == Palo.ESPADA) valorTrucoBase = 16;
-        else if (numero == 1 && palo == Palo.BASTO) valorTrucoBase = 15;
-        else if (numero == 7 && palo == Palo.ESPADA) valorTrucoBase = 14;
-        else if (numero == 7 && palo == Palo.ORO) valorTrucoBase = 13;
+        // --- Jerarquía / Poder (mapeo clásico de Truco) ---
+        if (numero == 1 && palo == Palo.ESPADA) valorTrucoPoderBase = 16;
+        else if (numero == 1 && palo == Palo.BASTO) valorTrucoPoderBase = 15;
+        else if (numero == 7 && palo == Palo.ESPADA) valorTrucoPoderBase = 14;
+        else if (numero == 7 && palo == Palo.ORO) valorTrucoPoderBase = 13;
         else {
             switch (numero) {
-                case 3: valorTrucoBase = 12; break;
-                case 2: valorTrucoBase = 11; break;
-                case 1: valorTrucoBase = 10; break;
-                case 12: valorTrucoBase = 9; break;
-                case 11: valorTrucoBase = 8; break;
-                case 10: valorTrucoBase = 7; break;
-                case 9: valorTrucoBase = 6; break;
-                case 8: valorTrucoBase = 5; break;
-                case 7: valorTrucoBase = 4; break;
-                case 6: valorTrucoBase = 3; break;
-                case 5: valorTrucoBase = 2; break;
-                case 4: valorTrucoBase = 1; break;
+                case 3: valorTrucoPoderBase = 12; break;
+                case 2: valorTrucoPoderBase = 11; break;
+                case 1: valorTrucoPoderBase = 10; break;
+                case 12: valorTrucoPoderBase = 9; break;
+                case 11: valorTrucoPoderBase = 8; break;
+                case 10: valorTrucoPoderBase = 7; break;
+                case 9: valorTrucoPoderBase = 6; break;
+                case 8: valorTrucoPoderBase = 5; break;
+                case 7: valorTrucoPoderBase = 4; break;
+                case 6: valorTrucoPoderBase = 3; break;
+                case 5: valorTrucoPoderBase = 2; break;
+                case 4: valorTrucoPoderBase = 1; break;
+                default: valorTrucoPoderBase = 0; break;
             }
         }
-        this.valorEnvidoBase = (numero >= 10) ? 0 : numero;
-        this.valorEnvidoActual = valorEnvidoBase;
+
+        // --- Puntos Truco / Aporte base (ejemplo -- ajustar si querés otros valores) ---
+        if (numero == 7 && palo == Palo.ORO) puntosTrucoAporteBase = 10;
+        else if (numero == 7 && palo == Palo.ESPADA) puntosTrucoAporteBase = 8;
+        else if (numero == 3) puntosTrucoAporteBase = 5;
+        else if (numero == 2) puntosTrucoAporteBase = 3;
+        else if (numero == 1) puntosTrucoAporteBase = 1;
+        else puntosTrucoAporteBase = 0;
+
+        // --- Envido (poder/valor) ---
+        this.valorEnvidoPoderBase = (numero >= 10) ? 0 : numero;
+        this.puntosEnvidoAporteBase = this.valorEnvidoPoderBase;
     }
 
     /**
-     * Se llama al pasar de mano (devolverCartas). Restaura valorTruco/valorEnvido
-     * a su base + bonus permanente, y limpia cualquier multiplicador temporal
-     * (no-persistente) que se haya acumulado durante la mano anterior.
-     * Los bonus permanentes y los multiplicadores base NO se tocan aca: persisten.
+     * Se llama al finalizar la mano / devolverCartas: restaura valores a su estado base + permanentes
+     * y limpia cualquier multiplicador/valor temporal.
      */
     public void resetearValores() {
-        valorTrucoActual = valorTrucoBase + bonusTrucoPermanente;
-        valorEnvidoActual = valorEnvidoBase + bonusEnvidoPermanente;
-        multiplicadorTrucoPropioTemporal = 0.0;
-        multiplicadorEnvidoPropioTemporal = 0.0;
+        // Reset Poder (jerarquía)
+        valorTrucoPoderActual = valorTrucoPoderBase + bonusPoderTrucoPermanente;
+        multiplicadorPoderTrucoTemporal = 0.0;
+
+        // Reset Aporte (Puntos Truco)
+        puntosTrucoAporteActual = puntosTrucoAporteBase + bonusAporteTrucoPermanente;
+        multiplicadorAporteTrucoTemporal = 0.0;
+
+        // Reset Envido
+        valorEnvidoPoderActual = valorEnvidoPoderBase + bonusPoderEnvidoPermanente;
+        multiplicadorPoderEnvidoTemporal = 0.0;
+        puntosEnvidoAporteActual = puntosEnvidoAporteBase + bonusAporteEnvidoPermanente;
+        multiplicadorAporteEnvidoTemporal = 0.0;
     }
 
-    /** No persiste: se resetea en resetearValores(). Se acumula con otros efectos iguales durante la mano. */
-    public void modificarValorTruco(int cantidad) {
-        valorTrucoActual += cantidad;
-    }
-
-    /** No persiste: idem para envido. */
-    public void modificarValorEnvido(int cantidad) {
-        valorEnvidoActual += cantidad;
-    }
-
-    /** Persiste para siempre en esta carta (hasta que algo especial lo revierta). */
-    public void modificarValorTrucoPermanente(int cantidad) {
-        this.bonusTrucoPermanente += cantidad;
-        this.valorTrucoActual += cantidad;
-    }
-
-    /** Persiste para siempre en esta carta. */
-    public void modificarValorEnvidoPermanente(int cantidad) {
-        this.bonusEnvidoPermanente += cantidad;
-        this.valorEnvidoActual += cantidad;
-    }
-
-    // ---------------- Multiplicador propio: TRUCO ----------------
-
-    /** Persiste: queda para siempre en la carta. */
-    public void sumarMultiplicadorTrucoPermanente(double cantidad) {
-        this.multiplicadorTrucoPropioBase += cantidad;
-    }
-
-    /** No persiste: se acumula durante la mano, se resetea en resetearValores(). */
-    public void sumarMultiplicadorTrucoTemporal(double cantidad) {
-        this.multiplicadorTrucoPropioTemporal += cantidad;
-    }
-
-    public double getMultiplicadorTrucoPropioBase() { return multiplicadorTrucoPropioBase; }
-    public double getMultiplicadorTrucoPropioTemporal() { return multiplicadorTrucoPropioTemporal; }
-
-    /** Multiplicador propio efectivo: base (persistente) + temporal (de esta mano). */
-    public double getMultiplicadorTrucoPropio() {
-        return multiplicadorTrucoPropioBase + multiplicadorTrucoPropioTemporal;
-    }
-
-    public double getValorTrucoEfectivo() {
-        return valorTrucoActual * getMultiplicadorTrucoPropio();
-    }
-
-    // ---------------- Multiplicador propio: ENVIDO ----------------
-
-    /** Persiste: queda para siempre en la carta. */
-    public void sumarMultiplicadorEnvidoPermanente(double cantidad) {
-        this.multiplicadorEnvidoPropioBase += cantidad;
-    }
-
-    /** No persiste: se acumula durante la mano, se resetea en resetearValores(). */
-    public void sumarMultiplicadorEnvidoTemporal(double cantidad) {
-        this.multiplicadorEnvidoPropioTemporal += cantidad;
-    }
-
-    public double getMultiplicadorEnvidoPropioBase() { return multiplicadorEnvidoPropioBase; }
-    public double getMultiplicadorEnvidoPropioTemporal() { return multiplicadorEnvidoPropioTemporal; }
-
-    /** Multiplicador propio efectivo: base (persistente) + temporal (de esta mano). */
-    public double getMultiplicadorEnvidoPropio() {
-        return multiplicadorEnvidoPropioBase + multiplicadorEnvidoPropioTemporal;
-    }
-
-    public double getValorEnvidoEfectivo() {
-        return valorEnvidoActual * getMultiplicadorEnvidoPropio();
-    }
-
-    public String getRutaImagen() {
-        return "imagenesCartas/" +
-            numero +
-            "_" +
-            palo.name().toLowerCase() +
-            ".PNG";
-    }
+    // -------------------- Utilidades / representación --------------------
 
     public String paloToString() {
         switch (this.palo) {

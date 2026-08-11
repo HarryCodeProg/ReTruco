@@ -184,7 +184,7 @@ public class VistaCarta implements Arrastrable{
     }
 
     /** Cambiar boca abajo ahora solo cambia la region, no crea/destruye texturas. */
-    public void cambiarBocaAbajo(TextureAtlas atlas){
+    public void cambiarBocaArriba(TextureAtlas atlas){
         this.bocaAbajo = false;
         this.region = atlas.findRegion(carta.getNombreRegion());
     }
@@ -315,6 +315,13 @@ public class VistaCarta implements Arrastrable{
         float h = height * scale;
         float drawY = y + visualOffsetY;
         return mx >= x && mx <= x + w && my >= drawY && my <= drawY + h;
+    }
+
+    // Agregar en VistaCarta.java
+    public void renderCartelStats(SpriteBatch batch, io.github.HarryCodeProg.TrucoSurvivors.Main game) {
+        if (!hover || bocaAbajo || carta == null) return;
+        float drawY = y + visualOffsetY;
+        dibujarCartelStats(batch, game, drawY);
     }
 
     public void setEnModal(boolean enModal) { this.enModal = enModal; }

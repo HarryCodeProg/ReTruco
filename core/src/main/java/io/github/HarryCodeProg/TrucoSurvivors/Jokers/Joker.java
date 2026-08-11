@@ -2,6 +2,7 @@ package io.github.HarryCodeProg.TrucoSurvivors.Jokers;
 
 import io.github.HarryCodeProg.TrucoSurvivors.Activacion.ContextoJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.EventoJuego;
+import io.github.HarryCodeProg.TrucoSurvivors.Jugador;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 
 import java.util.Collections;
@@ -17,6 +18,7 @@ public abstract class Joker {
     private int id;
     private final Set<CategoriaJoker> categorias;
     private final FaseActivacion fase;
+    private double acumulado = 0;
 
     public enum FaseActivacion {
         AL_JUGAR,           // Balatro: "On Played"
@@ -57,4 +59,20 @@ public abstract class Joker {
     public FaseActivacion getFase() { return fase; }
 
     public abstract void aplicarEfecto(EventoJuego evento, ContextoJuego contexto, Juego juego);
+    public String getNombreArchivo() {
+        return nombreArchivo;
+    }
+
+    public double getAcumulado() { return acumulado; }
+    public void sumarAcumulado(double cantidad) { this.acumulado += cantidad; }
+
+    /** Descripcion final mostrada, con placeholders resueltos. Override si querés mostrar el acumulado. */
+    public String getDescripcionRenderizada() {
+        return descripcion;
+    }
+
+    /** Para jokers "Instantaneo": se ejecuta una sola vez al agregarse al jugador. Override si aplica. */
+    public void aplicarEfectoInstantaneo(Jugador jugador) {}
+
+    public void desAplicarEfectoInstantaneo(Jugador jugador) {}
 }

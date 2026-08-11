@@ -1,23 +1,26 @@
-package io.github.HarryCodeProg.TrucoSurvivors.Jokers;
+package io.github.HarryCodeProg.TrucoSurvivors.Jokers.Comun;
 
 import io.github.HarryCodeProg.TrucoSurvivors.Activacion.ContextoJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.EventoJuego;
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Rareza;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 
 import static io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker.FaseActivacion.INDEPENDIENTE;
 
-public class Gaseosa extends Joker{
+public class Fernet extends Joker {
 
-    public Gaseosa(){
+    public Fernet(){
         super(
-            3,
-            "Gaseosa",
-            "Gaseosa",
-            "+100 puntos truco, +100 puntos envido. Si tienes un 'Fernet', obtienes +200 puntos mas de cada uno.",
+            5,
+            "Fernet",
+            "Fernet",
+            "+100 puntos truco, +100 puntos envido. Si tienes una 'Cola', obtienes +200 puntos mas de cada uno.",
             Rareza.comun,
             1,
             INDEPENDIENTE,
-            CategoriaJoker.INTERNACIONAL,CategoriaJoker.BEBIDA,CategoriaJoker.DULCE
+            CategoriaJoker.NACIONAL,CategoriaJoker.BEBIDA,CategoriaJoker.ALCOHOL
         );
     }
 
@@ -26,10 +29,9 @@ public class Gaseosa extends Joker{
         if (evento != EventoJuego.ANTES_DE_SUMAR_ENVIDO
             && evento != EventoJuego.ANTES_DE_SUMAR_TRUCO) return;
         double bonus = 100;
-        if (ctx.tieneJoker(Fernet.class)) {
+        if (ctx.tieneJoker(Gaseosa.class)) {
             bonus += 200;
         }
         ctx.getResolucionActual().sumarChips(bonus, this.getNombre());
     }
 }
-

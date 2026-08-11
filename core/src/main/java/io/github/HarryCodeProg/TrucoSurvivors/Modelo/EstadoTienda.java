@@ -11,15 +11,15 @@ public class EstadoTienda {
     private final ArrayList<ItemTienda> filaJokers = new ArrayList<>();
     private final ArrayList<ItemTienda> filaSantos = new ArrayList<>();
     private final ArrayList<ItemTienda> filaZodiaco = new ArrayList<>();
-
     private int cantidadCartas = 2;
     private int cantidadJokers = 2;
     private int rerollsCartas = 0;
     private int rerollsJokers = 0;
-
     private final Random random = new Random();
     private final PoolCartasTienda poolCartas = new PoolCartasTienda();
     private final PoolJokersTienda poolJokers = new PoolJokersTienda();
+    private double multiplicadorPrecio = 1.0;
+    private int rerollsGratis = 0;
 
     public EstadoTienda(Jugador jugador) {
         generarFilaCartas();
@@ -51,13 +51,6 @@ public class EstadoTienda {
         return ConfiguracionEconomia.COSTO_REROLL_BASE + rerollsJokers;
     }
 
-    public boolean rerollearCartas(Jugador jugador) {
-        if (!jugador.gastarPesos(costoRerollCartas())) return false;
-        rerollsCartas++;
-        generarFilaCartas();
-        return true;
-    }
-
     public boolean rerollearJokers(Jugador jugador) {
         if (!jugador.gastarPesos(costoRerollJokers())) return false;
         rerollsJokers++;
@@ -75,5 +68,19 @@ public class EstadoTienda {
         filaJokers.remove(item);
         filaSantos.remove(item);
         filaZodiaco.remove(item);
+    }
+
+    public void aplicarDescuento50() { multiplicadorPrecio = 0.5; }
+    public double getMultiplicadorPrecio() { return multiplicadorPrecio; }
+
+    public void sumarRerollsGratis(int cantidad) { rerollsGratis += cantidad; }
+
+    public boolean rerollearCartas(Jugador jugador) {
+        int costo = costoRerollCartas();
+        if (rerollsGratis > 0) { rerollsGratis--; }
+        else if (!jugador.gastarPesos(costo)) return false;
+        rerollsCartas++;
+        generarFilaCartas();
+        return true;
     }
 }

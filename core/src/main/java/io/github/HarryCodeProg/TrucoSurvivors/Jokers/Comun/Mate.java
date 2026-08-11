@@ -1,26 +1,29 @@
-package io.github.HarryCodeProg.TrucoSurvivors.Jokers;
+package io.github.HarryCodeProg.TrucoSurvivors.Jokers.Comun;
 
 import io.github.HarryCodeProg.TrucoSurvivors.Activacion.ContextoJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Carta;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.EventoJuego;
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Rareza;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 
 import java.util.ArrayList;
 
 import static io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker.FaseActivacion.AL_JUGAR;
 
-public class Termo extends Joker{
+public class Mate extends Joker {
 
-    public Termo(){
+    public Mate(){
         super(
-            4,
-            "Termo",
-            "Termo",
-            "La primera carta que juegues cada mano obtiene +15 Valor Envido",
+            2,
+            "Mate",
+            "Mate",
+            "La primera carta que juegues cada mano obtiene +2 Valor Truco",
             Rareza.comun,
             1,
             AL_JUGAR,
-            CategoriaJoker.NACIONAL
+            CategoriaJoker.NACIONAL,CategoriaJoker.BEBIDA,CategoriaJoker.AMARGO
         );
     }
 
@@ -30,6 +33,6 @@ public class Termo extends Joker{
         ArrayList<Carta> mesaJugador = ctx.getMesa().getMesaJugador();
         if (mesaJugador.isEmpty()) return;
         Carta cartaJugada = mesaJugador.get(mesaJugador.size() - 1);
-        cartaJugada.modificarValorEnvidoPermanente(15);
+        cartaJugada.modificarValorTruco(2);
     }
 }

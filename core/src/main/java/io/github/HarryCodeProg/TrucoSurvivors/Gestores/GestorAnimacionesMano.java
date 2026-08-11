@@ -37,7 +37,6 @@ public class GestorAnimacionesMano {
         if (esperandoTransicion)
             return;
         esperandoTransicion = true;
-        System.out.println("[ANIM] iniciarTransicion: esperandoTransicion=true, cartasViejas jugador=" + cartasJugador.size() + " rival=" + cartasRival.size() + " mesaJ=" + cartasMesaJugador.size() + " mesaR=" + cartasMesaRival.size());
         ArrayList<VistaCarta> viejas = new ArrayList<>();
         viejas.addAll(cartasJugador);
         viejas.addAll(cartasMesaJugador);
@@ -137,7 +136,6 @@ public class GestorAnimacionesMano {
                 && todasLlegaron(cartasMesaJugador)
                 && todasLlegaron(cartasMesaRival)) {
                 esperandoTransicion = false;
-                System.out.println("[ANIM] esperandoTransicion -> false (todas llegaron)");
             }
             return;
         }

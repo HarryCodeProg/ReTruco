@@ -1,12 +1,15 @@
-package io.github.HarryCodeProg.TrucoSurvivors.Jokers;
+package io.github.HarryCodeProg.TrucoSurvivors.Jokers.Comun;
 
 import io.github.HarryCodeProg.TrucoSurvivors.Activacion.ContextoJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.EventoJuego;
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Rareza;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 
 import static io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker.FaseActivacion.INDEPENDIENTE;
 
-public class DulceDeLeche extends Joker{
+public class DulceDeLeche extends Joker {
 
     public DulceDeLeche(){
         super(
