@@ -12,6 +12,9 @@ import io.github.HarryCodeProg.TrucoSurvivors.Estados.EventoJuego;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.IdentityHashMap;
+import java.util.Set;
 
 public class ContextoJuego {
     private final Jugador jugador;
@@ -31,6 +34,8 @@ public class ContextoJuego {
     private boolean primerFiguraPuntuadaAplicada = false;
     private boolean primerNoFiguraPuntuadaAplicada = false;
     private Carta cartaOponenteEnResolucion;
+    // Cartas que ya fueron reactivadas en esta resolucion (evita bucles infinitos al reencolar)
+    private final Set<Carta> cartasReactivadas = Collections.newSetFromMap(new IdentityHashMap<>());
 
     public ContextoJuego(Jugador jugador, Jugador rival, Mazo mazo, Mesa mesa, Juego juego) {
         this.jugador = jugador;
@@ -118,6 +123,20 @@ public class ContextoJuego {
 
     public boolean isPrimerCartaQueNoMataAplicada() { return primerCartaQueNoMataAplicada; }
     public void marcarPrimerCartaQueNoMataAplicada() { this.primerCartaQueNoMataAplicada = true; }
+    /** True si la carta del jugador gano su baza en la mesa (es decir, "mato"). */
+    public boolean cartaMato(Carta carta) {
+        if (carta == null) return false;
+        int idx = mesa.getMesaJugador().indexOf(carta);
+        if (idx == -1 || idx >= mesa.getMesaRival().size()) return false;
+        return carta.getValorTrucoActual() > mesa.getMesaRival().get(idx).getValorTrucoActual();
+    }
+
+    /** Marca la carta como ya reactivada; devuelve false si ya lo estaba (para no reactivarla de nuevo). */
+    public boolean marcarCartaReactivada(Carta carta) {
+        if (carta == null) return false;
+        return cartasReactivadas.add(carta);
+    }
+
     public boolean isPrimerFiguraPuntuadaAplicada() { return primerFiguraPuntuadaAplicada; }
     public void marcarPrimerFiguraPuntuadaAplicada() { this.primerFiguraPuntuadaAplicada = true; }
 

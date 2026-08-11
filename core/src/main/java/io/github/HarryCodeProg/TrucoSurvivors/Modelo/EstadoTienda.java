@@ -54,6 +54,7 @@ public class EstadoTienda {
     public boolean rerollearJokers(Jugador jugador) {
         if (!jugador.gastarPesos(costoRerollJokers())) return false;
         rerollsJokers++;
+        jugador.sumarRerollTienda();
         generarFilaJokers(jugador);
         return true;
     }
@@ -80,6 +81,7 @@ public class EstadoTienda {
         if (rerollsGratis > 0) { rerollsGratis--; }
         else if (!jugador.gastarPesos(costo)) return false;
         rerollsCartas++;
+        jugador.sumarRerollTienda();
         generarFilaCartas();
         return true;
     }

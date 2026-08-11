@@ -284,6 +284,7 @@ public class Juego {
             }
             puntosRival += acumulador * rival.getMultiplicadorTruco();
             manosGanadasConsecutivas = 0;
+            gestorJokers.disparar(EventoJuego.AL_PERDER_TRUCO, crearContexto(), this);
         }
         gestorJokers.disparar(EventoJuego.TERMINO_MANO, crearContexto(), this);
         verificarEstadoCombate();

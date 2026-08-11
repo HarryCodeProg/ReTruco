@@ -28,6 +28,7 @@ public class Jugador {
     private int tamañoManoExtra = 0;
     private int espacioSantosExtra = 0;
     private int proximoEfectoZodiacoMultiplicador = 1; // Libra
+    private int rerollsTienda = 0;
 
     public Jugador(String nombre) {
         this.nombre = nombre;
@@ -192,6 +193,10 @@ public class Jugador {
     public double getMultiplicadorEnvidoTemporal() { return multiplicadorEnvidoTemporal; }
     public void multEnvidoOriginal() { this.multiplicadorEnvidoTemporal = multiplicadorEnvido; }
     public void multTrucoOriginal() { this.multiplicadorTrucoTemporal = multiplicadorTruco; }
+
+    /** Cantidad total de rerolls hechos en la tienda a lo largo de la partida. */
+    public int getRerollsTienda() { return rerollsTienda; }
+    public void sumarRerollTienda() { this.rerollsTienda++; }
 
     public int getDescartesMaximos() {return descartesBase + descartesExtra;}
 
