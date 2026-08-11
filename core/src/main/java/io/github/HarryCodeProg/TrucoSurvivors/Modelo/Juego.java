@@ -22,7 +22,7 @@ public class Juego {
     private ArrayList<CantoEnvido> cantosEnvido;
     private ArrayList<CantoTruco> cantosTruco = new ArrayList<>();
     private ArrayList<ResultadoMano> resultados;
-    private int descartes;
+    private int descartesActuales;
     private GestorJokers gestorJokers;
     private boolean manoFinalizada;
     private Jugador cantorEnvidoPendiente;
@@ -37,20 +37,23 @@ public class Juego {
     private ResolucionPuntaje ultimaResolucion;
     private ResolucionPuntaje ultimaResolucionEnvido;
     private ResolutorSecuencia resolutorSecuencia;
-
+    private boolean primeraCartaQueMataAplicada = false;
+    private boolean primeraCartaQueNoMataAplicada = false;
+    private int manosGanadasConsecutivas = 0;
+    private boolean recompensaFinDeRondaAplicada = false;
 
     public Juego(Jugador jugador, Jugador rival, Mazo mazoRival){
         this.jugador = jugador;
         this.rival = rival;
         this.jugadorEsMano = true;
         this.turnoActual = jugador;
-        this.descartes = 5;
         this.mesa = new Mesa();
         this.cantosEnvido = new ArrayList<>();
         this.resultados = new ArrayList<>();
         this.rival.setMazo(mazoRival);
         this.gestorJokers = new GestorJokers(jugador);
         this.resolutorSecuencia = new ResolutorSecuencia(gestorJokers, this);
+        this.descartesActuales = jugador.getDescartesMaximos();
 
         limpiarEstadoResidualDeCombateAnterior();
 
@@ -133,6 +136,7 @@ public class Juego {
         vaciarCantos();
         devolverCartas();
         avanzarMano();
+        this.descartesActuales = jugador.getDescartesMaximos();
         this.turnoActual = jugadorEsMano ? jugador : rival;
         jugador.getMazo().limpiarDescartadas();
         repartir();
@@ -161,11 +165,9 @@ public class Juego {
 
     public void setTurnoActual(Jugador turnoActual) { this.turnoActual = turnoActual; }
 
-    public boolean hayDescartes(){ return this.descartes > 0; }
+    public boolean hayDescartes(){ return this.descartesActuales > 0; }
 
-    public void restarUnDescarte(){ this.descartes -= 1; }
-
-    public void sumarUnDescarte(){ this.descartes += 1; }
+    public void restarUnDescarte(){ this.descartesActuales -= 1; }
 
     public int getMazoDisponible(){ return jugador.getMazo().getCantidadDisponibles(); }
 
@@ -190,18 +192,24 @@ public class Juego {
     }
 
     public void jugarMano(int i) {
-        if (i==0){
-            gestorJokers.disparar(EventoJuego.AL_JUGAR_PRIMERA_CARTA, crearContexto(), this);
-        }else if (i == 1) {
-            gestorJokers.disparar(EventoJuego.AL_JUGAR_SEGUNDA_CARTA, crearContexto(), this);
-        }
+        if (i==0) gestorJokers.disparar(EventoJuego.AL_JUGAR_PRIMERA_CARTA, crearContexto(), this);
+        else if (i == 1) gestorJokers.disparar(EventoJuego.AL_JUGAR_SEGUNDA_CARTA, crearContexto(), this);
         ResultadoMano resultado = matoCarta(i);
         resultados.add(resultado);
+        Carta cartaJugador = mesa.getMesaJugador().get(i);
+        Carta cartaRival = mesa.getMesaRival().get(i);
         if (resultado == ResultadoMano.JUGADOR) {
             this.turnoActual = jugador;
+            ContextoJuego ctxMato = crearContexto();
+            ctxMato.setCartaEnResolucion(cartaJugador);
+            gestorJokers.disparar(EventoJuego.AL_MATAR_CARTA, ctxMato, this);
             gestorJokers.disparar(EventoJuego.AL_GANAR_BAZA, crearContexto(), this);
         } else if (resultado == ResultadoMano.RIVAL) {
             this.turnoActual = rival;
+            ContextoJuego ctxPerdio = crearContexto();
+            ctxPerdio.setCartaEnResolucion(cartaJugador);          // la que perdio (del jugador)
+            ctxPerdio.setCartaOponenteEnResolucion(cartaRival);    // la que gano (del rival)
+            gestorJokers.disparar(EventoJuego.AL_SER_MATADO, ctxPerdio, this);
         } else {
             this.turnoActual = jugadorEsMano ? jugador : rival;
         }
@@ -262,6 +270,7 @@ public class Juego {
             this.ultimaResolucion = resolucion;
             puntosJugador += resolucion.calcularPuntajeFinal();
             gestorJokers.disparar(EventoJuego.AL_GANAR_TRUCO, crearContexto(), this);
+            manosGanadasConsecutivas++;
         } else {
             this.ultimaResolucion = null;
             double acumulador = 0;
@@ -272,6 +281,7 @@ public class Juego {
                     acumulador += mesa.getMesaRival().get(i).getValorTrucoEfectivo();
             }
             puntosRival += acumulador * rival.getMultiplicadorTruco();
+            manosGanadasConsecutivas = 0;
         }
         gestorJokers.disparar(EventoJuego.TERMINO_MANO, crearContexto(), this);
         verificarEstadoCombate();
@@ -306,6 +316,10 @@ public class Juego {
 
     public boolean hayCantoTrucoPendiente(){ return cantorTrucoPendiente != null; }
     public Jugador getCantorTrucoPendiente(){ return cantorTrucoPendiente; }
+    public boolean isPrimeraCartaQueMataAplicada() { return primeraCartaQueMataAplicada; }
+    public void marcarPrimeraCartaQueMataAplicada() { this.primeraCartaQueMataAplicada = true; }
+    public boolean isPrimeraCartaQueNoMataAplicada() { return primeraCartaQueNoMataAplicada; }
+    public void marcarPrimeraCartaQueNoMataAplicada() { this.primeraCartaQueNoMataAplicada = true; }
 
     public boolean puedeEscalarTruco(Jugador quien){
         return cantorTrucoPendiente != null
@@ -330,8 +344,10 @@ public class Juego {
             double puntosCanto = valorNivelTruco(nivelTrucoPendiente);
             jugador.aumentarMultiplicadorTrucoTemporal(puntosCanto);
             rival.aumentarMultiplicadorTrucoTemporal(puntosCanto);
-        } else {
-            resolverNoQuieroTruco(canter);
+            gestorJokers.disparar(EventoJuego.AL_DECIR_QUIERO_TRUCO, crearContexto(), this);
+        }else {
+        resolverNoQuieroTruco(canter);
+        gestorJokers.disparar(EventoJuego.AL_DECIR_NO_QUIERO_TRUCO, crearContexto(), this); // NUEVO
         }
         cantorTrucoPendiente = null;
         nivelTrucoPendiente = null;
@@ -449,6 +465,8 @@ public class Juego {
         this.ultimoCantorTruco = null;
         this.cantorTrucoPendiente = null;
         this.nivelTrucoPendiente = null;
+        this.primeraCartaQueMataAplicada = false;
+        this.primeraCartaQueNoMataAplicada = false;
         jugador.multTrucoOriginal();
         rival.multTrucoOriginal();
     }
@@ -489,7 +507,13 @@ public class Juego {
     public void setPuntajeMeta(double i){ this.puntajeMeta = i; }
 
     public EstadoCombate verificarEstadoCombate() {
-        if (puntosJugador >= puntajeMeta) return EstadoCombate.VICTORIA_JUGADOR;
+        if (puntosJugador >= puntajeMeta) {
+            if (!recompensaFinDeRondaAplicada) {
+                recompensaFinDeRondaAplicada = true;
+                gestorJokers.disparar(EventoJuego.TERMINO_MANO, crearContexto(), this);
+            }
+            return EstadoCombate.VICTORIA_JUGADOR;
+        }
         if (puntosRival >= puntajeMeta) return EstadoCombate.VICTORIA_RIVAL;
         return EstadoCombate.EN_PROGRESO;
     }
@@ -497,4 +521,6 @@ public class Juego {
     public double getPuntajeMeta(){
         return this.puntajeMeta;
     }
+
+    public int getManosGanadasConsecutivas() { return manosGanadasConsecutivas; }
 }

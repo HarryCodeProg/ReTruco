@@ -3,6 +3,7 @@ package io.github.HarryCodeProg.TrucoSurvivors.Modelo;
 import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Carta;
 import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Palo;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.*;
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Comun.*;
 
 public class Creacion {
     private int[] numeros = {1,2,3,4,5,6,7,10,11,12};
@@ -34,6 +35,11 @@ public class Creacion {
         this.tienda.agregarJoker(new BotellaCortada());
         this.tienda.agregarJoker(new Fernet());
         this.tienda.agregarJoker(new VinoCaja());
+        this.tienda.agregarJoker(new Milanesa());
+        this.tienda.agregarJoker(new Pastafrola());
+        this.tienda.agregarJoker(new Pastelitos());
+        this.tienda.agregarJoker(new Churros());
+        this.tienda.agregarJoker(new BolasDeFraile());
 
     }
 

@@ -1,9 +1,12 @@
-package io.github.HarryCodeProg.TrucoSurvivors.Jokers;
+package io.github.HarryCodeProg.TrucoSurvivors.Jokers.Comun;
 
 import io.github.HarryCodeProg.TrucoSurvivors.Activacion.ContextoJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Carta;
 import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Palo;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.EventoJuego;
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Rareza;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.CartaDrop;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Probabilidad;
@@ -11,7 +14,7 @@ import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Probabilidad;
 import static io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker.FaseActivacion.INDEPENDIENTE;
 
 
-public class JokerEspañol extends Joker{
+public class JokerEspañol extends Joker {
 
     public JokerEspañol() {
         super(

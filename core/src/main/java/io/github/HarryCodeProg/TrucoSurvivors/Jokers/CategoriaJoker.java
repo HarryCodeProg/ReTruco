@@ -23,7 +23,8 @@ public enum CategoriaJoker {
     NATURALEZA,
     MASCOTA,
     TRANSPORTE,
-    HERRAMIENTA;
+    HERRAMIENTA,
+    POSTRE;
 
     public String getTexto() {
         return Main.getTexto("categoria." + this.name());

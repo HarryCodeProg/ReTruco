@@ -69,11 +69,10 @@ public class ResolutorSecuencia {
         Carta carta = act.carta;
         String nombreCarta = carta.getNumero() + " de " + carta.paloToString();
         ctx.setCartaEnResolucion(carta);
-        ctx.getResolucionActual().sumarChips(carta.getValorTrucoEfectivo(), nombreCarta);
-
+        ctx.getResolucionActual().sumarChips(carta.getPuntosTrucoAporteEfectivo(), nombreCarta); // <-- CAMBIO: aporte, no poder
         for (Joker j : ctx.getJugador().getJokers()) {
             if (j.getFase() == Joker.FaseActivacion.AL_PUNTUAR_CARTA) {
-                j.aplicarEfecto(act.evento, ctx, juego); // el propio joker puede reencolar en 'cola' via ctx
+                j.aplicarEfecto(act.evento, ctx, juego);
             }
         }
     }

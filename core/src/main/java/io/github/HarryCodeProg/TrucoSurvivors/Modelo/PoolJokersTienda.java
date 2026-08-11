@@ -1,7 +1,10 @@
 package io.github.HarryCodeProg.TrucoSurvivors.Modelo;
 
-import io.github.HarryCodeProg.TrucoSurvivors.Jokers.*;
+
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Comun.BotellaCortada;
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jugador;
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Comun.*;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -17,6 +20,22 @@ public class PoolJokersTienda {
         fabricas.add(BotellaCortada::new);
         fabricas.add(Fernet::new);
         fabricas.add(VinoCaja::new);
+        fabricas.add(BolasDeFraile::new);
+        fabricas.add(Cañoncito::new);
+        fabricas.add(Cerveza::new);
+        fabricas.add(CervezaRota::new);
+        fabricas.add(Churros::new);
+        fabricas.add(DulceDeLeche::new);
+        fabricas.add(Galletitas::new);
+        fabricas.add(MediaLuna::new);
+        fabricas.add(Milanesa::new);
+        fabricas.add(Moñito::new);
+        fabricas.add(Pastafrola::new);
+        fabricas.add(Pastelitos::new);
+        fabricas.add(Sacramento::new);
+        fabricas.add(Termo::new);
+        fabricas.add(TortaNegra::new);
+        fabricas.add(Vigilante::new);
     }
 
     /** Devuelve un joker nuevo al azar, evitando (si es posible) los que el jugador ya tiene por clase. */

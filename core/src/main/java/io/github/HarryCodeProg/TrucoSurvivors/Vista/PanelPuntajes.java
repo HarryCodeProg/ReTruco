@@ -36,6 +36,7 @@ public class PanelPuntajes {
 
     private final ShapeRenderer shapeRenderer;
     private final GlyphLayout layout = new GlyphLayout();
+    private String rivalNombre = "";
 
     public PanelPuntajes() {
         shapeRenderer = new ShapeRenderer();
@@ -81,52 +82,71 @@ public class PanelPuntajes {
         shapeRenderer.end();
     }
 
+    public void setRivalNombre(String nombre) {
+        this.rivalNombre = (nombre == null) ? "" : nombre;
+    }
+
     public void renderTextos(SpriteBatch batch, BitmapFont fuente, Juego juego, Jugador jugador, Jugador rival,
                              float x, float y, GestorAnimacionResolucion gestorAnimacion,
                              double puntosTrucoDisplay, double multTrucoDisplay,
                              double puntosEnvidoDisplay, double multEnvidoDisplay) {
-
+        String nombreARender = (rival != null && rival.getNombre() != null && !rival.getNombre().isEmpty())
+            ? rival.getNombre()
+            : this.rivalNombre;
+        if (nombreARender != null && !nombreARender.isEmpty()) {
+            float anchoPanelTotal = ANCHO_CAJA_BASE + ESPACIO_X + ANCHO_CAJA_MULT;
+            float escalaOriginal = fuente.getScaleX();
+            fuente.getData().setScale(escalaOriginal * 1.4f); // más grande
+            fuente.setColor(Color.WHITE);
+            GlyphLayout nameLayout = new GlyphLayout();
+            nameLayout.setText(fuente, nombreARender);
+            float nameX = x + (anchoPanelTotal - nameLayout.width) / 2f; // centrado en el ancho del panel
+            float nameY = y + ALTO_CAJA + 55f; // mas arriba, por encima de toda la primera fila
+            fuente.draw(batch, nombreARender, nameX, nameY);
+            fuente.getData().setScale(escalaOriginal); // restaurar escala original para el resto del texto
+        }
         // Aseguramos que el tinte global del batch no oscurezca las fuentes
         batch.setColor(Color.WHITE);
-
         float currentY = y;
         float xSeparador = x + ANCHO_CAJA_BASE;
-
         // Rival Truco
-        dibujarTextoCentrado(batch, fuente, String.valueOf((int) rival.getMultiplicadorTruco()), xSeparador + ESPACIO_X, ANCHO_CAJA_MULT, currentY, Color.WHITE);
+        dibujarTextoCentrado(batch, fuente, String.valueOf((int) (rival != null ? rival.getMultiplicadorTruco() : 0)),
+            xSeparador + ESPACIO_X, ANCHO_CAJA_MULT, currentY, Color.WHITE);
         currentY -= ESPACIO_LINEA;
-
         // Rival Envido
-        dibujarTextoCentrado(batch, fuente, String.valueOf((int) rival.getMultiplicadorEnvido()), xSeparador + ESPACIO_X, ANCHO_CAJA_MULT, currentY, Color.WHITE);
+        dibujarTextoCentrado(batch, fuente, String.valueOf((int) (rival != null ? rival.getMultiplicadorEnvido() : 0)),
+            xSeparador + ESPACIO_X, ANCHO_CAJA_MULT, currentY, Color.WHITE);
         currentY -= ESPACIO_LINEA;
-
-        // Puntos Rival (caja simple de ancho ANCHO_CAJA_SIMPLE + 100f)
-        dibujarTextoCentrado(batch, fuente, String.valueOf((int) juego.getPuntosRival()), x, ANCHO_CAJA_SIMPLE + 100f, currentY, Color.BLACK);
+        // Puntos Rival
+        dibujarTextoCentrado(batch, fuente, String.valueOf((int) juego.getPuntosRival()),
+            x, ANCHO_CAJA_SIMPLE + 100f, currentY, Color.BLACK);
         currentY -= ESPACIO_LINEA;
-
         // Meta
-        dibujarTextoCentrado(batch, fuente, String.valueOf((int) juego.getPuntajeMeta()), x, ANCHO_CAJA_SIMPLE + 100f, currentY, Color.BLACK);
+        dibujarTextoCentrado(batch, fuente, String.valueOf((int) juego.getPuntajeMeta()),
+            x, ANCHO_CAJA_SIMPLE + 100f, currentY, Color.BLACK);
         currentY -= ESPACIO_LINEA;
-
         // Puntos Jugador
-        dibujarTextoCentrado(batch, fuente, String.valueOf((int) juego.getPuntosJugador()), x, ANCHO_CAJA_SIMPLE + 100f, currentY, Color.BLACK);
+        dibujarTextoCentrado(batch, fuente, String.valueOf((int) juego.getPuntosJugador()),
+            x, ANCHO_CAJA_SIMPLE + 100f, currentY, Color.BLACK);
         currentY -= ESPACIO_LINEA;
-
         // Truco Jugador (Base X Mult)
         boolean animacionActiva = gestorAnimacion != null && gestorAnimacion.isActiva();
         double puntosTrucoAMostrar = animacionActiva ? puntosTrucoDisplay : 0;
         double multTrucoAMostrar = animacionActiva ? multTrucoDisplay : jugador.getMultiplicadorTruco();
-        dibujarTextoCentrado(batch, fuente, String.valueOf((int) puntosTrucoAMostrar), x, ANCHO_CAJA_BASE, currentY, Color.WHITE);
+        dibujarTextoCentrado(batch, fuente, String.valueOf((int) puntosTrucoAMostrar),
+            x, ANCHO_CAJA_BASE, currentY, Color.WHITE);
         dibujarTextoCentrado(batch, fuente, "X", xSeparador, ESPACIO_X, currentY, Color.WHITE);
-        dibujarTextoCentrado(batch, fuente, String.valueOf((int) multTrucoAMostrar), xSeparador + ESPACIO_X, ANCHO_CAJA_MULT, currentY, Color.WHITE);
+        dibujarTextoCentrado(batch, fuente, String.valueOf((int) multTrucoAMostrar),
+            xSeparador + ESPACIO_X, ANCHO_CAJA_MULT, currentY, Color.WHITE);
         currentY -= ESPACIO_LINEA;
-
         // Envido Jugador (Base X Mult)
         double puntosEnvidoAMostrar = animacionActiva ? puntosEnvidoDisplay : 0;
         double multEnvidoAMostrar = animacionActiva ? multEnvidoDisplay : jugador.getMultiplicadorEnvido();
-        dibujarTextoCentrado(batch, fuente, String.valueOf((int) puntosEnvidoAMostrar), x, ANCHO_CAJA_BASE, currentY, Color.WHITE);
+        dibujarTextoCentrado(batch, fuente, String.valueOf((int) puntosEnvidoAMostrar),
+            x, ANCHO_CAJA_BASE, currentY, Color.WHITE);
         dibujarTextoCentrado(batch, fuente, "X", xSeparador, ESPACIO_X, currentY, Color.WHITE);
-        dibujarTextoCentrado(batch, fuente, String.valueOf((int) multEnvidoAMostrar), xSeparador + ESPACIO_X, ANCHO_CAJA_MULT, currentY, Color.WHITE);
+        dibujarTextoCentrado(batch, fuente, String.valueOf((int) multEnvidoAMostrar),
+            xSeparador + ESPACIO_X, ANCHO_CAJA_MULT, currentY, Color.WHITE);
     }
 
     private void dibujarTextoCentrado(SpriteBatch batch, BitmapFont fuente, String texto, float x, float anchoCaja, float y, Color color) {

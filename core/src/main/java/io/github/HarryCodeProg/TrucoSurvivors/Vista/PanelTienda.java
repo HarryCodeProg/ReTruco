@@ -3,14 +3,13 @@ package io.github.HarryCodeProg.TrucoSurvivors.Vista;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Carta;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.Accion;
 import io.github.HarryCodeProg.TrucoSurvivors.Gestores.GestorInputArrastrable;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jugador;
 import io.github.HarryCodeProg.TrucoSurvivors.Main;
-import io.github.HarryCodeProg.TrucoSurvivors.Modelo.ConfiguracionEconomia;
-import io.github.HarryCodeProg.TrucoSurvivors.Modelo.EstadoTienda;
-import io.github.HarryCodeProg.TrucoSurvivors.Modelo.ItemTienda;
+import io.github.HarryCodeProg.TrucoSurvivors.Modelo.*;
 
 import java.util.ArrayList;
 
@@ -44,6 +43,10 @@ public class PanelTienda {
     private Runnable alCerrarCompletamente;
     private final ArrayList<VistaJoker> vistasJokersPropios = new ArrayList<>();
     private VistaJoker jokerPropioSeleccionado;
+    private static final float RUEDA_RADIO = 180f;
+    private static final float RUEDA_X = 1280f; // centro fuera de pantalla, mitad izquierda del circulo entra
+    private static final float RUEDA_Y = 300f;
+    private RuedaZodiaco ruedaZodiaco;
 
     public PanelTienda(Main game, Jugador jugador, Runnable alContinuar) {
         this.game = game;
@@ -58,6 +61,7 @@ public class PanelTienda {
         botonRerollCartas = new Boton(PANEL_X + 20, PANEL_Y + PANEL_ALTO - 60, 160, 40, Boton.TipoColor.AZUL, Accion.REROLL_CARTAS);
         botonRerollJokers = new Boton(PANEL_X + 20, PANEL_Y + PANEL_ALTO - 210, 160, 40, Boton.TipoColor.AZUL, Accion.REROLL_JOKERS);
         botonContinuar = new Boton(PANEL_X + PANEL_ANCHO - 180, PANEL_Y + PANEL_ALTO - 60, 160, 50, Boton.TipoColor.DORADO, Accion.CONTINUAR_TIENDA);
+        ruedaZodiaco = new RuedaZodiaco(RUEDA_X, RUEDA_Y, RUEDA_RADIO, null);
         reconstruirVistas();
         this.offsetY = -(PANEL_Y + PANEL_ALTO);
         this.offsetYObjetivo = 0f;
@@ -111,10 +115,17 @@ public class PanelTienda {
         boolean justTouched = Gdx.input.justTouched();
         for (VistaItemTienda v : vistasCartas) v.update(mouseWorldX, mouseWorldY, delta);
         for (VistaItemTienda v : vistasJokers) v.update(mouseWorldX, mouseWorldY, delta);
+        for (VistaJoker vj : vistasJokersPropios) vj.update(mouseWorldX, mouseWorldY, delta);
         botonComprar.update(mouseWorldX, mouseWorldY);
         botonRerollCartas.update(mouseWorldX, mouseWorldY);
         botonRerollJokers.update(mouseWorldX, mouseWorldY);
         botonContinuar.update(mouseWorldX, mouseWorldY);
+        ruedaZodiaco.update(delta);
+        if (Gdx.input.justTouched()) {
+            ruedaZodiaco.click(mouseWorldX, mouseWorldY, signo -> {
+                // abrir overlaySeleccionCarta si CANCER/ESCORPIO, sino aplicar directo
+            });
+        }
         if (justTouched) {
             for (VistaJoker vj : vistasJokersPropios) {
                 if (vj.contiene(mouseWorldX, mouseWorldY)) {
@@ -196,18 +207,22 @@ public class PanelTienda {
     }
 
     public void render(SpriteBatch batch) {
-        batch.end(); // cerramos el batch actual para cambiar la matriz
+        batch.end();
         com.badlogic.gdx.math.Matrix4 matrizOriginal = batch.getProjectionMatrix().cpy();
         com.badlogic.gdx.math.Matrix4 matrizConOffset = matrizOriginal.cpy().translate(0, offsetY, 0);
         batch.setProjectionMatrix(matrizConOffset);
         batch.begin();
+        // 1. Fondo de la tienda
         Texture pixel = game.getPixelBlanco();
         batch.setColor(0.06f, 0.07f, 0.1f, 0.94f);
         batch.draw(pixel, PANEL_X, PANEL_Y, PANEL_ANCHO, PANEL_ALTO);
         batch.setColor(1, 1, 1, 1);
-        for (VistaItemTienda v : vistasCartas) if (v != seleccionado) v.render(batch);
-        for (VistaItemTienda v : vistasJokers) if (v != seleccionado) v.render(batch);
-        if (seleccionado != null) seleccionado.render(batch);
+        // 2. Render normal de las cartas y jokers
+        for (VistaItemTienda v : vistasCartas) if (v != seleccionado) v.render(batch, game);
+        for (VistaItemTienda v : vistasJokers) if (v != seleccionado) v.render(batch, game);
+        for (VistaJoker vj : vistasJokersPropios) vj.render(batch);
+        if (seleccionado != null) seleccionado.render(batch, game);
+        // 3. Botones y textos
         botonComprar.render(batch);
         botonRerollCartas.render(batch);
         botonRerollJokers.render(batch);
@@ -215,17 +230,44 @@ public class PanelTienda {
         String textoPesos = "$" + jugador.getPesos();
         if (iconoPeso != null) batch.draw(iconoPeso, PANEL_X + 20, PANEL_Y + PANEL_ALTO - 150, 32, 32);
         game.getFuentePrincipal().draw(batch, textoPesos, PANEL_X + 60, PANEL_Y + PANEL_ALTO - 125);
+        float infoX = PANEL_X + PANEL_ANCHO - 350;
+        float infoY = PANEL_Y + PANEL_ALTO - 60;
+        float maxAnchoTexto = 320f;
         if (seleccionado != null) {
-            String textoPrecio = "Precio: $" + seleccionado.getItem().getPrecio();
+            ItemTienda item = seleccionado.getItem();
+            if (item.getTipo() == ItemTienda.Tipo.JOKER) {
+                Joker j = item.getJoker();
+                game.getFuentePrincipal().draw(batch, "Nombre: " + j.getNombre(), infoX, infoY);
+                game.getFuentePrincipal().draw(batch, "Rareza: " + j.getRareza().name(), infoX, infoY - 30);
+                game.getFuentePrincipal().draw(batch, j.getDescripcion(), infoX, infoY - 70, maxAnchoTexto, com.badlogic.gdx.utils.Align.left, true);
+            } else if (item.getTipo() == ItemTienda.Tipo.CARTA) {
+                Carta c = item.getCarta();
+                game.getFuentePrincipal().draw(batch, "Carta: " + c.getNumero() + " de " + c.paloToString(), infoX, infoY);
+                game.getFuentePrincipal().draw(batch, "Poder Truco: " + c.getValorTrucoPoderActual(), infoX, infoY - 30);
+                game.getFuentePrincipal().draw(batch, "Chips Aporte: " + c.getPuntosTrucoAporteActual(), infoX, infoY - 60);
+            }
+            String textoPrecio = "Precio: $" + item.getPrecio();
             game.getFuentePrincipal().draw(batch, textoPrecio, PANEL_X + PANEL_ANCHO - 220, PANEL_Y + 90);
         } else if (jokerPropioSeleccionado != null) {
-            int precioVenta = Math.max(1, jokerPropioSeleccionado.getJoker().getCoste() * ConfiguracionEconomia.PRECIO_VENTA_JOKER_PORCENTAJE / 100);
+            Joker j = jokerPropioSeleccionado.getJoker();
+            game.getFuentePrincipal().draw(batch, "Nombre: " + j.getNombre(), infoX, infoY);
+            game.getFuentePrincipal().draw(batch, "Rareza: " + j.getRareza().name(), infoX, infoY - 30);
+            game.getFuentePrincipal().draw(batch, j.getDescripcion(), infoX, infoY - 70, maxAnchoTexto, com.badlogic.gdx.utils.Align.left, true);
+            int precioVenta = Math.max(1, j.getCoste() * ConfiguracionEconomia.PRECIO_VENTA_JOKER_PORCENTAJE / 100);
             String textoVenta = "Vender por: $" + precioVenta;
             game.getFuentePrincipal().draw(batch, textoVenta, PANEL_X + PANEL_ANCHO - 220, PANEL_Y + 90);
         }
+        // 4. DIBUJAR CARTELES DE STATS POR ENCIMA (Capa superior de hover)
+        for (VistaItemTienda v : vistasCartas) v.renderCartelStats(batch, game);
+        for (VistaItemTienda v : vistasJokers) v.renderCartelStats(batch, game);
+        for (VistaJoker vj : vistasJokersPropios) {
+            if (vj.isHover()) {
+                vj.renderCartelStats(batch, game);
+            }
+        }
         batch.end();
         batch.setProjectionMatrix(matrizOriginal);
-        batch.begin(); // devolvemos el batch abierto, como estaba antes de entrar a este metodo
+        batch.begin();
     }
 
     /** Debe llamarse una vez por frame, ANTES de update() de input, para que la animacion avance siempre. */
@@ -254,5 +296,14 @@ public class PanelTienda {
 
     public void dispose() {
         if (iconoPeso != null) iconoPeso.dispose();
+    }
+
+    public void consumir(SignoZodiaco signo, Jugador jugador, Juego juego, EstadoTienda tienda, OverlaySeleccionCarta overlaySeleccion, Runnable alTerminarTodo) {
+        if (signo.requiereSeleccionCarta()) {
+            overlaySeleccion.abrir(signo, jugador.getMano(), game.getAtlasCartas(), alTerminarTodo);
+        } else {
+            signo.aplicarEfecto(jugador, juego, tienda, null);
+            alTerminarTodo.run();
+        }
     }
 }

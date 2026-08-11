@@ -18,9 +18,7 @@ public class GameRenderSystem {
     private final Main game;
     private final GlyphLayout layout = new GlyphLayout();
 
-    public GameRenderSystem(Main game) {
-        this.game = game;
-    }
+    public GameRenderSystem(Main game) {this.game = game;}
 
     public void render(
         float delta, OrthographicCamera camera, Background fondoPlasma, PanelPuntajes panelPuntajes,
@@ -104,13 +102,13 @@ public class GameRenderSystem {
     }
 
     private void renderJokers(ArrayList<VistaJoker> jokers, VistaJoker jokerArrastrado) {
-        // Pasada 1: Dibuja los Jokers quietos
+        // Pasada 1: Dibuja los Jokers quietos con su cartel nativo si están en hover
         for (VistaJoker j : jokers) {
             if (j != jokerArrastrado) {
                 j.render(game.batch);
             }
         }
-        // Pasada 2: Dibuja el Joker arrastrado AL FINAL
+        // Pasada 2: Dibuja el Joker arrastrado AL FINAL por encima de todo
         if (jokerArrastrado != null) {
             jokerArrastrado.render(game.batch);
         }

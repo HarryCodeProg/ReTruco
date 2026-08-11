@@ -21,9 +21,13 @@ public class Jugador {
     private double multiplicadorEnvidoTemporal;
     private double puntajeTotal;
     private int pesos = 0;
-
     private static final int INTERVALO_INTERES = 5;
     private static final int TOPE_INTERES = 5;
+    private int descartesBase = 4;
+    private int descartesExtra = 0;
+    private int tamañoManoExtra = 0;
+    private int espacioSantosExtra = 0;
+    private int proximoEfectoZodiacoMultiplicador = 1; // Libra
 
     public Jugador(String nombre) {
         this.nombre = nombre;
@@ -70,12 +74,16 @@ public class Jugador {
     public boolean agregarJoker(Joker joker) {
         if (jokers.size() < tamañoJokers) {
             this.jokers.add(joker);
+            joker.aplicarEfectoInstantaneo(this);
             return true;
         }
         return false;
     }
 
-    public void eliminarJoker(Joker joker) { this.jokers.remove(joker); }
+    public void eliminarJoker(Joker joker) {
+        this.jokers.remove(joker);
+        joker.desAplicarEfectoInstantaneo(this);
+    }
 
     public int getPesos() { return pesos; }
     public void sumarPesos(int cantidad) { this.pesos += cantidad; }
@@ -104,7 +112,6 @@ public class Jugador {
         double puntosEnvido = 0;
         double envidoActualG = 0;
         boolean hayMismoPalo = false;
-
         for (int i = 0; i < mano.size(); i++) {
             for (int j = 0; j < mano.size(); j++) {
                 if (i != j) {
@@ -122,6 +129,34 @@ public class Jugador {
             puntosEnvido = getNumeroMasGrande();
         }
         return puntosEnvido;
+    }
+
+    public ArrayList<Carta> getCartasEnvidoGanador() {
+        ArrayList<Carta> mejorPar = new ArrayList<>();
+        double mejor = 0;
+        boolean hayMismoPalo = false;
+        for (int i = 0; i < mano.size(); i++) {
+            for (int j = 0; j < mano.size(); j++) {
+                if (i != j && mano.get(i).getPalo() == mano.get(j).getPalo()) {
+                    hayMismoPalo = true;
+                    double suma = envidoActual + mano.get(i).getValorEnvidoActual() + mano.get(j).getValorEnvidoActual();
+                    if (suma > mejor) {
+                        mejor = suma;
+                        mejorPar.clear();
+                        mejorPar.add(mano.get(i));
+                        mejorPar.add(mano.get(j));
+                    }
+                }
+            }
+        }
+        if (!hayMismoPalo && !mano.isEmpty()) {
+            Carta masAlta = mano.get(0);
+            for (Carta c : mano) {
+                if (c.getValorEnvidoActual() > masAlta.getValorEnvidoActual()) masAlta = c;
+            }
+            mejorPar.add(masAlta);
+        }
+        return mejorPar;
     }
 
     public double getPuntosTruco() { return 0; }
@@ -157,4 +192,17 @@ public class Jugador {
     public double getMultiplicadorEnvidoTemporal() { return multiplicadorEnvidoTemporal; }
     public void multEnvidoOriginal() { this.multiplicadorEnvidoTemporal = multiplicadorEnvido; }
     public void multTrucoOriginal() { this.multiplicadorTrucoTemporal = multiplicadorTruco; }
+
+    public int getDescartesMaximos() {return descartesBase + descartesExtra;}
+
+    public void sumarDescartesExtra(int cantidad) {this.descartesExtra += cantidad;}
+
+    public void sumarEspacioSantos(int cantidad) { espacioSantosExtra += cantidad; }
+    public int getEspacioSantosExtra() { return espacioSantosExtra; }
+    public void activarDobleProximoZodiaco() { proximoEfectoZodiacoMultiplicador = 2; }
+    public int consumirMultiplicadorZodiaco() {
+        int m = proximoEfectoZodiacoMultiplicador;
+        proximoEfectoZodiacoMultiplicador = 1;
+        return m;
+    }
 }

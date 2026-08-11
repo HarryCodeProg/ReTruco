@@ -2,6 +2,7 @@ package io.github.HarryCodeProg.TrucoSurvivors;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -11,6 +12,7 @@ import com.badlogic.gdx.utils.I18NBundle;
 import io.github.HarryCodeProg.TrucoSurvivors.Gestores.GestorSonidos;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.DatosRival;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.PerfilJugador;
+import io.github.HarryCodeProg.TrucoSurvivors.Screens.LoadingScreenCentered;
 import io.github.HarryCodeProg.TrucoSurvivors.Screens.MainMenuScreen;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
@@ -32,6 +34,7 @@ public class Main extends Game {
     private TextureAtlas atlasJokers;
     private PerfilJugador perfilJugador;
     private TextureRegion pixelBlancoRegion;
+    public AssetManager assets;
 
     @Override
     public void create() {
@@ -56,7 +59,11 @@ public class Main extends Game {
         // 3. ¡Le damos Play! Empezará a sonar apenas se abra el juego
         musicaFondo.play();
         gestorSonidos = new GestorSonidos();
-        this.setScreen(new MainMenuScreen(this));
+        assets = new AssetManager();
+        setScreen(new LoadingScreenCentered(this, assets, "ui/unpeso-spritesheet.png", 12, 1.0f, () -> {
+            this.setScreen(new MainMenuScreen(this));
+        }));
+        //this.setScreen(new MainMenuScreen(this));
         atlasCartas = new TextureAtlas(Gdx.files.internal("atlas/cartas.atlas"));
         for (Texture texture : atlasCartas.getTextures()) {
             texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
