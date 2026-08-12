@@ -29,6 +29,7 @@ public class Jugador {
     private int espacioSantosExtra = 0;
     private int proximoEfectoZodiacoMultiplicador = 1; // Libra
     private int rerollsTienda = 0;
+    private double bonusEnvidoFinal = 0;
 
     public Jugador(String nombre) {
         this.nombre = nombre;
@@ -129,7 +130,7 @@ public class Jugador {
         if (!hayMismoPalo) {
             puntosEnvido = getNumeroMasGrande();
         }
-        return puntosEnvido;
+        return puntosEnvido + bonusEnvidoFinal;
     }
 
     public ArrayList<Carta> getCartasEnvidoGanador() {
@@ -193,6 +194,10 @@ public class Jugador {
     public double getMultiplicadorEnvidoTemporal() { return multiplicadorEnvidoTemporal; }
     public void multEnvidoOriginal() { this.multiplicadorEnvidoTemporal = multiplicadorEnvido; }
     public void multTrucoOriginal() { this.multiplicadorTrucoTemporal = multiplicadorTruco; }
+
+    /** Bonus que se suma al valor de envido final del jugador (afecta tambien quien gana el envido). */
+    public double getBonusEnvidoFinal() { return bonusEnvidoFinal; }
+    public void sumarBonusEnvidoFinal(double cantidad) { this.bonusEnvidoFinal += cantidad; }
 
     /** Cantidad total de rerolls hechos en la tienda a lo largo de la partida. */
     public int getRerollsTienda() { return rerollsTienda; }
