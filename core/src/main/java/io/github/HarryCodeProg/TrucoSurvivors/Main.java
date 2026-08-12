@@ -36,6 +36,7 @@ public class Main extends Game {
     private TextureRegion pixelBlancoRegion;
     public AssetManager assets;
     private TextureAtlas atlasZodiaco;
+    private Texture texturaRuletaFondo;
 
     @Override
     public void create() {
@@ -74,6 +75,7 @@ public class Main extends Game {
             texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         }
         atlasZodiaco = new TextureAtlas(Gdx.files.internal("atlas/zodiaco.atlas"));
+        texturaRuletaFondo = new Texture("ui/zodiaco_ruleta.png");
 
         cambiarIdioma("es");
     }
@@ -95,6 +97,8 @@ public class Main extends Game {
     public TextureRegion getPixelBlancoRegion() {
         return pixelBlancoRegion;
     }
+
+    public Texture getTexturaRuletaFondo() { return texturaRuletaFondo; }
 
     public static Main getInstance() {return instancia;}
 
@@ -192,5 +196,6 @@ public class Main extends Game {
         if (atlasCartas != null) atlasCartas.dispose();
         if (atlasJokers != null) atlasJokers.dispose();
         if (atlasZodiaco != null) atlasZodiaco.dispose();
+        if (texturaRuletaFondo != null) texturaRuletaFondo.dispose();
     }
 }

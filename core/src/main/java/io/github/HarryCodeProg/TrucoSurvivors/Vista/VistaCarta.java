@@ -106,18 +106,18 @@ public class VistaCarta implements Arrastrable{
         com.badlogic.gdx.graphics.Color colorEnvido = Boton.TipoColor.CAFE.base;
         com.badlogic.gdx.graphics.Color blanco = com.badlogic.gdx.graphics.Color.WHITE;
         String lineaNombre = carta.getNumero() + " de " + carta.paloToString();
-        double valorTrucoReal = carta.getValorTrucoActual();
-        double valorTrucoEfectivo = carta.getValorTrucoEfectivo();
-        double valorEnvidoReal = carta.getValorEnvidoActual();
-        double valorEnvidoEfectivo = carta.getValorEnvidoEfectivo();
+        double valorTrucoReal = carta.getValorTrucoEfectivo();
+        double puntosTrucoAporte = carta.getPuntosTrucoAporteEfectivo();
+        double valorEnvidoReal = carta.getValorEnvidoEfectivo();
+        double puntosEnvidoAporte = carta.getPuntosEnvidoAporteEfectivo();
         String etiquetaValorTruco = "Valor Truco: ";
         String numeroValorTruco = String.valueOf((int) valorTrucoReal);
         String etiquetaPuntosTruco = "Puntos Truco: ";
-        String numeroPuntosTruco = String.valueOf((int) valorTrucoEfectivo);
+        String numeroPuntosTruco = String.valueOf((int) puntosTrucoAporte);
         String etiquetaValorEnvido = "Valor Envido: ";
         String numeroValorEnvido = String.valueOf((int) valorEnvidoReal);
         String etiquetaPuntosEnvido = "Puntos Envido: ";
-        String numeroPuntosEnvido = String.valueOf((int) valorEnvidoEfectivo);
+        String numeroPuntosEnvido = String.valueOf((int) puntosEnvidoAporte);
         // Medimos el ancho maximo necesario entre todas las lineas (etiqueta + numero concatenados)
         layout.setText(font, lineaNombre);
         float maxAnchoTexto = layout.width;

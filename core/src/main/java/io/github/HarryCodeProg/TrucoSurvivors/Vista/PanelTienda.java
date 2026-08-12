@@ -1,6 +1,8 @@
 package io.github.HarryCodeProg.TrucoSurvivors.Vista;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Carta;
@@ -35,7 +37,7 @@ public class PanelTienda {
     private static final float PANEL_Y = 40f;
     private static final float PANEL_ALTO = 460f;
     private static final float PANEL_X = 260f;
-    private static final float PANEL_ANCHO = 1160f - PANEL_X;
+    private static final float PANEL_ANCHO = 1000f - PANEL_X;
     private static final float VELOCIDAD_SLIDE = 1800f; // px/seg
     private float offsetY;        // cuanto se desplaza el panel respecto a su posicion final (positivo = mas abajo)
     private float offsetYObjetivo; // 0 = posicion final (visible), -PANEL_ALTO-PANEL_Y = totalmente oculto abajo
@@ -43,10 +45,12 @@ public class PanelTienda {
     private Runnable alCerrarCompletamente;
     private final ArrayList<VistaJoker> vistasJokersPropios = new ArrayList<>();
     private VistaJoker jokerPropioSeleccionado;
-    private static final float RUEDA_RADIO = 180f;
-    private static final float RUEDA_X = 1280f; // centro fuera de pantalla, mitad izquierda del circulo entra
-    private static final float RUEDA_Y = 300f;
+    private static final float RUEDA_X = 1250f;
+    private static final float RUEDA_Y = 420f;
+    private static final float RUEDA_RADIO = 170f;
     private RuedaZodiaco ruedaZodiaco;
+    // PanelTienda.java
+
 
     public PanelTienda(Main game, Jugador jugador, Runnable alContinuar) {
         this.game = game;
@@ -61,7 +65,7 @@ public class PanelTienda {
         botonRerollCartas = new Boton(PANEL_X + 20, PANEL_Y + PANEL_ALTO - 60, 160, 40, Boton.TipoColor.AZUL, Accion.REROLL_CARTAS);
         botonRerollJokers = new Boton(PANEL_X + 20, PANEL_Y + PANEL_ALTO - 210, 160, 40, Boton.TipoColor.AZUL, Accion.REROLL_JOKERS);
         botonContinuar = new Boton(PANEL_X + PANEL_ANCHO - 180, PANEL_Y + PANEL_ALTO - 60, 160, 50, Boton.TipoColor.DORADO, Accion.CONTINUAR_TIENDA);
-        ruedaZodiaco = new RuedaZodiaco(RUEDA_X, RUEDA_Y, RUEDA_RADIO, game.getAtlasZodiaco());
+        ruedaZodiaco = new RuedaZodiaco(RUEDA_X, RUEDA_Y, RUEDA_RADIO, game.getAtlasZodiaco(), game.getTexturaRuletaFondo());
         reconstruirVistas();
         this.offsetY = -(PANEL_Y + PANEL_ALTO);
         this.offsetYObjetivo = 0f;
@@ -207,23 +211,23 @@ public class PanelTienda {
     }
 
     public void render(SpriteBatch batch) {
-        batch.end();
+        // 1. Guardamos la matriz original y aplicamos la del slide/offset de la tienda
         com.badlogic.gdx.math.Matrix4 matrizOriginal = batch.getProjectionMatrix().cpy();
         com.badlogic.gdx.math.Matrix4 matrizConOffset = matrizOriginal.cpy().translate(0, offsetY, 0);
         batch.setProjectionMatrix(matrizConOffset);
-        batch.begin();
-        // 1. Fondo de la tienda
+        // 2. Renderizamos el fondo de la rueda (usa batch.draw, así que EL BATCH TIENE QUE ESTAR ABIERTO)
+        ruedaZodiaco.renderFondo(batch);
+        // --- Fondo de la tienda ---
         Texture pixel = game.getPixelBlanco();
         batch.setColor(0.06f, 0.07f, 0.1f, 0.94f);
         batch.draw(pixel, PANEL_X, PANEL_Y, PANEL_ANCHO, PANEL_ALTO);
         batch.setColor(1, 1, 1, 1);
-        // 2. Render normal de las cartas y jokers
+        // --- Elementos ---
         for (VistaItemTienda v : vistasCartas) if (v != seleccionado) v.render(batch, game);
         for (VistaItemTienda v : vistasJokers) if (v != seleccionado) v.render(batch, game);
         for (VistaJoker vj : vistasJokersPropios) vj.render(batch);
         if (seleccionado != null) seleccionado.render(batch, game);
-        ruedaZodiaco.render(batch);
-        // 3. Botones y textos
+        // --- Botones y textos ---
         botonComprar.render(batch);
         botonRerollCartas.render(batch);
         botonRerollJokers.render(batch);
@@ -236,17 +240,6 @@ public class PanelTienda {
         float maxAnchoTexto = 320f;
         if (seleccionado != null) {
             ItemTienda item = seleccionado.getItem();
-            /*if (item.getTipo() == ItemTienda.Tipo.JOKER) {
-                Joker j = item.getJoker();
-                game.getFuentePrincipal().draw(batch, "Nombre: " + j.getNombre(), infoX, infoY);
-                game.getFuentePrincipal().draw(batch, "Rareza: " + j.getRareza().name(), infoX, infoY - 30);
-                game.getFuentePrincipal().draw(batch, j.getDescripcion(), infoX, infoY - 70, maxAnchoTexto, com.badlogic.gdx.utils.Align.left, true);
-            } else if (item.getTipo() == ItemTienda.Tipo.CARTA) {
-                Carta c = item.getCarta();
-                game.getFuentePrincipal().draw(batch, "Carta: " + c.getNumero() + " de " + c.paloToString(), infoX, infoY);
-                game.getFuentePrincipal().draw(batch, "Poder Truco: " + c.getValorTrucoPoderActual(), infoX, infoY - 30);
-                game.getFuentePrincipal().draw(batch, "Chips Aporte: " + c.getPuntosTrucoAporteActual(), infoX, infoY - 60);
-            }*/
             String textoPrecio = "Precio: $" + item.getPrecio();
             game.getFuentePrincipal().draw(batch, textoPrecio, PANEL_X + PANEL_ANCHO - 220, PANEL_Y + 90);
         } else if (jokerPropioSeleccionado != null) {
@@ -258,7 +251,7 @@ public class PanelTienda {
             String textoVenta = "Vender por: $" + precioVenta;
             game.getFuentePrincipal().draw(batch, textoVenta, PANEL_X + PANEL_ANCHO - 220, PANEL_Y + 90);
         }
-        // 4. DIBUJAR CARTELES DE STATS POR ENCIMA (Capa superior de hover)
+        // --- Carteles de stats (hovers) ---
         for (VistaItemTienda v : vistasCartas) v.renderCartelStats(batch, game);
         for (VistaItemTienda v : vistasJokers) v.renderCartelStats(batch, game);
         for (VistaJoker vj : vistasJokersPropios) {
@@ -266,9 +259,9 @@ public class PanelTienda {
                 vj.renderCartelStats(batch, game);
             }
         }
-        batch.end();
+        ruedaZodiaco.render(batch);
+        // 3. Restauramos la matriz original para devolver el batch como venía
         batch.setProjectionMatrix(matrizOriginal);
-        batch.begin();
     }
 
     /** Debe llamarse una vez por frame, ANTES de update() de input, para que la animacion avance siempre. */
@@ -297,6 +290,7 @@ public class PanelTienda {
 
     public void dispose() {
         if (iconoPeso != null) iconoPeso.dispose();
+        if (ruedaZodiaco != null) ruedaZodiaco.dispose();
     }
 
     public void consumir(SignoZodiaco signo, Jugador jugador, Juego juego, EstadoTienda tienda, OverlaySeleccionCarta overlaySeleccion, Runnable alTerminarTodo) {
