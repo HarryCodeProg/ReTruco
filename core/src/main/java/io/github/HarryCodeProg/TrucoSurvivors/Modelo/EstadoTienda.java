@@ -20,6 +20,9 @@ public class EstadoTienda {
     private final PoolJokersTienda poolJokers = new PoolJokersTienda();
     private double multiplicadorPrecio = 1.0;
     private int rerollsGratis = 0;
+    private int espacioJokersExtra = 0;
+    private int espacioSantosExtra = 0;
+
 
     public EstadoTienda(Jugador jugador) {
         generarFilaCartas();
@@ -85,4 +88,7 @@ public class EstadoTienda {
         generarFilaCartas();
         return true;
     }
+
+    public void sumarEspacioJokersTienda(int c) { espacioJokersExtra += c; cantidadJokers += c; }
+    public void sumarEspacioSantosTienda(int c) { espacioSantosExtra += c; }
 }
