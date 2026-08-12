@@ -7,6 +7,7 @@ public enum EventoJuego {
     AL_JUGAR_PRIMERA_CARTA,
     AL_GANAR_BAZA,
     AL_GANAR_TRUCO,
+    AL_PERDER_TRUCO,
     AL_GANAR_ENVIDO,
     AL_DESCARTAR,
     TERMINO_MANO,

@@ -19,6 +19,7 @@ public class Lwjgl3Launcher {
         settings.stripWhitespaceY = false;
         TexturePacker.process(settings, "assets/imagenesCartas", "assets/atlas", "cartas");
         TexturePacker.process(settings, "assets/jokers", "assets/atlas", "jokers");
+        TexturePacker.process(settings, "assets/zodiaco_src", "assets/atlas", "zodiaco");
         createApplication();
     }
 

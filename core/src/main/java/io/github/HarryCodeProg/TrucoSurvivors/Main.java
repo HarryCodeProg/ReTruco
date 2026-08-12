@@ -35,6 +35,8 @@ public class Main extends Game {
     private PerfilJugador perfilJugador;
     private TextureRegion pixelBlancoRegion;
     public AssetManager assets;
+    private TextureAtlas atlasZodiaco;
+    private Texture texturaRuletaFondo;
 
     @Override
     public void create() {
@@ -72,6 +74,8 @@ public class Main extends Game {
         for (Texture texture : atlasJokers.getTextures()) {
             texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         }
+        atlasZodiaco = new TextureAtlas(Gdx.files.internal("atlas/zodiaco.atlas"));
+        texturaRuletaFondo = new Texture("ui/zodiaco_ruleta.png");
 
         cambiarIdioma("es");
     }
@@ -88,9 +92,13 @@ public class Main extends Game {
         return this.musicaFondo;
     }
 
+    public TextureAtlas getAtlasZodiaco() { return atlasZodiaco; }
+
     public TextureRegion getPixelBlancoRegion() {
         return pixelBlancoRegion;
     }
+
+    public Texture getTexturaRuletaFondo() { return texturaRuletaFondo; }
 
     public static Main getInstance() {return instancia;}
 
@@ -115,9 +123,17 @@ public class Main extends Game {
         listaRivales.add(new DatosRival("Agusto", "Se hace odiar muy facil", 250000, false,13));
         listaRivales.add(new DatosRival("Benja", "No tiene VTV, es un peligro", 500000, false,14));
 
-        listaRivales.add(new DatosRival("El Z", "Le gusta Dragon Ball", 800000, false,15));
-        listaRivales.add(new DatosRival("Agusto", "Se hace odiar muy facil", 1000000, false,16));
+        listaRivales.add(new DatosRival("Juanse", "Se autonombra el secas", 800000, false,15));
+        listaRivales.add(new DatosRival("El Z", "Le gusta Dragon Ball", 1000000, false,16));
         listaRivales.add(new DatosRival("Liguo", "La parca oscura", 1500000, false,17));
+
+        listaRivales.add(new DatosRival("Mia", "Le gusta mirar el celular", 2000000, false,18));
+        listaRivales.add(new DatosRival("Thian", "Le gusta el futbol", 3000000, false,19));
+        listaRivales.add(new DatosRival("Thiago", "Es muy erratico", 3500000, false,20));
+
+        listaRivales.add(new DatosRival("Susana", "Doña de doñas", 4000000, false,21));
+        listaRivales.add(new DatosRival("Nahuel", "¿Quien?", 5000000, false,22));
+        listaRivales.add(new DatosRival("Harry", "El creador del juego", 6666666, false,23));
     }
 
     public ArrayList<DatosRival> getListaRivales() {
@@ -179,5 +195,7 @@ public class Main extends Game {
         gestorSonidos.dispose();
         if (atlasCartas != null) atlasCartas.dispose();
         if (atlasJokers != null) atlasJokers.dispose();
+        if (atlasZodiaco != null) atlasZodiaco.dispose();
+        if (texturaRuletaFondo != null) texturaRuletaFondo.dispose();
     }
 }

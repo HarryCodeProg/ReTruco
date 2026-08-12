@@ -158,36 +158,42 @@ public class Carta {
 
     public void calcularValoresBase() {
         // --- Jerarquía / Poder (mapeo clásico de Truco) ---
-        if (numero == 1 && palo == Palo.ESPADA) valorTrucoPoderBase = 16;
-        else if (numero == 1 && palo == Palo.BASTO) valorTrucoPoderBase = 15;
-        else if (numero == 7 && palo == Palo.ESPADA) valorTrucoPoderBase = 14;
-        else if (numero == 7 && palo == Palo.ORO) valorTrucoPoderBase = 13;
-        else {
-            switch (numero) {
-                case 3: valorTrucoPoderBase = 12; break;
-                case 2: valorTrucoPoderBase = 11; break;
-                case 1: valorTrucoPoderBase = 10; break;
-                case 12: valorTrucoPoderBase = 9; break;
-                case 11: valorTrucoPoderBase = 8; break;
-                case 10: valorTrucoPoderBase = 7; break;
-                case 9: valorTrucoPoderBase = 6; break;
-                case 8: valorTrucoPoderBase = 5; break;
-                case 7: valorTrucoPoderBase = 4; break;
-                case 6: valorTrucoPoderBase = 3; break;
-                case 5: valorTrucoPoderBase = 2; break;
-                case 4: valorTrucoPoderBase = 1; break;
-                default: valorTrucoPoderBase = 0; break;
-            }
+        if (numero == 1 && palo == Palo.ESPADA){
+            valorTrucoPoderBase = 16;
+            puntosTrucoAporteBase = 16;
         }
-
-        // --- Puntos Truco / Aporte base (ejemplo -- ajustar si querés otros valores) ---
-        if (numero == 7 && palo == Palo.ORO) puntosTrucoAporteBase = 10;
-        else if (numero == 7 && palo == Palo.ESPADA) puntosTrucoAporteBase = 8;
-        else if (numero == 3) puntosTrucoAporteBase = 5;
-        else if (numero == 2) puntosTrucoAporteBase = 3;
-        else if (numero == 1) puntosTrucoAporteBase = 1;
-        else puntosTrucoAporteBase = 0;
-
+        else if (numero == 1 && palo == Palo.BASTO){
+            valorTrucoPoderBase = 15;
+            puntosTrucoAporteBase = 15;
+        }
+        else if (numero == 7 && palo == Palo.ESPADA){
+            valorTrucoPoderBase = 14;
+            puntosTrucoAporteBase = 14;
+        }
+        else if (numero == 7 && palo == Palo.ORO){
+            valorTrucoPoderBase = 13;
+            puntosTrucoAporteBase = 13;
+        }
+        else {
+            int poder;
+            switch (numero) {
+                case 3:  poder = 12; break;
+                case 2:  poder = 11; break;
+                case 1:  poder = 10; break;
+                case 12: poder = 9;  break;
+                case 11: poder = 8;  break;
+                case 10: poder = 7;  break;
+                case 9:  poder = 6;  break;
+                case 8:  poder = 5;  break;
+                case 7:  poder = 4;  break;
+                case 6:  poder = 3;  break;
+                case 5:  poder = 2;  break;
+                case 4:  poder = 1;  break;
+                default: poder = 0;  break;
+            }
+            this.valorTrucoPoderBase = poder;
+            this.puntosTrucoAporteBase = poder;
+        }
         // --- Envido (poder/valor) ---
         this.valorEnvidoPoderBase = (numero >= 10) ? 0 : numero;
         this.puntosEnvidoAporteBase = this.valorEnvidoPoderBase;

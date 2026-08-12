@@ -14,6 +14,7 @@ public class PoolJokersTienda {
     private final ArrayList<Supplier<Joker>> fabricas = new ArrayList<>();
 
     public PoolJokersTienda() {
+        //comun
         fabricas.add(JokerEspañol::new);
         fabricas.add(Mate::new);
         fabricas.add(Gaseosa::new);
@@ -36,6 +37,34 @@ public class PoolJokersTienda {
         fabricas.add(Termo::new);
         fabricas.add(TortaNegra::new);
         fabricas.add(Vigilante::new);
+        fabricas.add(Agua::new);
+        fabricas.add(AltoGuiso::new);
+        fabricas.add(Damajuana::new);
+        fabricas.add(AndaALaCancha::new);
+        fabricas.add(AtiendoBoludos::new);
+        fabricas.add(DVD::new);
+        fabricas.add(Alfajor::new);
+        fabricas.add(Flan::new);
+        fabricas.add(Ñoquis::new);
+        fabricas.add(Chimichurri::new);
+        fabricas.add(Choripan::new);
+        fabricas.add(Locro::new);
+        fabricas.add(Pizza::new);
+        fabricas.add(GalletaConRelleno::new);
+        fabricas.add(Oblea::new);
+        fabricas.add(Peso::new);
+        fabricas.add(PastelDePapa::new);
+        fabricas.add(Yerba::new);
+        fabricas.add(Vacio::new);
+        fabricas.add(Birome::new);
+        fabricas.add(AK47::new);
+        fabricas.add(FanaticoEnojado::new);
+        fabricas.add(NoHayPolque::new);
+        fabricas.add(SeTieneQueArrepentir::new);
+        fabricas.add(NoMeMidas::new);
+        fabricas.add(DameLaMochila::new);
+        fabricas.add(NoEstaTanMal::new);
+        fabricas.add(Empanada::new);
     }
 
     /** Devuelve un joker nuevo al azar, evitando (si es posible) los que el jugador ya tiene por clase. */

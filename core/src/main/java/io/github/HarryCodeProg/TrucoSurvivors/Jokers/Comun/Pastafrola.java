@@ -12,7 +12,7 @@ import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 public class Pastafrola extends Joker {
 
     public Pastafrola(){
-        super(13,
+        super(14,
             "Pastafrola",
             "Pastafrola",
             "Las cartas que te maten reciben +10 puntos truco",
