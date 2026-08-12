@@ -20,7 +20,7 @@ public class Jugador {
     private double multiplicadorTrucoTemporal;
     private double multiplicadorEnvidoTemporal;
     private double puntajeTotal;
-    private int pesos = 0;
+    private int pesos = 100;
     private static final int INTERVALO_INTERES = 5;
     private static final int TOPE_INTERES = 5;
     private int descartesBase = 4;
@@ -28,6 +28,8 @@ public class Jugador {
     private int tamañoManoExtra = 0;
     private int espacioSantosExtra = 0;
     private int proximoEfectoZodiacoMultiplicador = 1; // Libra
+    private int rerollsTienda = 0;
+    private double bonusEnvidoFinal = 0;
 
     public Jugador(String nombre) {
         this.nombre = nombre;
@@ -128,7 +130,7 @@ public class Jugador {
         if (!hayMismoPalo) {
             puntosEnvido = getNumeroMasGrande();
         }
-        return puntosEnvido;
+        return puntosEnvido + bonusEnvidoFinal;
     }
 
     public ArrayList<Carta> getCartasEnvidoGanador() {
@@ -205,4 +207,10 @@ public class Jugador {
         proximoEfectoZodiacoMultiplicador = 1;
         return m;
     }
+
+    public int getRerollsTienda() { return rerollsTienda; }
+    public void sumarRerollTienda() { this.rerollsTienda++; }
+
+    public double getBonusEnvidoFinal() { return bonusEnvidoFinal; }
+    public void sumarBonusEnvidoFinal(double cantidad) { this.bonusEnvidoFinal += cantidad; }
 }

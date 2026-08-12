@@ -1,6 +1,7 @@
 package io.github.HarryCodeProg.TrucoSurvivors.Vista;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import io.github.HarryCodeProg.TrucoSurvivors.Gestores.GestorSonidos;
 import io.github.HarryCodeProg.TrucoSurvivors.Main;
@@ -18,8 +19,12 @@ public class RuedaZodiaco {
     private float x, y, radio;
     private TextureRegion[] regiones; // llenar con atlas 4x3 cuando este listo
 
-    public RuedaZodiaco(float x, float y, float radio, TextureRegion[] regiones) {
-        this.x = x; this.y = y; this.radio = radio; this.regiones = regiones;
+    public RuedaZodiaco(float x, float y, float radio, TextureAtlas atlasZodiaco) {
+        this.x = x; this.y = y; this.radio = radio;
+        this.regiones = new TextureRegion[signos.length];
+        for (int i = 0; i < signos.length; i++) {
+            regiones[i] = atlasZodiaco.findRegion(signos[i].getNombreRegion());
+        }
     }
 
     public void click(float mouseX, float mouseY, Consumer<SignoZodiaco> alConsumir) {

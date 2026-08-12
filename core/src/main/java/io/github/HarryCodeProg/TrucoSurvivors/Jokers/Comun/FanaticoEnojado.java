@@ -9,19 +9,20 @@ import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Rareza;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 
-// Cañoncito: cartas de ORO que maten, +15 puntos truco
-public class Cañoncito extends Joker {
+// Fanatico Enojado: cada copa que mata suma +50 puntos truco al activarse
+public class FanaticoEnojado extends Joker {
 
-    public Cañoncito(){
-        super(19, "Cañoncito", "Cañoncito", "Las cartas de oro que maten reciben +15 puntos truco",
+    public FanaticoEnojado(){
+        super(45, "Fanatico Enojado", "FanaticoEnojado", "Cada copa que mata otorga +50 puntos truco",
             Rareza.comun, 1, Joker.FaseActivacion.AL_PUNTUAR_CARTA, CategoriaJoker.NACIONAL);
     }
 
     @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego){
-        if (evento != EventoJuego.AL_MATAR_CARTA) return;
+        if (evento != EventoJuego.AL_PUNTUAR_CARTA) return;
         Carta c = ctx.getCartaEnResolucion();
-        if (c == null || c.getPalo() != Palo.ORO) return;
-        c.modificarPuntosTrucoAportePermanente(15);
+        if (c == null || c.getPalo() != Palo.COPA) return;
+        if (!ctx.cartaMato(c)) return;
+        ctx.getResolucionActual().sumarChips(50, getNombre());
     }
 }

@@ -11,7 +11,7 @@ import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 // Milanesa: cartas que maten reciben +10 PUNTOS TRUCO (aporte, no poder)
 public class Milanesa extends Joker {
     public Milanesa(){
-        super(12, "Milanesa", "Milanesa", "Las cartas que maten reciben +10 puntos truco",
+        super(13, "Milanesa", "Milanesa", "Las cartas que maten reciben +10 puntos truco",
             Rareza.comun, 1, FaseActivacion.AL_PUNTUAR_CARTA, CategoriaJoker.NACIONAL);
     }
 

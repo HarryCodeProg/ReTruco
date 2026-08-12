@@ -61,7 +61,7 @@ public class PanelTienda {
         botonRerollCartas = new Boton(PANEL_X + 20, PANEL_Y + PANEL_ALTO - 60, 160, 40, Boton.TipoColor.AZUL, Accion.REROLL_CARTAS);
         botonRerollJokers = new Boton(PANEL_X + 20, PANEL_Y + PANEL_ALTO - 210, 160, 40, Boton.TipoColor.AZUL, Accion.REROLL_JOKERS);
         botonContinuar = new Boton(PANEL_X + PANEL_ANCHO - 180, PANEL_Y + PANEL_ALTO - 60, 160, 50, Boton.TipoColor.DORADO, Accion.CONTINUAR_TIENDA);
-        ruedaZodiaco = new RuedaZodiaco(RUEDA_X, RUEDA_Y, RUEDA_RADIO, null);
+        ruedaZodiaco = new RuedaZodiaco(RUEDA_X, RUEDA_Y, RUEDA_RADIO, game.getAtlasZodiaco());
         reconstruirVistas();
         this.offsetY = -(PANEL_Y + PANEL_ALTO);
         this.offsetYObjetivo = 0f;
@@ -222,6 +222,7 @@ public class PanelTienda {
         for (VistaItemTienda v : vistasJokers) if (v != seleccionado) v.render(batch, game);
         for (VistaJoker vj : vistasJokersPropios) vj.render(batch);
         if (seleccionado != null) seleccionado.render(batch, game);
+        ruedaZodiaco.render(batch);
         // 3. Botones y textos
         botonComprar.render(batch);
         botonRerollCartas.render(batch);
@@ -235,7 +236,7 @@ public class PanelTienda {
         float maxAnchoTexto = 320f;
         if (seleccionado != null) {
             ItemTienda item = seleccionado.getItem();
-            if (item.getTipo() == ItemTienda.Tipo.JOKER) {
+            /*if (item.getTipo() == ItemTienda.Tipo.JOKER) {
                 Joker j = item.getJoker();
                 game.getFuentePrincipal().draw(batch, "Nombre: " + j.getNombre(), infoX, infoY);
                 game.getFuentePrincipal().draw(batch, "Rareza: " + j.getRareza().name(), infoX, infoY - 30);
@@ -245,7 +246,7 @@ public class PanelTienda {
                 game.getFuentePrincipal().draw(batch, "Carta: " + c.getNumero() + " de " + c.paloToString(), infoX, infoY);
                 game.getFuentePrincipal().draw(batch, "Poder Truco: " + c.getValorTrucoPoderActual(), infoX, infoY - 30);
                 game.getFuentePrincipal().draw(batch, "Chips Aporte: " + c.getPuntosTrucoAporteActual(), infoX, infoY - 60);
-            }
+            }*/
             String textoPrecio = "Precio: $" + item.getPrecio();
             game.getFuentePrincipal().draw(batch, textoPrecio, PANEL_X + PANEL_ANCHO - 220, PANEL_Y + 90);
         } else if (jokerPropioSeleccionado != null) {

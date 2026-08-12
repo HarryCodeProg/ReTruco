@@ -51,13 +51,6 @@ public class EstadoTienda {
         return ConfiguracionEconomia.COSTO_REROLL_BASE + rerollsJokers;
     }
 
-    public boolean rerollearJokers(Jugador jugador) {
-        if (!jugador.gastarPesos(costoRerollJokers())) return false;
-        rerollsJokers++;
-        generarFilaJokers(jugador);
-        return true;
-    }
-
     public ArrayList<ItemTienda> getFilaCartas() { return filaCartas; }
     public ArrayList<ItemTienda> getFilaJokers() { return filaJokers; }
     public ArrayList<ItemTienda> getFilaSantos() { return filaSantos; }
@@ -75,11 +68,20 @@ public class EstadoTienda {
 
     public void sumarRerollsGratis(int cantidad) { rerollsGratis += cantidad; }
 
+    public boolean rerollearJokers(Jugador jugador) {
+        if (!jugador.gastarPesos(costoRerollJokers())) return false;
+        rerollsJokers++;
+        jugador.sumarRerollTienda();
+        generarFilaJokers(jugador);
+        return true;
+    }
+
     public boolean rerollearCartas(Jugador jugador) {
         int costo = costoRerollCartas();
         if (rerollsGratis > 0) { rerollsGratis--; }
         else if (!jugador.gastarPesos(costo)) return false;
         rerollsCartas++;
+        jugador.sumarRerollTienda();
         generarFilaCartas();
         return true;
     }

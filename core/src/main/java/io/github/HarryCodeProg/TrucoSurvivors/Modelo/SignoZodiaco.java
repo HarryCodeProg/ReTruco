@@ -4,7 +4,13 @@ import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Carta;
 import io.github.HarryCodeProg.TrucoSurvivors.Jugador;
 
 public enum SignoZodiaco {
-    ARIES, TAURO, GEMINIS, CANCER, LEO, VIRGO, LIBRA, ESCORPIO, SAGITARIO, CAPRICORNIO, ACUARIO, PISCIS;
+    ARIES("01_aries"), TAURO("02_tauro"), GEMINIS("03_geminis"), CANCER("04_cancer"),
+    LEO("05_leo"), VIRGO("06_virgo"), LIBRA("07_libra"), ESCORPIO("08_escorpio"),
+    SAGITARIO("09_sagitario"), CAPRICORNIO("10_capricornio"), ACUARIO("11_acuario"), PISCIS("12_piscis");
+
+    private final String nombreRegion;
+    SignoZodiaco(String nombreRegion) { this.nombreRegion = nombreRegion; }
+    public String getNombreRegion() { return nombreRegion; }
 
     public void aplicarEfecto(Jugador jugador, Juego juego, EstadoTienda tienda, Carta cartaSeleccionada) {
         int mult = (this == LIBRA) ? 1 : jugador.consumirMultiplicadorZodiaco();

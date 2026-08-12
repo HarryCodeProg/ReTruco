@@ -1,0 +1,96 @@
+
+zodiaco.png
+size: 2048, 2048
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+01_aries
+  rotate: false
+  xy: 2, 1030
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+02_tauro
+  rotate: false
+  xy: 2, 516
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+03_geminis
+  rotate: false
+  xy: 516, 1030
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+04_cancer
+  rotate: false
+  xy: 2, 2
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+05_leo
+  rotate: false
+  xy: 516, 516
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+06_virgo
+  rotate: false
+  xy: 1030, 1030
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+07_libra
+  rotate: false
+  xy: 516, 2
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+08_escorpio
+  rotate: false
+  xy: 1030, 516
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+09_sagitario
+  rotate: false
+  xy: 1030, 2
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+
+zodiaco2.png
+size: 2048, 1024
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+10_capricornio
+  rotate: false
+  xy: 2, 2
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+11_acuario
+  rotate: false
+  xy: 516, 2
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+12_piscis
+  rotate: false
+  xy: 1030, 2
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1

@@ -1,0 +1,34 @@
+package io.github.HarryCodeProg.TrucoSurvivors.Jokers.Comun;
+
+import io.github.HarryCodeProg.TrucoSurvivors.Activacion.ContextoJuego;
+import io.github.HarryCodeProg.TrucoSurvivors.Estados.EventoJuego;
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Rareza;
+import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
+
+// No Esta Tan Mal: gana +4 mult truco permanente cada vez que perdes la mano
+public class NoEstaTanMal extends Joker {
+
+    private static final double MULT_POR_DERROTA = 4.0;
+
+    public NoEstaTanMal(){
+        super(50, "No Esta Tan Mal", "NoEstaTanMal", "Si perdés la mano, aumenta +4 multiplicador truco",
+            Rareza.comun, 1, Joker.FaseActivacion.INDEPENDIENTE, CategoriaJoker.NACIONAL);
+    }
+
+    @Override
+    public String getDescripcionRenderizada() {
+        return "Si perdés la mano, aumenta +4 multiplicador truco (Actual: +" + (int) getAcumulado() + ")";
+    }
+
+    @Override
+    public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego){
+        if (evento == EventoJuego.AL_PERDER_TRUCO) {
+            sumarAcumulado(MULT_POR_DERROTA);
+            return;
+        }
+        if (evento != EventoJuego.ANTES_DE_SUMAR_TRUCO) return;
+        ctx.getResolucionActual().sumarMult(getAcumulado(), getNombre());
+    }
+}
