@@ -3,8 +3,10 @@ package io.github.HarryCodeProg.TrucoSurvivors.Vista;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
 import io.github.HarryCodeProg.TrucoSurvivors.Gestores.*;
 import io.github.HarryCodeProg.TrucoSurvivors.Jugador;
@@ -13,6 +15,8 @@ import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 import io.github.HarryCodeProg.TrucoSurvivors.Screens.Background;
 
 import java.util.ArrayList;
+
+import static io.github.HarryCodeProg.TrucoSurvivors.Vista.GameLayout.*;
 
 public class GameRenderSystem {
     private final Main game;
@@ -43,6 +47,8 @@ public class GameRenderSystem {
         // 4. SPRITES Y TEXTOS (SpriteBatch)
         game.batch.begin();
         // Renderizado de textos del panel
+        renderAreasJugador(game.batch, jugador, game.getPixelBlanco());
+        renderContadoresAreas(game.batch, jugador);
         panelPuntajes.renderTextos(
             game.batch, game.getFuentePrincipal(), juego, jugador, rival, panelX, panelY,
             gestorAnimacion, puntosTrucoDisplay, multTrucoDisplay, puntosEnvidoDisplay, multEnvidoDisplay);
@@ -112,5 +118,58 @@ public class GameRenderSystem {
         if (jokerArrastrado != null) {
             jokerArrastrado.render(game.batch);
         }
+    }
+
+    private void renderAreasJugador(SpriteBatch batch, Jugador jugador, Texture pixelBlanco) {
+        if (pixelBlanco == null || jugador == null) return;
+        float areaX = MARGEN_AREA_LATERAL;
+        float areaAncho = ANCHO_AREA_JUGADOR;
+        // ÁREA DE CARTAS
+        float cartasY = Y_MANO_JUGADOR - 10f;
+        batch.setColor(0.05f, 0.05f, 0.08f, 0.45f);
+        batch.draw(
+            pixelBlanco,
+            areaX,
+            cartasY,
+            areaAncho,
+            ALTO_AREA_CARTAS
+        );
+        // Borde
+        batch.setColor(0.25f, 0.28f, 0.35f, 0.7f);
+        batch.draw(pixelBlanco, areaX, cartasY, areaAncho, 2f);
+        batch.draw(pixelBlanco, areaX, cartasY + ALTO_AREA_CARTAS - 2f, areaAncho, 2f);
+        batch.draw(pixelBlanco, areaX, cartasY, 2f, ALTO_AREA_CARTAS);
+        batch.draw(pixelBlanco, areaX + areaAncho - 2f, cartasY, 2f, ALTO_AREA_CARTAS);
+        // ÁREA DE JOKERS
+        float jokersY = Y_JOKERS - 10f;
+        batch.setColor(0.05f, 0.05f, 0.08f, 0.45f);
+        batch.draw(
+            pixelBlanco,
+            areaX,
+            jokersY,
+            areaAncho,
+            ALTO_AREA_JOKERS
+        );
+        batch.setColor(0.25f, 0.28f, 0.35f, 0.7f);
+        batch.draw(pixelBlanco, areaX, jokersY, areaAncho, 2f);
+        batch.draw(pixelBlanco, areaX, jokersY + ALTO_AREA_JOKERS - 2f, areaAncho, 2f);
+        batch.draw(pixelBlanco, areaX, jokersY, 2f, ALTO_AREA_JOKERS);
+        batch.draw(pixelBlanco, areaX + areaAncho - 2f, jokersY, 2f, ALTO_AREA_JOKERS);
+        batch.setColor(Color.WHITE);
+    }
+
+    private void renderContadoresAreas(SpriteBatch batch, Jugador jugador) {
+        BitmapFont font = game.getFuentePrincipal();
+        String textoCartas = jugador.getMano().size() + "/" + jugador.getTamañoMano();
+        String textoJokers = jugador.getJokers().size() + "/" + jugador.getTamañoJokers();
+        GlyphLayout layoutCartas = new GlyphLayout(font, textoCartas);
+        GlyphLayout layoutJokers = new GlyphLayout(font, textoJokers);
+        float centroX = MARGEN_AREA_LATERAL + ANCHO_AREA_JUGADOR / 2f;
+        float yCartas = Y_MANO_JUGADOR - 18f;
+        float yJokers = Y_JOKERS - 18f;
+        float xContadorJokers = MARGEN_AREA_LATERAL + 8f;
+        font.setColor(Color.WHITE);
+        font.draw(batch, textoCartas, centroX - layoutCartas.width / 2f, yCartas);
+        font.draw(batch, textoJokers, xContadorJokers, yJokers);
     }
 }

@@ -348,4 +348,8 @@ public class VistaJoker implements Arrastrable{
     public float getAncho() {
         return this.width;
     }
+
+    public float getHandTargetY() {
+        return handY;
+    }
 }

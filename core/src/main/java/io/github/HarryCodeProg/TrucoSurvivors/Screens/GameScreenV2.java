@@ -2,8 +2,13 @@ package io.github.HarryCodeProg.TrucoSurvivors.Screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -73,6 +78,12 @@ public class GameScreenV2 implements Screen {
     // persistencia / visibilidad
     private boolean panelTiendaVisible = false;
     private boolean panelSeleccionVisible = false;
+    private VistaJoker jokerCompradoAnimando = null;
+    private float jokerCompraX;
+    private float jokerCompraY;
+    private float jokerCompraObjetivoX;
+    private float jokerCompraObjetivoY;
+    private static final float VELOCIDAD_ANIMACION_JOKER_COMPRA = 1400f;
 
 
     public GameScreenV2(Main game, DatosRival datosRival) {
@@ -228,6 +239,7 @@ public class GameScreenV2 implements Screen {
     public void render(float delta) {
         prepararFrame();
         actualizarJokersYVenta(delta);
+        actualizarAnimacionCompraJoker(delta);
         if (estado == EstadoPantalla.TIENDA) {
             renderConTienda(delta);
             if (pendingEstado != null) { enterState(pendingEstado); pendingEstado = null; }
@@ -300,6 +312,8 @@ public class GameScreenV2 implements Screen {
             panelSeleccionRival.update(mouseWorld.x, mouseWorld.y);
         }
         game.batch.begin();
+        renderAreaJokers(game.batch, game.getPixelBlanco());
+        renderContadoresAreas(game.batch, jugador);
         renderJokers();
         if (partidaIniciada) {
             panelPuntajes.renderTextos(   game.batch, game.getFuentePrincipal(), juego, jugador, rival,
@@ -319,7 +333,9 @@ public class GameScreenV2 implements Screen {
     private void renderConTienda(float delta) {
         if (panelTienda == null) {
             if (jugador == null) jugador = game.getPerfilJugador() != null ? game.getPerfilJugador().getJugador() : null;
-            panelTienda = new PanelTienda(game, jugador, this::iniciarSalidaDeTienda);
+            panelTienda = new PanelTienda(
+                game, jugador, this::iniciarSalidaDeTienda, this::iniciarAnimacionCompraJoker
+            );
         }
         ScreenUtils.clear(0.1f, 0.12f, 0.16f, 1f);
         camera.update();
@@ -333,6 +349,8 @@ public class GameScreenV2 implements Screen {
             panelTienda.update(mouseWorld.x, mouseWorld.y, delta);
         }
         game.batch.begin();
+        renderAreaJokers(game.batch, game.getPixelBlanco());
+        renderContadoresAreas(game.batch, jugador);
         renderJokers();
         panelPuntajes.renderTextos(
             game.batch, game.getFuentePrincipal(), juego, jugador, rival,
@@ -347,9 +365,54 @@ public class GameScreenV2 implements Screen {
         if (panelTienda != null && panelTiendaVisible) {
             panelTienda.render(game.batch);
         }
+        if (jokerCompradoAnimando != null) {
+            jokerCompradoAnimando.render(game.batch);
+        }
         gestorVentaJoker.render(game.batch);
         renderCartelJokerSiCorresponde();
         game.batch.end();
+    }
+
+    private void renderAreaCartas(SpriteBatch batch, Texture pixelBlanco) {
+        float areaX = MARGEN_AREA_LATERAL;
+        float areaAncho = ANCHO_AREA_JUGADOR;
+        float cartasY = Y_MANO_JUGADOR - 10f;
+        batch.setColor(0.05f, 0.05f, 0.08f, 0.45f);
+        batch.draw(pixelBlanco, areaX, cartasY, areaAncho, ALTO_AREA_CARTAS);
+        batch.setColor(0.25f, 0.28f, 0.35f, 0.7f);
+        batch.draw(pixelBlanco, areaX, cartasY, areaAncho, 2f);
+        batch.draw(pixelBlanco, areaX, cartasY + ALTO_AREA_CARTAS - 2f, areaAncho, 2f);
+        batch.draw(pixelBlanco, areaX, cartasY, 2f, ALTO_AREA_CARTAS);
+        batch.draw(pixelBlanco, areaX + areaAncho - 2f, cartasY, 2f, ALTO_AREA_CARTAS);
+        batch.setColor(Color.WHITE);
+    }
+
+    private void renderAreaJokers(SpriteBatch batch, Texture pixelBlanco) {
+        float areaX = MARGEN_AREA_LATERAL;
+        float areaAncho = ANCHO_AREA_JUGADOR;
+        float jokersY = Y_JOKERS - 10f;
+        batch.setColor(0.05f, 0.05f, 0.08f, 0.45f);
+        batch.draw(pixelBlanco, areaX, jokersY, areaAncho, ALTO_AREA_JOKERS);
+        batch.setColor(0.25f, 0.28f, 0.35f, 0.7f);
+        batch.draw(pixelBlanco, areaX, jokersY, areaAncho, 2f);
+        batch.draw(pixelBlanco, areaX, jokersY + ALTO_AREA_JOKERS - 2f, areaAncho, 2f);
+        batch.draw(pixelBlanco, areaX, jokersY, 2f, ALTO_AREA_JOKERS);
+        batch.draw(pixelBlanco, areaX + areaAncho - 2f, jokersY, 2f, ALTO_AREA_JOKERS);
+        batch.setColor(Color.WHITE);
+    }
+
+    private void renderContadoresAreas(SpriteBatch batch, Jugador jugador) {
+        BitmapFont font = game.getFuentePrincipal();
+        String textoCartas = cartasJugador.size() + "/" + jugador.getTamañoMano();
+        String textoJokers = jokers.size() + "/" + jugador.getTamañoJokers();
+        GlyphLayout layoutCartas = new GlyphLayout(font, textoCartas);
+        GlyphLayout layoutJokers = new GlyphLayout(font, textoJokers);
+        float xContador = MARGEN_AREA_LATERAL + 8f;
+        float yCartas = Y_MANO_JUGADOR - 18f;
+        float yJokers = Y_JOKERS - 18f;
+        font.setColor(Color.WHITE);
+        font.draw(batch, textoCartas, xContador, yCartas);
+        font.draw(batch, textoJokers, xContador, yJokers);
     }
 
     private void prepararFrame() {
@@ -567,7 +630,8 @@ public class GameScreenV2 implements Screen {
                 partidaIniciada = false;
                 break;
             case TIENDA:
-                panelTienda = new PanelTienda(game, jugador, this::iniciarSalidaDeTienda);
+                panelTienda = new PanelTienda(game, jugador, this::iniciarSalidaDeTienda,
+                    this::iniciarAnimacionCompraJoker);
                 panelTiendaVisible = true;
                 panelSeleccionVisible = false;
                 break;
@@ -611,6 +675,68 @@ public class GameScreenV2 implements Screen {
             pendingEstado = EstadoPantalla.TIENDA;
         } else {
             pendingEstado = EstadoPantalla.SELECCION_RIVAL;
+        }
+    }
+
+    private void iniciarAnimacionCompraJoker(VistaItemTienda item) {
+        Joker joker = item.getItem().getJoker();
+        if (joker == null) return;
+        // Vista temporal del Joker comprado
+        jokerCompradoAnimando = new VistaJoker(joker, game.getAtlasJokers());
+        jokerCompradoAnimando.setTamaño(ANCHO_JOKER, ALTO_JOKER);
+        // La tienda está desplazada verticalmente.
+        // La posición real de dibujo es Y + offset del panel.
+        jokerCompraX = item.getX();
+        jokerCompraY = item.getY() + panelTienda.getOffsetY();
+        jokerCompradoAnimando.setPosition(jokerCompraX, jokerCompraY);
+        // Calculamos cómo quedaría la fila con el nuevo Joker.
+        ArrayList<VistaJoker> simulacion = new ArrayList<>(jokers);
+        simulacion.add(jokerCompradoAnimando);
+        areaJokers.distribuir(simulacion, null);
+        jokerCompraObjetivoX = jokerCompradoAnimando.getHandTargetX();
+        jokerCompraObjetivoY = jokerCompradoAnimando.getHandTargetY();
+        // Dejamos preparados los Jokers existentes para su nueva posición.
+        organizarJokersConNuevoSlot();
+    }
+
+    private void organizarJokersConNuevoSlot() {
+        ArrayList<VistaJoker> simulacion = new ArrayList<>(jokers);
+        if (jokerCompradoAnimando != null) {
+            simulacion.add(jokerCompradoAnimando);
+        }
+        areaJokers.distribuir(simulacion, jokerCompradoAnimando);
+    }
+
+    private float moverHacia(float actual, float objetivo, float velocidad, float delta) {
+        float distancia = objetivo - actual;
+        if (Math.abs(distancia) <= velocidad * delta) {
+            return objetivo;
+        }
+        return actual + Math.signum(distancia) * velocidad * delta;
+    }
+
+    private void actualizarAnimacionCompraJoker(float delta) {
+        if (jokerCompradoAnimando == null) {
+            return;
+        }
+        jokerCompraX = moverHacia(
+            jokerCompraX,
+            jokerCompraObjetivoX,
+            VELOCIDAD_ANIMACION_JOKER_COMPRA,
+            delta
+        );
+        jokerCompraY = moverHacia(
+            jokerCompraY,
+            jokerCompraObjetivoY,
+            VELOCIDAD_ANIMACION_JOKER_COMPRA,
+            delta
+        );
+        jokerCompradoAnimando.setPosition(jokerCompraX, jokerCompraY);
+        if (jokerCompraX == jokerCompraObjetivoX
+            && jokerCompraY == jokerCompraObjetivoY) {
+            jokers.add(jokerCompradoAnimando);
+            jokerCompradoAnimando = null;
+            organizarJokers();
         }
     }
 

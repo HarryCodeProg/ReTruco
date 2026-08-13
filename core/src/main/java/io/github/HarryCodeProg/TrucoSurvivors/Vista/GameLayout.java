@@ -27,6 +27,13 @@ public final class GameLayout {
     public static final float PANEL_PUNTAJES_X = 20f;
     public static final float PANEL_PUNTAJES_Y = TECHO_MESA - 20f;
     public static final float Y_BOTONES_CANTOS = Y_BOTONES + ALTO_BOTON + 10f;
+    public static final float ANCHO_AREA_JUGADOR = 800f;
+    public static final float ALTO_AREA_CARTAS = ALTO_CARTA + 20f;
+    public static final float ANCHO_AREA_JOKERS = 800f;
+    public static final float ALTO_AREA_JOKERS = ALTO_JOKER + 20f;
+    public static final float MARGEN_AREA_LATERAL = 220f;
+    public static final float ALTO_CONTADOR_AREA = 24f;
+    public static final float MARGEN_CONTADOR_AREA = 6f;
 
     private GameLayout() {}
 }
