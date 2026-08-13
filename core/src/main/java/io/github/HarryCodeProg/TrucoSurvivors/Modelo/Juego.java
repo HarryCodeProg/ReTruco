@@ -74,7 +74,8 @@ public class Juego {
     }
 
     private void limpiarEstadoResidualDeCombateAnterior() {
-        devolverTodasLasCartasDelJugadorAlMazo();
+        jugador.getMazo().reciclarCartasTomadas();
+        jugador.limpiarMano();
     }
 
     public static Mazo crearMazoRival(int nivelDificultad) {
@@ -83,20 +84,6 @@ public class Juego {
             mazo.getMazo().get(i).modificarValorTrucoPermanente(2); // ajustar nombre real del metodo en Carta
         }
         return mazo;
-    }
-
-    /** Devuelve al mazo del jugador TODAS sus cartas sueltas: mano + mesa (jugador y rival, del lado del jugador). */
-    private void devolverTodasLasCartasDelJugadorAlMazo() {
-        for (Carta c : jugador.getMano()) {
-            c.resetearValores();
-            jugador.getMazo().agregarCarta(c);
-        }
-        jugador.limpiarMano();
-        // Cartas que el jugador ya habia jugado a su propia fila de mesa en el combate anterior
-        for (Carta c : mesa.getMesaJugador()) {
-            c.resetearValores();
-            jugador.getMazo().agregarCarta(c);
-        }
     }
 
     public void ganadorEnvido(){
@@ -138,7 +125,6 @@ public class Juego {
         avanzarMano();
         this.descartesActuales = jugador.getDescartesMaximos();
         this.turnoActual = jugadorEsMano ? jugador : rival;
-        jugador.getMazo().limpiarDescartadas();
         repartir();
     }
 
@@ -175,17 +161,11 @@ public class Juego {
 
     public ResolucionPuntaje getUltimaResolucion() {return ultimaResolucion;}
 
-    public void devolverCartas(){
-        // Reseteamos los valores de todas las cartas antes de devolverlas al mazo,
-        // para que los efectos de los jokers de esta ronda no se acumulen en la siguiente.
-        for (Carta c : mesa.getMesaJugador()) c.resetearValores();
-        for (Carta c : mesa.getMesaRival())   c.resetearValores();
-        for (Carta c : jugador.getMano())     c.resetearValores();
-        for (Carta c : rival.getMano())       c.resetearValores();
-        jugador.getMazo().agregarCartas(mesa.getMesaJugador());
-        jugador.getMazo().agregarCartas(jugador.getMano());
-        rival.getMazo().agregarCartas(mesa.getMesaRival());
-        rival.getMazo().agregarCartas(rival.getMano());
+    public void devolverCartas() {
+        for (Carta c : mesa.getMesaJugador()) {c.resetearValores();}
+        for (Carta c : mesa.getMesaRival()) {c.resetearValores();}
+        for (Carta c : jugador.getMano()) {c.resetearValores();}
+        for (Carta c : rival.getMano()) {c.resetearValores();}
         mesa.limpiarMesa();
         jugador.limpiarMano();
         rival.limpiarMano();

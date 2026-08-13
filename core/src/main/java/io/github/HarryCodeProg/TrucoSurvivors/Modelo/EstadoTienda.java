@@ -91,4 +91,8 @@ public class EstadoTienda {
 
     public void sumarEspacioJokersTienda(int c) { espacioJokersExtra += c; cantidadJokers += c; }
     public void sumarEspacioSantosTienda(int c) { espacioSantosExtra += c; }
+
+    public void sumarEspacioCartasTienda(int c) {
+        cantidadCartas += c;
+    }
 }

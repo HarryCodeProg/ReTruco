@@ -131,12 +131,8 @@ public class PanelTienda {
         overlaySeleccion.update(mouseWorldX, mouseWorldY, delta);
         if (overlayConsumo.debeAplicarEfectoAhora()) {
             SignoZodiaco s = ruedaZodiaco.getUltimoSignoConsumido();
-            if (s.requiereSeleccionCarta()) {
-                overlaySeleccion.abrir(s, jugador.getMano(), game.getAtlasCartas(), overlayConsumo::confirmarCierre);
-            } else {
-                s.aplicarEfecto(jugador, null, estadoTienda, null);
-                overlayConsumo.confirmarCierre();
-            }
+            s.aplicarEfecto(jugador, null, estadoTienda, null);
+            overlayConsumo.confirmarCierre();
         }
         if (Gdx.input.justTouched()) {
             ruedaZodiaco.click(mouseWorldX, mouseWorldY, signo -> {
@@ -244,9 +240,9 @@ public class PanelTienda {
         botonRerollCartas.render(batch);
         botonRerollJokers.render(batch);
         botonContinuar.render(batch);
-        String textoPesos = "$" + jugador.getPesos();
+        /*String textoPesos = "$" + jugador.getPesos();
         if (iconoPeso != null) batch.draw(iconoPeso, PANEL_X + 20, PANEL_Y + PANEL_ALTO - 150, 32, 32);
-        game.getFuentePrincipal().draw(batch, textoPesos, PANEL_X + 60, PANEL_Y + PANEL_ALTO - 125);
+        game.getFuentePrincipal().draw(batch, textoPesos, PANEL_X + 60, PANEL_Y + PANEL_ALTO - 125);*/
         float infoX = PANEL_X + PANEL_ANCHO - 350;
         float infoY = PANEL_Y + PANEL_ALTO - 60;
         float maxAnchoTexto = 320f;
@@ -308,11 +304,7 @@ public class PanelTienda {
     }
 
     public void consumir(SignoZodiaco signo, Jugador jugador, Juego juego, EstadoTienda tienda, OverlaySeleccionCarta overlaySeleccion, Runnable alTerminarTodo) {
-        if (signo.requiereSeleccionCarta()) {
-            overlaySeleccion.abrir(signo, jugador.getMano(), game.getAtlasCartas(), alTerminarTodo);
-        } else {
-            signo.aplicarEfecto(jugador, juego, tienda, null);
-            alTerminarTodo.run();
-        }
+        signo.aplicarEfecto(jugador, juego, tienda, null);
+        alTerminarTodo.run();
     }
 }

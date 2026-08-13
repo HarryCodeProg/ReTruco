@@ -11,7 +11,6 @@ public enum SignoZodiaco {
     private final String nombreRegion;
     SignoZodiaco(String nombreRegion) { this.nombreRegion = nombreRegion; }
     public String getNombreRegion() { return nombreRegion; }
-    public boolean requiereSeleccionCarta() { return this == CANCER; }
 
     public void aplicarEfecto(Jugador jugador, Juego juego, EstadoTienda tienda, Carta cartaSeleccionada) {
         int mult = (this == LIBRA) ? 1 : jugador.consumirMultiplicadorZodiaco();
@@ -23,8 +22,7 @@ public enum SignoZodiaco {
             case ARIES: if (tienda != null) tienda.sumarEspacioJokersTienda(1); break;
             case TAURO: jugador.sumarDescartesExtra(1); break;
             case GEMINIS: jugador.sumarPesos(jugador.getPesos()); break;
-            case CANCER: if (cartaSeleccionada != null) cartaSeleccionada.modificarPuntosTrucoAportePermanente(100); break;
-            case LEO: jugador.aumentarTamañoMano(1); break;
+            case CANCER: if (tienda != null) tienda.sumarEspacioCartasTienda(1); break;case LEO: jugador.aumentarTamañoMano(1); break;
             case VIRGO: jugador.sumarEspacioSantos(1); break;
             case LIBRA: jugador.activarDobleProximoZodiaco(); break;
             case ESCORPIO: if (tienda != null) tienda.sumarEspacioSantosTienda(1); break;
