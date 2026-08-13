@@ -49,7 +49,9 @@ public class PanelTienda {
     private static final float RUEDA_Y = 420f;
     private static final float RUEDA_RADIO = 170f;
     private RuedaZodiaco ruedaZodiaco;
-    // PanelTienda.java
+    private OverlayConsumoZodiaco overlayConsumo = new OverlayConsumoZodiaco();
+    private OverlaySeleccionCarta overlaySeleccion = new OverlaySeleccionCarta();
+    private SignoZodiaco signoObtenido;
 
 
     public PanelTienda(Main game, Jugador jugador, Runnable alContinuar) {
@@ -65,7 +67,7 @@ public class PanelTienda {
         botonRerollCartas = new Boton(PANEL_X + 20, PANEL_Y + PANEL_ALTO - 60, 160, 40, Boton.TipoColor.AZUL, Accion.REROLL_CARTAS);
         botonRerollJokers = new Boton(PANEL_X + 20, PANEL_Y + PANEL_ALTO - 210, 160, 40, Boton.TipoColor.AZUL, Accion.REROLL_JOKERS);
         botonContinuar = new Boton(PANEL_X + PANEL_ANCHO - 180, PANEL_Y + PANEL_ALTO - 60, 160, 50, Boton.TipoColor.DORADO, Accion.CONTINUAR_TIENDA);
-        ruedaZodiaco = new RuedaZodiaco(RUEDA_X, RUEDA_Y, RUEDA_RADIO, game.getAtlasZodiaco(), game.getTexturaRuletaFondo());
+        ruedaZodiaco = new RuedaZodiaco(RUEDA_X, RUEDA_Y, RUEDA_RADIO, game.getTexturaRuletaFondo());
         reconstruirVistas();
         this.offsetY = -(PANEL_Y + PANEL_ALTO);
         this.offsetYObjetivo = 0f;
@@ -125,10 +127,18 @@ public class PanelTienda {
         botonRerollJokers.update(mouseWorldX, mouseWorldY);
         botonContinuar.update(mouseWorldX, mouseWorldY);
         ruedaZodiaco.update(delta);
+        overlayConsumo.update(delta);
+        overlaySeleccion.update(mouseWorldX, mouseWorldY, delta);
+        if (overlayConsumo.debeAplicarEfectoAhora()) {
+            SignoZodiaco s = ruedaZodiaco.getUltimoSignoConsumido();
+            s.aplicarEfecto(jugador, null, estadoTienda, null);
+            overlayConsumo.confirmarCierre();
+        }
         if (Gdx.input.justTouched()) {
             ruedaZodiaco.click(mouseWorldX, mouseWorldY, signo -> {
-                // abrir overlaySeleccionCarta si CANCER/ESCORPIO, sino aplicar directo
+                overlayConsumo.abrir(signo, game.getAtlasZodiaco().findRegion(signo.getNombreRegion()), () -> {});
             });
+            overlaySeleccion.click(mouseWorldX, mouseWorldY, jugador, null);
         }
         if (justTouched) {
             for (VistaJoker vj : vistasJokersPropios) {
@@ -215,8 +225,6 @@ public class PanelTienda {
         com.badlogic.gdx.math.Matrix4 matrizOriginal = batch.getProjectionMatrix().cpy();
         com.badlogic.gdx.math.Matrix4 matrizConOffset = matrizOriginal.cpy().translate(0, offsetY, 0);
         batch.setProjectionMatrix(matrizConOffset);
-        // 2. Renderizamos el fondo de la rueda (usa batch.draw, así que EL BATCH TIENE QUE ESTAR ABIERTO)
-        ruedaZodiaco.renderFondo(batch);
         // --- Fondo de la tienda ---
         Texture pixel = game.getPixelBlanco();
         batch.setColor(0.06f, 0.07f, 0.1f, 0.94f);
@@ -232,9 +240,9 @@ public class PanelTienda {
         botonRerollCartas.render(batch);
         botonRerollJokers.render(batch);
         botonContinuar.render(batch);
-        String textoPesos = "$" + jugador.getPesos();
+        /*String textoPesos = "$" + jugador.getPesos();
         if (iconoPeso != null) batch.draw(iconoPeso, PANEL_X + 20, PANEL_Y + PANEL_ALTO - 150, 32, 32);
-        game.getFuentePrincipal().draw(batch, textoPesos, PANEL_X + 60, PANEL_Y + PANEL_ALTO - 125);
+        game.getFuentePrincipal().draw(batch, textoPesos, PANEL_X + 60, PANEL_Y + PANEL_ALTO - 125);*/
         float infoX = PANEL_X + PANEL_ANCHO - 350;
         float infoY = PANEL_Y + PANEL_ALTO - 60;
         float maxAnchoTexto = 320f;
@@ -260,6 +268,8 @@ public class PanelTienda {
             }
         }
         ruedaZodiaco.render(batch);
+        overlayConsumo.render(batch, game);
+        overlaySeleccion.render(batch, game);
         // 3. Restauramos la matriz original para devolver el batch como venía
         batch.setProjectionMatrix(matrizOriginal);
     }
@@ -294,11 +304,7 @@ public class PanelTienda {
     }
 
     public void consumir(SignoZodiaco signo, Jugador jugador, Juego juego, EstadoTienda tienda, OverlaySeleccionCarta overlaySeleccion, Runnable alTerminarTodo) {
-        if (signo.requiereSeleccionCarta()) {
-            overlaySeleccion.abrir(signo, jugador.getMano(), game.getAtlasCartas(), alTerminarTodo);
-        } else {
-            signo.aplicarEfecto(jugador, juego, tienda, null);
-            alTerminarTodo.run();
-        }
+        signo.aplicarEfecto(jugador, juego, tienda, null);
+        alTerminarTodo.run();
     }
 }

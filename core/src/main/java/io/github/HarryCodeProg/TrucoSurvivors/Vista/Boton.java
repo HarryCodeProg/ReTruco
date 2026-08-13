@@ -10,6 +10,8 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.Accion;
 
+import static io.github.HarryCodeProg.TrucoSurvivors.Estados.Accion.COMPRAR_ITEM_TIENDA;
+
 public class Boton {
     // --- NUEVO ENUM PARA SELECCIONAR EL COLOR CON PERSONALIDAD ---
     public enum TipoColor {
@@ -226,6 +228,10 @@ public class Boton {
             case VALE_CUATRO: return "VALE 4";
             case REAL_ENVIDO: return "REAL ENVIDO";
             case FALTA_ENVIDO: return "FALTA ENVIDO";
+            case COMPRAR_ITEM_TIENDA: return "COMPRAR";
+            case REROLL_CARTAS:
+            case REROLL_JOKERS: return "REROLL";
+            case CONTINUAR_TIENDA: return "CONTINUAR";
             default: return accion != null ? accion.name() : "";
         }
     }

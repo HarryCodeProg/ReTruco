@@ -3,6 +3,7 @@ package io.github.HarryCodeProg.TrucoSurvivors.Vista;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -25,7 +26,6 @@ public class PanelPuntajes {
     private static final Color TURQUESA_SOMBRA = new Color(0.05f, 0.32f, 0.28f, 1f);
     private static final Color BRONCE = new Color(0.70f, 0.45f, 0.22f, 1f);
     private static final Color BRONCE_SOMBRA = new Color(0.38f, 0.22f, 0.08f, 1f);
-
     public static final float ESPACIO_LINEA = 45f;
     public static final float ALTO_CAJA = 36f;
     public static final float ANCHO_CAJA_BASE = 80f;
@@ -33,12 +33,15 @@ public class PanelPuntajes {
     public static final float ANCHO_CAJA_SIMPLE = 90f;
     public static final float ESPACIO_X = 30f;
     private static final float RADIO_ESQUINA = 6f;
-
     private final ShapeRenderer shapeRenderer;
     private final GlyphLayout layout = new GlyphLayout();
     private String rivalNombre = "";
+    private Texture iconoPeso;
 
     public PanelPuntajes() {
+        if (Gdx.files.internal("ui/peso.png").exists()) {
+            iconoPeso = new Texture("ui/peso.png");
+        }
         shapeRenderer = new ShapeRenderer();
     }
 
@@ -52,9 +55,7 @@ public class PanelPuntajes {
         float anchoFondo = (ANCHO_CAJA_BASE + ESPACIO_X + ANCHO_CAJA_MULT) + (margenX * 2f);
         float altoFondo = Gdx.graphics.getHeight();
         float fondoX = x - margenX;
-
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-
         // 1. Fondo general del panel
         shapeRenderer.setColor(new Color(0f, 0f, 0f, 0.4f));
         dibujarRectanguloRedondeado(fondoX + 4, 0f, anchoFondo, altoFondo, RADIO_ESQUINA * 2f);
@@ -62,7 +63,6 @@ public class PanelPuntajes {
         dibujarRectanguloRedondeado(fondoX - 2, 0f, anchoFondo + 4, altoFondo, RADIO_ESQUINA * 2f);
         shapeRenderer.setColor(new Color(0.1f, 0.1f, 0.11f, 0.95f));
         dibujarRectanguloRedondeado(fondoX, 0f, anchoFondo, altoFondo, RADIO_ESQUINA * 2f);
-
         // 2. Cajas del panel por fila
         float currentY = y;
         dibujarCajaBaseYMultiplicador(x, currentY, NEGRO, NEGRO_SOMBRA); // Rival Truco
@@ -147,6 +147,19 @@ public class PanelPuntajes {
         dibujarTextoCentrado(batch, fuente, "X", xSeparador, ESPACIO_X, currentY, Color.WHITE);
         dibujarTextoCentrado(batch, fuente, String.valueOf((int) multEnvidoAMostrar),
             xSeparador + ESPACIO_X, ANCHO_CAJA_MULT, currentY, Color.WHITE);
+        currentY -= ESPACIO_LINEA;
+        if (jugador != null) {
+            String textoPesos = "$" + jugador.getPesos();
+            fuente.setColor(Color.WHITE);
+            if (iconoPeso != null) {
+                batch.draw(iconoPeso, x + 20, currentY - 5, 28, 28);
+                fuente.draw(batch, textoPesos, x + 55, currentY + 18);
+            } else {
+                // Si no hay icono, centramos el texto en el ancho del panel
+                float anchoPanelTotal = ANCHO_CAJA_BASE + ESPACIO_X + ANCHO_CAJA_MULT;
+                dibujarTextoCentrado(batch, fuente, textoPesos, x, anchoPanelTotal, currentY, Color.GOLD);
+            }
+        }
     }
 
     private void dibujarTextoCentrado(SpriteBatch batch, BitmapFont fuente, String texto, float x, float anchoCaja, float y, Color color) {
@@ -154,14 +167,11 @@ public class PanelPuntajes {
         if (fuente.getScaleX() == 0 || fuente.getScaleY() == 0) {
             fuente.getData().setScale(1f);
         }
-
         fuente.setColor(color);
         layout.setText(fuente, texto);
-
         float xTexto = x + (anchoCaja - layout.width) / 2f;
         // Centrado vertical preciso
         float yTexto = y + (ALTO_CAJA + layout.height) / 2f;
-
         fuente.draw(batch, texto, xTexto, yTexto);
     }
 
@@ -196,5 +206,6 @@ public class PanelPuntajes {
 
     public void dispose() {
         shapeRenderer.dispose();
+        if (iconoPeso != null) iconoPeso.dispose();
     }
 }

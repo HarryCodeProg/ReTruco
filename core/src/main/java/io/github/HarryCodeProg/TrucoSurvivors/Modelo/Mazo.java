@@ -36,6 +36,10 @@ public class Mazo {
         sumarTamañoMazo(1);
     }
 
+    public void devolverCarta(Carta carta) {
+        this.mazo.add(carta);
+    }
+
     public void quitarCarta(Carta carta){
         this.mazo.remove(carta);
     }
@@ -50,9 +54,13 @@ public class Mazo {
         }
     }
 
-    public Carta tomarCarta(){
-        this.cartasTomadas.add(mazo.get(0));
-        return mazo.remove(0);
+    public Carta tomarCarta() {
+        if (mazo.isEmpty()) {
+            return null;
+        }
+        Carta carta = mazo.remove(0);
+        cartasTomadas.add(carta);
+        return carta;
     }
 
     public void sumarTamañoMazo(int i){
@@ -89,7 +97,7 @@ public class Mazo {
         return this.cartasDescartadas;
     }
 
-    public void limpiarDescartadas(){
+    public void limpiarDescartadas() {
         this.mazo.addAll(this.cartasDescartadas);
         this.cartasDescartadas.clear();
     }
@@ -103,5 +111,11 @@ public class Mazo {
             return Integer.compare(c1.getNumero(), c2.getNumero());
         });
         return copia;
+    }
+
+    public void reciclarCartasTomadas() {
+        this.mazo.addAll(this.cartasTomadas);
+        this.cartasTomadas.clear();
+        this.cartasDescartadas.clear();
     }
 }

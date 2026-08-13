@@ -14,53 +14,22 @@ public enum SignoZodiaco {
 
     public void aplicarEfecto(Jugador jugador, Juego juego, EstadoTienda tienda, Carta cartaSeleccionada) {
         int mult = (this == LIBRA) ? 1 : jugador.consumirMultiplicadorZodiaco();
-        for (int rep = 0; rep < mult; rep++) {
-            aplicarUnaVez(jugador, juego, tienda, cartaSeleccionada);
-        }
-    }
-
-    public boolean requiereSeleccionCarta() {
-        return this == CANCER || this == ESCORPIO;
+        for (int rep = 0; rep < mult; rep++) aplicarUnaVez(jugador, juego, tienda, cartaSeleccionada);
     }
 
     private void aplicarUnaVez(Jugador jugador, Juego juego, EstadoTienda tienda, Carta cartaSeleccionada) {
         switch (this) {
-            case ARIES:
-                jugador.sumarPesos(100);
-                break;
-            case TAURO:
-                jugador.sumarDescartesExtra(1);
-                break;
-            case GEMINIS:
-                jugador.sumarPesos(jugador.getPesos());
-                break;
-            case CANCER:
-                if (cartaSeleccionada != null) cartaSeleccionada.modificarPuntosTrucoAportePermanente(100);
-                break;
-            case LEO:
-                jugador.aumentarTamañoMano(1);
-                break;
-            case VIRGO:
-                jugador.sumarEspacioSantos(1);
-                break;
-            case LIBRA:
-                jugador.activarDobleProximoZodiaco();
-                break;
-            case ESCORPIO:
-                if (cartaSeleccionada != null) cartaSeleccionada.modificarPuntosEnvidoAportePermanente(100);
-                break;
-            case SAGITARIO:
-                jugador.setTamañoJokers(jugador.getTamañoJokers() + 1);
-                break;
-            case CAPRICORNIO:
-                if (tienda != null) tienda.aplicarDescuento50();
-                break;
-            case ACUARIO:
-                if (tienda != null) tienda.sumarRerollsGratis(10);
-                break;
-            case PISCIS:
-                // requiere pool de jokers legendarios; hoy no existe ninguno
-                break;
+            case ARIES: if (tienda != null) tienda.sumarEspacioJokersTienda(1); break;
+            case TAURO: jugador.sumarDescartesExtra(1); break;
+            case GEMINIS: jugador.sumarPesos(jugador.getPesos()); break;
+            case CANCER: if (tienda != null) tienda.sumarEspacioCartasTienda(1); break;case LEO: jugador.aumentarTamañoMano(1); break;
+            case VIRGO: jugador.sumarEspacioSantos(1); break;
+            case LIBRA: jugador.activarDobleProximoZodiaco(); break;
+            case ESCORPIO: if (tienda != null) tienda.sumarEspacioSantosTienda(1); break;
+            case SAGITARIO: jugador.setTamañoJokers(jugador.getTamañoJokers() + 1); break;
+            case CAPRICORNIO: if (tienda != null) tienda.aplicarDescuento50(); break;
+            case ACUARIO: if (tienda != null) tienda.sumarRerollsGratis(10); break;
+            case PISCIS: /* pendiente jokers legendarios */ break;
         }
     }
 }
