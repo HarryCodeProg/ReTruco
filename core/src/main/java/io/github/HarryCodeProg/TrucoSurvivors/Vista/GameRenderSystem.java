@@ -48,7 +48,7 @@ public class GameRenderSystem {
         game.batch.begin();
         // Renderizado de textos del panel
         renderAreasJugador(game.batch, jugador, game.getPixelBlanco());
-        renderContadoresAreas(game.batch, jugador);
+        renderContadoresAreas(game.batch, jugador, cartasJugador);
         panelPuntajes.renderTextos(
             game.batch, game.getFuentePrincipal(), juego, jugador, rival, panelX, panelY,
             gestorAnimacion, puntosTrucoDisplay, multTrucoDisplay, puntosEnvidoDisplay, multEnvidoDisplay);
@@ -158,9 +158,9 @@ public class GameRenderSystem {
         batch.setColor(Color.WHITE);
     }
 
-    private void renderContadoresAreas(SpriteBatch batch, Jugador jugador) {
+    private void renderContadoresAreas(SpriteBatch batch, Jugador jugador, ArrayList<VistaCarta> cartasJugador) {
         BitmapFont font = game.getFuentePrincipal();
-        String textoCartas = jugador.getMano().size() + "/" + jugador.getTamañoMano();
+        String textoCartas = cartasJugador.size() + "/" + jugador.getTamañoMano();
         String textoJokers = jugador.getJokers().size() + "/" + jugador.getTamañoJokers();
         GlyphLayout layoutCartas = new GlyphLayout(font, textoCartas);
         GlyphLayout layoutJokers = new GlyphLayout(font, textoJokers);

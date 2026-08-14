@@ -234,4 +234,13 @@ public class Carta {
     public String getNombreRegion() {
         return numero + "_" + palo.name().toLowerCase();
     }
+
+    public void cambiarPalo(Palo nuevoPalo) {
+        this.palo = nuevoPalo;
+        calcularValoresBase(); // recalcula poder/aporte segun nuevo palo, PERO pisa bonus permanentes ya aplicados
+    }
+    public void cambiarNumero(int nuevoNumero) {
+        this.numero = nuevoNumero;
+        calcularValoresBase();
+    }
 }

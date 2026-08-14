@@ -313,7 +313,7 @@ public class GameScreenV2 implements Screen {
         }
         game.batch.begin();
         renderAreaJokers(game.batch, game.getPixelBlanco());
-        renderContadoresAreas(game.batch, jugador);
+        renderContadoresAreas(game.batch, jugador, false);
         renderJokers();
         if (partidaIniciada) {
             panelPuntajes.renderTextos(   game.batch, game.getFuentePrincipal(), juego, jugador, rival,
@@ -350,7 +350,7 @@ public class GameScreenV2 implements Screen {
         }
         game.batch.begin();
         renderAreaJokers(game.batch, game.getPixelBlanco());
-        renderContadoresAreas(game.batch, jugador);
+        renderContadoresAreas(game.batch, jugador, false);
         renderJokers();
         panelPuntajes.renderTextos(
             game.batch, game.getFuentePrincipal(), juego, jugador, rival,
@@ -401,17 +401,17 @@ public class GameScreenV2 implements Screen {
         batch.setColor(Color.WHITE);
     }
 
-    private void renderContadoresAreas(SpriteBatch batch, Jugador jugador) {
+    private void renderContadoresAreas(SpriteBatch batch, Jugador jugador, boolean mostrarCartas) {
         BitmapFont font = game.getFuentePrincipal();
-        String textoCartas = cartasJugador.size() + "/" + jugador.getTamañoMano();
         String textoJokers = jokers.size() + "/" + jugador.getTamañoJokers();
-        GlyphLayout layoutCartas = new GlyphLayout(font, textoCartas);
-        GlyphLayout layoutJokers = new GlyphLayout(font, textoJokers);
         float xContador = MARGEN_AREA_LATERAL + 8f;
-        float yCartas = Y_MANO_JUGADOR - 18f;
         float yJokers = Y_JOKERS - 18f;
         font.setColor(Color.WHITE);
-        font.draw(batch, textoCartas, xContador, yCartas);
+        if (mostrarCartas) {
+            String textoCartas = cartasJugador.size() + "/" + jugador.getTamañoMano();
+            float yCartas = Y_MANO_JUGADOR - 18f;
+            font.draw(batch, textoCartas, xContador, yCartas);
+        }
         font.draw(batch, textoJokers, xContador, yJokers);
     }
 
