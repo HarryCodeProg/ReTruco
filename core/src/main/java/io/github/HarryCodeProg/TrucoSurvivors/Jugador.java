@@ -3,6 +3,7 @@ package io.github.HarryCodeProg.TrucoSurvivors;
 import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Carta;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Mazo;
+import io.github.HarryCodeProg.TrucoSurvivors.Santos.Santo;
 
 import java.util.ArrayList;
 
@@ -30,6 +31,8 @@ public class Jugador {
     private int proximoEfectoZodiacoMultiplicador = 1; // Libra
     private int rerollsTienda = 0;
     private double bonusEnvidoFinal = 0;
+    private ArrayList<Santo> santos = new ArrayList<>();
+    private int tamañoSantos = 3; // capacidad base
 
     public Jugador(String nombre) {
         this.nombre = nombre;
@@ -213,4 +216,12 @@ public class Jugador {
 
     public double getBonusEnvidoFinal() { return bonusEnvidoFinal; }
     public void sumarBonusEnvidoFinal(double cantidad) { this.bonusEnvidoFinal += cantidad; }
+
+    public ArrayList<Santo> getSantos() { return santos; }
+    public int getTamañoSantos() { return tamañoSantos + espacioSantosExtra; } // espacioSantosExtra ya definido para Virgo
+    public boolean agregarSanto(Santo santo) {
+        if (santos.size() < getTamañoSantos()) { santos.add(santo); return true; }
+        return false;
+    }
+    public void eliminarSanto(Santo santo) { santos.remove(santo); }
 }

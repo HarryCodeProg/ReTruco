@@ -1,0 +1,46 @@
+package io.github.HarryCodeProg.TrucoSurvivors.Jokers.Comun;
+
+import io.github.HarryCodeProg.TrucoSurvivors.Activacion.ContextoJuego;
+import io.github.HarryCodeProg.TrucoSurvivors.Estados.EventoJuego;
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Rareza;
+import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
+
+import java.util.Random;
+
+public class SosInumputable extends Joker {
+
+    private final Random random = new Random();
+
+    public SosInumputable() {
+        super(
+            54,
+            "Sos Inumputable",
+            "SosInumputable",
+            "Genera un multiplicador truco aleatorio entre +1 y +20 al final de la mano",
+            Rareza.comun,
+            1,
+            Joker.FaseActivacion.INDEPENDIENTE
+        );
+    }
+
+    @Override
+    public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego) {
+        if (evento == EventoJuego.TERMINO_MANO) {
+            int mult = random.nextInt(20) + 1;
+            // Guardamos el multiplicador generado
+            sumarAcumulado(mult);
+            return;
+        }
+        if (evento == EventoJuego.ANTES_DE_SUMAR_TRUCO) {
+            if (getAcumulado() <= 0) return;
+            ctx.getResolucionActual().sumarMult(
+                getAcumulado(),
+                getNombre()
+            );
+            // Se consume el valor generado.
+            double generado = getAcumulado();
+            sumarAcumulado(-generado);
+        }
+    }
+}

@@ -110,4 +110,12 @@ public class VistaItemTienda {
             vistaCartaInterna.renderCartelStats(batch, game);
         }
     }
+
+    public float getX() {
+        return x;
+    }
+
+    public float getY() {
+        return y;
+    }
 }

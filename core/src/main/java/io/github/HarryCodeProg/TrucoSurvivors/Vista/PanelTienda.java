@@ -14,6 +14,7 @@ import io.github.HarryCodeProg.TrucoSurvivors.Main;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.*;
 
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 /**
  * Panel de tienda que se dibuja SOBRE la mesa de GameScreenV2, ocupando solo
@@ -52,13 +53,15 @@ public class PanelTienda {
     private OverlayConsumoZodiaco overlayConsumo = new OverlayConsumoZodiaco();
     private OverlaySeleccionCarta overlaySeleccion = new OverlaySeleccionCarta();
     private SignoZodiaco signoObtenido;
+    private final Consumer<VistaItemTienda> alComprarJoker;
 
 
-    public PanelTienda(Main game, Jugador jugador, Runnable alContinuar) {
+    public PanelTienda(Main game, Jugador jugador, Runnable alContinuar, Consumer<VistaItemTienda> alComprarJoker) {
         this.game = game;
         this.jugador = jugador;
         this.alContinuar = alContinuar;
         this.estadoTienda = new EstadoTienda(jugador);
+        this.alComprarJoker = alComprarJoker;
         if (Gdx.files.internal("ui/peso.png").exists()) {
             iconoPeso = new Texture("ui/peso.png");
         }
@@ -209,12 +212,22 @@ public class PanelTienda {
 
     private void comprar(VistaItemTienda vista) {
         ItemTienda item = vista.getItem();
-        if (item.getTipo() == ItemTienda.Tipo.JOKER && jugador.getJokers().size() >= jugador.getTamañoJokers()) return;
-        if (!jugador.gastarPesos(item.getPrecio())) return;
+        if (item.getTipo() == ItemTienda.Tipo.JOKER
+            && jugador.getJokers().size() >= jugador.getTamañoJokers()) {
+            return;
+        }
+        if (!jugador.gastarPesos(item.getPrecio())) {
+            return;
+        }
         if (item.getTipo() == ItemTienda.Tipo.CARTA) {
             jugador.getMazo().agregarCarta(item.getCarta());
+
         } else if (item.getTipo() == ItemTienda.Tipo.JOKER) {
             jugador.agregarJoker(item.getJoker());
+
+            if (alComprarJoker != null) {
+                alComprarJoker.accept(vista);
+            }
         }
         estadoTienda.removerItemComprado(item);
         reconstruirVistas();
@@ -306,5 +319,9 @@ public class PanelTienda {
     public void consumir(SignoZodiaco signo, Jugador jugador, Juego juego, EstadoTienda tienda, OverlaySeleccionCarta overlaySeleccion, Runnable alTerminarTodo) {
         signo.aplicarEfecto(jugador, juego, tienda, null);
         alTerminarTodo.run();
+    }
+
+    public float getOffsetY() {
+        return offsetY;
     }
 }
