@@ -11,7 +11,6 @@ import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 
 import java.util.Random;
 
-// Se Tiene Que Arrepentir: cada oro que mata agrega una carta de oro aleatoria al mazo del jugador
 public class SeTieneQueArrepentir extends Joker {
 
     private static final int[] NUMEROS_MAZO = {1, 2, 3, 4, 5, 6, 7, 10, 11, 12};
@@ -21,6 +20,14 @@ public class SeTieneQueArrepentir extends Joker {
         super(47, "Se Tiene Que Arrepentir", "SeTieneQueArrepentir",
             "Cada oro que mata agrega una carta de oro aleatoria al mazo",
             Rareza.comun, 1, Joker.FaseActivacion.AL_PUNTUAR_CARTA, CategoriaJoker.NACIONAL);
+    }
+
+    @Override
+    public Joker copiar() {
+        SeTieneQueArrepentir copia = new SeTieneQueArrepentir();
+        copiarEstado(copia);
+        copia.setAcumulado(this.getAcumulado());
+        return copia;
     }
 
     @Override

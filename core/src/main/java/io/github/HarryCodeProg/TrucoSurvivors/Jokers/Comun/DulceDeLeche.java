@@ -25,6 +25,14 @@ public class DulceDeLeche extends Joker {
     }
 
     @Override
+    public Joker copiar() {
+        DulceDeLeche copia = new DulceDeLeche();
+        copiarEstado(copia);
+        copia.setAcumulado(this.getAcumulado());
+        return copia;
+    }
+
+    @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego){
         if (evento != EventoJuego.ANTES_DE_SUMAR_TRUCO) return;
         double bonus = 0;

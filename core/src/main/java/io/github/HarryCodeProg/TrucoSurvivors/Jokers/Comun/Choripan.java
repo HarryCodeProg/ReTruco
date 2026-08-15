@@ -12,10 +12,20 @@ public class Choripan extends Joker {
         super(28, "Choripan", "Choripan", "Gana +4 Multiplicador truco cada vez que cantás \"No Quiero\"",
             Rareza.comun, 1, Joker.FaseActivacion.INDEPENDIENTE, CategoriaJoker.NACIONAL);
     }
+
     @Override
     public String getDescripcionRenderizada() {
         return "Gana +4 Multiplicador truco cada vez que cantás \"No Quiero\" (Actual: +" + (int) getAcumulado() + ")";
     }
+
+    @Override
+    public Joker copiar() {
+        Choripan copia = new Choripan();
+        copiarEstado(copia);
+        copia.setAcumulado(this.getAcumulado());
+        return copia;
+    }
+
     @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego){
         if (evento == EventoJuego.AL_DECIR_NO_QUIERO_TRUCO) {

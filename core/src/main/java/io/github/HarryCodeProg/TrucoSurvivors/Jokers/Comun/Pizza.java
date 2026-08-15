@@ -14,6 +14,14 @@ public class Pizza extends Joker {
     }
 
     @Override
+    public Joker copiar() {
+        Pizza copia = new Pizza();
+        copiarEstado(copia);
+        copia.setAcumulado(this.getAcumulado());
+        return copia;
+    }
+
+    @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego){
         if (evento != EventoJuego.ANTES_DE_SUMAR_ENVIDO) return;
         boolean tieneFigura = ctx.getJugador().getCartasEnvidoGanador().stream().anyMatch(c -> c.getNumero() >= 10);

@@ -9,12 +9,19 @@ import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Rareza;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 
-// Pastelitos: cartas de COPA que maten, +15 puntos truco (aporte)
 public class Pastelitos extends Joker {
 
     public Pastelitos(){
         super(17, "Pastelitos", "Pastelitos", "Las cartas de copa que maten reciben +15 puntos truco",
             Rareza.comun, 1, FaseActivacion.AL_PUNTUAR_CARTA, CategoriaJoker.NACIONAL);
+    }
+
+    @Override
+    public Joker copiar() {
+        Pastelitos copia = new Pastelitos();
+        copiarEstado(copia);
+        copia.setAcumulado(this.getAcumulado());
+        return copia;
     }
 
     @Override

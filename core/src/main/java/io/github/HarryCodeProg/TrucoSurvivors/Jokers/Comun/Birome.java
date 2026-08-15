@@ -17,6 +17,13 @@ public class Birome extends Joker {
     }
 
     @Override
+    public Joker copiar() {
+        Birome copia = new Birome();
+        copiarEstado(copia);
+        return copia;
+    }
+
+    @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego){
         if (evento != EventoJuego.AL_GANAR_ENVIDO_CANTO) return;
         for (Carta c : ctx.getJugador().getCartasEnvidoGanador()) {

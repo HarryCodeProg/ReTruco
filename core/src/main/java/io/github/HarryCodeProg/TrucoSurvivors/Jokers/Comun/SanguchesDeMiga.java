@@ -24,30 +24,31 @@ public class SanguchesDeMiga extends Joker {
 
     @Override
     public String getDescripcionRenderizada() {
-        return "Gana +25 puntos truco por cada joker 'Comida' (Actual: +"
-            + (int) getAcumulado() + ")";
+        return "Gana +25 puntos truco por cada joker 'Comida' (Actual: +" + (int) getAcumulado() + ")";
+    }
+
+    @Override
+    public Joker copiar() {
+        SanguchesDeMiga copia = new SanguchesDeMiga();
+        copiarEstado(copia);
+        copia.setAcumulado(this.getAcumulado());
+        return copia;
     }
 
     @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego) {
-
         if (evento == EventoJuego.TERMINO_MANO) {
-
             int cantidadComida = 0;
-
             for (Joker joker : ctx.getJugador().getJokers()) {
                 if (joker.tieneCategoria(CategoriaJoker.COMIDA)) {
                     cantidadComida++;
                 }
             }
-
             sumarAcumulado(cantidadComida * 25);
             return;
         }
-
         if (evento == EventoJuego.ANTES_DE_SUMAR_TRUCO) {
             if (getAcumulado() <= 0) return;
-
             ctx.getResolucionActual().sumarChips(
                 getAcumulado(),
                 getNombre()

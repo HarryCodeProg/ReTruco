@@ -15,6 +15,14 @@ public class Flan extends Joker {
     }
 
     @Override
+    public Joker copiar() {
+        Flan copia = new Flan();
+        copiarEstado(copia);
+        copia.setAcumulado(this.getAcumulado());
+        return copia;
+    }
+
+    @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego) {
         if (evento != EventoJuego.TERMINO_MANO) return;
         int cantidadPostres = ctx.contarJokersConCategoria(CategoriaJoker.POSTRE, this);

@@ -34,6 +34,32 @@ public class Carta {
         resetearValores();
     }
 
+    //copia de carta (para efectos de duplicar cartas, etc)
+    public Carta(Carta otra) {
+        this.numero = otra.numero;
+        this.palo = otra.palo;
+        this.valorTrucoPoderBase = otra.valorTrucoPoderBase;
+        this.valorTrucoPoderActual = otra.valorTrucoPoderActual;
+        this.bonusPoderTrucoPermanente = otra.bonusPoderTrucoPermanente;
+        this.multiplicadorPoderTrucoBase = otra.multiplicadorPoderTrucoBase;
+        this.multiplicadorPoderTrucoTemporal = otra.multiplicadorPoderTrucoTemporal;
+        this.puntosTrucoAporteBase = otra.puntosTrucoAporteBase;
+        this.puntosTrucoAporteActual = otra.puntosTrucoAporteActual;
+        this.bonusAporteTrucoPermanente = otra.bonusAporteTrucoPermanente;
+        this.multiplicadorAporteTrucoBase = otra.multiplicadorAporteTrucoBase;
+        this.multiplicadorAporteTrucoTemporal = otra.multiplicadorAporteTrucoTemporal;
+        this.valorEnvidoPoderBase = otra.valorEnvidoPoderBase;
+        this.valorEnvidoPoderActual = otra.valorEnvidoPoderActual;
+        this.bonusPoderEnvidoPermanente = otra.bonusPoderEnvidoPermanente;
+        this.multiplicadorPoderEnvidoBase = otra.multiplicadorPoderEnvidoBase;
+        this.multiplicadorPoderEnvidoTemporal = otra.multiplicadorPoderEnvidoTemporal;
+        this.puntosEnvidoAporteBase = otra.puntosEnvidoAporteBase;
+        this.puntosEnvidoAporteActual = otra.puntosEnvidoAporteActual;
+        this.bonusAporteEnvidoPermanente = otra.bonusAporteEnvidoPermanente;
+        this.multiplicadorAporteEnvidoBase = otra.multiplicadorAporteEnvidoBase;
+        this.multiplicadorAporteEnvidoTemporal = otra.multiplicadorAporteEnvidoTemporal;
+    }
+
     // -------------------- GETTERS BÁSICOS --------------------
 
     public int getNumero(){ return this.numero; }
@@ -237,10 +263,13 @@ public class Carta {
 
     public void cambiarPalo(Palo nuevoPalo) {
         this.palo = nuevoPalo;
-        calcularValoresBase(); // recalcula poder/aporte segun nuevo palo, PERO pisa bonus permanentes ya aplicados
+        calcularValoresBase();
+        resetearValores();
     }
+
     public void cambiarNumero(int nuevoNumero) {
         this.numero = nuevoNumero;
         calcularValoresBase();
+        resetearValores();
     }
 }

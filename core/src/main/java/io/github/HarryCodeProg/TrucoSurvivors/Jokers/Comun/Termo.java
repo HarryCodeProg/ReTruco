@@ -28,6 +28,14 @@ public class Termo extends Joker {
     }
 
     @Override
+    public Joker copiar() {
+        Termo copia = new Termo();
+        copiarEstado(copia);
+        copia.setAcumulado(this.getAcumulado());
+        return copia;
+    }
+
+    @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego){
         if (evento != EventoJuego.AL_JUGAR_PRIMERA_CARTA) return;
         ArrayList<Carta> mesaJugador = ctx.getMesa().getMesaJugador();

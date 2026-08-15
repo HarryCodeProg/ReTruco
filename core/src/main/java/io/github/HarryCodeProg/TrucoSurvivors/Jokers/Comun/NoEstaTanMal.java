@@ -7,7 +7,6 @@ import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Rareza;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 
-// No Esta Tan Mal: gana +4 mult truco permanente cada vez que perdes la mano
 public class NoEstaTanMal extends Joker {
 
     private static final double MULT_POR_DERROTA = 4.0;
@@ -20,6 +19,14 @@ public class NoEstaTanMal extends Joker {
     @Override
     public String getDescripcionRenderizada() {
         return "Si perdés la mano, aumenta +4 multiplicador truco (Actual: +" + (int) getAcumulado() + ")";
+    }
+
+    @Override
+    public Joker copiar() {
+        NoEstaTanMal copia = new NoEstaTanMal();
+        copiarEstado(copia);
+        copia.setAcumulado(this.getAcumulado());
+        return copia;
     }
 
     @Override

@@ -18,6 +18,13 @@ public class Damajuana extends Joker {
     }
 
     @Override
+    public Joker copiar() {
+        Damajuana copia = new Damajuana();
+        copiarEstado(copia);
+        return copia;
+    }
+
+    @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego){
         if (evento != EventoJuego.ANTES_DE_SUMAR_TRUCO) return;
         if (ctx.contarJokersConCategoria(CategoriaJoker.BEBIDA, this) < BEBIDAS_REQUERIDAS) return;

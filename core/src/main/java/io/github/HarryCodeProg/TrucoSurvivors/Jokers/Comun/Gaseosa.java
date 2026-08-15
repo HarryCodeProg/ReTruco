@@ -25,6 +25,14 @@ public class Gaseosa extends Joker {
     }
 
     @Override
+    public Joker copiar() {
+        Gaseosa copia = new Gaseosa();
+        copiarEstado(copia);
+        copia.setAcumulado(this.getAcumulado());
+        return copia;
+    }
+
+    @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego){
         if (evento != EventoJuego.ANTES_DE_SUMAR_ENVIDO
             && evento != EventoJuego.ANTES_DE_SUMAR_TRUCO) return;

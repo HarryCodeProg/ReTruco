@@ -23,6 +23,13 @@ public class Consola extends Joker {
     }
 
     @Override
+    public Joker copiar() {
+        Consola copia = new Consola();
+        copiarEstado(copia);
+        return copia;
+    }
+
+    @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego) {
         if (evento != EventoJuego.AL_PERDER_ENVIDO) return;
         for (Carta carta : ctx.getJugador().getMano()) {

@@ -15,6 +15,15 @@ public class PastelDePapa extends Joker {
         super(34, "Pastel De Papa", "PastelDePapa", "Las cartas de copa que ganen envido reciben +15 puntos envido",
             Rareza.comun, 1, Joker.FaseActivacion.INDEPENDIENTE, CategoriaJoker.NACIONAL);
     }
+
+    @Override
+    public Joker copiar() {
+        PastelDePapa copia = new PastelDePapa();
+        copiarEstado(copia);
+        copia.setAcumulado(this.getAcumulado());
+        return copia;
+    }
+
     @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego){
         if (evento != EventoJuego.AL_GANAR_ENVIDO_CANTO) return;

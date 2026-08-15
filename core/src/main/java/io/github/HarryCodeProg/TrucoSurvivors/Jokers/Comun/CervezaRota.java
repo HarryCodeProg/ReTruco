@@ -25,6 +25,13 @@ public class CervezaRota extends Joker {
     }
 
     @Override
+    public Joker copiar() {
+        CervezaRota copia = new CervezaRota();
+        copiarEstado(copia);
+        return copia;
+    }
+
+    @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego){
         if (evento != EventoJuego.ANTES_DE_SUMAR_TRUCO && evento != EventoJuego.ANTES_DE_SUMAR_ENVIDO) return;
         double bonus = 100;

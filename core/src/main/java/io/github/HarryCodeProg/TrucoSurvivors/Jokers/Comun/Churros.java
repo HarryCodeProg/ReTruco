@@ -17,6 +17,14 @@ public class Churros extends Joker {
     }
 
     @Override
+    public Joker copiar() {
+        Churros copia = new Churros();
+        copiarEstado(copia);
+        copia.setAcumulado(this.getAcumulado());
+        return copia;
+    }
+
+    @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego){
         if (evento != EventoJuego.AL_SER_MATADO) return;
         if (juego.isPrimeraCartaQueNoMataAplicada()) return;

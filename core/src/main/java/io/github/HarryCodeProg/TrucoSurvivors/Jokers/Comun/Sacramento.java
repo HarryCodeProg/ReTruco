@@ -9,12 +9,19 @@ import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Rareza;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 
-// Sacramento: cartas de BASTO que maten, +15 puntos truco
 public class Sacramento extends Joker {
 
     public Sacramento(){
         super(18, "Sacramento", "Sacramento", "Las cartas de basto que maten reciben +15 puntos truco",
             Rareza.comun, 1, FaseActivacion.AL_PUNTUAR_CARTA, CategoriaJoker.NACIONAL);
+    }
+
+    @Override
+    public Joker copiar() {
+        Sacramento copia = new Sacramento();
+        copiarEstado(copia);
+        copia.setAcumulado(this.getAcumulado());
+        return copia;
     }
 
     @Override

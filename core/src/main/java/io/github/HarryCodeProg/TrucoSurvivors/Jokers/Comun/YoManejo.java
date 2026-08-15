@@ -22,16 +22,20 @@ public class YoManejo extends Joker {
     }
 
     @Override
+    public Joker copiar() {
+        YoManejo copia = new YoManejo();
+        copiarEstado(copia);
+        copia.setAcumulado(this.getAcumulado());
+        return copia;
+    }
+
+    @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego) {
         if (evento != EventoJuego.AL_MATAR_CARTA) return;
-
         Carta carta = ctx.getCartaEnResolucion();
         if (carta == null) return;
-
         if (ctx.isPrimerCartaQueMataAplicada()) return;
-
         ctx.marcarPrimerCartaQueMataAplicada();
-
         for (int i = 0; i < 3; i++) {
             ctx.reencolarActivacionCarta(carta, EventoJuego.AL_PUNTUAR_CARTA);
         }

@@ -8,7 +8,6 @@ import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Rareza;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 
-// Pastafrola: cartas que TE maten (del rival) reciben +10 puntos truco
 public class Pastafrola extends Joker {
 
     public Pastafrola(){
@@ -20,6 +19,14 @@ public class Pastafrola extends Joker {
             1,
             FaseActivacion.AL_PUNTUAR_CARTA,
             CategoriaJoker.NACIONAL);
+    }
+
+    @Override
+    public Joker copiar() {
+        Pastafrola copia = new Pastafrola();
+        copiarEstado(copia);
+        copia.setAcumulado(this.getAcumulado());
+        return copia;
     }
 
     @Override

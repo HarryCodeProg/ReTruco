@@ -15,6 +15,15 @@ public class TortaNegra extends Joker {
         super(23, "Torta Negra", "TortaNegra", "Las cartas de oro que no maten reciben +20 puntos truco",
             Rareza.comun, 1, Joker.FaseActivacion.AL_PUNTUAR_CARTA, CategoriaJoker.NACIONAL);
     }
+
+    @Override
+    public Joker copiar() {
+        TortaNegra copia = new TortaNegra();
+        copiarEstado(copia);
+        copia.setAcumulado(this.getAcumulado());
+        return copia;
+    }
+
     @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego){
         if (evento != EventoJuego.AL_SER_MATADO) return;

@@ -15,6 +15,14 @@ public class Peso extends Joker {
     }
 
     @Override
+    public Joker copiar() {
+        Peso copia = new Peso();
+        copiarEstado(copia);
+        copia.setAcumulado(this.getAcumulado());
+        return copia;
+    }
+
+    @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego){
         if (evento != EventoJuego.TERMINO_MANO) return;
         int cantidadNacionales = 0;

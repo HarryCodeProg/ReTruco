@@ -9,12 +9,19 @@ import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Rareza;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 
-// No Me Midas: cada espada que mata se vuelve a activar (una sola vez por resolucion)
 public class NoMeMidas extends Joker {
 
     public NoMeMidas(){
         super(48, "No Me Midas", "NoMeMidas", "Cada espada que mata vuelve a activarse",
             Rareza.comun, 1, Joker.FaseActivacion.AL_PUNTUAR_CARTA, CategoriaJoker.NACIONAL);
+    }
+
+    @Override
+    public Joker copiar() {
+        NoMeMidas copia = new NoMeMidas();
+        copiarEstado(copia);
+        copia.setAcumulado(this.getAcumulado());
+        return copia;
     }
 
     @Override
