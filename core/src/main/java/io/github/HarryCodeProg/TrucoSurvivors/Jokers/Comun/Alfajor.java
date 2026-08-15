@@ -17,6 +17,13 @@ public class Alfajor extends Joker {
     }
 
     @Override
+    public Joker copiar() {
+        Alfajor copia = new Alfajor();
+        copiarEstado(copia);
+        return copia;
+    }
+
+    @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego) {
         if (evento != EventoJuego.AL_SER_MATADO) return;
         Carta c = ctx.getCartaEnResolucion();

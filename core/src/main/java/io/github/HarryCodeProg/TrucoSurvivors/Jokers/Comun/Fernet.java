@@ -25,6 +25,14 @@ public class Fernet extends Joker {
     }
 
     @Override
+    public Joker copiar() {
+        Fernet copia = new Fernet();
+        copiarEstado(copia);
+        copia.setAcumulado(this.getAcumulado());
+        return copia;
+    }
+
+    @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego){
         if (evento != EventoJuego.ANTES_DE_SUMAR_ENVIDO
             && evento != EventoJuego.ANTES_DE_SUMAR_TRUCO) return;

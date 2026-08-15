@@ -30,6 +30,14 @@ public class DameLaMochila extends Joker {
     }
 
     @Override
+    public Joker copiar() {
+        DameLaMochila copia = new DameLaMochila();
+        copiarEstado(copia);
+        copia.setAcumulado(this.getAcumulado());
+        return copia;
+    }
+
+    @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego){
         if (evento != EventoJuego.ANTES_DE_SUMAR_ENVIDO) return;
         int rerolls = ctx.getJugador().getRerollsTienda() - rerollsAlComprarse;

@@ -19,6 +19,7 @@ public abstract class Joker {
     private final Set<CategoriaJoker> categorias;
     private final FaseActivacion fase;
     private double acumulado = 0;
+    private int precioVenta;
 
     public enum FaseActivacion {
         AL_JUGAR,           // Balatro: "On Played"
@@ -35,6 +36,7 @@ public abstract class Joker {
         this.descripcion = descripcion;
         this.rareza = rareza;
         this.coste = coste;
+        this.precioVenta = coste / 2;
         this.fase = fase;
         if (categorias != null && categorias.length > 0) {
             this.categorias = EnumSet.noneOf(CategoriaJoker.class);
@@ -75,4 +77,19 @@ public abstract class Joker {
     public void aplicarEfectoInstantaneo(Jugador jugador) {}
 
     public void desAplicarEfectoInstantaneo(Jugador jugador) {}
+
+    public int getPrecioVenta() { return precioVenta; }
+
+    public void aumentarPrecioVenta(int cantidad) { this.precioVenta += cantidad; }
+
+    public abstract Joker copiar();
+
+    public void setAcumulado(double acumulado) {
+        this.acumulado = acumulado;
+    }
+
+    protected void copiarEstado(Joker copia) {
+        copia.acumulado = this.acumulado;
+        copia.precioVenta = this.precioVenta;
+    }
 }

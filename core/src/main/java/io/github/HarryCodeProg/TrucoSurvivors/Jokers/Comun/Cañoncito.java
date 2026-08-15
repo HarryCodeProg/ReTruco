@@ -18,6 +18,13 @@ public class Cañoncito extends Joker {
     }
 
     @Override
+    public Joker copiar() {
+        Cañoncito copia = new Cañoncito();
+        copiarEstado(copia);
+        return copia;
+    }
+
+    @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego){
         if (evento != EventoJuego.AL_MATAR_CARTA) return;
         Carta c = ctx.getCartaEnResolucion();

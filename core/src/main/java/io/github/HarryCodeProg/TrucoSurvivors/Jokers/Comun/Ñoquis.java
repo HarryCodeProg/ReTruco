@@ -19,6 +19,14 @@ public class Ñoquis extends Joker {
     }
 
     @Override
+    public Joker copiar() {
+        Ñoquis copia = new Ñoquis();
+        copiarEstado(copia);
+        copia.setAcumulado(this.getAcumulado());
+        return copia;
+    }
+
+    @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego){
         if (evento == EventoJuego.AL_DECIR_QUIERO_TRUCO) {
             sumarAcumulado(2);

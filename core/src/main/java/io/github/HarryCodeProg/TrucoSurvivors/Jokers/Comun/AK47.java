@@ -16,6 +16,13 @@ public class AK47 extends Joker {
     }
 
     @Override
+    public Joker copiar() {
+        AK47 copia = new AK47();
+        copiarEstado(copia);
+        return copia;
+    }
+
+    @Override
     public void aplicarEfectoInstantaneo(Jugador jugador) {
         jugador.aumentarTamañoMano(2);
     }

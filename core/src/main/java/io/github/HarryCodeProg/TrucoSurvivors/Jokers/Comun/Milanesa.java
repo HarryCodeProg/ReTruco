@@ -16,6 +16,14 @@ public class Milanesa extends Joker {
     }
 
     @Override
+    public Joker copiar() {
+        Milanesa copia = new Milanesa();
+        copiarEstado(copia);
+        copia.setAcumulado(this.getAcumulado());
+        return copia;
+    }
+
+    @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego){
         if (evento != EventoJuego.AL_MATAR_CARTA) return;
         Carta c = ctx.getCartaEnResolucion();

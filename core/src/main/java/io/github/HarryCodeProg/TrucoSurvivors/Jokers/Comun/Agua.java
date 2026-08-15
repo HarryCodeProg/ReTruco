@@ -17,6 +17,13 @@ public class Agua extends Joker {
     }
 
     @Override
+    public Joker copiar() {
+        Agua copia = new Agua();
+        copiarEstado(copia);
+        return copia;
+    }
+
+    @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego){
         if (evento != EventoJuego.AL_PUNTUAR_CARTA) return;
         if (ctx.isPrimerFiguraPuntuadaAplicada()) return;

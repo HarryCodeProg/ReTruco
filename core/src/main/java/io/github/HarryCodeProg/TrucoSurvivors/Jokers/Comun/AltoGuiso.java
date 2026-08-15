@@ -17,6 +17,13 @@ public class AltoGuiso extends Joker {
     }
 
     @Override
+    public Joker copiar() {
+        AltoGuiso copia = new AltoGuiso();
+        copiarEstado(copia);
+        return copia;
+    }
+
+    @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego){
         if (evento != EventoJuego.AL_PUNTUAR_CARTA) return;
         if (ctx.isPrimerNoFiguraPuntuadaAplicada()) return;

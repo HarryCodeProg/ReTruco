@@ -17,6 +17,13 @@ public class BolasDeFraile extends Joker {
     }
 
     @Override
+    public Joker copiar() {
+        BolasDeFraile copia = new BolasDeFraile();
+        copiarEstado(copia);
+        return copia;
+    }
+
+    @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego){
         if (evento != EventoJuego.AL_MATAR_CARTA) return;
         if (juego.isPrimeraCartaQueMataAplicada()) return;

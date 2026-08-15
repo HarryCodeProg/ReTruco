@@ -29,6 +29,14 @@ public class JokerEspañol extends Joker {
         );
     }
 
+    @Override
+    public Joker copiar() {
+        JokerEspañol copia = new JokerEspañol();
+        copiarEstado(copia);
+        copia.setAcumulado(this.getAcumulado());
+        return copia;
+    }
+
     private static Carta[] todas(int numero) {
         return new Carta[]{
             new Carta(numero, Palo.BASTO),

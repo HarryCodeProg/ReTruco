@@ -8,9 +8,7 @@ import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Rareza;
 import io.github.HarryCodeProg.TrucoSurvivors.Jugador;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 
-// Empanada: +10 al valor de envido final del jugador (tambien cuenta para ganar el envido)
 public class Empanada extends Joker {
-
     private static final double BONUS_ENVIDO = 10;
 
     public Empanada(){
@@ -26,6 +24,14 @@ public class Empanada extends Joker {
     @Override
     public void desAplicarEfectoInstantaneo(Jugador jugador) {
         jugador.sumarBonusEnvidoFinal(-BONUS_ENVIDO);
+    }
+
+    @Override
+    public Joker copiar() {
+        Empanada copia = new Empanada();
+        copiarEstado(copia);
+        copia.setAcumulado(this.getAcumulado());
+        return copia;
     }
 
     @Override

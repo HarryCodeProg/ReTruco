@@ -7,7 +7,6 @@ import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Rareza;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 
-// Anda A La Cancha: +5 mult (truco y envido) por cada descarte que te quede sin usar
 public class AndaALaCancha extends Joker {
 
     private static final double MULT_POR_DESCARTE = 5.0;
@@ -15,6 +14,13 @@ public class AndaALaCancha extends Joker {
     public AndaALaCancha(){
         super(42, "Anda A La Cancha", "AndaALaCancha", "+5 multiplicador truco y envido por cada descarte restante",
             Rareza.comun, 1, Joker.FaseActivacion.INDEPENDIENTE, CategoriaJoker.NACIONAL);
+    }
+
+    @Override
+    public Joker copiar() {
+        AndaALaCancha copia = new AndaALaCancha();
+        copiarEstado(copia);
+        return copia;
     }
 
     @Override

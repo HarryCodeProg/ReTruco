@@ -17,6 +17,14 @@ public class DVD extends Joker {
     }
 
     @Override
+    public Joker copiar() {
+        DVD copia = new DVD();
+        copiarEstado(copia);
+        copia.setAcumulado(this.getAcumulado());
+        return copia;
+    }
+
+    @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego){
         if (evento != EventoJuego.ANTES_DE_SUMAR_TRUCO) return;
         ArrayList<Carta> cartasJugador = ctx.getMesa().getMesaJugador();

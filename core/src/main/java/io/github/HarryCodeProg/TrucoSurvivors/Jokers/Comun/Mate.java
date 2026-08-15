@@ -28,6 +28,14 @@ public class Mate extends Joker {
     }
 
     @Override
+    public Joker copiar() {
+        Mate copia = new Mate();
+        copiarEstado(copia);
+        copia.setAcumulado(this.getAcumulado());
+        return copia;
+    }
+
+    @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego){
         if (evento != EventoJuego.AL_JUGAR_PRIMERA_CARTA) return;
         ArrayList<Carta> mesaJugador = ctx.getMesa().getMesaJugador();

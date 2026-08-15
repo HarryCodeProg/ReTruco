@@ -19,6 +19,14 @@ public class Chimichurri extends Joker {
     }
 
     @Override
+    public Joker copiar() {
+        Chimichurri copia = new Chimichurri();
+        copiarEstado(copia);
+        copia.setAcumulado(this.getAcumulado());
+        return copia;
+    }
+
+    @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego){
         if (evento != EventoJuego.ANTES_DE_SUMAR_TRUCO) return;
         double acumuladoNuevo = juego.getManosGanadasConsecutivas() * 2.0;

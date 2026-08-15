@@ -25,5 +25,13 @@ public class GalletaConRelleno extends Joker {
     }
 
     @Override
+    public Joker copiar() {
+        GalletaConRelleno copia = new GalletaConRelleno();
+        copiarEstado(copia);
+        copia.setAcumulado(this.getAcumulado());
+        return copia;
+    }
+
+    @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego){}
 }

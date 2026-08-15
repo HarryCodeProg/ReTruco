@@ -22,6 +22,14 @@ public class AtiendoBoludos extends Joker {
     }
 
     @Override
+    public Joker copiar() {
+        AtiendoBoludos copia = new AtiendoBoludos();
+        copiarEstado(copia);
+        copia.setAcumulado(this.getAcumulado());
+        return copia;
+    }
+
+    @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego){
         if (evento != EventoJuego.ANTES_DE_SUMAR_ENVIDO) return;
         double acumuladoNuevo = juego.getManosGanadasConsecutivas() * MULT_POR_MANO;

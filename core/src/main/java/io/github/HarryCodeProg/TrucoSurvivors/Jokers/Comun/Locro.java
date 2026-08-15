@@ -7,11 +7,18 @@ import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Rareza;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 
-// Locro: +6 mult envido si el tanto ganador tiene figura
 public class Locro extends Joker {
     public Locro(){
         super(29, "Locro", "Locro", "+6 multiplicador envido si tu tanto tiene una figura",
             Rareza.comun, 1, Joker.FaseActivacion.INDEPENDIENTE, CategoriaJoker.NACIONAL);
+    }
+
+    @Override
+    public Joker copiar() {
+        Locro copia = new Locro();
+        copiarEstado(copia);
+        copia.setAcumulado(this.getAcumulado());
+        return copia;
     }
 
     @Override

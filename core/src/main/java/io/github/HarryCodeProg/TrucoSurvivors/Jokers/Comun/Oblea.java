@@ -28,5 +28,13 @@ public class Oblea extends Joker{
     }
 
     @Override
+    public Joker copiar() {
+        Oblea copia = new Oblea();
+        copiarEstado(copia);
+        copia.setAcumulado(this.getAcumulado());
+        return copia;
+    }
+
+    @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego){}
 }

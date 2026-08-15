@@ -9,12 +9,19 @@ import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Rareza;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 
-// MediaLuna: cartas de COPA que pierdan, +20 puntos truco
 public class MediaLuna extends Joker {
 
     public MediaLuna(){
         super(21, "Media Luna", "MediaLuna", "Las cartas de copa que no maten reciben +20 puntos truco",
             Rareza.comun, 1, Joker.FaseActivacion.AL_PUNTUAR_CARTA, CategoriaJoker.NACIONAL);
+    }
+
+    @Override
+    public Joker copiar() {
+        MediaLuna copia = new MediaLuna();
+        copiarEstado(copia);
+        copia.setAcumulado(this.getAcumulado());
+        return copia;
     }
 
     @Override

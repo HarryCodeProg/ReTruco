@@ -28,6 +28,13 @@ public class BotellaCortada extends Joker {
     }
 
     @Override
+    public Joker copiar() {
+        BotellaCortada copia = new BotellaCortada();
+        copiarEstado(copia);
+        return copia;
+    }
+
+    @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego){
         if (evento != EventoJuego.AL_JUGAR_SEGUNDA_CARTA) return;
         ArrayList<Carta> mesaJugador = ctx.getMesa().getMesaJugador();

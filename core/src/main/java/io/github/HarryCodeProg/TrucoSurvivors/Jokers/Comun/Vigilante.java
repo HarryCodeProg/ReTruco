@@ -9,12 +9,19 @@ import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Rareza;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 
-// Vigilante: cartas de ESPADA que maten, +15 puntos truco
 public class Vigilante extends Joker {
 
     public Vigilante(){
         super(20, "Vigilante", "Vigilante", "Las cartas de espada que maten reciben +15 puntos truco",
             Rareza.comun, 1, FaseActivacion.AL_PUNTUAR_CARTA, CategoriaJoker.NACIONAL);
+    }
+
+    @Override
+    public Joker copiar() {
+        Vigilante copia = new Vigilante();
+        copiarEstado(copia);
+        copia.setAcumulado(this.getAcumulado());
+        return copia;
     }
 
     @Override

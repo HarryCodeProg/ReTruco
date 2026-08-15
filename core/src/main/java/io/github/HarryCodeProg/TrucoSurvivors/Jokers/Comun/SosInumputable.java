@@ -25,6 +25,14 @@ public class SosInumputable extends Joker {
     }
 
     @Override
+    public Joker copiar() {
+        SosInumputable copia = new SosInumputable();
+        copiarEstado(copia);
+        copia.setAcumulado(this.getAcumulado());
+        return copia;
+    }
+
+    @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego) {
         if (evento == EventoJuego.TERMINO_MANO) {
             int mult = random.nextInt(20) + 1;

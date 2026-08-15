@@ -9,12 +9,19 @@ import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Rareza;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 
-// No Hay Polque: cada basto que mata suma +5 multiplicador truco al activarse
 public class NoHayPolque extends Joker {
 
     public NoHayPolque(){
         super(46, "No Hay Polque", "NoHayPolque", "Cada basto que mata otorga +5 multiplicador truco",
             Rareza.comun, 1, Joker.FaseActivacion.AL_PUNTUAR_CARTA, CategoriaJoker.NACIONAL);
+    }
+
+    @Override
+    public Joker copiar() {
+        NoHayPolque copia = new NoHayPolque();
+        copiarEstado(copia);
+        copia.setAcumulado(this.getAcumulado());
+        return copia;
     }
 
     @Override
