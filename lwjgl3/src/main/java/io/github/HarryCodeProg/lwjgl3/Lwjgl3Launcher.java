@@ -20,6 +20,7 @@ public class Lwjgl3Launcher {
         TexturePacker.process(settings, "assets/imagenesCartas", "assets/atlas", "cartas");
         TexturePacker.process(settings, "assets/jokers", "assets/atlas", "jokers");
         TexturePacker.process(settings, "assets/zodiaco_src", "assets/atlas", "zodiaco");
+        TexturePacker.process(settings, "assets/santos", "assets/atlas", "santos");
         createApplication();
     }
 

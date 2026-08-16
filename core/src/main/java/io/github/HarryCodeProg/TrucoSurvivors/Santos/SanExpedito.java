@@ -24,6 +24,11 @@ public class SanExpedito extends Santo {
     }
 
     @Override
+    public int maxCartasSeleccionables() {
+        return 0;
+    }
+
+    @Override
     public void aplicarEfecto(Jugador jugador, ArrayList<Carta> seleccionadas, ContextoJuego ctx) {
         jugador.sumarPesos(jugador.getMazo().getTamañoMazo());
     }

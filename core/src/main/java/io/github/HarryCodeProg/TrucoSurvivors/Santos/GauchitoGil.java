@@ -11,7 +11,13 @@ public class GauchitoGil extends Santo {
     public GauchitoGil() {
         super(3, "Gauchito Gil", "GauchitoGil", "Otorga 30 pesos", 2);
     }
+
     @Override public int cartasRequeridas() { return 0; }
+
+    @Override
+    public int maxCartasSeleccionables() {
+        return 0;
+    }
 
     @Override
     public void aplicarEfecto(Jugador jugador, ArrayList<Carta> seleccionadas, ContextoJuego ctx) {

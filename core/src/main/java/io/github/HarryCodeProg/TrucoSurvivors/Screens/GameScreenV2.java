@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -20,6 +21,7 @@ import io.github.HarryCodeProg.TrucoSurvivors.Estados.Accion;
 import io.github.HarryCodeProg.TrucoSurvivors.Gestores.*;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.*;
+import io.github.HarryCodeProg.TrucoSurvivors.Santos.Santo;
 import io.github.HarryCodeProg.TrucoSurvivors.Vista.*;
 import java.util.ArrayList;
 import static io.github.HarryCodeProg.TrucoSurvivors.Vista.GameLayout.*;
@@ -78,12 +80,8 @@ public class GameScreenV2 implements Screen {
     // persistencia / visibilidad
     private boolean panelTiendaVisible = false;
     private boolean panelSeleccionVisible = false;
-    private VistaJoker jokerCompradoAnimando = null;
-    private float jokerCompraX;
-    private float jokerCompraY;
-    private float jokerCompraObjetivoX;
-    private float jokerCompraObjetivoY;
-    private static final float VELOCIDAD_ANIMACION_JOKER_COMPRA = 1400f;
+    private final GestorCompraJokerAnimado gestorCompraJoker = new GestorCompraJokerAnimado();
+    private GestorSantos gestorSantos;
 
 
     public GameScreenV2(Main game, DatosRival datosRival) {
@@ -107,7 +105,7 @@ public class GameScreenV2 implements Screen {
             new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(),
             this::organizarCartas
         );
-
+        gestorSantos = new GestorSantos(game, 1080f, Y_JOKERS, 170f, ALTO_JOKER);
         iniciarShader();
         inicializarJuego();
         this.partidaIniciada = true;
@@ -139,6 +137,7 @@ public class GameScreenV2 implements Screen {
         this.cartasRival = new ArrayList<>();
         this.jokers = new ArrayList<>();
         this.gestorJokers = new GestorInputArrastrable<>(jokers);
+        gestorSantos = new GestorSantos(game, 1080f, Y_JOKERS, 170f, ALTO_JOKER);
         this.renderSystem = new GameRenderSystem(game);
         for (int i = 0; i < jugador.getJokers().size(); i++) {
             VistaJoker view = new VistaJoker(jugador.getJokers().get(i), game.getAtlasJokers());
@@ -239,7 +238,7 @@ public class GameScreenV2 implements Screen {
     public void render(float delta) {
         prepararFrame();
         actualizarJokersYVenta(delta);
-        actualizarAnimacionCompraJoker(delta);
+        gestorCompraJoker.update(delta, jokers, areaJokers);
         if (estado == EstadoPantalla.TIENDA) {
             renderConTienda(delta);
             if (pendingEstado != null) { enterState(pendingEstado); pendingEstado = null; }
@@ -266,13 +265,10 @@ public class GameScreenV2 implements Screen {
         hudController.update(mouseWorld, puedeInteract, gestorAccion);
         if (controladorIARival != null) controladorIARival.update(puedeInteract);
         // Actualizaciones comunes
-        //gestorVentaJoker.update(mouseWorld.x, mouseWorld.y, jokers, jugador, (v) -> organizarJokers());
         VistaCarta cartaArrastradaAntes = gestorCartas.getArrastrado();
-        VistaJoker jokerArrastradoAntes = gestorJokers.getArrastrado();
+        //VistaJoker jokerArrastradoAntes = gestorJokers.getArrastrado();
         gestorCartas.update(mouseWorld.x, mouseWorld.y, delta, puedeInteract);
         // En JUGANDO permitimos drops/reorder; aquí usamos canDrop según estado
-        gestorJokers.update(mouseWorld.x, mouseWorld.y, delta, true); // input always
-        //actualizarJokers(delta);
         if (!puedeInteract) {
             for (VistaCarta c : new ArrayList<>(cartasJugador)) c.update(mouseWorld.x, mouseWorld.y, delta);
         }
@@ -281,7 +277,7 @@ public class GameScreenV2 implements Screen {
         actualizarPreviewsCartas(puedeInteract);
         hudController.actualizarSeleccion(juego, puedeInteract, gestorCartas, gestorJokers, cartasJugador, jokers);
         if (cartaArrastradaAntes != null && gestorCartas.getArrastrado() == null) organizarCartas();
-        if (jokerArrastradoAntes != null && gestorJokers.getArrastrado() == null) organizarJokers(true);
+        //if (jokerArrastradoAntes != null && gestorJokers.getArrastrado() == null) organizarJokers(true);
         renderizar(delta);
         if (pendingEstado != null) { enterState(pendingEstado); pendingEstado = null; }
     }
@@ -333,9 +329,8 @@ public class GameScreenV2 implements Screen {
     private void renderConTienda(float delta) {
         if (panelTienda == null) {
             if (jugador == null) jugador = game.getPerfilJugador() != null ? game.getPerfilJugador().getJugador() : null;
-            panelTienda = new PanelTienda(
-                game, jugador, this::iniciarSalidaDeTienda, this::iniciarAnimacionCompraJoker
-            );
+            panelTienda = new PanelTienda(game, jugador, this::iniciarSalidaDeTienda,
+                this::iniciarAnimacionCompraJoker, (s) -> gestorSantos.comprarYUsar(s, jugador));
         }
         ScreenUtils.clear(0.1f, 0.12f, 0.16f, 1f);
         camera.update();
@@ -365,26 +360,10 @@ public class GameScreenV2 implements Screen {
         if (panelTienda != null && panelTiendaVisible) {
             panelTienda.render(game.batch);
         }
-        if (jokerCompradoAnimando != null) {
-            jokerCompradoAnimando.render(game.batch);
-        }
+        gestorCompraJoker.render(game.batch);
         gestorVentaJoker.render(game.batch);
         renderCartelJokerSiCorresponde();
         game.batch.end();
-    }
-
-    private void renderAreaCartas(SpriteBatch batch, Texture pixelBlanco) {
-        float areaX = MARGEN_AREA_LATERAL;
-        float areaAncho = ANCHO_AREA_JUGADOR;
-        float cartasY = Y_MANO_JUGADOR - 10f;
-        batch.setColor(0.05f, 0.05f, 0.08f, 0.45f);
-        batch.draw(pixelBlanco, areaX, cartasY, areaAncho, ALTO_AREA_CARTAS);
-        batch.setColor(0.25f, 0.28f, 0.35f, 0.7f);
-        batch.draw(pixelBlanco, areaX, cartasY, areaAncho, 2f);
-        batch.draw(pixelBlanco, areaX, cartasY + ALTO_AREA_CARTAS - 2f, areaAncho, 2f);
-        batch.draw(pixelBlanco, areaX, cartasY, 2f, ALTO_AREA_CARTAS);
-        batch.draw(pixelBlanco, areaX + areaAncho - 2f, cartasY, 2f, ALTO_AREA_CARTAS);
-        batch.setColor(Color.WHITE);
     }
 
     private void renderAreaJokers(SpriteBatch batch, Texture pixelBlanco) {
@@ -631,7 +610,7 @@ public class GameScreenV2 implements Screen {
                 break;
             case TIENDA:
                 panelTienda = new PanelTienda(game, jugador, this::iniciarSalidaDeTienda,
-                    this::iniciarAnimacionCompraJoker);
+                    this::iniciarAnimacionCompraJoker, (s) -> gestorSantos.comprarYUsar(s, jugador));
                 panelTiendaVisible = true;
                 panelSeleccionVisible = false;
                 break;
@@ -681,63 +660,8 @@ public class GameScreenV2 implements Screen {
     private void iniciarAnimacionCompraJoker(VistaItemTienda item) {
         Joker joker = item.getItem().getJoker();
         if (joker == null) return;
-        // Vista temporal del Joker comprado
-        jokerCompradoAnimando = new VistaJoker(joker, game.getAtlasJokers());
-        jokerCompradoAnimando.setTamaño(ANCHO_JOKER, ALTO_JOKER);
-        // La tienda está desplazada verticalmente.
-        // La posición real de dibujo es Y + offset del panel.
-        jokerCompraX = item.getX();
-        jokerCompraY = item.getY() + panelTienda.getOffsetY();
-        jokerCompradoAnimando.setPosition(jokerCompraX, jokerCompraY);
-        // Calculamos cómo quedaría la fila con el nuevo Joker.
-        ArrayList<VistaJoker> simulacion = new ArrayList<>(jokers);
-        simulacion.add(jokerCompradoAnimando);
-        areaJokers.distribuir(simulacion, null);
-        jokerCompraObjetivoX = jokerCompradoAnimando.getHandTargetX();
-        jokerCompraObjetivoY = jokerCompradoAnimando.getHandTargetY();
-        // Dejamos preparados los Jokers existentes para su nueva posición.
-        organizarJokersConNuevoSlot();
-    }
-
-    private void organizarJokersConNuevoSlot() {
-        ArrayList<VistaJoker> simulacion = new ArrayList<>(jokers);
-        if (jokerCompradoAnimando != null) {
-            simulacion.add(jokerCompradoAnimando);
-        }
-        areaJokers.distribuir(simulacion, jokerCompradoAnimando);
-    }
-
-    private float moverHacia(float actual, float objetivo, float velocidad, float delta) {
-        float distancia = objetivo - actual;
-        if (Math.abs(distancia) <= velocidad * delta) {
-            return objetivo;
-        }
-        return actual + Math.signum(distancia) * velocidad * delta;
-    }
-
-    private void actualizarAnimacionCompraJoker(float delta) {
-        if (jokerCompradoAnimando == null) {
-            return;
-        }
-        jokerCompraX = moverHacia(
-            jokerCompraX,
-            jokerCompraObjetivoX,
-            VELOCIDAD_ANIMACION_JOKER_COMPRA,
-            delta
-        );
-        jokerCompraY = moverHacia(
-            jokerCompraY,
-            jokerCompraObjetivoY,
-            VELOCIDAD_ANIMACION_JOKER_COMPRA,
-            delta
-        );
-        jokerCompradoAnimando.setPosition(jokerCompraX, jokerCompraY);
-        if (jokerCompraX == jokerCompraObjetivoX
-            && jokerCompraY == jokerCompraObjetivoY) {
-            jokers.add(jokerCompradoAnimando);
-            jokerCompradoAnimando = null;
-            organizarJokers();
-        }
+        float x = item.getX(), y = item.getY() + panelTienda.getOffsetY();
+        gestorCompraJoker.iniciar(joker, game.getAtlasJokers(), ANCHO_JOKER, ALTO_JOKER, x, y, jokers, areaJokers);
     }
 
     public void setTiempoNuevaRonda() { tiempoNuevaRonda = 2.5f; }

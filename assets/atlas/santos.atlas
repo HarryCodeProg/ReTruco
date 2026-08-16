@@ -1,0 +1,181 @@
+
+santos.png
+size: 2048, 512
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+AlmaMula
+  rotate: false
+  xy: 2, 194
+  size: 142, 190
+  orig: 142, 190
+  offset: 0, 0
+  index: -1
+CeferinoNamuncura
+  rotate: false
+  xy: 2, 2
+  size: 142, 190
+  orig: 142, 190
+  offset: 0, 0
+  index: -1
+CuraBrochero
+  rotate: false
+  xy: 146, 194
+  size: 142, 190
+  orig: 142, 190
+  offset: 0, 0
+  index: -1
+DifuntaCorrea
+  rotate: false
+  xy: 146, 2
+  size: 142, 190
+  orig: 142, 190
+  offset: 0, 0
+  index: -1
+ElFamiliar
+  rotate: false
+  xy: 290, 194
+  size: 142, 190
+  orig: 142, 190
+  offset: 0, 0
+  index: -1
+GauchitoGil
+  rotate: false
+  xy: 290, 2
+  size: 142, 190
+  orig: 142, 190
+  offset: 0, 0
+  index: -1
+LuzMala
+  rotate: false
+  xy: 434, 194
+  size: 142, 190
+  orig: 142, 190
+  offset: 0, 0
+  index: -1
+MadreMaria
+  rotate: false
+  xy: 434, 2
+  size: 142, 190
+  orig: 142, 190
+  offset: 0, 0
+  index: -1
+MariaDeLosRemedios
+  rotate: false
+  xy: 578, 194
+  size: 142, 190
+  orig: 142, 190
+  offset: 0, 0
+  index: -1
+MboiTu'i
+  rotate: false
+  xy: 578, 2
+  size: 142, 190
+  orig: 142, 190
+  offset: 0, 0
+  index: -1
+Pachamama
+  rotate: false
+  xy: 722, 194
+  size: 142, 190
+  orig: 142, 190
+  offset: 0, 0
+  index: -1
+Pombero
+  rotate: false
+  xy: 722, 2
+  size: 142, 190
+  orig: 142, 190
+  offset: 0, 0
+  index: -1
+SanAntonioDePadua
+  rotate: false
+  xy: 866, 194
+  size: 142, 190
+  orig: 142, 190
+  offset: 0, 0
+  index: -1
+SanBenito
+  rotate: false
+  xy: 866, 2
+  size: 142, 190
+  orig: 142, 190
+  offset: 0, 0
+  index: -1
+SanCayetano
+  rotate: false
+  xy: 1010, 194
+  size: 142, 190
+  orig: 142, 190
+  offset: 0, 0
+  index: -1
+SanExpedito
+  rotate: false
+  xy: 1010, 2
+  size: 142, 190
+  orig: 142, 190
+  offset: 0, 0
+  index: -1
+SanFranciscoDeAsis
+  rotate: false
+  xy: 1154, 194
+  size: 142, 190
+  orig: 142, 190
+  offset: 0, 0
+  index: -1
+SanJorge
+  rotate: false
+  xy: 1154, 2
+  size: 142, 190
+  orig: 142, 190
+  offset: 0, 0
+  index: -1
+SanLaMuerte
+  rotate: false
+  xy: 1298, 194
+  size: 142, 190
+  orig: 142, 190
+  offset: 0, 0
+  index: -1
+SanMartinDePorres
+  rotate: false
+  xy: 1298, 2
+  size: 142, 190
+  orig: 142, 190
+  offset: 0, 0
+  index: -1
+SanNicolas
+  rotate: false
+  xy: 1442, 194
+  size: 142, 190
+  orig: 142, 190
+  offset: 0, 0
+  index: -1
+SanPantaleon
+  rotate: false
+  xy: 1442, 2
+  size: 142, 190
+  orig: 142, 190
+  offset: 0, 0
+  index: -1
+SanRoque
+  rotate: false
+  xy: 1586, 194
+  size: 142, 190
+  orig: 142, 190
+  offset: 0, 0
+  index: -1
+SantaRita
+  rotate: false
+  xy: 1586, 2
+  size: 142, 190
+  orig: 142, 190
+  offset: 0, 0
+  index: -1
+YasyYatere
+  rotate: false
+  xy: 1730, 194
+  size: 142, 190
+  orig: 142, 190
+  offset: 0, 0
+  index: -1

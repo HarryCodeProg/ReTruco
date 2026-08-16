@@ -34,6 +34,10 @@ public final class GameLayout {
     public static final float MARGEN_AREA_LATERAL = 220f;
     public static final float ALTO_CONTADOR_AREA = 24f;
     public static final float MARGEN_CONTADOR_AREA = 6f;
+    public static final float SANTOS_AREA_X = 1000f; // a la derecha de jokers
+    public static final float SANTOS_AREA_ANCHO = 180f;
+    public static final float ANCHO_SANTO = 60f;
+    public static final float ALTO_SANTO = 80f;
 
     private GameLayout() {}
 }

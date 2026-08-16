@@ -28,6 +28,11 @@ public class SanFrancisco extends Santo {
     }
 
     @Override
+    public int maxCartasSeleccionables() {
+        return 1;
+    }
+
+    @Override
     public void aplicarEfecto(Jugador jugador, ArrayList<Carta> seleccionadas, ContextoJuego ctx) {
         if (seleccionadas.size() != 1) return;
         Carta carta = seleccionadas.get(0);

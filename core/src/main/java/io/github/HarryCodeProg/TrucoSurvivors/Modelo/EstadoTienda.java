@@ -2,6 +2,7 @@ package io.github.HarryCodeProg.TrucoSurvivors.Modelo;
 
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jugador;
+import io.github.HarryCodeProg.TrucoSurvivors.Santos.Santo;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -22,11 +23,13 @@ public class EstadoTienda {
     private int rerollsGratis = 0;
     private int espacioJokersExtra = 0;
     private int espacioSantosExtra = 0;
-
+    private final PoolSantosTienda poolSantos = new PoolSantosTienda();
+    private int cantidadSantos = 1;
 
     public EstadoTienda(Jugador jugador) {
         generarFilaCartas();
         generarFilaJokers(jugador);
+        generarFilaSantos();
     }
 
     public void generarFilaCartas() {
@@ -90,9 +93,25 @@ public class EstadoTienda {
     }
 
     public void sumarEspacioJokersTienda(int c) { espacioJokersExtra += c; cantidadJokers += c; }
-    public void sumarEspacioSantosTienda(int c) { espacioSantosExtra += c; }
 
     public void sumarEspacioCartasTienda(int c) {
         cantidadCartas += c;
+    }
+
+    public void generarFilaSantos() {
+        filaSantos.clear();
+        for (int i = 0; i < cantidadSantos; i++) {
+            Santo santo = poolSantos.tomarAleatorio(random);
+            if (santo != null) {
+                filaSantos.add(
+                    ItemTienda.deSanto(santo, santo.getCoste())
+                );
+            }
+        }
+    }
+
+    public void sumarEspacioSantosTienda(int cantidad) {
+        espacioSantosExtra += cantidad;
+        cantidadSantos += cantidad;
     }
 }
