@@ -30,8 +30,24 @@ public class VistaItemTienda {
         if (item.getTipo() == ItemTienda.Tipo.CARTA) {
             this.vistaCartaInterna = new VistaCarta(item.getCarta(), false, atlasCartas);
             this.vistaCartaInterna.setEnModal(true); // Permite hover individual dentro de paneles/tienda
+        } else if (item.getTipo() == ItemTienda.Tipo.JOKER) {
+            // Puede ser null si el ItemTienda no contiene un joker (p. ej. santos)
+            if (item.getJoker() != null) {
+                this.vistaJokerInterna = new VistaJoker(item.getJoker(), atlasJokers);
+            } else {
+                this.vistaJokerInterna = null;
+            }
+        } else if (item.getTipo() == ItemTienda.Tipo.SANTO) {
+            // Para santos usamos el atlasSantos cargado en Main
+            if (Main.getInstance() != null && Main.getInstance().getAtlasSantos() != null) {
+                String regionName = item.getSanto() != null ? item.getSanto().getNombreRegion() : null;
+                if (regionName != null) {
+                    this.region = Main.getInstance().getAtlasSantos().findRegion(regionName);
+                }
+            }
         } else {
-            this.vistaJokerInterna = new VistaJoker(item.getJoker(), atlasJokers);
+            // otros tipos (ZODIACO, etc) — intentar obtener region del atlas de cartas/jokers si aplica
+            this.region = null;
         }
     }
 
@@ -108,6 +124,9 @@ public class VistaItemTienda {
             vistaJokerInterna.renderCartelStats(batch, game);
         } else if (vistaCartaInterna != null) {
             vistaCartaInterna.renderCartelStats(batch, game);
+        } else if (item.getTipo() == ItemTienda.Tipo.SANTO) {
+            // Si queremos mostrar info del santo al hover, podríamos dibujar un texto simple
+            // Por ahora no hacemos nada extra para evitar NPEs.
         }
     }
 
