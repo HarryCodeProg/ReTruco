@@ -278,52 +278,34 @@ public class GameScreenV2 implements Screen {
         hudController.actualizarSeleccion(juego, puedeInteract, gestorCartas, gestorJokers, cartasJugador, jokers);
         if (cartaArrastradaAntes != null && gestorCartas.getArrastrado() == null) organizarCartas();
         //if (jokerArrastradoAntes != null && gestorJokers.getArrastrado() == null) organizarJokers(true);
+        gestorSantos.update(mouseWorld.x, mouseWorld.y, delta);
         renderizar(delta);
         if (pendingEstado != null) { enterState(pendingEstado); pendingEstado = null; }
     }
 
     private void renderizar(float delta) {
-        renderSystem.render(
-            delta, camera, fondoPlasma, panelPuntajes, PANEL_PUNTAJES_X, PANEL_PUNTAJES_Y, juego, jugador, rival,
-            cartasMesaJugador, cartasMesaRival,
-            cartasRival, cartasJugador, jokers,
-            gestorCartas, gestorJokers,
-            vistaMazo, gestorVentaJoker, gestorAnimacionResolucion, puntosTrucoDisplay, multTrucoDisplay, puntosEnvidoDisplay,
-            multEnvidoDisplay, textoFlotanteActual,
+        renderSystem.render(delta, camera, fondoPlasma, panelPuntajes, PANEL_PUNTAJES_X, PANEL_PUNTAJES_Y,
+            juego, jugador, rival, cartasMesaJugador, cartasMesaRival, cartasRival, cartasJugador, jokers,
+            gestorCartas, gestorJokers, vistaMazo, gestorVentaJoker, gestorAnimacionResolucion, puntosTrucoDisplay,
+            multTrucoDisplay, puntosEnvidoDisplay, multEnvidoDisplay, textoFlotanteActual,
             () -> hudController.renderBotones(game.batch, game.getPixelBlancoRegion()),
             this::renderCartelJokerSiCorresponde
         );
+        game.batch.begin();
+        gestorSantos.render(game.batch, game);
+        game.batch.end();
     }
 
     private void renderConSeleccionRival(float delta) {
-        ScreenUtils.clear(0.1f, 0.12f, 0.16f, 1f);
-        camera.update();
-        game.batch.setProjectionMatrix(camera.combined);
-        game.batch.begin();
-        fondoPlasma.render(game.batch, delta);
-        game.batch.end();
-        panelPuntajes.renderFondosYCajas(camera, PANEL_PUNTAJES_X, PANEL_PUNTAJES_Y);
         if (panelSeleccionRival != null && panelSeleccionVisible) {
             panelSeleccionRival.updateAnimacion(delta);
             panelSeleccionRival.update(mouseWorld.x, mouseWorld.y);
         }
-        game.batch.begin();
-        renderAreaJokers(game.batch, game.getPixelBlanco());
-        renderContadoresAreas(game.batch, jugador, false);
-        renderJokers();
-        if (partidaIniciada) {
-            panelPuntajes.renderTextos(   game.batch, game.getFuentePrincipal(), juego, jugador, rival,
-                PANEL_PUNTAJES_X, PANEL_PUNTAJES_Y, gestorAnimacionResolucion,
-                puntosTrucoDisplay, multTrucoDisplay, puntosEnvidoDisplay, multEnvidoDisplay);
-        }
-        game.batch.end();
-        game.batch.begin();
-        if (panelSeleccionRival != null && panelSeleccionVisible) {
-            panelSeleccionRival.render(game.batch);
-        }
-        gestorVentaJoker.render(game.batch);
-        renderCartelJokerSiCorresponde();
-        game.batch.end();
+        gestorSantos.update(mouseWorld.x, mouseWorld.y, delta);
+        renderComun(delta, false,
+            () -> { if (panelSeleccionRival != null && panelSeleccionVisible) panelSeleccionRival.render(game.batch); },
+            () -> {}
+        );
     }
 
     private void renderConTienda(float delta) {
@@ -332,6 +314,18 @@ public class GameScreenV2 implements Screen {
             panelTienda = new PanelTienda(game, jugador, this::iniciarSalidaDeTienda,
                 this::iniciarAnimacionCompraJoker, (s) -> gestorSantos.comprarYUsar(s, jugador));
         }
+        if (panelTienda != null && panelTiendaVisible) {
+            panelTienda.updateAnimacion(delta);
+            panelTienda.update(mouseWorld.x, mouseWorld.y, delta);
+        }
+        gestorSantos.update(mouseWorld.x, mouseWorld.y, delta);
+        renderComun(delta, true,
+            () -> { if (panelTienda != null && panelTiendaVisible) panelTienda.render(game.batch); },
+            () -> gestorCompraJoker.render(game.batch)
+        );
+    }
+
+    private void renderComun(float delta, boolean mostrarMazo, Runnable renderPanelSuperpuesto, Runnable renderOverlaysFinal) {
         ScreenUtils.clear(0.1f, 0.12f, 0.16f, 1f);
         camera.update();
         game.batch.setProjectionMatrix(camera.combined);
@@ -339,31 +333,28 @@ public class GameScreenV2 implements Screen {
         fondoPlasma.render(game.batch, delta);
         game.batch.end();
         panelPuntajes.renderFondosYCajas(camera, PANEL_PUNTAJES_X, PANEL_PUNTAJES_Y);
-        if (panelTienda != null && panelTiendaVisible) {
-            panelTienda.updateAnimacion(delta);
-            panelTienda.update(mouseWorld.x, mouseWorld.y, delta);
-        }
         game.batch.begin();
-        renderAreaJokers(game.batch, game.getPixelBlanco());
-        renderContadoresAreas(game.batch, jugador, false);
+        renderHUDJugador();
         renderJokers();
-        panelPuntajes.renderTextos(
-            game.batch, game.getFuentePrincipal(), juego, jugador, rival,
+        panelPuntajes.renderTextos(game.batch, game.getFuentePrincipal(), juego, jugador, rival,
             PANEL_PUNTAJES_X, PANEL_PUNTAJES_Y, gestorAnimacionResolucion,
-            puntosTrucoDisplay, multTrucoDisplay, puntosEnvidoDisplay, multEnvidoDisplay
-        );
-        if (juego != null && vistaMazo != null) {
+            puntosTrucoDisplay, multTrucoDisplay, puntosEnvidoDisplay, multEnvidoDisplay);
+        if (mostrarMazo && juego != null && vistaMazo != null) {
             vistaMazo.render(game.batch, juego.getMazoJugador().getCartasRestantesOrdenadas(), juego.getMazoJugador().getTamañoMazo());
         }
         game.batch.end();
         game.batch.begin();
-        if (panelTienda != null && panelTiendaVisible) {
-            panelTienda.render(game.batch);
-        }
-        gestorCompraJoker.render(game.batch);
+        renderPanelSuperpuesto.run();
         gestorVentaJoker.render(game.batch);
         renderCartelJokerSiCorresponde();
+        gestorSantos.render(game.batch, game);
+        renderOverlaysFinal.run();
         game.batch.end();
+    }
+
+    private void renderHUDJugador() {
+        renderAreaJokers(game.batch, game.getPixelBlanco());
+        renderContadoresAreas(game.batch, jugador, false);
     }
 
     private void renderAreaJokers(SpriteBatch batch, Texture pixelBlanco) {
@@ -432,7 +423,6 @@ public class GameScreenV2 implements Screen {
     }
 
     private void renderCartelJokerSiCorresponde() {
-        // Buscamos si hay algún joker que tenga el mouse encima
         VistaJoker jokerConHover = null;
         for (VistaJoker j : jokers) {
             if (j.isHover() || j.contiene(mouseWorld.x, mouseWorld.y)) {
@@ -440,14 +430,13 @@ public class GameScreenV2 implements Screen {
                 break;
             }
         }
-        // Si encontramos uno, dibujamos su cartel de stats
         if (jokerConHover != null) {
             jokerConHover.renderCartelStats(game.batch, game);
         }
     }
 
     private void actualizarJokersYVenta(float delta) {
-        actualizarJokers(delta); // ya update+reorder+snap, dejalo como esta
+        actualizarJokers(delta);
         gestorVentaJoker.update(mouseWorld.x, mouseWorld.y, jokers, jugador, (v) -> organizarJokers());
     }
 
@@ -457,7 +446,7 @@ public class GameScreenV2 implements Screen {
         areaJokers.distribuir(jokers, gestorJokers.getArrastrado());
         if (instant) {
             for (VistaJoker v : jokers) {
-                v.setPosition(v.getHandTargetX(), areaJokers.getY()); // requiere getHandTargetY() si tu VistaJoker guarda Y aparte; ver nota abajo
+                v.setPosition(v.getHandTargetX(), areaJokers.getY());
             }
         }
     }
@@ -566,16 +555,12 @@ public class GameScreenV2 implements Screen {
         for (VistaCarta c : new ArrayList<>(cartasMesaRival)) c.update(mouseWorld.x, mouseWorld.y, delta);
     }
 
-    /** Comportamiento de drag/reorden de jokers, IDÉNTICO en los 3 estados de pantalla (JUGANDO, TIENDA, SELECCION_RIVAL). */
     private void actualizarJokers(float delta) {
         VistaJoker antes = gestorJokers.getArrastrado();
-        // 1. Actualizamos el estado interno (hover, escala, etc.) de CADA joker
         for (VistaJoker vj : jokers) {
             vj.update(mouseWorld.x, mouseWorld.y, delta);
         }
-        // 2. Actualizamos el gestor de arrastre
         gestorJokers.update(mouseWorld.x, mouseWorld.y, delta, true);
-        // 3. Previsualizamos si hay reordenamiento
         boolean cambio = gestorReordenamiento.previsualizarReordenamientoJokers(gestorJokers, jokers);
         if (cambio) organizarJokers();
         if (antes != null && gestorJokers.getArrastrado() == null) organizarJokers();
@@ -637,7 +622,6 @@ public class GameScreenV2 implements Screen {
         if (oldState == null) return;
         switch (oldState) {
             case TIENDA:
-                // mantengo panel en memoria para reutilizarlo; solo oculto
                 panelTiendaVisible = false;
                 break;
             case SELECCION_RIVAL:
@@ -690,7 +674,6 @@ public class GameScreenV2 implements Screen {
         if (cartasMesaJugador != null) { for (VistaCarta carta : cartasMesaJugador) carta.dispose(); cartasMesaJugador.clear(); }
         if (cartasMesaRival != null) { for (VistaCarta carta : cartasMesaRival) carta.dispose(); cartasMesaRival.clear(); }
         if (jokers != null) { for (VistaJoker joker : jokers) joker.dispose(); jokers.clear(); }
-        if (gestorAnimaciones != null) { /* si tiene dispose impl, llamalo */ }
     }
 
     @Override
