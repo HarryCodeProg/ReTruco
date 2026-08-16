@@ -29,6 +29,11 @@ public class SanJorge extends Santo {
     }
 
     @Override
+    public int maxCartasSeleccionables() {
+        return 0;
+    }
+
+    @Override
     public void aplicarEfecto(Jugador jugador, ArrayList<Carta> seleccionadas, ContextoJuego ctx) {
         if (jugador.getJokers().isEmpty()) return;
         if (jugador.getJokers().size() >= jugador.getTamañoJokers()) return;

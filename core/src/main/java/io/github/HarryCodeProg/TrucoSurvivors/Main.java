@@ -37,6 +37,7 @@ public class Main extends Game {
     public AssetManager assets;
     private TextureAtlas atlasZodiaco;
     private Texture texturaRuletaFondo;
+    private TextureAtlas atlasSantos;
 
     @Override
     public void create() {
@@ -74,6 +75,10 @@ public class Main extends Game {
         for (Texture texture : atlasJokers.getTextures()) {
             texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         }
+        atlasSantos = new TextureAtlas(Gdx.files.internal("atlas/santos.atlas"));
+        for (Texture texture : atlasSantos.getTextures()) {
+            texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        }
         atlasZodiaco = new TextureAtlas(Gdx.files.internal("atlas/zodiaco.atlas"));
         texturaRuletaFondo = new Texture("ui/zodiaco_ruleta.png");
 
@@ -99,6 +104,8 @@ public class Main extends Game {
     }
 
     public Texture getTexturaRuletaFondo() { return texturaRuletaFondo; }
+
+    public TextureAtlas getAtlasSantos(){return atlasSantos;}
 
     public static Main getInstance() {return instancia;}
 

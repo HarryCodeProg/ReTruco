@@ -4,6 +4,7 @@ import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Carta;
 import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Palo;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -12,6 +13,7 @@ public class Mazo {
     private ArrayList<Carta> cartasTomadas;
     private ArrayList<Carta> cartasDescartadas;
     private int tamañoMazo;
+
 
     public Mazo(){
         this.mazo = new ArrayList<>();
@@ -111,6 +113,20 @@ public class Mazo {
             return Integer.compare(c1.getNumero(), c2.getNumero());
         });
         return copia;
+    }
+
+    public ArrayList<Carta> getCartasAleatoriasParaSanto(int cantidad) {
+        ArrayList<Carta> disponibles = new ArrayList<>(mazo);
+        Collections.shuffle(disponibles);
+        int limite = Math.min(cantidad, disponibles.size());
+        return new ArrayList<>(disponibles.subList(0, limite));
+    }
+
+    public ArrayList<Carta> tomarCartasAleatorias(int cantidad) {
+        ArrayList<Carta> disponibles = new ArrayList<>(mazo);
+        Collections.shuffle(disponibles);
+        int limite = Math.min(cantidad, disponibles.size());
+        return new ArrayList<>(disponibles.subList(0, limite));
     }
 
     public void reciclarCartasTomadas() {

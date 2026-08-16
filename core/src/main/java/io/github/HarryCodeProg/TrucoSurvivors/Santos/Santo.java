@@ -32,4 +32,6 @@ public abstract class Santo {
 
     /** Ejecuta el efecto. 'seleccionadas' respeta el orden de seleccion (para efectos tipo "izquierda->derecha"). */
     public abstract void aplicarEfecto(Jugador jugador, ArrayList<Carta> seleccionadas, ContextoJuego ctxOpcional);
+
+    public abstract int maxCartasSeleccionables();
 }

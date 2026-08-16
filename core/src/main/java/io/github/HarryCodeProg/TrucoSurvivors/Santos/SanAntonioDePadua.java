@@ -24,6 +24,11 @@ public class SanAntonioDePadua extends Santo {
     }
 
     @Override
+    public int maxCartasSeleccionables() {
+        return 3;
+    }
+
+    @Override
     public void aplicarEfecto(Jugador jugador, ArrayList<Carta> seleccionadas, ContextoJuego ctx) {
         int limite = Math.min(2, seleccionadas.size());
         for (int i = 0; i < limite; i++) {

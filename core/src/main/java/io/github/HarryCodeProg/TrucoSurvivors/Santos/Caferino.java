@@ -23,6 +23,11 @@ public class Caferino extends Santo {
     public int cartasRequeridas() {return -1;}
 
     @Override
+    public int maxCartasSeleccionables() {
+        return 3;
+    }
+
+    @Override
     public void aplicarEfecto(Jugador jugador, ArrayList<Carta> seleccionadas, ContextoJuego ctx) {
         int limite = Math.min(3, seleccionadas.size());
         for (int i = 0; i < limite; i++) {

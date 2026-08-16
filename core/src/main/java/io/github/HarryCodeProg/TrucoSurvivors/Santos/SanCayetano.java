@@ -25,6 +25,11 @@ public class SanCayetano extends Santo {
     }
 
     @Override
+    public int maxCartasSeleccionables() {
+        return 0;
+    }
+
+    @Override
     public void aplicarEfecto(Jugador jugador, ArrayList<Carta> seleccionadas, ContextoJuego ctx) {
         int total = 0;
         for (Joker joker : jugador.getJokers()) {

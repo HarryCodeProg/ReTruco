@@ -12,6 +12,7 @@ import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jugador;
 import io.github.HarryCodeProg.TrucoSurvivors.Main;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.*;
+import io.github.HarryCodeProg.TrucoSurvivors.Santos.Santo;
 
 import java.util.ArrayList;
 import java.util.function.Consumer;
@@ -54,14 +55,18 @@ public class PanelTienda {
     private OverlaySeleccionCarta overlaySeleccion = new OverlaySeleccionCarta();
     private SignoZodiaco signoObtenido;
     private final Consumer<VistaItemTienda> alComprarJoker;
+    private final Boton botonComprarYUsar;
+    private final Consumer<Santo> alComprarYUsarSanto;
 
 
-    public PanelTienda(Main game, Jugador jugador, Runnable alContinuar, Consumer<VistaItemTienda> alComprarJoker) {
+    public PanelTienda(Main game, Jugador jugador,
+        Runnable alContinuar, Consumer<VistaItemTienda> alComprarJoker, Consumer<Santo> alComprarYUsarSanto){
         this.game = game;
         this.jugador = jugador;
         this.alContinuar = alContinuar;
         this.estadoTienda = new EstadoTienda(jugador);
         this.alComprarJoker = alComprarJoker;
+        this.alComprarYUsarSanto = alComprarYUsarSanto;
         if (Gdx.files.internal("ui/peso.png").exists()) {
             iconoPeso = new Texture("ui/peso.png");
         }
@@ -70,6 +75,8 @@ public class PanelTienda {
         botonRerollCartas = new Boton(PANEL_X + 20, PANEL_Y + PANEL_ALTO - 60, 160, 40, Boton.TipoColor.AZUL, Accion.REROLL_CARTAS);
         botonRerollJokers = new Boton(PANEL_X + 20, PANEL_Y + PANEL_ALTO - 210, 160, 40, Boton.TipoColor.AZUL, Accion.REROLL_JOKERS);
         botonContinuar = new Boton(PANEL_X + PANEL_ANCHO - 180, PANEL_Y + PANEL_ALTO - 60, 160, 50, Boton.TipoColor.DORADO, Accion.CONTINUAR_TIENDA);
+        botonComprarYUsar = new Boton(PANEL_X + PANEL_ANCHO - 180, PANEL_Y + 80, 160, 50, Boton.TipoColor.DORADO, Accion.COMPRAR_Y_USAR_SANTO);
+        botonComprarYUsar.setVisible(false);
         ruedaZodiaco = new RuedaZodiaco(RUEDA_X, RUEDA_Y, RUEDA_RADIO, game.getTexturaRuletaFondo());
         reconstruirVistas();
         this.offsetY = -(PANEL_Y + PANEL_ALTO);
@@ -126,6 +133,7 @@ public class PanelTienda {
         for (VistaItemTienda v : vistasJokers) v.update(mouseWorldX, mouseWorldY, delta);
         for (VistaJoker vj : vistasJokersPropios) vj.update(mouseWorldX, mouseWorldY, delta);
         botonComprar.update(mouseWorldX, mouseWorldY);
+        botonComprarYUsar.update(mouseWorldX, mouseWorldY);
         botonRerollCartas.update(mouseWorldX, mouseWorldY);
         botonRerollJokers.update(mouseWorldX, mouseWorldY);
         botonContinuar.update(mouseWorldX, mouseWorldY);
@@ -155,6 +163,12 @@ public class PanelTienda {
             }
         }
         boolean cliqueoAlgunElemento = false;
+        if (botonComprarYUsar.fueCliqueado(mouseWorldX, mouseWorldY)
+            && seleccionado != null
+            && seleccionado.getItem().getTipo() == ItemTienda.Tipo.SANTO) {
+            comprarYUsarSanto(seleccionado);
+            return;
+        }
         if (botonContinuar.fueCliqueado(mouseWorldX, mouseWorldY)) {
             alContinuar.run();
             return;
@@ -191,9 +205,21 @@ public class PanelTienda {
                     seleccionado = itemClickeado;
                     seleccionado.setSeleccionado(true);
                     boolean dineroSuficiente = jugador.getPesos() >= seleccionado.getItem().getPrecio();
-                    boolean espacioDisponible = seleccionado.getItem().getTipo() != ItemTienda.Tipo.JOKER
+                    /*boolean espacioDisponible = seleccionado.getItem().getTipo() != ItemTienda.Tipo.JOKER
                         || jugador.getJokers().size() < jugador.getTamañoJokers();
+                    botonComprar.setHabilitado(dineroSuficiente && espacioDisponible);*/
+                    boolean esSanto = seleccionado.getItem().getTipo() == ItemTienda.Tipo.SANTO;
+                    boolean espacioDisponible;
+                    if (seleccionado.getItem().getTipo() == ItemTienda.Tipo.JOKER) {
+                        espacioDisponible = jugador.getJokers().size() < jugador.getTamañoJokers();
+                    } else if (seleccionado.getItem().getTipo() == ItemTienda.Tipo.SANTO) {
+                        espacioDisponible = jugador.getSantos().size() < jugador.getTamañoSantos();
+                    } else {
+                        espacioDisponible = true;
+                    }
                     botonComprar.setHabilitado(dineroSuficiente && espacioDisponible);
+                    botonComprarYUsar.setVisible(esSanto);
+                    botonComprarYUsar.setHabilitado(esSanto && dineroSuficiente && espacioDisponible);
                 }
             } else {
                 deseleccionarTodo();
@@ -212,8 +238,10 @@ public class PanelTienda {
 
     private void comprar(VistaItemTienda vista) {
         ItemTienda item = vista.getItem();
-        if (item.getTipo() == ItemTienda.Tipo.JOKER
-            && jugador.getJokers().size() >= jugador.getTamañoJokers()) {
+        if (item.getTipo() == ItemTienda.Tipo.JOKER && jugador.getJokers().size() >= jugador.getTamañoJokers()) {
+            return;
+        }
+        if (item.getTipo() == ItemTienda.Tipo.SANTO && jugador.getSantos().size() >= jugador.getTamañoSantos()) {
             return;
         }
         if (!jugador.gastarPesos(item.getPrecio())) {
@@ -221,16 +249,31 @@ public class PanelTienda {
         }
         if (item.getTipo() == ItemTienda.Tipo.CARTA) {
             jugador.getMazo().agregarCarta(item.getCarta());
-
         } else if (item.getTipo() == ItemTienda.Tipo.JOKER) {
             jugador.agregarJoker(item.getJoker());
-
             if (alComprarJoker != null) {
                 alComprarJoker.accept(vista);
             }
+        } else if (item.getTipo() == ItemTienda.Tipo.SANTO) {
+            jugador.agregarSanto(item.getSanto());
         }
         estadoTienda.removerItemComprado(item);
         reconstruirVistas();
+    }
+
+    private void comprarYUsarSanto(VistaItemTienda vista) {
+        ItemTienda item = vista.getItem();
+        Santo santo = item.getSanto();
+        if (santo == null) return;
+        if (jugador.getSantos().size() >= jugador.getTamañoSantos()) {
+            return;
+        }
+        if (!jugador.gastarPesos(item.getPrecio())) {
+            return;
+        }
+        estadoTienda.removerItemComprado(item);
+        reconstruirVistas();
+        alComprarYUsarSanto.accept(santo);
     }
 
     public void render(SpriteBatch batch) {
