@@ -29,15 +29,15 @@ public class PanelTienda {
     private final Runnable alContinuar;
     private final ArrayList<VistaItemTienda> vistasCartas = new ArrayList<>();
     private final ArrayList<VistaItemTienda> vistasJokers = new ArrayList<>();
+    private final ArrayList<VistaItemTienda> vistasSantos = new ArrayList<>();
     private VistaItemTienda seleccionado;
     private final Boton botonComprar;
-    private final Boton botonRerollCartas;
-    private final Boton botonRerollJokers;
+    private final Boton botonReroll; // Unico boton REROLL (para jokers en esta implementación)
     private final Boton botonContinuar;
     private Texture iconoPeso;
     // Zona ocupada por el panel: deja libre la franja superior (donde estan los jokers)
     private static final float PANEL_Y = 40f;
-    private static final float PANEL_ALTO = 460f;
+    private static final float PANEL_ALTO = 540f; // aumentado para dar espacio a santos
     private static final float PANEL_X = 260f;
     private static final float PANEL_ANCHO = 1000f - PANEL_X;
     private static final float VELOCIDAD_SLIDE = 1800f; // px/seg
@@ -60,7 +60,7 @@ public class PanelTienda {
 
 
     public PanelTienda(Main game, Jugador jugador,
-        Runnable alContinuar, Consumer<VistaItemTienda> alComprarJoker, Consumer<Santo> alComprarYUsarSanto){
+                       Runnable alContinuar, Consumer<VistaItemTienda> alComprarJoker, Consumer<Santo> alComprarYUsarSanto){
         this.game = game;
         this.jugador = jugador;
         this.alContinuar = alContinuar;
@@ -72,8 +72,7 @@ public class PanelTienda {
         }
         botonComprar = new Boton(PANEL_X + PANEL_ANCHO - 180, PANEL_Y + 20, 160, 50, Boton.TipoColor.VERDE, Accion.COMPRAR_ITEM_TIENDA);
         botonComprar.setHabilitado(false);
-        botonRerollCartas = new Boton(PANEL_X + 20, PANEL_Y + PANEL_ALTO - 60, 160, 40, Boton.TipoColor.AZUL, Accion.REROLL_CARTAS);
-        botonRerollJokers = new Boton(PANEL_X + 20, PANEL_Y + PANEL_ALTO - 210, 160, 40, Boton.TipoColor.AZUL, Accion.REROLL_JOKERS);
+        botonReroll = new Boton(PANEL_X + 20, PANEL_Y + PANEL_ALTO - 60, 160, 40, Boton.TipoColor.AZUL, Accion.REROLL_JOKERS);
         botonContinuar = new Boton(PANEL_X + PANEL_ANCHO - 180, PANEL_Y + PANEL_ALTO - 60, 160, 50, Boton.TipoColor.DORADO, Accion.CONTINUAR_TIENDA);
         botonComprarYUsar = new Boton(PANEL_X + PANEL_ANCHO - 180, PANEL_Y + 80, 160, 50, Boton.TipoColor.DORADO, Accion.COMPRAR_Y_USAR_SANTO);
         botonComprarYUsar.setVisible(false);
@@ -99,6 +98,7 @@ public class PanelTienda {
     private void reconstruirVistas() {
         vistasCartas.clear();
         vistasJokers.clear();
+        vistasSantos.clear();
         deseleccionarTodo();
         float xCartas = PANEL_X + 220;
         for (ItemTienda item : estadoTienda.getFilaCartas()) {
@@ -108,11 +108,20 @@ public class PanelTienda {
             xCartas += 120;
         }
         float xJokers = PANEL_X + 220;
+        // Dibujamos los jokers de venta un poco arriba de la zona inferior
         for (ItemTienda item : estadoTienda.getFilaJokers()) {
             VistaItemTienda v = new VistaItemTienda(item, game.getAtlasCartas(), game.getAtlasJokers());
-            v.setPosition(xJokers, PANEL_Y + 40);
+            v.setPosition(xJokers, PANEL_Y + 120);
             vistasJokers.add(v);
             xJokers += 120;
+        }
+        float xSantos = PANEL_X + 220;
+        // Santos aparecen abajo de los jokers
+        for (ItemTienda item : estadoTienda.getFilaSantos()) {
+            VistaItemTienda v = new VistaItemTienda(item, game.getAtlasCartas(), game.getAtlasJokers());
+            v.setPosition(xSantos, PANEL_Y + 20);
+            vistasSantos.add(v);
+            xSantos += 120;
         }
     }
 
@@ -121,6 +130,7 @@ public class PanelTienda {
         jokerPropioSeleccionado = null;
         for (VistaItemTienda v : vistasCartas) v.setSeleccionado(false);
         for (VistaItemTienda v : vistasJokers) v.setSeleccionado(false);
+        for (VistaItemTienda v : vistasSantos) v.setSeleccionado(false);
         for (VistaJoker vj : vistasJokersPropios) vj.setSeleccionada(false);
         botonComprar.setHabilitado(false);
     }
@@ -131,11 +141,11 @@ public class PanelTienda {
         boolean justTouched = Gdx.input.justTouched();
         for (VistaItemTienda v : vistasCartas) v.update(mouseWorldX, mouseWorldY, delta);
         for (VistaItemTienda v : vistasJokers) v.update(mouseWorldX, mouseWorldY, delta);
+        for (VistaItemTienda v : vistasSantos) v.update(mouseWorldX, mouseWorldY, delta);
         for (VistaJoker vj : vistasJokersPropios) vj.update(mouseWorldX, mouseWorldY, delta);
         botonComprar.update(mouseWorldX, mouseWorldY);
         botonComprarYUsar.update(mouseWorldX, mouseWorldY);
-        botonRerollCartas.update(mouseWorldX, mouseWorldY);
-        botonRerollJokers.update(mouseWorldX, mouseWorldY);
+        botonReroll.update(mouseWorldX, mouseWorldY);
         botonContinuar.update(mouseWorldX, mouseWorldY);
         ruedaZodiaco.update(delta);
         overlayConsumo.update(delta);
@@ -182,8 +192,9 @@ public class PanelTienda {
             } else if (seleccionado != null) {
                 comprar(seleccionado);
             }
-        } else if (botonRerollJokers.fueCliqueado(mouseWorldX, mouseWorldY)) {
+        } else if (botonReroll.fueCliqueado(mouseWorldX, mouseWorldY)) {
             cliqueoAlgunElemento = true;
+            // Unico reroll: rerollear jokers
             estadoTienda.rerollearJokers(jugador);
             reconstruirVistas();
         }
@@ -197,6 +208,11 @@ public class PanelTienda {
                     if (v.contiene(mouseWorldX, mouseWorldY)) { itemClickeado = v; break; }
                 }
             }
+            if (itemClickeado == null) {
+                for (VistaItemTienda v : vistasSantos) {
+                    if (v.contiene(mouseWorldX, mouseWorldY)) { itemClickeado = v; break; }
+                }
+            }
             if (itemClickeado != null) {
                 if (seleccionado == itemClickeado) {
                     deseleccionarTodo();
@@ -205,9 +221,6 @@ public class PanelTienda {
                     seleccionado = itemClickeado;
                     seleccionado.setSeleccionado(true);
                     boolean dineroSuficiente = jugador.getPesos() >= seleccionado.getItem().getPrecio();
-                    /*boolean espacioDisponible = seleccionado.getItem().getTipo() != ItemTienda.Tipo.JOKER
-                        || jugador.getJokers().size() < jugador.getTamañoJokers();
-                    botonComprar.setHabilitado(dineroSuficiente && espacioDisponible);*/
                     boolean esSanto = seleccionado.getItem().getTipo() == ItemTienda.Tipo.SANTO;
                     boolean espacioDisponible;
                     if (seleccionado.getItem().getTipo() == ItemTienda.Tipo.JOKER) {
@@ -289,16 +302,14 @@ public class PanelTienda {
         // --- Elementos ---
         for (VistaItemTienda v : vistasCartas) if (v != seleccionado) v.render(batch, game);
         for (VistaItemTienda v : vistasJokers) if (v != seleccionado) v.render(batch, game);
+        for (VistaItemTienda v : vistasSantos) if (v != seleccionado) v.render(batch, game);
         for (VistaJoker vj : vistasJokersPropios) vj.render(batch);
         if (seleccionado != null) seleccionado.render(batch, game);
         // --- Botones y textos ---
         botonComprar.render(batch);
-        botonRerollCartas.render(batch);
-        botonRerollJokers.render(batch);
+        botonReroll.render(batch);
         botonContinuar.render(batch);
-        /*String textoPesos = "$" + jugador.getPesos();
-        if (iconoPeso != null) batch.draw(iconoPeso, PANEL_X + 20, PANEL_Y + PANEL_ALTO - 150, 32, 32);
-        game.getFuentePrincipal().draw(batch, textoPesos, PANEL_X + 60, PANEL_Y + PANEL_ALTO - 125);*/
+        botonComprarYUsar.render(batch);
         float infoX = PANEL_X + PANEL_ANCHO - 350;
         float infoY = PANEL_Y + PANEL_ALTO - 60;
         float maxAnchoTexto = 320f;
@@ -318,6 +329,7 @@ public class PanelTienda {
         // --- Carteles de stats (hovers) ---
         for (VistaItemTienda v : vistasCartas) v.renderCartelStats(batch, game);
         for (VistaItemTienda v : vistasJokers) v.renderCartelStats(batch, game);
+        for (VistaItemTienda v : vistasSantos) v.renderCartelStats(batch, game);
         for (VistaJoker vj : vistasJokersPropios) {
             if (vj.isHover()) {
                 vj.renderCartelStats(batch, game);

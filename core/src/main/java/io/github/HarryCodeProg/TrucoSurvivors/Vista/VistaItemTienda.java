@@ -30,8 +30,21 @@ public class VistaItemTienda {
         if (item.getTipo() == ItemTienda.Tipo.CARTA) {
             this.vistaCartaInterna = new VistaCarta(item.getCarta(), false, atlasCartas);
             this.vistaCartaInterna.setEnModal(true); // Permite hover individual dentro de paneles/tienda
+        } else if (item.getTipo() == ItemTienda.Tipo.JOKER) {
+            if (item.getJoker() != null) {
+                this.vistaJokerInterna = new VistaJoker(item.getJoker(), atlasJokers);
+            } else {
+                this.vistaJokerInterna = null;
+            }
+        } else if (item.getTipo() == ItemTienda.Tipo.SANTO) {
+            if (Main.getInstance() != null && Main.getInstance().getAtlasSantos() != null) {
+                String regionName = item.getSanto() != null ? item.getSanto().getNombreRegion() : null;
+                if (regionName != null) {
+                    this.region = Main.getInstance().getAtlasSantos().findRegion(regionName);
+                }
+            }
         } else {
-            this.vistaJokerInterna = new VistaJoker(item.getJoker(), atlasJokers);
+            this.region = null;
         }
     }
 
