@@ -26,11 +26,13 @@ public class GestorSantos {
         this.area = new AreaElementos<>(areaX, areaY, areaAncho, altoSanto, 70f, 95f, 5f);
     }
 
-    public void agregarComprado(Santo santo) {
+    public boolean agregarComprado(Santo santo, Jugador jugador) {
+        if (santos.size() >= jugador.getTamañoSantos()) return false;
         VistaSanto vista = new VistaSanto(santo, game.getAtlasSantos());
         vista.setTamaño(70, 95);
         santos.add(vista);
         area.distribuir(santos, null);
+        return true;
     }
 
     public void comprarYUsar(Santo santo, Jugador jugador) {
@@ -65,5 +67,34 @@ public class GestorSantos {
         overlayConsumo.render(batch, game);
     }
 
+    public void usarSeleccionado(VistaSanto vista, Jugador jugador) {
+        Santo santo = vista.getSanto();
+        TextureRegion region = game.getAtlasSantos().findRegion(santo.getNombreRegion());
+        if (region == null) return;
+        Runnable quitarDelArea = () -> {
+            santos.remove(vista);
+            area.distribuir(santos, null);
+        };
+        if (santo.cartasRequeridas() == 0) {
+            overlayConsumo.abrir(santo, region, () -> {
+                santo.aplicarEfecto(jugador, new ArrayList<>(), null);
+                quitarDelArea.run();
+                overlayConsumo.confirmarCierre();
+            });
+            return;
+        }
+        ArrayList<Carta> cartasParaElegir = new ArrayList<>(jugador.getMano()); // usar mano real, no aleatorias del mazo (esto ya es "en partida", no en tienda)
+        overlaySeleccion.abrir(santo, cartasParaElegir, game.getAtlasCartas(), seleccion ->
+            overlayConsumo.abrir(santo, region, () -> {
+                santo.aplicarEfecto(jugador, seleccion, null);
+                quitarDelArea.run();
+                overlayConsumo.confirmarCierre();
+            })
+        );
+    }
+
     public ArrayList<VistaSanto> getSantos() { return santos; }
+
+    public AreaElementos<VistaSanto> getArea() { return area; }
+    public int getMaximo(Jugador jugador) { return jugador.getTamañoSantos(); }
 }

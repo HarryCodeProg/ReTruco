@@ -49,14 +49,15 @@ public class VistaSanto implements Arrastrable {
 
     @Override
     public float getAncho() {
-        return 0;
+        return width;
     }
 
     public float getCentroX() { return x + (width * scale) / 2f; }
 
     public boolean contiene(float mx, float my) {
         float w = width * scale, h = height * scale;
-        return mx >= x && mx <= x + w && my >= y && my <= y + h;
+        float drawY = y + visualOffsetY;
+        return mx >= x && mx <= x + w && my >= drawY && my <= drawY + h;
     }
 
     @Override public boolean isDragging() { return dragging; }
@@ -116,8 +117,80 @@ public class VistaSanto implements Arrastrable {
 
     public void render(SpriteBatch batch) {
         float drawY = y + visualOffsetY;
-        batch.draw(region, x, drawY, width / 2f, height / 2f, width, height, scale, scale, rotation);
+        if (region != null) {
+            batch.draw(region, x, drawY, width / 2f, height / 2f, width, height, scale, scale, rotation);
+        } else {
+            // placeholder box if no region
+            com.badlogic.gdx.graphics.Texture pixel = Main.getInstance() != null ? Main.getInstance().getPixelBlanco() : null;
+            if (pixel != null) {
+                batch.setColor(0.2f, 0.2f, 0.22f, 1f);
+                batch.draw(pixel, x, drawY, width, height);
+                batch.setColor(1f, 1f, 1f, 1f);
+            }
+            if (Main.getInstance() != null && santo != null) {
+                com.badlogic.gdx.graphics.g2d.BitmapFont font = Main.getInstance().getFuentePrincipal();
+                font.draw(batch, santo.getNombre(), x + 6f, drawY + height / 2f);
+            }
+        }
+        // Mostrar cartel de descripción al pasar el mouse (igual que VistaCarta/VistaJoker)
+        if (hover && !dragging && santo != null) {
+            Main game = Main.getInstance();
+            renderCartelStats(batch, game);
+        }
     }
+
+    public void renderCartelStats(SpriteBatch batch, Main game) {
+        if (!hover || santo == null || game == null) return;
+        com.badlogic.gdx.graphics.g2d.BitmapFont font = game.getFuentePrincipal();
+        com.badlogic.gdx.graphics.g2d.GlyphLayout layout = new com.badlogic.gdx.graphics.g2d.GlyphLayout();
+        String titulo = santo.getNombre();
+        String descripcion = santo.getDescripcion();
+        float maxAnchoDesc = 240f;
+        float paddingX = 12f;
+        float paddingY = 10f;
+        float altoLinea = font.getLineHeight() + 4f;
+        // Medimos texto
+        layout.setText(font, titulo);
+        float anchoTitulo = layout.width;
+        layout.setText(font, descripcion, com.badlogic.gdx.graphics.Color.WHITE, maxAnchoDesc, com.badlogic.gdx.utils.Align.left, true);
+        float altoDescripcion = layout.height;
+        float anchoCartel = Math.max(anchoTitulo, maxAnchoDesc) + paddingX * 2f;
+        float altoCartel = altoLinea + altoDescripcion + paddingY * 2f;
+        float actualWidth = width * scale;
+        float actualHeight = height * scale;
+        float drawY = y + visualOffsetY;
+        float cartelX = x + (actualWidth / 2f) - (anchoCartel / 2f);
+        float cartelY = drawY + actualHeight + 12f;
+        // si sale fuera de pantalla lo colocamos abajo
+        if (cartelY + altoCartel > com.badlogic.gdx.Gdx.graphics.getHeight() - 20f) {
+            cartelY = drawY - altoCartel - 12f;
+        }
+        com.badlogic.gdx.graphics.Texture pixel = game.getPixelBlanco();
+        if (pixel != null) {
+            batch.setColor(0.05f, 0.05f, 0.08f, 0.9f);
+            batch.draw(pixel, cartelX, cartelY, anchoCartel, altoCartel);
+            batch.setColor(0.28f, 0.30f, 0.36f, 0.9f);
+            float grosor = 1.5f;
+            batch.draw(pixel, cartelX, cartelY, anchoCartel, grosor);
+            batch.draw(pixel, cartelX, cartelY + altoCartel - grosor, anchoCartel, grosor);
+            batch.draw(pixel, cartelX, cartelY, grosor, altoCartel);
+            batch.draw(pixel, cartelX + anchoCartel - grosor, cartelY, grosor, altoCartel);
+            batch.setColor(1f, 1f, 1f, 1f);
+        }
+        float textX = cartelX + paddingX;
+        float textY = cartelY + altoCartel - paddingY;
+        // Título
+        font.setColor(com.badlogic.gdx.graphics.Color.GOLD);
+        font.draw(batch, titulo, textX, textY);
+        // Descripción con wrap
+        font.setColor(com.badlogic.gdx.graphics.Color.WHITE);
+        font.draw(batch, descripcion, textX, textY - altoLinea, maxAnchoDesc, com.badlogic.gdx.utils.Align.left, true);
+        // restaurar color
+        font.setColor(com.badlogic.gdx.graphics.Color.WHITE);
+        batch.setColor(1f, 1f, 1f, 1f);
+    }
+
+    public float getHeight() { return height; }
 
     public void dispose() {}
 }

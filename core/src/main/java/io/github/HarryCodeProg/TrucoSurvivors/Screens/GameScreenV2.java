@@ -77,11 +77,11 @@ public class GameScreenV2 implements Screen {
     private AreaElementos<VistaJoker> areaJokers;
     private EstadoPantalla pendingEstado = null;
     private boolean aplicarAnimacionInicial = true; // evitar animación de repartos repetida
-    // persistencia / visibilidad
     private boolean panelTiendaVisible = false;
     private boolean panelSeleccionVisible = false;
     private final GestorCompraJokerAnimado gestorCompraJoker = new GestorCompraJokerAnimado();
     private GestorSantos gestorSantos;
+    private final GestorUsoSanto gestorUsoSanto = new GestorUsoSanto();
 
 
     public GameScreenV2(Main game, DatosRival datosRival) {
@@ -279,6 +279,9 @@ public class GameScreenV2 implements Screen {
         if (cartaArrastradaAntes != null && gestorCartas.getArrastrado() == null) organizarCartas();
         //if (jokerArrastradoAntes != null && gestorJokers.getArrastrado() == null) organizarJokers(true);
         gestorSantos.update(mouseWorld.x, mouseWorld.y, delta);
+        gestorUsoSanto.update(mouseWorld.x, mouseWorld.y, gestorSantos.getSantos(), jugador, (vistaSanto, jug) -> {
+            gestorSantos.usarSeleccionado(vistaSanto, jug);
+        });
         renderizar(delta);
         if (pendingEstado != null) { enterState(pendingEstado); pendingEstado = null; }
     }
@@ -292,7 +295,10 @@ public class GameScreenV2 implements Screen {
             this::renderCartelJokerSiCorresponde
         );
         game.batch.begin();
+        renderAreaSantos(game.batch, game.getPixelBlanco());
+        renderContadorSantos(game.batch);
         gestorSantos.render(game.batch, game);
+        gestorUsoSanto.render(game.batch);
         game.batch.end();
     }
 
@@ -302,6 +308,9 @@ public class GameScreenV2 implements Screen {
             panelSeleccionRival.update(mouseWorld.x, mouseWorld.y);
         }
         gestorSantos.update(mouseWorld.x, mouseWorld.y, delta);
+        gestorUsoSanto.update(mouseWorld.x, mouseWorld.y, gestorSantos.getSantos(), jugador, (vistaSanto, jug) -> {
+            gestorSantos.usarSeleccionado(vistaSanto, jug);
+        });
         renderComun(delta, false,
             () -> { if (panelSeleccionRival != null && panelSeleccionVisible) panelSeleccionRival.render(game.batch); },
             () -> {}
@@ -312,13 +321,17 @@ public class GameScreenV2 implements Screen {
         if (panelTienda == null) {
             if (jugador == null) jugador = game.getPerfilJugador() != null ? game.getPerfilJugador().getJugador() : null;
             panelTienda = new PanelTienda(game, jugador, this::iniciarSalidaDeTienda,
-                this::iniciarAnimacionCompraJoker, (s) -> gestorSantos.comprarYUsar(s, jugador));
+                this::iniciarAnimacionCompraJoker, (s) -> gestorSantos.comprarYUsar(s, jugador),
+                (santo) -> gestorSantos.agregarComprado(santo, jugador));
         }
         if (panelTienda != null && panelTiendaVisible) {
             panelTienda.updateAnimacion(delta);
             panelTienda.update(mouseWorld.x, mouseWorld.y, delta);
         }
         gestorSantos.update(mouseWorld.x, mouseWorld.y, delta);
+        gestorUsoSanto.update(mouseWorld.x, mouseWorld.y, gestorSantos.getSantos(), jugador, (vistaSanto, jug) -> {
+            gestorSantos.usarSeleccionado(vistaSanto, jug);
+        });
         renderComun(delta, true,
             () -> { if (panelTienda != null && panelTiendaVisible) panelTienda.render(game.batch); },
             () -> gestorCompraJoker.render(game.batch)
@@ -348,6 +361,7 @@ public class GameScreenV2 implements Screen {
         gestorVentaJoker.render(game.batch);
         renderCartelJokerSiCorresponde();
         gestorSantos.render(game.batch, game);
+        gestorUsoSanto.render(game.batch);
         renderOverlaysFinal.run();
         game.batch.end();
     }
@@ -355,6 +369,8 @@ public class GameScreenV2 implements Screen {
     private void renderHUDJugador() {
         renderAreaJokers(game.batch, game.getPixelBlanco());
         renderContadoresAreas(game.batch, jugador, false);
+        renderAreaSantos(game.batch, game.getPixelBlanco());
+        renderContadorSantos(game.batch);
     }
 
     private void renderAreaJokers(SpriteBatch batch, Texture pixelBlanco) {
@@ -383,6 +399,31 @@ public class GameScreenV2 implements Screen {
             font.draw(batch, textoCartas, xContador, yCartas);
         }
         font.draw(batch, textoJokers, xContador, yJokers);
+    }
+
+    private void renderAreaSantos(SpriteBatch batch, Texture pixelBlanco) {
+        AreaElementos<VistaSanto> area = gestorSantos.getArea();
+        float areaX = area.getX();
+        float areaAncho = area.getAncho();
+        float areaY = area.getY() - 10f; // mismo offset que renderAreaJokers usa con Y_JOKERS - 10f
+        batch.setColor(0.05f, 0.05f, 0.08f, 0.45f);
+        batch.draw(pixelBlanco, areaX, areaY, areaAncho, ALTO_AREA_JOKERS);
+        batch.setColor(0.25f, 0.28f, 0.35f, 0.7f);
+        batch.draw(pixelBlanco, areaX, areaY, areaAncho, 2f);
+        batch.draw(pixelBlanco, areaX, areaY + ALTO_AREA_JOKERS - 2f, areaAncho, 2f);
+        batch.draw(pixelBlanco, areaX, areaY, 2f, ALTO_AREA_JOKERS);
+        batch.draw(pixelBlanco, areaX + areaAncho - 2f, areaY, 2f, ALTO_AREA_JOKERS);
+        batch.setColor(Color.WHITE);
+    }
+
+    private void renderContadorSantos(SpriteBatch batch) {
+        AreaElementos<VistaSanto> area = gestorSantos.getArea();
+        BitmapFont font = game.getFuentePrincipal();
+        String texto = gestorSantos.getSantos().size() + "/" + gestorSantos.getMaximo(jugador);
+        float x = area.getX() + 8f;
+        float y = area.getY() - 18f;
+        font.setColor(Color.WHITE);
+        font.draw(batch, texto, x, y);
     }
 
     private void prepararFrame() {
@@ -595,7 +636,8 @@ public class GameScreenV2 implements Screen {
                 break;
             case TIENDA:
                 panelTienda = new PanelTienda(game, jugador, this::iniciarSalidaDeTienda,
-                    this::iniciarAnimacionCompraJoker, (s) -> gestorSantos.comprarYUsar(s, jugador));
+                    this::iniciarAnimacionCompraJoker, (s) -> gestorSantos.comprarYUsar(s, jugador),
+                    (santo) -> gestorSantos.agregarComprado(santo, jugador));
                 panelTiendaVisible = true;
                 panelSeleccionVisible = false;
                 break;
