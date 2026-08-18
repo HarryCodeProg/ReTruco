@@ -9,7 +9,7 @@ import java.util.ArrayList;
 public class LuzMala extends Santo {
 
     public LuzMala() {
-        super(27, "Luz Mala", "LuzMala", "Genera 2 santos aleatorios (si hay espacio)", 5);
+        super(25, "Luz Mala", "LuzMala", "Genera 2 santos aleatorios (si hay espacio)", 5);
     }
 
     @Override public int cartasRequeridas() { return 0; }

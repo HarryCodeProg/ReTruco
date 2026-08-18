@@ -16,7 +16,7 @@ public class SanFrancisco extends Santo {
         super(
             17,
             "San Francisco",
-            "SanFrancisco",
+            "SanFranciscoDeAsis",
             "Elimina 1 carta seleccionada, genera 3 aleatorias",
             4
         );

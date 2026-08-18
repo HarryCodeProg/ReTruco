@@ -24,32 +24,31 @@ public class VistaItemTienda {
     private static final float VELOCIDAD_ESCALA = 4f;
     private VistaJoker vistaJokerInterna;
     private VistaCarta vistaCartaInterna;
+    private VistaSanto vistaSantoInterna;
 
     public VistaItemTienda(ItemTienda item, TextureAtlas atlasCartas, TextureAtlas atlasJokers) {
-        this.item = item;
-        if (item.getTipo() == ItemTienda.Tipo.CARTA) {
-            this.vistaCartaInterna = new VistaCarta(item.getCarta(), false, atlasCartas);
-            this.vistaCartaInterna.setEnModal(true); // Permite hover individual dentro de paneles/tienda
-        } else if (item.getTipo() == ItemTienda.Tipo.JOKER) {
-            // Puede ser null si el ItemTienda no contiene un joker (p. ej. santos)
-            if (item.getJoker() != null) {
-                this.vistaJokerInterna = new VistaJoker(item.getJoker(), atlasJokers);
-            } else {
-                this.vistaJokerInterna = null;
-            }
-        } else if (item.getTipo() == ItemTienda.Tipo.SANTO) {
-            // Para santos usamos el atlasSantos cargado en Main
-            if (Main.getInstance() != null && Main.getInstance().getAtlasSantos() != null) {
-                String regionName = item.getSanto() != null ? item.getSanto().getNombreRegion() : null;
-                if (regionName != null) {
-                    this.region = Main.getInstance().getAtlasSantos().findRegion(regionName);
-                }
-            }
+    this.item = item;
+    if (item.getTipo() == ItemTienda.Tipo.CARTA) {
+        this.vistaCartaInterna = new VistaCarta(item.getCarta(), false, atlasCartas);
+        this.vistaCartaInterna.setEnModal(true); // Permite hover individual dentro de paneles/tienda
+    } else if (item.getTipo() == ItemTienda.Tipo.JOKER) {
+        // Solo crear VistaJoker si realmente hay un Joker (evita NPE)
+        if (item.getJoker() != null) {
+            this.vistaJokerInterna = new VistaJoker(item.getJoker(), atlasJokers);
         } else {
-            // otros tipos (ZODIACO, etc) — intentar obtener region del atlas de cartas/jokers si aplica
-            this.region = null;
+            this.vistaJokerInterna = null;
         }
+    } else if (item.getTipo() == ItemTienda.Tipo.SANTO) {
+        // Crear VistaSanto usando atlas de Main (si está disponible)
+        if (item.getSanto() != null) {
+            TextureAtlas atlasSantos = (Main.getInstance() != null) ? Main.getInstance().getAtlasSantos() : null;
+            this.vistaSantoInterna = new VistaSanto(item.getSanto(), atlasSantos);
+        }
+    } else {
+        // otros tipos (ZODIACO, etc) — inicializar region si hace falta
+        this.region = null;
     }
+}
 
     public void setPosition(float x, float y) {
         this.x = x;
@@ -64,6 +63,11 @@ public class VistaItemTienda {
             vistaCartaInterna.setHandPosition(x, y);
             vistaCartaInterna.setTamaño(width, height);
         }
+        if (vistaSantoInterna != null) {
+            vistaSantoInterna.setPosition(x, y);
+            vistaSantoInterna.setHandPosition(x, y);
+            vistaSantoInterna.setTamaño(width, height);
+        }
     }
 
     public ItemTienda getItem() { return item; }
@@ -73,6 +77,7 @@ public class VistaItemTienda {
         this.seleccionado = seleccionado;
         if (vistaJokerInterna != null) vistaJokerInterna.setSeleccionada(seleccionado);
         if (vistaCartaInterna != null) vistaCartaInterna.setSeleccionada(seleccionado);
+        if (vistaSantoInterna != null) vistaSantoInterna.setSeleccionada(seleccionado);
     }
 
     public boolean contiene(float mx, float my) {
@@ -98,6 +103,7 @@ public class VistaItemTienda {
             float h = height * scale;
             batch.draw(region, x, drawY, w, h);
         }
+        if (vistaSantoInterna != null) vistaSantoInterna.render(batch);
     }
 
     public boolean isHover() {return hover;}
@@ -116,11 +122,14 @@ public class VistaItemTienda {
             scale = moverHacia(scale, targetScale, VELOCIDAD_ESCALA * delta);
             visualOffsetY = moverHacia(visualOffsetY, targetOffsetY, VELOCIDAD_OFFSET * delta);
         }
+        if (vistaSantoInterna != null) vistaSantoInterna.update(mouseX, mouseY, delta);
     }
 
     public void renderCartelStats(SpriteBatch batch, Main game) {
         if (!hover) return;
-        if (vistaJokerInterna != null) {
+        if (vistaSantoInterna != null) {
+            vistaSantoInterna.renderCartelStats(batch, game);
+        } else if (vistaJokerInterna != null) {
             vistaJokerInterna.renderCartelStats(batch, game);
         } else if (vistaCartaInterna != null) {
             vistaCartaInterna.renderCartelStats(batch, game);
@@ -130,11 +139,18 @@ public class VistaItemTienda {
         }
     }
 
-    public float getX() {
-        return x;
-    }
+    public float getX() {return x;}
 
-    public float getY() {
-        return y;
+    public float getY() {return y;}
+
+    public void setTamaño(float width, float height) {
+        this.width = width;
+        this.height = height;
+        if (vistaJokerInterna != null) {
+            vistaJokerInterna.setTamaño(width, height);
+        }
+        if (vistaCartaInterna != null) {
+            vistaCartaInterna.setTamaño(width, height);
+        }
     }
 }

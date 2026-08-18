@@ -24,7 +24,8 @@ public class EstadoTienda {
     private int espacioJokersExtra = 0;
     private int espacioSantosExtra = 0;
     private final PoolSantosTienda poolSantos = new PoolSantosTienda();
-    private int cantidadSantos = 1;
+    private int cantidadSantos = 2;
+    private int rerollsTienda = 0;
 
     public EstadoTienda(Jugador jugador) {
         generarFilaCartas();
@@ -102,6 +103,7 @@ public class EstadoTienda {
         filaSantos.clear();
         for (int i = 0; i < cantidadSantos; i++) {
             Santo santo = poolSantos.tomarAleatorio(random);
+            System.out.println("Santo tienda: " + (santo != null ? santo.getNombre() : "NULL"));
             if (santo != null) {
                 filaSantos.add(
                     ItemTienda.deSanto(santo, santo.getCoste())
@@ -113,5 +115,45 @@ public class EstadoTienda {
     public void sumarEspacioSantosTienda(int cantidad) {
         espacioSantosExtra += cantidad;
         cantidadSantos += cantidad;
+    }
+
+    public boolean rerollearTodo(Jugador jugador) {
+        int costoTotal = costoRerollCartas() + costoRerollJokers();
+        if (rerollsGratis > 0) {
+            // decidir conducta: consumir 1 reroll gratis para cartas (o para todo). Aquí lo dejamos simple:
+            // si hay rerollsGratis, lo aplicamos sólo a las cartas (como ahora) y cobramos jokers.
+        }
+        if (!jugador.gastarPesos(costoTotal)) return false;
+        rerollsCartas++;
+        rerollsJokers++;
+        jugador.sumarRerollTienda();
+        generarFilaCartas();
+        generarFilaJokers(jugador);
+        generarFilaSantos();
+        return true;
+    }
+
+    public int costoRerollTienda() {
+        if (rerollsGratis > 0) return 0;
+        return ConfiguracionEconomia.COSTO_REROLL_BASE + rerollsTienda;
+    }
+
+    public boolean rerollearTienda(Jugador jugador) {
+        int costo = costoRerollTienda();
+        if (costo == 0) {
+            if (rerollsGratis > 0) rerollsGratis--;
+            generarFilaCartas();
+            generarFilaJokers(jugador);
+            generarFilaSantos();
+            return true;
+        }
+        if (!jugador.gastarPesos(costo)) return false;
+        // Pago exitoso: incrementar contador local de esta instancia de tienda
+        rerollsTienda++;
+        jugador.sumarRerollTienda(); // si quieres contar usos totales del jugador globalmente
+        generarFilaCartas();
+        generarFilaJokers(jugador);
+        generarFilaSantos();
+        return true;
     }
 }

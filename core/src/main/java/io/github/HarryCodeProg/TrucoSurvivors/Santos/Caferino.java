@@ -13,7 +13,7 @@ public class Caferino extends Santo {
         super(
             5,
             "Caferino",
-            "Caferino",
+            "CeferinoNamuncur",
             "Cambia hasta 3 cartas seleccionadas al Palo Oro",
             3
         );

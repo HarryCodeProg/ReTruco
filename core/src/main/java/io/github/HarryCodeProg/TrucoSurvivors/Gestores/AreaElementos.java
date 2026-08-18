@@ -55,4 +55,5 @@ public class AreaElementos<T extends Arrastrable> {
     public float getX() { return x; }
     public float getY() { return y; }
     public float getAncho() { return ancho; }
+
 }

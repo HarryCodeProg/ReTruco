@@ -4,175 +4,175 @@ size: 2048, 512
 format: RGBA8888
 filter: Linear, Linear
 repeat: none
-AlmaMula
+10_Pachamama
   rotate: false
   xy: 2, 194
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-CeferinoNamuncura
+11_Pombero
   rotate: false
   xy: 2, 2
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-CuraBrochero
+12_SanRoque
   rotate: false
   xy: 146, 194
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-DifuntaCorrea
+13_SanAntonioDePadua
   rotate: false
   xy: 146, 2
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-ElFamiliar
+14_SanBenito
   rotate: false
   xy: 290, 194
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-GauchitoGil
+15_SanCayetano
   rotate: false
   xy: 290, 2
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-LuzMala
+16_SanExpedito
   rotate: false
   xy: 434, 194
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-MadreMaria
+17_SanFranciscoDeAsis
   rotate: false
   xy: 434, 2
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-MariaDeLosRemedios
+18_SanJorge
   rotate: false
   xy: 578, 194
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-MboiTu'i
+19_SanLaMuerte
   rotate: false
   xy: 578, 2
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-Pachamama
+1_DifuntaCorrea
   rotate: false
   xy: 722, 194
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-Pombero
+20_SanMartinDePorres
   rotate: false
   xy: 722, 2
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-SanAntonioDePadua
+21_SanNicolas
   rotate: false
   xy: 866, 194
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-SanBenito
+22_SanPantaleon
   rotate: false
   xy: 866, 2
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-SanCayetano
+23_SantaRita
   rotate: false
   xy: 1010, 194
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-SanExpedito
+24_YasyYatere
   rotate: false
   xy: 1010, 2
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-SanFranciscoDeAsis
+25_LuzMala
   rotate: false
   xy: 1154, 194
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-SanJorge
+2_ElFamiliar
   rotate: false
   xy: 1154, 2
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-SanLaMuerte
+3_GauchitoGil
   rotate: false
   xy: 1298, 194
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-SanMartinDePorres
+4_AlmaMula
   rotate: false
   xy: 1298, 2
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-SanNicolas
+5_CeferinoNamuncura
   rotate: false
   xy: 1442, 194
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-SanPantaleon
+6_CuraBrochero
   rotate: false
   xy: 1442, 2
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-SanRoque
+7_MadreMaria
   rotate: false
   xy: 1586, 194
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-SantaRita
+8_MariaDeLosRemedios
   rotate: false
   xy: 1586, 2
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-YasyYatere
+9_MboiTui
   rotate: false
   xy: 1730, 194
   size: 142, 190

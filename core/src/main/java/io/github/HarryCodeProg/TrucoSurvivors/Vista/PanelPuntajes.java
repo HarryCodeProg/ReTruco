@@ -107,6 +107,10 @@ public class PanelPuntajes {
         }
         // Aseguramos que el tinte global del batch no oscurezca las fuentes
         batch.setColor(Color.WHITE);
+        // defensas contra juego == null
+        int puntosRival = (juego != null) ? (int) juego.getPuntosRival() : 0;
+        int puntajeMeta = (juego != null) ? (int) juego.getPuntajeMeta() : 0;
+        int puntosJugador = (juego != null) ? (int) juego.getPuntosJugador() : 0;
         float currentY = y;
         float xSeparador = x + ANCHO_CAJA_BASE;
         // Rival Truco
@@ -118,21 +122,21 @@ public class PanelPuntajes {
             xSeparador + ESPACIO_X, ANCHO_CAJA_MULT, currentY, Color.WHITE);
         currentY -= ESPACIO_LINEA;
         // Puntos Rival
-        dibujarTextoCentrado(batch, fuente, String.valueOf((int) juego.getPuntosRival()),
+        dibujarTextoCentrado(batch, fuente, String.valueOf(puntosRival),
             x, ANCHO_CAJA_SIMPLE + 100f, currentY, Color.BLACK);
         currentY -= ESPACIO_LINEA;
         // Meta
-        dibujarTextoCentrado(batch, fuente, String.valueOf((int) juego.getPuntajeMeta()),
+        dibujarTextoCentrado(batch, fuente, String.valueOf(puntajeMeta),
             x, ANCHO_CAJA_SIMPLE + 100f, currentY, Color.BLACK);
         currentY -= ESPACIO_LINEA;
         // Puntos Jugador
-        dibujarTextoCentrado(batch, fuente, String.valueOf((int) juego.getPuntosJugador()),
+        dibujarTextoCentrado(batch, fuente, String.valueOf(puntosJugador),
             x, ANCHO_CAJA_SIMPLE + 100f, currentY, Color.BLACK);
         currentY -= ESPACIO_LINEA;
         // Truco Jugador (Base X Mult)
         boolean animacionActiva = gestorAnimacion != null && gestorAnimacion.isActiva();
         double puntosTrucoAMostrar = animacionActiva ? puntosTrucoDisplay : 0;
-        double multTrucoAMostrar = animacionActiva ? multTrucoDisplay : jugador.getMultiplicadorTruco();
+        double multTrucoAMostrar = animacionActiva ? multTrucoDisplay : (jugador != null ? jugador.getMultiplicadorTruco() : 0);
         dibujarTextoCentrado(batch, fuente, String.valueOf((int) puntosTrucoAMostrar),
             x, ANCHO_CAJA_BASE, currentY, Color.WHITE);
         dibujarTextoCentrado(batch, fuente, "X", xSeparador, ESPACIO_X, currentY, Color.WHITE);
@@ -141,7 +145,7 @@ public class PanelPuntajes {
         currentY -= ESPACIO_LINEA;
         // Envido Jugador (Base X Mult)
         double puntosEnvidoAMostrar = animacionActiva ? puntosEnvidoDisplay : 0;
-        double multEnvidoAMostrar = animacionActiva ? multEnvidoDisplay : jugador.getMultiplicadorEnvido();
+        double multEnvidoAMostrar = animacionActiva ? multEnvidoDisplay : (jugador != null ? jugador.getMultiplicadorEnvido() : 0);
         dibujarTextoCentrado(batch, fuente, String.valueOf((int) puntosEnvidoAMostrar),
             x, ANCHO_CAJA_BASE, currentY, Color.WHITE);
         dibujarTextoCentrado(batch, fuente, "X", xSeparador, ESPACIO_X, currentY, Color.WHITE);
