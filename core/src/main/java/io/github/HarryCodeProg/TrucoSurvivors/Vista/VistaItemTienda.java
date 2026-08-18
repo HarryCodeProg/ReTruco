@@ -27,25 +27,28 @@ public class VistaItemTienda {
     private VistaSanto vistaSantoInterna;
 
     public VistaItemTienda(ItemTienda item, TextureAtlas atlasCartas, TextureAtlas atlasJokers) {
-        this.item = item;
-        if (item.getTipo() == ItemTienda.Tipo.CARTA) {
-            this.vistaCartaInterna = new VistaCarta(item.getCarta(), false, atlasCartas);
-            this.vistaCartaInterna.setEnModal(true); // Permite hover individual dentro de paneles/tienda
-        } else if (item.getTipo() == ItemTienda.Tipo.JOKER) {
-            if (item.getJoker() != null) {
-                this.vistaJokerInterna = new VistaJoker(item.getJoker(), atlasJokers);
-            } else {
-                this.vistaJokerInterna = null;
-            }
-        } else if (item.getTipo() == ItemTienda.Tipo.SANTO) {
-            if (item.getSanto() != null) {
-                TextureAtlas atlasSantos = (Main.getInstance() != null) ? Main.getInstance().getAtlasSantos() : null;
-                this.vistaSantoInterna = new VistaSanto(item.getSanto(), atlasSantos);
-            }
+    this.item = item;
+    if (item.getTipo() == ItemTienda.Tipo.CARTA) {
+        this.vistaCartaInterna = new VistaCarta(item.getCarta(), false, atlasCartas);
+        this.vistaCartaInterna.setEnModal(true); // Permite hover individual dentro de paneles/tienda
+    } else if (item.getTipo() == ItemTienda.Tipo.JOKER) {
+        // Solo crear VistaJoker si realmente hay un Joker (evita NPE)
+        if (item.getJoker() != null) {
+            this.vistaJokerInterna = new VistaJoker(item.getJoker(), atlasJokers);
         } else {
-            this.region = null;
+            this.vistaJokerInterna = null;
         }
+    } else if (item.getTipo() == ItemTienda.Tipo.SANTO) {
+        // Crear VistaSanto usando atlas de Main (si está disponible)
+        if (item.getSanto() != null) {
+            TextureAtlas atlasSantos = (Main.getInstance() != null) ? Main.getInstance().getAtlasSantos() : null;
+            this.vistaSantoInterna = new VistaSanto(item.getSanto(), atlasSantos);
+        }
+    } else {
+        // otros tipos (ZODIACO, etc) — inicializar region si hace falta
+        this.region = null;
     }
+}
 
     public void setPosition(float x, float y) {
         this.x = x;
@@ -130,6 +133,9 @@ public class VistaItemTienda {
             vistaJokerInterna.renderCartelStats(batch, game);
         } else if (vistaCartaInterna != null) {
             vistaCartaInterna.renderCartelStats(batch, game);
+        } else if (item.getTipo() == ItemTienda.Tipo.SANTO) {
+            // Si queremos mostrar info del santo al hover, podríamos dibujar un texto simple
+            // Por ahora no hacemos nada extra para evitar NPEs.
         }
     }
 
