@@ -26,19 +26,19 @@ public class GestorCompraJokerAnimado {
         area.distribuir(simulacion, animando); // reacomoda existentes dejando lugar
     }
 
-    /** true si termino este frame y hay que agregarlo a la lista real. */
-    public boolean update(float delta, ArrayList<VistaJoker> jokersReales, AreaElementos<VistaJoker> area) {
-        if (animando == null) return false;
+    public Joker update(float delta, ArrayList<VistaJoker> jokersReales, AreaElementos<VistaJoker> area) {
+        if (animando == null) return null;
         x = moverHacia(x, objetivoX, delta);
         y = moverHacia(y, objetivoY, delta);
         animando.setPosition(x, y);
         if (x == objetivoX && y == objetivoY) {
             jokersReales.add(animando);
+            Joker modelo = animando.getJoker();
             animando = null;
             area.distribuir(jokersReales, null);
-            return true;
+            return modelo;
         }
-        return false;
+        return null;
     }
 
     private float moverHacia(float actual, float objetivo, float delta) {
@@ -49,4 +49,8 @@ public class GestorCompraJokerAnimado {
 
     public void render(SpriteBatch batch) { if (animando != null) animando.render(batch); }
     public boolean isAnimando() { return animando != null; }
+
+    public void cancel() {
+        animando = null;
+    }
 }

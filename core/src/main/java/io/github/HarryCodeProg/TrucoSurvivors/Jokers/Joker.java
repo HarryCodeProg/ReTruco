@@ -92,4 +92,8 @@ public abstract class Joker {
         copia.acumulado = this.acumulado;
         copia.precioVenta = this.precioVenta;
     }
+
+    public String getDescripcionRenderizada(Juego juego) {
+        return getDescripcionRenderizada();
+    }
 }

@@ -6,6 +6,9 @@ import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Mazo;
 import io.github.HarryCodeProg.TrucoSurvivors.Santos.Santo;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Consumer;
 
 public class Jugador {
     private String nombre;
@@ -21,7 +24,7 @@ public class Jugador {
     private double multiplicadorTrucoTemporal;
     private double multiplicadorEnvidoTemporal;
     private double puntajeTotal;
-    private int pesos = 100;
+    private int pesos = 10000;
     private static final int INTERVALO_INTERES = 5;
     private static final int TOPE_INTERES = 5;
     private int descartesBase = 4;
@@ -33,6 +36,10 @@ public class Jugador {
     private double bonusEnvidoFinal = 0;
     private ArrayList<Santo> santos = new ArrayList<>();
     private int tamañoSantos = 3; // capacidad base
+    private final List<Consumer<Joker>> jokerAddedListeners = new CopyOnWriteArrayList<>();
+    private final List<Consumer<Joker>> jokerRemovedListeners = new CopyOnWriteArrayList<>();
+    private final List<Consumer<Santo>> santoAddedListeners = new CopyOnWriteArrayList<>();
+    private final List<Consumer<Santo>> santoRemovedListeners = new CopyOnWriteArrayList<>();
 
     public Jugador(String nombre) {
         this.nombre = nombre;
@@ -80,6 +87,9 @@ public class Jugador {
         if (jokers.size() < tamañoJokers) {
             this.jokers.add(joker);
             joker.aplicarEfectoInstantaneo(this);
+            for (Consumer<Joker> l : jokerAddedListeners) {
+                try { l.accept(joker); } catch (Exception e) { e.printStackTrace(); }
+            }
             return true;
         }
         return false;
@@ -88,6 +98,9 @@ public class Jugador {
     public void eliminarJoker(Joker joker) {
         this.jokers.remove(joker);
         joker.desAplicarEfectoInstantaneo(this);
+        for (Consumer<Joker> l : jokerRemovedListeners) {
+            try { l.accept(joker); } catch (Exception e) { e.printStackTrace(); }
+        }
     }
 
     public int getPesos() { return pesos; }
@@ -219,9 +232,36 @@ public class Jugador {
 
     public ArrayList<Santo> getSantos() { return santos; }
     public int getTamañoSantos() { return tamañoSantos + espacioSantosExtra; } // espacioSantosExtra ya definido para Virgo
+
+    public void addJokerAddedListener(Consumer<Joker> listener) {
+        jokerAddedListeners.add(listener);
+    }
+    public void removeJokerAddedListener(Consumer<Joker> listener) {
+        jokerAddedListeners.remove(listener);
+    }
+    public void addJokerRemovedListener(Consumer<Joker> listener) {
+        jokerRemovedListeners.add(listener);
+    }
+    public void removeJokerRemovedListener(Consumer<Joker> listener) {
+        jokerRemovedListeners.remove(listener);
+    }
+
     public boolean agregarSanto(Santo santo) {
-        if (santos.size() < getTamañoSantos()) { santos.add(santo); return true; }
+        if (santos.size() < getTamañoSantos()) {
+            santos.add(santo);
+            for (Consumer<Santo> l : santoAddedListeners) { try { l.accept(santo); } catch (Exception e) { e.printStackTrace(); } }
+            return true;
+        }
         return false;
     }
-    public void eliminarSanto(Santo santo) { santos.remove(santo); }
+
+    public void eliminarSanto(Santo santo) {
+        santos.remove(santo);
+        for (Consumer<Santo> l : santoRemovedListeners) { try { l.accept(santo); } catch (Exception e) { e.printStackTrace(); } }
+    }
+
+    public void addSantoAddedListener(Consumer<Santo> l) { santoAddedListeners.add(l); }
+    public void removeSantoAddedListener(Consumer<Santo> l) { santoAddedListeners.remove(l); }
+    public void addSantoRemovedListener(Consumer<Santo> l) { santoRemovedListeners.add(l); }
+    public void removeSantoRemovedListener(Consumer<Santo> l) { santoRemovedListeners.remove(l); }
 }

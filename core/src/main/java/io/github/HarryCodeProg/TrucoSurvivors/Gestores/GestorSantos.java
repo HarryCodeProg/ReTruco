@@ -27,12 +27,7 @@ public class GestorSantos {
     }
 
     public boolean agregarComprado(Santo santo, Jugador jugador) {
-        if (santos.size() >= jugador.getTamañoSantos()) return false;
-        VistaSanto vista = new VistaSanto(santo, game.getAtlasSantos());
-        vista.setTamaño(70, 95);
-        santos.add(vista);
-        area.distribuir(santos, null);
-        return true;
+        return agregarVistaDesdeModelo(santo, jugador);
     }
 
     public void comprarYUsar(Santo santo, Jugador jugador) {
@@ -68,28 +63,24 @@ public class GestorSantos {
     }
 
     public void usarSeleccionado(VistaSanto vista, Jugador jugador) {
+        if (vista == null || jugador == null) return;
         Santo santo = vista.getSanto();
         TextureRegion region = game.getAtlasSantos().findRegion(santo.getNombreRegion());
         if (region == null) return;
-        Runnable quitarDelArea = () -> {
-            santos.remove(vista);
-            area.distribuir(santos, null);
-        };
         if (santo.cartasRequeridas() == 0) {
-            overlayConsumo.abrir(santo, region, () -> {
-                santo.aplicarEfecto(jugador, new ArrayList<>(), null);
-                quitarDelArea.run();
+            overlayConsumo.abrir(santo, region, () -> {santo.aplicarEfecto(jugador, new ArrayList<>(), null);
+                jugador.eliminarSanto(santo);
                 overlayConsumo.confirmarCierre();
             });
             return;
         }
-        ArrayList<Carta> cartasParaElegir = new ArrayList<>(jugador.getMano()); // usar mano real, no aleatorias del mazo (esto ya es "en partida", no en tienda)
-        overlaySeleccion.abrir(santo, cartasParaElegir, game.getAtlasCartas(), seleccion ->
-            overlayConsumo.abrir(santo, region, () -> {
-                santo.aplicarEfecto(jugador, seleccion, null);
-                quitarDelArea.run();
-                overlayConsumo.confirmarCierre();
-            })
+        ArrayList<Carta> cartasParaElegir = new ArrayList<>(jugador.getMano());
+        overlaySeleccion.abrir(santo, cartasParaElegir, game.getAtlasCartas(),
+            seleccion ->
+                overlayConsumo.abrir(santo, region, () -> {santo.aplicarEfecto(jugador, seleccion, null);
+                    jugador.eliminarSanto(santo);
+                    overlayConsumo.confirmarCierre();
+                })
         );
     }
 
@@ -97,4 +88,32 @@ public class GestorSantos {
 
     public AreaElementos<VistaSanto> getArea() { return area; }
     public int getMaximo(Jugador jugador) { return jugador.getTamañoSantos(); }
+
+    public boolean agregarVistaDesdeModelo(Santo santo, Jugador jugador) {
+        if (santo == null) return false;
+        if (santos.size() >= jugador.getTamañoSantos()) {
+            return false;
+        }
+        VistaSanto vista = new VistaSanto(santo, game.getAtlasSantos());
+        vista.setTamaño(70, 95);
+        santos.add(vista);
+        area.distribuir(santos, null);
+        return true;
+    }
+
+    public void eliminarVistaDesdeModelo(Santo santo) {
+        if (santo == null) return;
+        VistaSanto vistaAEliminar = null;
+        for (VistaSanto vista : santos) {
+            if (vista.getSanto() == santo) {
+                vistaAEliminar = vista;
+                break;
+            }
+        }
+        if (vistaAEliminar != null) {
+            santos.remove(vistaAEliminar);
+            vistaAEliminar.dispose();
+            area.distribuir(santos, null);
+        }
+    }
 }

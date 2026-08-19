@@ -22,6 +22,15 @@ public class AtiendoBoludos extends Joker {
     }
 
     @Override
+    public String getDescripcionRenderizada(Juego juego) {
+        int actual = 0;
+        if (juego != null) {
+            actual = juego.getManosGanadasConsecutivas() * (int) MULT_POR_MANO;
+        }
+        return "+2 multiplicador envido por cada mano ganada de forma consecutiva (Actual: +" + actual + ")";
+    }
+
+    @Override
     public Joker copiar() {
         AtiendoBoludos copia = new AtiendoBoludos();
         copiarEstado(copia);

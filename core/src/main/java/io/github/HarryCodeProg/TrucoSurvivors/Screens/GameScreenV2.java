@@ -7,9 +7,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -24,6 +22,8 @@ import io.github.HarryCodeProg.TrucoSurvivors.Modelo.*;
 import io.github.HarryCodeProg.TrucoSurvivors.Santos.Santo;
 import io.github.HarryCodeProg.TrucoSurvivors.Vista.*;
 import java.util.ArrayList;
+import java.util.function.Consumer;
+
 import static io.github.HarryCodeProg.TrucoSurvivors.Vista.GameLayout.*;
 
 public class GameScreenV2 implements Screen {
@@ -82,6 +82,10 @@ public class GameScreenV2 implements Screen {
     private final GestorCompraJokerAnimado gestorCompraJoker = new GestorCompraJokerAnimado();
     private GestorSantos gestorSantos;
     private final GestorUsoSanto gestorUsoSanto = new GestorUsoSanto();
+    private Consumer<Joker> jugadorJokerAddedListener;
+    private boolean suppressJugadorJokerListener = false;
+    private Consumer<Santo> jugadorSantoAddedListener;
+    private Consumer<Santo> jugadorSantoRemovedListener;
 
 
     public GameScreenV2(Main game, DatosRival datosRival) {
@@ -153,8 +157,46 @@ public class GameScreenV2 implements Screen {
     }
 
     private void inicializarJuego() {
+        if (this.jugador != null) {
+            if (jugadorJokerAddedListener != null) {
+                this.jugador.removeJokerAddedListener(jugadorJokerAddedListener);
+            }
+            if (jugadorSantoAddedListener != null) {
+                this.jugador.removeSantoAddedListener(jugadorSantoAddedListener);
+            }
+            if (jugadorSantoRemovedListener != null) {
+                this.jugador.removeSantoRemovedListener(jugadorSantoRemovedListener);
+            }
+        }
         this.fondoPlasma = new Background();
         this.jugador = game.getPerfilJugador().getJugador();
+        jugadorJokerAddedListener = (jokerModel) -> {
+            // Si estamos suprimiendo el listener (p. ej. acabamos de terminar la animación),
+            // no crear otra vista: la animación ya colocó la vista visual.
+            if (suppressJugadorJokerListener) return;
+            VistaJoker vista = new VistaJoker(jokerModel, game.getAtlasJokers());
+            vista.setTamaño(ANCHO_JOKER, ALTO_JOKER);
+            jokers.add(vista);
+            organizarJokers(true);
+        };
+        jugador.addJokerAddedListener(jugadorJokerAddedListener);
+        // también registrar eliminación (opcional)
+        jugador.addJokerRemovedListener((jokerModel) -> {
+            // buscar la vista asociada y eliminarla
+            VistaJoker aRemover = null;
+            for (VistaJoker v : jokers) {
+                if (v.getJoker() == jokerModel) { aRemover = v; break; }
+            }
+            if (aRemover != null) {
+                aRemover.dispose();
+                jokers.remove(aRemover);
+                organizarJokers(true);
+            }
+        });
+        jugadorSantoAddedListener = (santo) -> {gestorSantos.agregarVistaDesdeModelo(santo, jugador);};
+        jugadorSantoRemovedListener = (santo) -> {gestorSantos.eliminarVistaDesdeModelo(santo);};
+        jugador.addSantoAddedListener(jugadorSantoAddedListener);
+        jugador.addSantoRemovedListener(jugadorSantoRemovedListener);
         if (datosRival == null) datosRival = new DatosRival("Maty", "", 0, true, 0); // fallback
         this.rival = new Jugador(datosRival.getNombre());
         this.tocoJugar = 0;
@@ -238,7 +280,19 @@ public class GameScreenV2 implements Screen {
     public void render(float delta) {
         prepararFrame();
         actualizarJokersYVenta(delta);
-        gestorCompraJoker.update(delta, jokers, areaJokers);
+        Joker jokerAgregado = gestorCompraJoker.update(delta, jokers, areaJokers);
+        if (jokerAgregado != null) {
+            // Evitamos que el listener global cree una segunda vista mientras actualizamos el modelo.
+            suppressJugadorJokerListener = true;
+            try {
+                jugador.agregarJoker(jokerAgregado); // actualiza el modelo (sin crear vista desde el listener)
+            } finally {
+                suppressJugadorJokerListener = false;
+            }
+            // Asegurarnos de que la UI esté alineada con la vista animada que ya fue añadida.
+            organizarJokers(true);
+            // Si la tienda está abierta, reanudamos sus listeners para que vuelva a reaccionar a cambios futuros.
+        }
         if (estado == EstadoPantalla.TIENDA) {
             renderConTienda(delta);
             if (pendingEstado != null) { enterState(pendingEstado); pendingEstado = null; }
@@ -320,9 +374,12 @@ public class GameScreenV2 implements Screen {
     private void renderConTienda(float delta) {
         if (panelTienda == null) {
             if (jugador == null) jugador = game.getPerfilJugador() != null ? game.getPerfilJugador().getJugador() : null;
-            panelTienda = new PanelTienda(game, jugador, this::iniciarSalidaDeTienda,
-                this::iniciarAnimacionCompraJoker, (s) -> gestorSantos.comprarYUsar(s, jugador),
-                (santo) -> gestorSantos.agregarComprado(santo, jugador));
+            panelTienda = new PanelTienda(game, jugador, this::iniciarSalidaDeTienda, this::iniciarAnimacionCompraJoker,
+                (s) -> gestorSantos.comprarYUsar(s, jugador),
+                () -> {
+                    if (gestorCompraJoker != null) {gestorCompraJoker.cancel();}
+                    organizarJokers(true);}
+            ,juego);
         }
         if (panelTienda != null && panelTiendaVisible) {
             panelTienda.updateAnimacion(delta);
@@ -472,7 +529,7 @@ public class GameScreenV2 implements Screen {
             }
         }
         if (jokerConHover != null) {
-            jokerConHover.renderCartelStats(game.batch, game);
+            jokerConHover.renderCartelStats(game.batch, game, juego);
         }
     }
 
@@ -635,9 +692,11 @@ public class GameScreenV2 implements Screen {
                 partidaIniciada = false;
                 break;
             case TIENDA:
-                panelTienda = new PanelTienda(game, jugador, this::iniciarSalidaDeTienda,
-                    this::iniciarAnimacionCompraJoker, (s) -> gestorSantos.comprarYUsar(s, jugador),
-                    (santo) -> gestorSantos.agregarComprado(santo, jugador));
+                panelTienda = new PanelTienda(game, jugador, this::iniciarSalidaDeTienda, this::iniciarAnimacionCompraJoker,
+                    (s) -> gestorSantos.comprarYUsar(s, jugador),
+                    () -> {if (gestorCompraJoker != null) {gestorCompraJoker.cancel();}
+                        organizarJokers(true);}, juego
+                );
                 panelTiendaVisible = true;
                 panelSeleccionVisible = false;
                 break;
@@ -716,6 +775,10 @@ public class GameScreenV2 implements Screen {
         if (cartasMesaJugador != null) { for (VistaCarta carta : cartasMesaJugador) carta.dispose(); cartasMesaJugador.clear(); }
         if (cartasMesaRival != null) { for (VistaCarta carta : cartasMesaRival) carta.dispose(); cartasMesaRival.clear(); }
         if (jokers != null) { for (VistaJoker joker : jokers) joker.dispose(); jokers.clear(); }
+        if (jugador != null) {if (jugadorJokerAddedListener != null) {jugador.removeJokerAddedListener(jugadorJokerAddedListener);jugadorJokerAddedListener = null;}
+            if (jugadorSantoAddedListener != null) {jugador.removeSantoAddedListener(jugadorSantoAddedListener);jugadorSantoAddedListener = null;}
+            if (jugadorSantoRemovedListener != null) {jugador.removeSantoRemovedListener(jugadorSantoRemovedListener);jugadorSantoRemovedListener = null;}
+        }
     }
 
     @Override
