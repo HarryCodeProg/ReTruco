@@ -10,7 +10,8 @@ import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 public class Choripan extends Joker {
     public Choripan(){
         super(28, "Choripan", "Choripan", "Gana +4 Multiplicador truco cada vez que cantás \"No Quiero\"",
-            Rareza.comun, 1, Joker.FaseActivacion.INDEPENDIENTE, CategoriaJoker.NACIONAL);
+            Rareza.comun, 1, Joker.FaseActivacion.INDEPENDIENTE,
+            CategoriaJoker.NACIONAL, CategoriaJoker.COMIDA, CategoriaJoker.TRADICIONAL);
     }
 
     @Override
@@ -33,6 +34,6 @@ public class Choripan extends Joker {
             return;
         }
         if (evento != EventoJuego.ANTES_DE_SUMAR_TRUCO) return;
-        ctx.getResolucionActual().sumarMult(getAcumulado(), getNombre());
+        ctx.getResolucionActual().sumarMult(getAcumulado(), getNombre(), this);
     }
 }

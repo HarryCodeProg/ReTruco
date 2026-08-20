@@ -16,7 +16,8 @@ public class DameLaMochila extends Joker {
 
     public DameLaMochila(){
         super(49, "Dame La Mochila", "DameLaMochila", "+2 multiplicador envido por cada roll en la tienda",
-            Rareza.comun, 1, Joker.FaseActivacion.INDEPENDIENTE, CategoriaJoker.NACIONAL);
+            Rareza.comun, 1, Joker.FaseActivacion.INDEPENDIENTE,
+            CategoriaJoker.TV, CategoriaJoker.SECUENCIA);
     }
 
     @Override
@@ -43,6 +44,6 @@ public class DameLaMochila extends Joker {
         int rerolls = ctx.getJugador().getRerollsTienda() - rerollsAlComprarse;
         double acumuladoNuevo = Math.max(0, rerolls) * MULT_POR_REROLL;
         while (getAcumulado() < acumuladoNuevo) sumarAcumulado(MULT_POR_REROLL);
-        ctx.getResolucionActual().sumarMult(getAcumulado(), getNombre());
+        ctx.getResolucionActual().sumarMult(getAcumulado(), getNombre(), this);
     }
 }

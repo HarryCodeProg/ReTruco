@@ -13,11 +13,17 @@ public class AtiendoBoludos extends Joker {
 
     public AtiendoBoludos(){
         super(43, "Atiendo Boludos", "AtiendoBoludos", "+2 multiplicador envido por cada mano ganada de forma consecutiva",
-            Rareza.comun, 1, Joker.FaseActivacion.INDEPENDIENTE, CategoriaJoker.NACIONAL);
+            Rareza.comun, 1, Joker.FaseActivacion.INDEPENDIENTE,
+            CategoriaJoker.TV, CategoriaJoker.SECUENCIA);
     }
 
     @Override
     public String getDescripcionRenderizada() {
+        return "+2 multiplicador envido por cada mano ganada de forma consecutiva (Actual: +" + (int) getAcumulado() + ")";
+    }
+
+    @Override
+    public String getDescripcionRenderizada(Juego juego) {
         return "+2 multiplicador envido por cada mano ganada de forma consecutiva (Actual: +" + (int) getAcumulado() + ")";
     }
 
@@ -31,9 +37,17 @@ public class AtiendoBoludos extends Joker {
 
     @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego){
+        if (evento == EventoJuego.AL_GANAR_TRUCO) {
+            sumarAcumulado(MULT_POR_MANO);
+            return;
+        }
+        if (evento == EventoJuego.AL_PERDER_TRUCO) {
+            setAcumulado(0);
+            return;
+        }
         if (evento != EventoJuego.ANTES_DE_SUMAR_ENVIDO) return;
-        double acumuladoNuevo = juego.getManosGanadasConsecutivas() * MULT_POR_MANO;
-        while (getAcumulado() < acumuladoNuevo) sumarAcumulado(MULT_POR_MANO);
-        ctx.getResolucionActual().sumarMult(getAcumulado(), getNombre());
+        if (getAcumulado() > 0) {
+            ctx.getResolucionActual().sumarMult(getAcumulado(), getNombre(), this);
+        }
     }
 }

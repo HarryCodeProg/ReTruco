@@ -13,7 +13,8 @@ public class AndaALaCancha extends Joker {
 
     public AndaALaCancha(){
         super(42, "Anda A La Cancha", "AndaALaCancha", "+5 multiplicador truco y envido por cada descarte restante",
-            Rareza.comun, 1, Joker.FaseActivacion.INDEPENDIENTE, CategoriaJoker.NACIONAL);
+            Rareza.comun, 1, Joker.FaseActivacion.INDEPENDIENTE,
+            CategoriaJoker.TV, CategoriaJoker.SECUENCIA);
     }
 
     @Override
@@ -29,6 +30,6 @@ public class AndaALaCancha extends Joker {
             && evento != EventoJuego.ANTES_DE_SUMAR_ENVIDO) return;
         double bonus = juego.getDescartesActuales() * MULT_POR_DESCARTE;
         if (bonus <= 0) return;
-        ctx.getResolucionActual().sumarMult(bonus, getNombre());
+        ctx.getResolucionActual().sumarMult(bonus, getNombre(), this);
     }
 }

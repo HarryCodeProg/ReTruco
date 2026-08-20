@@ -76,12 +76,12 @@ public class VistaCarta implements Arrastrable{
         float drawY = y + visualOffsetY;
         float scaleExtra = resaltado ? 1f + (float)(Math.sin(pulso) * 0.06f) : 1f;
         if (resaltado) {
-            batch.setColor(1.25f, 1.15f, 0.6f, 1f); // tinte dorado, igual criterio que VistaJoker
-        }
-        batch.draw(region, x, drawY, width / 2f, height / 2f, width * scaleExtra, height * scaleExtra, scale, scale, rotation);
-        if (resaltado) {
+            batch.setColor(1.25f, 1.15f, 0.6f, 1f);
+        } else {
             batch.setColor(1f, 1f, 1f, 1f);
         }
+        batch.draw(region, x, drawY, width / 2f, height / 2f, width * scaleExtra, height * scaleExtra, scale, scale, rotation);
+        batch.setColor(1f, 1f, 1f, 1f);
         if (hover && !bocaAbajo && !dragging && carta != null) {
             dibujarCartelStats(batch, game, drawY);
         }
@@ -325,6 +325,17 @@ public class VistaCarta implements Arrastrable{
     }
 
     public void setEnModal(boolean enModal) { this.enModal = enModal; }
+
+    /** Restringe targetX/targetY (mientras se arrastra) a un rectángulo. No hace nada si no está dragging. */
+    public void clampArea(float minX, float minY, float maxX, float maxY) {
+        if (!dragging) return;
+        float maxTX = maxX - width;
+        float maxTY = maxY - height;
+        if (targetX < minX) targetX = minX;
+        if (targetX > maxTX) targetX = maxTX;
+        if (targetY < minY) targetY = minY;
+        if (targetY > maxTY) targetY = maxTY;
+    }
 
     public boolean llegoATarget() {
         return Math.abs(x - targetX) < 1f && Math.abs(y - targetY) < 1f;

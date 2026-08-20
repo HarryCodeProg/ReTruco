@@ -13,7 +13,8 @@ public class NoHayPolque extends Joker {
 
     public NoHayPolque(){
         super(46, "No Hay Polque", "NoHayPolque", "Cada basto que mata otorga +5 multiplicador truco",
-            Rareza.comun, 1, Joker.FaseActivacion.AL_PUNTUAR_CARTA, CategoriaJoker.NACIONAL);
+            Rareza.comun, 1, Joker.FaseActivacion.AL_PUNTUAR_CARTA,
+            CategoriaJoker.TV, CategoriaJoker.SECUENCIA);
     }
 
     @Override
@@ -30,6 +31,6 @@ public class NoHayPolque extends Joker {
         Carta c = ctx.getCartaEnResolucion();
         if (c == null || c.getPalo() != Palo.BASTO) return;
         if (!ctx.cartaMato(c)) return;
-        ctx.getResolucionActual().sumarMult(5, getNombre());
+        ctx.getResolucionActual().sumarMult(5, getNombre(), this);
     }
 }

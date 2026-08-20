@@ -14,7 +14,8 @@ public class FanaticoEnojado extends Joker {
 
     public FanaticoEnojado(){
         super(45, "Fanatico Enojado", "FanaticoEnojado", "Cada copa que mata otorga +50 puntos truco",
-            Rareza.comun, 1, Joker.FaseActivacion.AL_PUNTUAR_CARTA, CategoriaJoker.NACIONAL);
+            Rareza.comun, 1, Joker.FaseActivacion.AL_PUNTUAR_CARTA,
+            CategoriaJoker.TV, CategoriaJoker.SECUENCIA);
     }
 
     @Override
@@ -31,6 +32,6 @@ public class FanaticoEnojado extends Joker {
         Carta c = ctx.getCartaEnResolucion();
         if (c == null || c.getPalo() != Palo.COPA) return;
         if (!ctx.cartaMato(c)) return;
-        ctx.getResolucionActual().sumarChips(50, getNombre());
+        ctx.getResolucionActual().sumarChips(50, getNombre(),this);
     }
 }

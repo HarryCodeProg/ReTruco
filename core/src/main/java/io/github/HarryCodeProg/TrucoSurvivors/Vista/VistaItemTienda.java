@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import io.github.HarryCodeProg.TrucoSurvivors.Main;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.ItemTienda;
+import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 
 public class VistaItemTienda {
     private final ItemTienda item;
@@ -25,16 +26,25 @@ public class VistaItemTienda {
     private VistaJoker vistaJokerInterna;
     private VistaCarta vistaCartaInterna;
     private VistaSanto vistaSantoInterna;
+    private Juego juego;
 
-    public VistaItemTienda(ItemTienda item, TextureAtlas atlasCartas, TextureAtlas atlasJokers) {
-    this.item = item;
-    if (item.getTipo() == ItemTienda.Tipo.CARTA) {
-        this.vistaCartaInterna = new VistaCarta(item.getCarta(), false, atlasCartas);
-        this.vistaCartaInterna.setEnModal(true); // Permite hover individual dentro de paneles/tienda
-    } else if (item.getTipo() == ItemTienda.Tipo.JOKER) {
-        // Solo crear VistaJoker si realmente hay un Joker (evita NPE)
-        if (item.getJoker() != null) {
-            this.vistaJokerInterna = new VistaJoker(item.getJoker(), atlasJokers);
+    public VistaItemTienda(ItemTienda item, TextureAtlas atlasCartas, TextureAtlas atlasJokers, Juego juego) {
+        this.item = item;
+        this.juego = juego;
+        if (item.getTipo() == ItemTienda.Tipo.CARTA) {
+            this.vistaCartaInterna = new VistaCarta(item.getCarta(), false, atlasCartas);
+            this.vistaCartaInterna.setEnModal(true); // Permite hover individual dentro de paneles/tienda
+        } else if (item.getTipo() == ItemTienda.Tipo.JOKER) {
+            if (item.getJoker() != null) {
+                this.vistaJokerInterna = new VistaJoker(item.getJoker(), atlasJokers);
+            } else {
+                this.vistaJokerInterna = null;
+            }
+        } else if (item.getTipo() == ItemTienda.Tipo.SANTO) {
+            if (item.getSanto() != null) {
+                TextureAtlas atlasSantos = (Main.getInstance() != null) ? Main.getInstance().getAtlasSantos() : null;
+                this.vistaSantoInterna = new VistaSanto(item.getSanto(), atlasSantos);
+            }
         } else {
             this.vistaJokerInterna = null;
         }
@@ -130,7 +140,7 @@ public class VistaItemTienda {
         if (vistaSantoInterna != null) {
             vistaSantoInterna.renderCartelStats(batch, game);
         } else if (vistaJokerInterna != null) {
-            vistaJokerInterna.renderCartelStats(batch, game);
+            vistaJokerInterna.renderCartelStats(batch, game, juego);
         } else if (vistaCartaInterna != null) {
             vistaCartaInterna.renderCartelStats(batch, game);
         } else if (item.getTipo() == ItemTienda.Tipo.SANTO) {

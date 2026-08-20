@@ -20,7 +20,7 @@ public class DulceDeLeche extends Joker {
             Rareza.comun,
             1,
             INDEPENDIENTE,
-            CategoriaJoker.NACIONAL, CategoriaJoker.COMIDA, CategoriaJoker.DULCE
+            CategoriaJoker.NACIONAL, CategoriaJoker.COMIDA, CategoriaJoker.DULCE, CategoriaJoker.POSTRE
         );
     }
 
@@ -38,7 +38,7 @@ public class DulceDeLeche extends Joker {
         double bonus = 0;
         int cantidadMazo = ctx.getJugador().getMazo().getTamañoMazo();
         bonus = 10 * cantidadMazo;
-        ctx.getResolucionActual().sumarChips(bonus, this.getNombre());
+        ctx.getResolucionActual().sumarChips(bonus, this.getNombre(),this);
     }
 
 }

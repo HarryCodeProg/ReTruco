@@ -10,7 +10,8 @@ import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 public class Locro extends Joker {
     public Locro(){
         super(29, "Locro", "Locro", "+6 multiplicador envido si tu tanto tiene una figura",
-            Rareza.comun, 1, Joker.FaseActivacion.INDEPENDIENTE, CategoriaJoker.NACIONAL);
+            Rareza.comun, 1, Joker.FaseActivacion.INDEPENDIENTE,
+            CategoriaJoker.NACIONAL, CategoriaJoker.COMIDA);
     }
 
     @Override
@@ -25,6 +26,6 @@ public class Locro extends Joker {
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego){
         if (evento != EventoJuego.ANTES_DE_SUMAR_ENVIDO) return;
         boolean tieneFigura = ctx.getJugador().getCartasEnvidoGanador().stream().anyMatch(c -> c.getNumero() >= 10);
-        if (tieneFigura) ctx.getResolucionActual().sumarMult(6, getNombre());
+        if (tieneFigura) ctx.getResolucionActual().sumarMult(6, getNombre(), this);
     }
 }

@@ -13,7 +13,8 @@ public class BolasDeFraile extends Joker {
 
     public BolasDeFraile(){
         super(16, "Bolas de Fraile", "BolasDeFraile", "La primer carta que mate recibe +1 valor truco",
-            Rareza.comun, 1, Joker.FaseActivacion.AL_PUNTUAR_CARTA, CategoriaJoker.NACIONAL);
+            Rareza.comun, 1, Joker.FaseActivacion.AL_PUNTUAR_CARTA,
+            CategoriaJoker.NACIONAL, CategoriaJoker.COMIDA, CategoriaJoker.DULCE);
     }
 
     @Override

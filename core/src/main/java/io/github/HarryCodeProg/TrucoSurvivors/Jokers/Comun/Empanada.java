@@ -13,7 +13,8 @@ public class Empanada extends Joker {
 
     public Empanada(){
         super(11, "Empanada", "Empanada", "+10 al valor envido final",
-            Rareza.comun, 1, Joker.FaseActivacion.INDEPENDIENTE, CategoriaJoker.NACIONAL);
+            Rareza.comun, 1, Joker.FaseActivacion.INDEPENDIENTE,
+            CategoriaJoker.COMIDA);
     }
 
     @Override

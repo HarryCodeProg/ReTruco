@@ -9,6 +9,7 @@ import io.github.HarryCodeProg.TrucoSurvivors.Gestores.GestorSonidos;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Main;
+import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 
 public class VistaJoker implements Arrastrable{
     private Joker joker;
@@ -73,10 +74,10 @@ public class VistaJoker implements Arrastrable{
         }
     }
 
-    public void renderCartelStats(SpriteBatch batch, io.github.HarryCodeProg.TrucoSurvivors.Main game) {
+    public void renderCartelStats(SpriteBatch batch, io.github.HarryCodeProg.TrucoSurvivors.Main game, Juego juego) {
         if (!hover || dragging || joker == null) return;
         float drawY = y + visualOffsetY;
-        dibujarCartelStats(batch, game, drawY);
+        dibujarCartelStats(batch, game, juego, drawY);
     }
 
     public boolean isHover() { return hover; }
@@ -187,12 +188,12 @@ public class VistaJoker implements Arrastrable{
         return mx >= x && mx <= x + w && my >= y && my <= y + h;
     }
 
-    private void dibujarCartelStats(SpriteBatch batch, io.github.HarryCodeProg.TrucoSurvivors.Main game, float drawY) {
+    private void dibujarCartelStats(SpriteBatch batch, io.github.HarryCodeProg.TrucoSurvivors.Main game, Juego juego, float drawY){
         com.badlogic.gdx.graphics.g2d.BitmapFont font = game.getFuentePrincipal();
         com.badlogic.gdx.graphics.g2d.GlyphLayout layout = new com.badlogic.gdx.graphics.g2d.GlyphLayout();
         // 1. Datos del Joker
         String lineaNombre = joker.getNombre();
-        String descripcion = joker.getDescripcion();
+        String descripcion = joker.getDescripcionRenderizada(juego);
         String rarezaStr = joker.getRareza().toString();
         float ANCHO_MAX_DESC = 220f;
         // Variables para el diseño de las etiquetas (badges)

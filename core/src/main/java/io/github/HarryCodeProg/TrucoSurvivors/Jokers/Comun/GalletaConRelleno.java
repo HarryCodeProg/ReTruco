@@ -11,7 +11,8 @@ import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 public class GalletaConRelleno extends Joker {
     public GalletaConRelleno(){
         super(31, "Galleta Con Relleno", "GalletaConRelleno", "+1 descarte",
-            Rareza.comun, 1, Joker.FaseActivacion.INDEPENDIENTE, CategoriaJoker.NACIONAL);
+            Rareza.comun, 1, Joker.FaseActivacion.INDEPENDIENTE,
+            CategoriaJoker.NACIONAL, CategoriaJoker.COMIDA, CategoriaJoker.DULCE, CategoriaJoker.POSTRE);
     }
 
     @Override

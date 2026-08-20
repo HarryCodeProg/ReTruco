@@ -14,18 +14,30 @@ public class ResolucionPuntaje {
     }
 
     public void sumarChips(double cantidad, String origen) {
+        sumarChips(cantidad, origen, null);
+    }
+
+    public void sumarChips(double cantidad, String origen, Object origenRef) {
         chips += cantidad;
-        log.add(new PasoResolucion(origen, TipoPaso.SUMA_CHIPS, cantidad, chips, mult));
+        log.add(new PasoResolucion(origen, TipoPaso.SUMA_CHIPS, cantidad, chips, mult, origenRef));
     }
 
-    public void sumarMult(double cantidad, String origen) {
+    /*public void sumarMult(double cantidad, String origen) {
+        sumarMult(cantidad, origen, null);
+    }*/
+
+    public void sumarMult(double cantidad, String origen, Object origenRef) {
         mult += cantidad;
-        log.add(new PasoResolucion(origen, TipoPaso.SUMA_MULT, cantidad, chips, mult));
+        log.add(new PasoResolucion(origen, TipoPaso.SUMA_MULT, cantidad, chips, mult, origenRef));
     }
 
-    public void multiplicarMult(double factor, String origen) {
+    /*public void multiplicarMult(double factor, String origen) {
+        multiplicarMult(factor, origen, null);
+    }*/
+
+    public void multiplicarMult(double factor, String origen, Object origenRef) {
         mult *= factor;
-        log.add(new PasoResolucion(origen, TipoPaso.MULT_MULT, factor, chips, mult));
+        log.add(new PasoResolucion(origen, TipoPaso.MULT_MULT, factor, chips, mult, origenRef));
     }
 
     public double getChips() { return chips; }
@@ -41,16 +53,22 @@ public class ResolucionPuntaje {
     public static class PasoResolucion {
         public final String origen;
         public final TipoPaso tipo;
-        public final double valor;        // cuanto sumo/multiplico en ESTE paso
-        public final double chipsActual;  // snapshot de chips despues de este paso
-        public final double multActual;   // snapshot de mult despues de este paso
+        public final double valor;
+        public final double chipsActual;
+        public final double multActual;
+        public final Object origenRef; // referencia identity (Joker o Carta) — null si no se especificó
 
-        public PasoResolucion(String origen, TipoPaso tipo, double valor, double chipsActual, double multActual) {
+        public PasoResolucion(String origen, TipoPaso tipo, double valor, double chipsActual, double multActual, Object origenRef) {
             this.origen = origen;
             this.tipo = tipo;
             this.valor = valor;
             this.chipsActual = chipsActual;
             this.multActual = multActual;
+            this.origenRef = origenRef;
+        }
+
+        public PasoResolucion(String origen, TipoPaso tipo, double valor, double chipsActual, double multActual) {
+            this(origen, tipo, valor, chipsActual, multActual, null);
         }
 
         @Override

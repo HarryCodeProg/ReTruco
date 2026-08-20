@@ -1,13 +1,9 @@
 package io.github.HarryCodeProg.TrucoSurvivors.Vista;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Carta;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.Accion;
-import io.github.HarryCodeProg.TrucoSurvivors.Gestores.GestorInputArrastrable;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jugador;
 import io.github.HarryCodeProg.TrucoSurvivors.Main;
@@ -32,55 +28,50 @@ public class PanelTienda {
     private final ArrayList<VistaItemTienda> vistasSantos = new ArrayList<>();
     private VistaItemTienda seleccionado;
     private final Boton botonComprar;
-    private final Boton botonReroll; // Unico boton REROLL (para jokers en esta implementación)
+    private final Boton botonReroll;
     private final Boton botonContinuar;
+    private final Boton botonComprarYUsar;
     private Texture iconoPeso;
-    // Zona ocupada por el panel: deja libre la franja superior (donde estan los jokers)
     private static final float PANEL_Y = 40f;
-    private static final float PANEL_ALTO = 540f; // aumentado para dar espacio a santos
+    private static final float PANEL_ALTO = 540f;
     private static final float PANEL_X = 260f;
     private static final float PANEL_ANCHO = 1000f - PANEL_X;
-    private static final float VELOCIDAD_SLIDE = 1800f; // px/seg
-    private float offsetY;        // cuanto se desplaza el panel respecto a su posicion final (positivo = mas abajo)
-    private float offsetYObjetivo; // 0 = posicion final (visible), -PANEL_ALTO-PANEL_Y = totalmente oculto abajo
+    private static final float VELOCIDAD_SLIDE = 1800f;
+    private float offsetY;
+    private float offsetYObjetivo;
     private boolean cerrando = false;
     private Runnable alCerrarCompletamente;
-    private final ArrayList<VistaJoker> vistasJokersPropios = new ArrayList<>();
-    private VistaJoker jokerPropioSeleccionado;
     private static final float RUEDA_X = 1250f;
     private static final float RUEDA_Y = 420f;
     private static final float RUEDA_RADIO = 170f;
     private RuedaZodiaco ruedaZodiaco;
-    private OverlayConsumoZodiaco overlayConsumo = new OverlayConsumoZodiaco();
-    private OverlaySeleccionCarta overlaySeleccion = new OverlaySeleccionCarta();
+    private final OverlayConsumoZodiaco overlayConsumo = new OverlayConsumoZodiaco();
+    private final OverlaySeleccionCarta overlaySeleccion = new OverlaySeleccionCarta();
     private SignoZodiaco signoObtenido;
     private final Consumer<VistaItemTienda> alComprarJoker;
-    private final Boton botonComprarYUsar;
     private final Consumer<Santo> alComprarYUsarSanto;
-    private final Consumer<Santo> alComprarSanto;
+    private final Runnable onBeforeReroll;
+    private Juego juego;
 
     public PanelTienda(Main game, Jugador jugador, Runnable alContinuar, Consumer<VistaItemTienda> alComprarJoker,
-        Consumer<Santo> alComprarYUsarSanto, Consumer<Santo> alComprarSanto) {
+        Consumer<Santo> alComprarYUsarSanto, Runnable onBeforeReroll, Juego juego) {
         this.game = game;
+        this.juego = juego;
         this.jugador = jugador;
         this.alContinuar = alContinuar;
-        this.estadoTienda = new EstadoTienda(jugador);
         this.alComprarJoker = alComprarJoker;
         this.alComprarYUsarSanto = alComprarYUsarSanto;
-        this.alComprarSanto = alComprarSanto;
+        this.onBeforeReroll = onBeforeReroll;
+        this.estadoTienda = new EstadoTienda(jugador);
         if (Gdx.files.internal("ui/peso.png").exists()) {
             iconoPeso = new Texture("ui/peso.png");
         }
-        botonComprar = new Boton(PANEL_X + PANEL_ANCHO - 180, PANEL_Y + 20, 160, 50,
-            Boton.TipoColor.VERDE, Accion.COMPRAR_ITEM_TIENDA);
+        botonComprar = new Boton(PANEL_X + PANEL_ANCHO - 180, PANEL_Y + 20, 160, 50, Boton.TipoColor.VERDE, Accion.COMPRAR_ITEM_TIENDA);
         botonComprar.setHabilitado(false);
-        botonReroll = new Boton(PANEL_X + 20, PANEL_Y + PANEL_ALTO - 60, 160, 40, Boton.TipoColor.AZUL,
-            Accion.REROLL_JOKERS);
+        botonReroll = new Boton(PANEL_X + 20, PANEL_Y + PANEL_ALTO - 60, 160, 40, Boton.TipoColor.AZUL, Accion.REROLL_JOKERS);
         botonReroll.setTexto("Reroll $" + estadoTienda.costoRerollTienda());
-        botonContinuar = new Boton(PANEL_X + PANEL_ANCHO - 180, PANEL_Y + PANEL_ALTO - 60, 160, 50,
-            Boton.TipoColor.DORADO, Accion.CONTINUAR_TIENDA);
-        botonComprarYUsar = new Boton(PANEL_X + PANEL_ANCHO - 180, PANEL_Y + 80, 160, 50, Boton.TipoColor.DORADO,
-            Accion.COMPRAR_Y_USAR_SANTO);
+        botonContinuar = new Boton(PANEL_X + PANEL_ANCHO - 180, PANEL_Y + PANEL_ALTO - 60, 160, 50, Boton.TipoColor.DORADO, Accion.CONTINUAR_TIENDA);
+        botonComprarYUsar = new Boton(PANEL_X + PANEL_ANCHO - 180, PANEL_Y + 80, 160, 50, Boton.TipoColor.DORADO, Accion.COMPRAR_Y_USAR_SANTO);
         botonComprarYUsar.setVisible(false);
         ruedaZodiaco = new RuedaZodiaco(RUEDA_X, RUEDA_Y, RUEDA_RADIO, game.getTexturaRuletaFondo());
         reconstruirVistas();
@@ -88,48 +79,33 @@ public class PanelTienda {
         this.offsetYObjetivo = 0f;
     }
 
-    private void reconstruirJokersPropios() {
-        vistasJokersPropios.clear();
-        float xJokerPropio = PANEL_X + 220;
-        for (Joker joker : jugador.getJokers()) {
-            VistaJoker vj = new VistaJoker(joker, game.getAtlasJokers());
-            vj.setTamaño(70, 95);
-            vj.setPosition(xJokerPropio, PANEL_Y + PANEL_ALTO - 355); // una fila propia, entre cartas y jokers de venta
-            vj.setHandPosition(xJokerPropio, PANEL_Y + PANEL_ALTO - 355);
-            vistasJokersPropios.add(vj);
-            xJokerPropio += 90;
-        }
-        if (botonReroll != null) {
-            botonReroll.setTexto("Reroll $" + estadoTienda.costoRerollTienda());
-        }
-    }
-
     private void reconstruirVistas() {
         vistasCartas.clear();
         vistasJokers.clear();
         vistasSantos.clear();
         deseleccionarTodo();
+        // CARTAS
         float xCartas = PANEL_X + 220;
         for (ItemTienda item : estadoTienda.getFilaCartas()) {
-            VistaItemTienda v = new VistaItemTienda(item, game.getAtlasCartas(), game.getAtlasJokers());
+            VistaItemTienda v = new VistaItemTienda(item, game.getAtlasCartas(), game.getAtlasJokers(), juego);
+            v.setTamaño(85f, 125f);
             v.setPosition(xCartas, PANEL_Y + PANEL_ALTO - 200);
             vistasCartas.add(v);
-            xCartas += 120;
+            xCartas += 105;
         }
+        // JOKERS DE LA TIENDA
         float xJokers = PANEL_X + 220;
-        // Dibujamos los jokers de venta un poco arriba de la zona inferior
         for (ItemTienda item : estadoTienda.getFilaJokers()) {
-            VistaItemTienda v = new VistaItemTienda(item, game.getAtlasCartas(), game.getAtlasJokers());
-            //v.setPosition(xJokers, PANEL_Y + 120);
+            VistaItemTienda v = new VistaItemTienda(item, game.getAtlasCartas(), game.getAtlasJokers(), juego);
             v.setTamaño(85f, 125f);
             v.setPosition(xJokers, PANEL_Y + 200);
             vistasJokers.add(v);
             xJokers += 105;
         }
+        // SANTOS DE LA TIENDA
         float xSantos = PANEL_X + 220;
-        // Santos aparecen abajo de los jokers
         for (ItemTienda item : estadoTienda.getFilaSantos()) {
-            VistaItemTienda v = new VistaItemTienda(item, game.getAtlasCartas(), game.getAtlasJokers());
+            VistaItemTienda v = new VistaItemTienda(item, game.getAtlasCartas(), game.getAtlasJokers(), juego);
             v.setTamaño(85f, 125f);
             v.setPosition(xSantos, PANEL_Y + 20);
             vistasSantos.add(v);
@@ -139,22 +115,34 @@ public class PanelTienda {
 
     private void deseleccionarTodo() {
         seleccionado = null;
-        jokerPropioSeleccionado = null;
-        for (VistaItemTienda v : vistasCartas) v.setSeleccionado(false);
-        for (VistaItemTienda v : vistasJokers) v.setSeleccionado(false);
-        for (VistaItemTienda v : vistasSantos) v.setSeleccionado(false);
-        for (VistaJoker vj : vistasJokersPropios) vj.setSeleccionada(false);
+        for (VistaItemTienda v : vistasCartas) {
+            v.setSeleccionado(false);
+        }
+        for (VistaItemTienda v : vistasJokers) {
+            v.setSeleccionado(false);
+        }
+        for (VistaItemTienda v : vistasSantos) {
+            v.setSeleccionado(false);
+        }
         botonComprar.setHabilitado(false);
+        botonComprarYUsar.setVisible(false);
+        botonComprarYUsar.setHabilitado(false);
     }
 
-    /** Debe llamarse UNA vez por frame, con las coordenadas de mouse ya convertidas al mundo. */
     public void update(float mouseWorldX, float mouseWorldY, float delta) {
-        if (isAnimando()) return;
+        if (isAnimando()) {
+            return;
+        }
         boolean justTouched = Gdx.input.justTouched();
-        for (VistaItemTienda v : vistasCartas) v.update(mouseWorldX, mouseWorldY, delta);
-        for (VistaItemTienda v : vistasJokers) v.update(mouseWorldX, mouseWorldY, delta);
-        for (VistaItemTienda v : vistasSantos) v.update(mouseWorldX, mouseWorldY, delta);
-        for (VistaJoker vj : vistasJokersPropios) vj.update(mouseWorldX, mouseWorldY, delta);
+        for (VistaItemTienda v : vistasCartas) {
+            v.update(mouseWorldX, mouseWorldY, delta);
+        }
+        for (VistaItemTienda v : vistasJokers) {
+            v.update(mouseWorldX, mouseWorldY, delta);
+        }
+        for (VistaItemTienda v : vistasSantos) {
+            v.update(mouseWorldX, mouseWorldY, delta);
+        }
         botonComprar.update(mouseWorldX, mouseWorldY);
         botonComprarYUsar.update(mouseWorldX, mouseWorldY);
         botonReroll.update(mouseWorldX, mouseWorldY);
@@ -168,70 +156,64 @@ public class PanelTienda {
             overlayConsumo.confirmarCierre();
         }
         if (Gdx.input.justTouched()) {
-            ruedaZodiaco.click(mouseWorldX, mouseWorldY, signo -> {
-                overlayConsumo.abrir(signo, game.getAtlasZodiaco().findRegion(signo.getNombreRegion()), () -> {});
-            });
+            ruedaZodiaco.click(mouseWorldX, mouseWorldY,
+                signo -> {
+                    overlayConsumo.abrir(signo, game.getAtlasZodiaco().findRegion(signo.getNombreRegion()),
+                        () -> {
+                        }
+                    );
+                }
+            );
             overlaySeleccion.click(mouseWorldX, mouseWorldY, jugador, null);
         }
-        if (justTouched) {
-            for (VistaJoker vj : vistasJokersPropios) {
-                if (vj.contiene(mouseWorldX, mouseWorldY)) {
-                    deseleccionarTodo();
-                    jokerPropioSeleccionado = vj;
-                    vj.setSeleccionada(true);
-                    botonComprar.setHabilitado(true); // reusamos el mismo boton, ver mas abajo
-                    break;
-                }
-            }
-        }
         boolean cliqueoAlgunElemento = false;
-        if (botonComprarYUsar.fueCliqueado(mouseWorldX, mouseWorldY)
-            && seleccionado != null
-            && seleccionado.getItem().getTipo() == ItemTienda.Tipo.SANTO) {
+        // COMPRAR Y USAR SANTO
+        if (botonComprarYUsar.fueCliqueado(mouseWorldX, mouseWorldY) && seleccionado != null && seleccionado.getItem().getTipo() == ItemTienda.Tipo.SANTO) {
             comprarYUsarSanto(seleccionado);
             return;
         }
+        // CONTINUAR
         if (botonContinuar.fueCliqueado(mouseWorldX, mouseWorldY)) {
             alContinuar.run();
             return;
-        } else if (botonComprar.fueCliqueado(mouseWorldX, mouseWorldY) && seleccionado != null) {
+        }
+        // COMPRAR
+        if (botonComprar.fueCliqueado(mouseWorldX, mouseWorldY) && seleccionado != null) {
             cliqueoAlgunElemento = true;
             comprar(seleccionado);
-        } else if (botonComprar.fueCliqueado(mouseWorldX, mouseWorldY)) {
-            cliqueoAlgunElemento = true;
-            if (jokerPropioSeleccionado != null) {
-                vender(jokerPropioSeleccionado);
-            } else if (seleccionado != null) {
-                comprar(seleccionado);
-            }
         } else if (botonReroll.fueCliqueado(mouseWorldX, mouseWorldY)) {
             cliqueoAlgunElemento = true;
+            if (onBeforeReroll != null) {
+                onBeforeReroll.run();
+            }
             boolean exito = estadoTienda.rerollearTienda(jugador);
-            if (exito) {
-                reconstruirVistas();
-                // actualizar texto del boton con el nuevo costo (si cambió)
+            if (exito) {reconstruirVistas();
                 botonReroll.setTexto("Reroll $" + estadoTienda.costoRerollTienda());
-                // opcional: reproducir sonido de confirmación
-                // if (Main.getInstance().getGestorSonidos() != null) Main.getInstance().getGestorSonidos().reproducirConVariacion("click");
-            } else {
-                // no alcanzan los pesos: feedback visual/sonoro opcional
-                // if (Main.getInstance().getGestorSonidos() != null) Main.getInstance().getGestorSonidos().reproducirConVariacion("denied");
-                // podrías mostrar un texto flotante o animación; por ahora no hace nada.
             }
         }
+        // SELECCIONAR ITEM
         if (justTouched && !cliqueoAlgunElemento) {
             VistaItemTienda itemClickeado = null;
             for (VistaItemTienda v : vistasCartas) {
-                if (v.contiene(mouseWorldX, mouseWorldY)) { itemClickeado = v; break; }
+                if (v.contiene(mouseWorldX, mouseWorldY)) {
+                    itemClickeado = v;
+                    break;
+                }
             }
             if (itemClickeado == null) {
                 for (VistaItemTienda v : vistasJokers) {
-                    if (v.contiene(mouseWorldX, mouseWorldY)) { itemClickeado = v; break; }
+                    if (v.contiene(mouseWorldX, mouseWorldY)) {
+                        itemClickeado = v;
+                        break;
+                    }
                 }
             }
             if (itemClickeado == null) {
                 for (VistaItemTienda v : vistasSantos) {
-                    if (v.contiene(mouseWorldX, mouseWorldY)) { itemClickeado = v; break; }
+                    if (v.contiene(mouseWorldX, mouseWorldY)) {
+                        itemClickeado = v;
+                        break;
+                    }
                 }
             }
             if (itemClickeado != null) {
@@ -246,7 +228,7 @@ public class PanelTienda {
                     boolean espacioDisponible;
                     if (seleccionado.getItem().getTipo() == ItemTienda.Tipo.JOKER) {
                         espacioDisponible = jugador.getJokers().size() < jugador.getTamañoJokers();
-                    } else if (seleccionado.getItem().getTipo() == ItemTienda.Tipo.SANTO) {
+                    } else if (esSanto) {
                         espacioDisponible = jugador.getSantos().size() < jugador.getTamañoSantos();
                     } else {
                         espacioDisponible = true;
@@ -259,15 +241,6 @@ public class PanelTienda {
                 deseleccionarTodo();
             }
         }
-    }
-
-    private void vender(VistaJoker vista) {
-        Joker joker = vista.getJoker();
-        int precioVenta = Math.max(1, joker.getCoste() * ConfiguracionEconomia.PRECIO_VENTA_JOKER_PORCENTAJE / 100);
-        jugador.eliminarJoker(joker);
-        jugador.sumarPesos(precioVenta);
-        reconstruirJokersPropios();
-        deseleccionarTodo();
     }
 
     private void comprar(VistaItemTienda vista) {
@@ -283,30 +256,35 @@ public class PanelTienda {
         }
         if (item.getTipo() == ItemTienda.Tipo.CARTA) {
             jugador.getMazo().agregarCarta(item.getCarta());
+            estadoTienda.removerItemComprado(item);
         } else if (item.getTipo() == ItemTienda.Tipo.JOKER) {
-            jugador.agregarJoker(item.getJoker());
             if (alComprarJoker != null) {
+                estadoTienda.removerItemComprado(item);
+                reconstruirVistas();
+                // La animación agregará el Joker al modelo
+                // al terminar.
                 alComprarJoker.accept(vista);
+            } else {
+                jugador.agregarJoker(item.getJoker());
+                estadoTienda.removerItemComprado(item);
             }
         } else if (item.getTipo() == ItemTienda.Tipo.SANTO) {
             Santo santo = item.getSanto();
-            boolean agregado = jugador.agregarSanto(santo);
-            if (!agregado) {
+            if (!jugador.agregarSanto(santo)) {
                 jugador.sumarPesos(item.getPrecio());
                 return;
             }
-            if (alComprarSanto != null) {
-                alComprarSanto.accept(santo);
-            }
+            estadoTienda.removerItemComprado(item);
         }
-        estadoTienda.removerItemComprado(item);
         reconstruirVistas();
     }
 
     private void comprarYUsarSanto(VistaItemTienda vista) {
         ItemTienda item = vista.getItem();
         Santo santo = item.getSanto();
-        if (santo == null) return;
+        if (santo == null) {
+            return;
+        }
         if (jugador.getSantos().size() >= jugador.getTamañoSantos()) {
             return;
         }
@@ -319,22 +297,37 @@ public class PanelTienda {
     }
 
     public void render(SpriteBatch batch) {
-        // 1. Guardamos la matriz original y aplicamos la del slide/offset de la tienda
         com.badlogic.gdx.math.Matrix4 matrizOriginal = batch.getProjectionMatrix().cpy();
         com.badlogic.gdx.math.Matrix4 matrizConOffset = matrizOriginal.cpy().translate(0, offsetY, 0);
         batch.setProjectionMatrix(matrizConOffset);
-        // --- Fondo de la tienda ---
+        // Fondo
         Texture pixel = game.getPixelBlanco();
         batch.setColor(0.06f, 0.07f, 0.1f, 0.94f);
         batch.draw(pixel, PANEL_X, PANEL_Y, PANEL_ANCHO, PANEL_ALTO);
         batch.setColor(1, 1, 1, 1);
-        // --- Elementos ---
-        for (VistaItemTienda v : vistasCartas) if (v != seleccionado) v.render(batch, game);
-        for (VistaItemTienda v : vistasJokers) if (v != seleccionado) v.render(batch, game);
-        for (VistaItemTienda v : vistasSantos) if (v != seleccionado) v.render(batch, game);
-        for (VistaJoker vj : vistasJokersPropios) vj.render(batch);
-        if (seleccionado != null) seleccionado.render(batch, game);
-        // --- Botones y textos ---
+        // CARTAS
+        for (VistaItemTienda v : vistasCartas) {
+            if (v != seleccionado) {
+                v.render(batch, game);
+            }
+        }
+        // JOKERS DE LA TIENDA
+        for (VistaItemTienda v : vistasJokers) {
+            if (v != seleccionado) {
+                v.render(batch, game);
+            }
+        }
+        // SANTOS DE LA TIENDA
+        for (VistaItemTienda v : vistasSantos) {
+            if (v != seleccionado) {
+                v.render(batch, game);
+            }
+        }
+        // ITEM SELECCIONADO
+        if (seleccionado != null) {
+            seleccionado.render(batch, game);
+        }
+        // Botones
         botonComprar.render(batch);
         botonReroll.render(batch);
         botonContinuar.render(batch);
@@ -346,38 +339,35 @@ public class PanelTienda {
             ItemTienda item = seleccionado.getItem();
             String textoPrecio = "Precio: $" + item.getPrecio();
             game.getFuentePrincipal().draw(batch, textoPrecio, PANEL_X + PANEL_ANCHO - 220, PANEL_Y + 90);
-        } else if (jokerPropioSeleccionado != null) {
-            Joker j = jokerPropioSeleccionado.getJoker();
-            game.getFuentePrincipal().draw(batch, "Nombre: " + j.getNombre(), infoX, infoY);
-            game.getFuentePrincipal().draw(batch, "Rareza: " + j.getRareza().name(), infoX, infoY - 30);
-            game.getFuentePrincipal().draw(batch, j.getDescripcion(), infoX, infoY - 70, maxAnchoTexto, com.badlogic.gdx.utils.Align.left, true);
-            int precioVenta = Math.max(1, j.getCoste() * ConfiguracionEconomia.PRECIO_VENTA_JOKER_PORCENTAJE / 100);
-            String textoVenta = "Vender por: $" + precioVenta;
-            game.getFuentePrincipal().draw(batch, textoVenta, PANEL_X + PANEL_ANCHO - 220, PANEL_Y + 90);
         }
-        // --- Carteles de stats (hovers) ---
-        for (VistaItemTienda v : vistasCartas) v.renderCartelStats(batch, game);
-        for (VistaItemTienda v : vistasJokers) v.renderCartelStats(batch, game);
-        for (VistaItemTienda v : vistasSantos) v.renderCartelStats(batch, game);
-        for (VistaJoker vj : vistasJokersPropios) {
-            if (vj.isHover()) {
-                vj.renderCartelStats(batch, game);
-            }
+        // Carteles de stats
+        for (VistaItemTienda v : vistasCartas) {
+            v.renderCartelStats(batch, game);
+        }
+        for (VistaItemTienda v : vistasJokers) {
+            v.renderCartelStats(batch, game);
+        }
+        for (VistaItemTienda v : vistasSantos) {
+            v.renderCartelStats(batch, game);
         }
         ruedaZodiaco.render(batch);
         overlayConsumo.render(batch, game);
         overlaySeleccion.render(batch, game);
-        // 3. Restauramos la matriz original para devolver el batch como venía
         batch.setProjectionMatrix(matrizOriginal);
     }
 
-    /** Debe llamarse una vez por frame, ANTES de update() de input, para que la animacion avance siempre. */
     public void updateAnimacion(float delta) {
         float diferencia = offsetYObjetivo - offsetY;
-        if (Math.abs(diferencia) <= VELOCIDAD_SLIDE * delta) {
+        if (Math.abs(diferencia)
+            <= VELOCIDAD_SLIDE * delta
+        ) {
             offsetY = offsetYObjetivo;
-            if (cerrando && offsetY == offsetYObjetivo) {
-                if (alCerrarCompletamente != null) alCerrarCompletamente.run();
+            if (
+                cerrando && offsetY == offsetYObjetivo
+            ) {
+                if (alCerrarCompletamente != null) {
+                    alCerrarCompletamente.run();
+                }
             }
         } else {
             offsetY += Math.signum(diferencia) * VELOCIDAD_SLIDE * delta;
@@ -388,7 +378,6 @@ public class PanelTienda {
         return offsetY != offsetYObjetivo;
     }
 
-    /** Inicia el slide down. Cuando termine de salir de pantalla, ejecuta el callback (recien ahi cerrar la tienda de verdad). */
     public void cerrar(Runnable alCerrarCompletamente) {
         this.cerrando = true;
         this.alCerrarCompletamente = alCerrarCompletamente;
@@ -396,11 +385,16 @@ public class PanelTienda {
     }
 
     public void dispose() {
-        if (iconoPeso != null) iconoPeso.dispose();
-        if (ruedaZodiaco != null) ruedaZodiaco.dispose();
+        if (iconoPeso != null) {
+            iconoPeso.dispose();
+        }
+        if (ruedaZodiaco != null) {
+            ruedaZodiaco.dispose();
+        }
     }
 
-    public void consumir(SignoZodiaco signo, Jugador jugador, Juego juego, EstadoTienda tienda, OverlaySeleccionCarta overlaySeleccion, Runnable alTerminarTodo) {
+    public void consumir(SignoZodiaco signo, Jugador jugador, Juego juego,
+                         EstadoTienda tienda, OverlaySeleccionCarta overlaySeleccion, Runnable alTerminarTodo) {
         signo.aplicarEfecto(jugador, juego, tienda, null);
         alTerminarTodo.run();
     }

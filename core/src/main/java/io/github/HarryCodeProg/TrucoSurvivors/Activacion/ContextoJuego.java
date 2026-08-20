@@ -24,12 +24,12 @@ public class ContextoJuego {
     private ArrayDeque<Activacion> colaActivaciones;
     private ArrayList<Carta> cartasContribuyentesEnvido = new ArrayList<>();
     // Flags para "primera carta que mata/no mata" durante la resolución actual
-    private boolean primerCartaQueMataAplicada = false;
-    private boolean primerCartaQueNoMataAplicada = false;
     private Carta cartaOponenteEnResolucion;
-    private boolean primerFiguraPuntuadaAplicada = false;
-    private boolean primerNoFiguraPuntuadaAplicada = false;
-    private final Set<Carta> cartasReactivadas = Collections.newSetFromMap(new IdentityHashMap<>());
+    private final Set<Joker> jokersPrimerCartaQueMataAplicada = Collections.newSetFromMap(new IdentityHashMap<>());
+    private final Set<Joker> jokersPrimerCartaQueNoMataAplicada = Collections.newSetFromMap(new IdentityHashMap<>());
+    private final Set<Joker> jokersPrimerFiguraPuntuadaAplicada = Collections.newSetFromMap(new IdentityHashMap<>());
+    private final Set<Joker> jokersPrimerNoFiguraPuntuadaAplicada = Collections.newSetFromMap(new IdentityHashMap<>());
+    private final Map<Joker, Set<Object>> marcasPorJoker = new IdentityHashMap<>();
 
 
     public ContextoJuego(Jugador jugador, Jugador rival, Mazo mazo, Mesa mesa, Juego juego) {
@@ -113,18 +113,20 @@ public class ContextoJuego {
     }
     public void clearCartasContribuyentesEnvido() { this.cartasContribuyentesEnvido.clear(); }
 
-    public boolean isPrimerCartaQueMataAplicada() { return primerCartaQueMataAplicada; }
-    public void marcarPrimerCartaQueMataAplicada() { this.primerCartaQueMataAplicada = true; }
-
-    public boolean isPrimerCartaQueNoMataAplicada() { return primerCartaQueNoMataAplicada; }
-    public void marcarPrimerCartaQueNoMataAplicada() { this.primerCartaQueNoMataAplicada = true; }
     public Carta getCartaOponenteEnResolucion() { return cartaOponenteEnResolucion; }
     public void setCartaOponenteEnResolucion(Carta carta) { this.cartaOponenteEnResolucion = carta; }
 
-    public boolean isPrimerFiguraPuntuadaAplicada() { return primerFiguraPuntuadaAplicada; }
-    public void marcarPrimerFiguraPuntuadaAplicada() { this.primerFiguraPuntuadaAplicada = true; }
-    public boolean isPrimerNoFiguraPuntuadaAplicada() { return primerNoFiguraPuntuadaAplicada; }
-    public void marcarPrimerNoFiguraPuntuadaAplicada() { this.primerNoFiguraPuntuadaAplicada = true; }
+    public boolean isPrimerCartaQueMataAplicada(Joker joker) { return jokersPrimerCartaQueMataAplicada.contains(joker); }
+    public void marcarPrimerCartaQueMataAplicada(Joker joker) { jokersPrimerCartaQueMataAplicada.add(joker); }
+
+    public boolean isPrimerCartaQueNoMataAplicada(Joker joker) { return jokersPrimerCartaQueNoMataAplicada.contains(joker); }
+    public void marcarPrimerCartaQueNoMataAplicada(Joker joker) { jokersPrimerCartaQueNoMataAplicada.add(joker); }
+
+    public boolean isPrimerFiguraPuntuadaAplicada(Joker joker) { return jokersPrimerFiguraPuntuadaAplicada.contains(joker); }
+    public void marcarPrimerFiguraPuntuadaAplicada(Joker joker) { jokersPrimerFiguraPuntuadaAplicada.add(joker); }
+
+    public boolean isPrimerNoFiguraPuntuadaAplicada(Joker joker) { return jokersPrimerNoFiguraPuntuadaAplicada.contains(joker); }
+    public void marcarPrimerNoFiguraPuntuadaAplicada(Joker joker) { jokersPrimerNoFiguraPuntuadaAplicada.add(joker); }
 
     public boolean cartaMato(Carta carta) {
         if (carta == null) return false;
@@ -133,9 +135,13 @@ public class ContextoJuego {
         return carta.getValorTrucoActual() > mesa.getMesaRival().get(idx).getValorTrucoActual();
     }
 
-    /** Marca la carta como ya reactivada; devuelve false si ya lo estaba (para no reactivarla de nuevo). */
-    public boolean marcarCartaReactivada(Carta carta) {
-        if (carta == null) return false;
-        return cartasReactivadas.add(carta);
+    public boolean marcarUsado(Joker joker, Object objetivo) {
+        Set<Object> marcas = marcasPorJoker.computeIfAbsent(joker, k -> Collections.newSetFromMap(new IdentityHashMap<>()));
+        return marcas.add(objetivo);
+    }
+
+    public boolean fueUsado(Joker joker, Object objetivo) {
+        Set<Object> marcas = marcasPorJoker.get(joker);
+        return marcas != null && marcas.contains(objetivo);
     }
 }

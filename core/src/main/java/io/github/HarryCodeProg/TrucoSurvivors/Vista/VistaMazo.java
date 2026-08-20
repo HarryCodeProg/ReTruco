@@ -12,6 +12,9 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Align;
 import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Carta;
 import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Palo;
+import io.github.HarryCodeProg.TrucoSurvivors.Gestores.AreaElementos;
+import io.github.HarryCodeProg.TrucoSurvivors.Gestores.GestorInputArrastrable;
+import io.github.HarryCodeProg.TrucoSurvivors.Gestores.GestorReordenamiento;
 import io.github.HarryCodeProg.TrucoSurvivors.Main;
 
 import java.util.ArrayList;
@@ -33,6 +36,14 @@ public class VistaMazo {
     private boolean hoverAtras = false;
     private List<VistaCarta> cartasModal = new ArrayList<>();
     private List<Carta> cartasModalRestantes = new ArrayList<>();
+    private final java.util.Map<Palo, ArrayList<VistaCarta>> filasModal = new java.util.EnumMap<>(Palo.class);
+    private final java.util.Map<Palo, GestorInputArrastrable<VistaCarta>> gestoresFilas = new java.util.EnumMap<>(Palo.class);
+    private final java.util.Map<Palo, AreaElementos<VistaCarta>> areasFilas = new java.util.EnumMap<>(Palo.class);
+    private final GestorReordenamiento gestorReordenamiento = new GestorReordenamiento();
+    private static final float MARCO_W = 1000f;
+    private static final float MARCO_H = 580f;
+    private static final float MARCO_X = (1280 - MARCO_W) / 2f;
+    private static final float MARCO_Y = (720 - MARCO_H) / 2f;
 
 
     public VistaMazo(float x, float y, float width, float height, TextureAtlas atlasCartas, BitmapFont font, Texture pixelBlanco) {
@@ -51,15 +62,23 @@ public class VistaMazo {
         this.boundsBotonAtras = new Rectangle(1280 / 2f - anchoBoton / 2f, 80f, anchoBoton, altoBoton);
     }
 
-    // Actualiza el estado (detecta hover en botón atrás)
     public void update(float mouseX, float mouseY) {
         if (modalAbierto) {
             hoverAtras = boundsBotonAtras.contains(mouseX, mouseY);
-            for (VistaCarta vc : cartasModal) {
-                // Desactivar la lógica global de drag en el modal
-                vc.update(mouseX, mouseY, Gdx.graphics.getDeltaTime());
-                vc.input(mouseX, mouseY);
-                vc.setSeleccionada(false);
+            float delta = Gdx.graphics.getDeltaTime();
+            for (Palo palo : filasModal.keySet()) {
+                ArrayList<VistaCarta> fila = filasModal.get(palo);
+                io.github.HarryCodeProg.TrucoSurvivors.Gestores.GestorInputArrastrable<VistaCarta> gestor = gestoresFilas.get(palo);
+                io.github.HarryCodeProg.TrucoSurvivors.Gestores.AreaElementos<VistaCarta> area = areasFilas.get(palo);
+                VistaCarta arrastradoAntes = gestor.getArrastrado();
+                gestor.update(mouseX, mouseY, delta, true);
+                for (VistaCarta vc : fila) {
+                    vc.update(mouseX, mouseY, delta);
+                    vc.setSeleccionada(false); // en este modal no hay selección, solo visualización
+                }
+                boolean cambio = gestorReordenamiento.previsualizarReordenamiento(gestor, fila);
+                if (cambio) area.distribuir(fila, gestor.getArrastrado());
+                if (arrastradoAntes != null && gestor.getArrastrado() == null) area.distribuir(fila, null);
             }
             isHovered = false;
         } else {
@@ -70,42 +89,44 @@ public class VistaMazo {
 
     public boolean tocar(float mouseX, float mouseY) {
         if (modalAbierto) {
-            // Si hace click en "Atrás" cerramos la ventana
             if (boundsBotonAtras.contains(mouseX, mouseY)) {
                 modalAbierto = false;
                 return true;
             }
-            return true; // bloquea clicks al fondo mientras está abierto
+            return true;
         } else {
-            // Si hace click en la pila del mazo, abrimos la ventana y creamos las cartas
             if (boundsMazo.contains(mouseX, mouseY)) {
                 modalAbierto = true;
                 cartasModal.clear();
+                filasModal.clear();
+                gestoresFilas.clear();
+                areasFilas.clear();
                 Palo[] palos = {Palo.ESPADA, Palo.BASTO, Palo.ORO, Palo.COPA};
-                float startX = (1280 - 1000f) / 2f + 80f;
-                float startY = (720 - 580f) / 2f + 580f - 160f;
+                float startX = MARCO_X + 80f;
+                float startY = MARCO_Y + MARCO_H - 160f;
                 float cartaW = 54f, cartaH = 78f, gapX = 14f, gapY = 40f;
-                int maxCols = 15;
+                float anchoDisponible = (MARCO_X + MARCO_W - 20f) - startX; // hasta cerca del borde derecho del marco
                 for (int fila = 0; fila < palos.length; fila++) {
                     Palo paloActual = palos[fila];
                     float currentY = startY - (fila * (cartaH + gapY));
-                    int col = 0, rowExtra = 0;
+                    ArrayList<VistaCarta> filaLista = new ArrayList<>();
                     for (Carta c : cartasModalRestantes) {
-                        if (c.getPalo() == paloActual) {
-                            float currentX = startX + (col * (cartaW + gapX));
-                            float yCarta = currentY - (rowExtra * (cartaH + gapY));
-                            VistaCarta vc = new VistaCarta(c, false, atlasCartas);
-                            vc.setTamaño(cartaW, cartaH);
-                            vc.setPosition(currentX, yCarta);
-                            vc.setHandPosition(currentX, yCarta);
-                            vc.volverAMano();
-                            vc.setSeleccionada(false);
-                            cartasModal.add(vc);
-
-                            col++;
-                            if (col >= maxCols) { col = 0; rowExtra++; }
-                        }
+                        if (c.getPalo() != paloActual) continue;
+                        VistaCarta vc = new VistaCarta(c, false, atlasCartas);
+                        vc.setTamaño(cartaW, cartaH);
+                        vc.setEnModal(true); // <-- FIX: hover individual correcto dentro del modal
+                        filaLista.add(vc);
+                        cartasModal.add(vc);
                     }
+                    AreaElementos<VistaCarta> area = new AreaElementos<>(startX, currentY, anchoDisponible, cartaH, cartaW, cartaH, gapX);
+                    area.distribuir(filaLista, null); // posiciona target correctamente (no esquina 0,0)
+                    for (VistaCarta vc : filaLista) {
+                        vc.setPosition(vc.getHandTargetX(), currentY); // instantáneo al abrir
+                        vc.setSeleccionada(false);
+                    }
+                    filasModal.put(paloActual, filaLista);
+                    areasFilas.put(paloActual, area);
+                    gestoresFilas.put(paloActual, new GestorInputArrastrable<>(filaLista));
                 }
                 return true;
             }

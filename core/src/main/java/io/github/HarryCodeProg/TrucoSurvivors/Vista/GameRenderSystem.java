@@ -24,8 +24,7 @@ public class GameRenderSystem {
 
     public GameRenderSystem(Main game) {this.game = game;}
 
-    public void render(
-        float delta, OrthographicCamera camera, Background fondoPlasma, PanelPuntajes panelPuntajes,
+    public void render(float delta, OrthographicCamera camera, Background fondoPlasma, PanelPuntajes panelPuntajes,
         float panelX, float panelY, Juego juego, Jugador jugador, Jugador rival,
         ArrayList<VistaCarta> cartasMesaJugador, ArrayList<VistaCarta> cartasMesaRival,
         ArrayList<VistaCarta> cartasRival, ArrayList<VistaCarta> cartasJugador, ArrayList<VistaJoker> jokers,
@@ -127,13 +126,7 @@ public class GameRenderSystem {
         // ÁREA DE CARTAS
         float cartasY = Y_MANO_JUGADOR - 10f;
         batch.setColor(0.05f, 0.05f, 0.08f, 0.45f);
-        batch.draw(
-            pixelBlanco,
-            areaX,
-            cartasY,
-            areaAncho,
-            ALTO_AREA_CARTAS
-        );
+        batch.draw(pixelBlanco, areaX, cartasY, areaAncho, ALTO_AREA_CARTAS);
         // Borde
         batch.setColor(0.25f, 0.28f, 0.35f, 0.7f);
         batch.draw(pixelBlanco, areaX, cartasY, areaAncho, 2f);
@@ -143,13 +136,7 @@ public class GameRenderSystem {
         // ÁREA DE JOKERS
         float jokersY = Y_JOKERS - 10f;
         batch.setColor(0.05f, 0.05f, 0.08f, 0.45f);
-        batch.draw(
-            pixelBlanco,
-            areaX,
-            jokersY,
-            areaAncho,
-            ALTO_AREA_JOKERS
-        );
+        batch.draw(pixelBlanco, areaX, jokersY, areaAncho, ALTO_AREA_JOKERS);
         batch.setColor(0.25f, 0.28f, 0.35f, 0.7f);
         batch.draw(pixelBlanco, areaX, jokersY, areaAncho, 2f);
         batch.draw(pixelBlanco, areaX, jokersY + ALTO_AREA_JOKERS - 2f, areaAncho, 2f);
