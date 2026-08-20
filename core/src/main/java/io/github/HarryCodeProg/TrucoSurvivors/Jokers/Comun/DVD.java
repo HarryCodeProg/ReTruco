@@ -13,7 +13,8 @@ public class DVD extends Joker {
 
     public DVD(){
         super(44, "DVD", "DVD", "Activa las cartas que no maten",
-            Rareza.comun, 1, Joker.FaseActivacion.INDEPENDIENTE, CategoriaJoker.NACIONAL);
+            Rareza.comun, 1, Joker.FaseActivacion.INDEPENDIENTE,
+            CategoriaJoker.INTERNACIONAL, CategoriaJoker.HERRAMIENTA, CategoriaJoker.HISTORIA);
     }
 
     @Override

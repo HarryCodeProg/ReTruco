@@ -606,7 +606,7 @@ public class GameScreenV2 implements Screen {
         gestorAnimacionResolucion.iniciar(resolucion,
             paso -> {
                 textoFlotanteActual = paso.toString();
-                resaltarPorOrigen(paso.origen);
+                resaltarPorOrigen(paso.origen, paso.origenRef);
                 reproducirSonidoActivacion(paso.origen);
                 if (esTruco) {
                     puntosTrucoDisplay = paso.chipsActual;
@@ -618,7 +618,7 @@ public class GameScreenV2 implements Screen {
             },
             () -> {
                 textoFlotanteActual = null;
-                resaltarPorOrigen(null);
+                resaltarPorOrigen(null, null);
                 if (esTruco) {
                     puntosTrucoDisplay = 0;
                     multTrucoDisplay = 1;
@@ -640,11 +640,17 @@ public class GameScreenV2 implements Screen {
         else sonidos.reproducirConVariacion("activar_carta");
     }
 
-    private void resaltarPorOrigen(String origen) {
-        for (VistaJoker vj : jokers) vj.setResaltado(origen != null && vj.getJoker().getNombre().equals(origen));
+    private void resaltarPorOrigen(String origen, Object origenRef) {
+        for (VistaJoker vj : jokers) {
+            boolean activo = origenRef != null ? vj.getJoker() == origenRef
+                : (origen != null && vj.getJoker().getNombre().equals(origen));
+            vj.setResaltado(activo);
+        }
         for (VistaCarta vc : cartasMesaJugador) {
             String nombreCarta = vc.getCarta().getNumero() + " de " + vc.getCarta().paloToString();
-            vc.setResaltado(origen != null && nombreCarta.equals(origen));
+            boolean activo = origenRef != null ? vc.getCarta() == origenRef
+                : (origen != null && nombreCarta.equals(origen));
+            vc.setResaltado(activo);
         }
     }
 

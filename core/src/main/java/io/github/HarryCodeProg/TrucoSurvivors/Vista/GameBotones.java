@@ -8,7 +8,7 @@ import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 
 public class GameBotones {
     public final Boton jugarCarta, truco, envidoOpciones, envido, realEnvido, faltaEnvido,
-        quiero, descartar, valeCuatro, noQuiero, mazo;
+        quiero, descartar, valeCuatro, noQuiero;
     public final GestorBotones gestor = new GestorBotones();
     private final EnvidoMenuState envidoMenuState = new EnvidoMenuState();
 
@@ -25,11 +25,11 @@ public class GameBotones {
         faltaEnvido = new Boton(xInicial + (anchoBoton + gapX) * 2, yDesplegable, anchoBoton, GameLayout.ALTO_BOTON, Boton.TipoColor.BRONCE, Accion.FALTA_ENVIDO);
 
         quiero = new Boton(720, GameLayout.Y_BOTONES, 120, GameLayout.ALTO_BOTON, Boton.TipoColor.CELESTE, Accion.QUIERO);
-        descartar = new Boton(1000, GameLayout.Y_BOTONES, 120, GameLayout.ALTO_BOTON, Boton.TipoColor.BORDO, Accion.DESCARTAR);
+        descartar = new Boton(1140, GameLayout.Y_BOTONES, 120, GameLayout.ALTO_BOTON, Boton.TipoColor.BORDO, Accion.DESCARTAR);
         descartar.setHabilitado(false);
-        valeCuatro = new Boton(440, GameLayout.Y_BOTONES_CANTOS, 120, GameLayout.ALTO_BOTON, Boton.TipoColor.TURQUESA, Accion.VALE_CUATRO);
+        valeCuatro = new Boton(1000, GameLayout.Y_BOTONES, 120, GameLayout.ALTO_BOTON, Boton.TipoColor.TURQUESA, Accion.VALE_CUATRO);
         noQuiero = new Boton(860, GameLayout.Y_BOTONES, 120, GameLayout.ALTO_BOTON, Boton.TipoColor.BORDO, Accion.NO_QUIERO);
-        mazo = new Boton(1140, GameLayout.Y_BOTONES, 120, GameLayout.ALTO_BOTON, Boton.TipoColor.BORDO, Accion.IR_AL_MAZO);
+        //mazo = new Boton(1140, GameLayout.Y_BOTONES, 120, GameLayout.ALTO_BOTON, Boton.TipoColor.BORDO, Accion.IR_AL_MAZO);
 
         realEnvido.setHabilitado(false);
         faltaEnvido.setHabilitado(false);
@@ -37,14 +37,14 @@ public class GameBotones {
         quiero.setHabilitado(false);
         noQuiero.setHabilitado(false);
 
-        for (Boton b : new Boton[]{envidoOpciones, envido, truco, mazo, jugarCarta, descartar, realEnvido, faltaEnvido, valeCuatro, quiero, noQuiero}) {
+        for (Boton b : new Boton[]{envidoOpciones, envido, truco, jugarCarta, descartar, realEnvido, faltaEnvido, valeCuatro, quiero, noQuiero}) {
             gestor.agregar(b);
         }
     }
 
     public void actualizarEstados(Juego juego, boolean puedeInteractuar, int cartasSeleccionadas) {
         gestor.setHabilitado(Accion.DESCARTAR, puedeInteractuar);
-        gestor.setHabilitado(Accion.IR_AL_MAZO, puedeInteractuar);
+        //gestor.setHabilitado(Accion.IR_AL_MAZO, puedeInteractuar);
         gestor.setHabilitado(Accion.TRUCO, puedeInteractuar);
         gestor.setHabilitado(Accion.ENVIDO, puedeInteractuar);
 

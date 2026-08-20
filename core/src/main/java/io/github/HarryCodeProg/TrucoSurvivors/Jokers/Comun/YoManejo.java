@@ -3,6 +3,7 @@ package io.github.HarryCodeProg.TrucoSurvivors.Jokers.Comun;
 import io.github.HarryCodeProg.TrucoSurvivors.Activacion.ContextoJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Carta;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.EventoJuego;
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Rareza;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
@@ -17,7 +18,8 @@ public class YoManejo extends Joker {
             "Reactiva 3 veces la primera carta que mata",
             Rareza.comun,
             1,
-            Joker.FaseActivacion.AL_PUNTUAR_CARTA
+            Joker.FaseActivacion.AL_PUNTUAR_CARTA,
+            CategoriaJoker.SECUENCIA, CategoriaJoker.TV
         );
     }
 
@@ -34,8 +36,8 @@ public class YoManejo extends Joker {
         if (evento != EventoJuego.AL_MATAR_CARTA) return;
         Carta carta = ctx.getCartaEnResolucion();
         if (carta == null) return;
-        if (ctx.isPrimerCartaQueMataAplicada()) return;
-        ctx.marcarPrimerCartaQueMataAplicada();
+        if (ctx.isPrimerCartaQueMataAplicada(this)) return;
+        ctx.marcarPrimerCartaQueMataAplicada(this);
         for (int i = 0; i < 3; i++) {
             ctx.reencolarActivacionCarta(carta, EventoJuego.AL_PUNTUAR_CARTA);
         }

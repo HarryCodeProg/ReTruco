@@ -10,7 +10,8 @@ import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 public class Ñoquis extends Joker {
     public Ñoquis(){
         super(26, "Ñoquis", "Ñoquis", "Gana +2 Multiplicador truco cada vez que cantás \"Quiero\"",
-            Rareza.comun, 1, Joker.FaseActivacion.INDEPENDIENTE, CategoriaJoker.NACIONAL);
+            Rareza.comun, 1, Joker.FaseActivacion.INDEPENDIENTE,
+            CategoriaJoker.NACIONAL, CategoriaJoker.COMIDA, CategoriaJoker.TRADICIONAL);
     }
 
     @Override
@@ -33,6 +34,6 @@ public class Ñoquis extends Joker {
             return;
         }
         if (evento != EventoJuego.ANTES_DE_SUMAR_TRUCO) return;
-        ctx.getResolucionActual().sumarMult(getAcumulado(), getNombre());
+        ctx.getResolucionActual().sumarMult(getAcumulado(), getNombre(),this);
     }
 }

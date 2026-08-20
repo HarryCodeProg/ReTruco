@@ -42,7 +42,7 @@ public class Juego {
     private int manosGanadasConsecutivas = 0;
     private boolean recompensaFinDeRondaAplicada = false;
 
-    public Juego(Jugador jugador, Jugador rival, Mazo mazoRival){
+    public Juego(Jugador jugador, Jugador rival, Mazo mazoRival) {
         this.jugador = jugador;
         this.rival = rival;
         this.jugadorEsMano = true;
@@ -64,7 +64,7 @@ public class Juego {
         return new ContextoJuego(jugador, rival, jugador.getMazo(), mesa, this);
     }
 
-    public void repartir(){
+    public void repartir() {
         this.jugador.getMazo().barajar();
         this.rival.getMazo().barajar();
         jugador.robar(jugador.getMazo(), jugador.getTamañoMano());
@@ -86,7 +86,7 @@ public class Juego {
         return mazo;
     }
 
-    public void ganadorEnvido(){
+    public void ganadorEnvido() {
         double puntosEJ = jugador.getPuntosEnvido();
         double puntosER = rival.getPuntosEnvido();
         double sumMult = calcularPuntosEnvido();
@@ -118,7 +118,7 @@ public class Juego {
         return total;
     }
 
-    public void irAlMazo(){
+    public void irAlMazo() {
         vaciarTruco();
         vaciarCantos();
         devolverCartas();
@@ -128,11 +128,11 @@ public class Juego {
         repartir();
     }
 
-    public void setManoFinalizada(boolean b){
+    public void setManoFinalizada(boolean b) {
         this.manoFinalizada = b;
     }
 
-    public ArrayList<Carta> descartarCartas(ArrayList<Carta> cartas){
+    public ArrayList<Carta> descartarCartas(ArrayList<Carta> cartas) {
         ArrayList<Carta> cartasNuevas = new ArrayList<>();
         if (cartas.isEmpty()) return cartasNuevas;
         if (!hayDescartes()) return cartasNuevas;
@@ -149,30 +149,50 @@ public class Juego {
         return cartasNuevas;
     }
 
-    public void setTurnoActual(Jugador turnoActual) { this.turnoActual = turnoActual; }
+    public void setTurnoActual(Jugador turnoActual) {
+        this.turnoActual = turnoActual;
+    }
 
-    public boolean hayDescartes(){ return this.descartesActuales > 0; }
+    public boolean hayDescartes() {
+        return this.descartesActuales > 0;
+    }
 
-    public void restarUnDescarte(){ this.descartesActuales -= 1; }
+    public void restarUnDescarte() {
+        this.descartesActuales -= 1;
+    }
 
-    public int getMazoDisponible(){ return jugador.getMazo().getCantidadDisponibles(); }
+    public int getMazoDisponible() {
+        return jugador.getMazo().getCantidadDisponibles();
+    }
 
-    public Mazo getMazoJugador(){ return this.jugador.getMazo(); }
+    public Mazo getMazoJugador() {
+        return this.jugador.getMazo();
+    }
 
-    public ResolucionPuntaje getUltimaResolucion() {return ultimaResolucion;}
+    public ResolucionPuntaje getUltimaResolucion() {
+        return ultimaResolucion;
+    }
 
     public void devolverCartas() {
-        for (Carta c : mesa.getMesaJugador()) {c.resetearValores();}
-        for (Carta c : mesa.getMesaRival()) {c.resetearValores();}
-        for (Carta c : jugador.getMano()) {c.resetearValores();}
-        for (Carta c : rival.getMano()) {c.resetearValores();}
+        for (Carta c : mesa.getMesaJugador()) {
+            c.resetearValores();
+        }
+        for (Carta c : mesa.getMesaRival()) {
+            c.resetearValores();
+        }
+        for (Carta c : jugador.getMano()) {
+            c.resetearValores();
+        }
+        for (Carta c : rival.getMano()) {
+            c.resetearValores();
+        }
         mesa.limpiarMesa();
         jugador.limpiarMano();
         rival.limpiarMano();
     }
 
     public void jugarMano(int i) {
-        if (i==0) gestorJokers.disparar(EventoJuego.AL_JUGAR_PRIMERA_CARTA, crearContexto(), this);
+        if (i == 0) gestorJokers.disparar(EventoJuego.AL_JUGAR_PRIMERA_CARTA, crearContexto(), this);
         else if (i == 1) gestorJokers.disparar(EventoJuego.AL_JUGAR_SEGUNDA_CARTA, crearContexto(), this);
         ResultadoMano resultado = matoCarta(i);
         resultados.add(resultado);
@@ -195,32 +215,32 @@ public class Juego {
         }
     }
 
-    public ResultadoMano matoCarta(int i){
+    public ResultadoMano matoCarta(int i) {
         double valorJugador = mesa.getMesaJugador().get(i).getValorTrucoActual();
         double valorRival = mesa.getMesaRival().get(i).getValorTrucoActual();
-        if(valorJugador > valorRival) return ResultadoMano.JUGADOR;
-        if(valorJugador < valorRival) return ResultadoMano.RIVAL;
+        if (valorJugador > valorRival) return ResultadoMano.JUGADOR;
+        if (valorJugador < valorRival) return ResultadoMano.RIVAL;
         return ResultadoMano.PARDA;
     }
 
     public Jugador ganoTruco() {
-        if(resultados.size() < 2) return null;
+        if (resultados.size() < 2) return null;
         ResultadoMano r1 = resultados.get(0);
         ResultadoMano r2 = resultados.get(1);
         ResultadoMano r3 = resultados.size() > 2 ? resultados.get(2) : null;
         boolean dobleParda = (r1 == ResultadoMano.PARDA && r2 == ResultadoMano.PARDA);
-        if(r1 == ResultadoMano.JUGADOR && r2 == ResultadoMano.JUGADOR) return jugador;
-        if(r1 == ResultadoMano.RIVAL   && r2 == ResultadoMano.RIVAL)   return rival;
-        if(r1 == ResultadoMano.PARDA   && r2 == ResultadoMano.JUGADOR) return jugador;
-        if(r1 == ResultadoMano.PARDA   && r2 == ResultadoMano.RIVAL)   return rival;
-        if(r1 == ResultadoMano.JUGADOR && r2 == ResultadoMano.PARDA)   return jugador;
-        if(r1 == ResultadoMano.RIVAL   && r2 == ResultadoMano.PARDA)   return rival;
-        if(r3 == null) return null;
-        if(r3 == ResultadoMano.JUGADOR) return jugador;
-        if(r3 == ResultadoMano.RIVAL)   return rival;
-        if(dobleParda) return null;
-        if(r1 == ResultadoMano.JUGADOR) return jugador;
-        if(r1 == ResultadoMano.RIVAL)   return rival;
+        if (r1 == ResultadoMano.JUGADOR && r2 == ResultadoMano.JUGADOR) return jugador;
+        if (r1 == ResultadoMano.RIVAL && r2 == ResultadoMano.RIVAL) return rival;
+        if (r1 == ResultadoMano.PARDA && r2 == ResultadoMano.JUGADOR) return jugador;
+        if (r1 == ResultadoMano.PARDA && r2 == ResultadoMano.RIVAL) return rival;
+        if (r1 == ResultadoMano.JUGADOR && r2 == ResultadoMano.PARDA) return jugador;
+        if (r1 == ResultadoMano.RIVAL && r2 == ResultadoMano.PARDA) return rival;
+        if (r3 == null) return null;
+        if (r3 == ResultadoMano.JUGADOR) return jugador;
+        if (r3 == ResultadoMano.RIVAL) return rival;
+        if (dobleParda) return null;
+        if (r1 == ResultadoMano.JUGADOR) return jugador;
+        if (r1 == ResultadoMano.RIVAL) return rival;
         return null;
     }
 
@@ -272,19 +292,19 @@ public class Juego {
         return obtenerGanadorTruco() != null;
     }
 
-    public boolean cantarTruco(Jugador quien, int nivel){
+    public boolean cantarTruco(Jugador quien, int nivel) {
         if (nivelTrucoActual != 0) return false;
         return proponerTruco(quien, nivel);
     }
 
-    public boolean escalarTruco(Jugador quien){
+    public boolean escalarTruco(Jugador quien) {
         if (cantorTrucoPendiente == null) return false;
         if (quien.equals(cantorTrucoPendiente)) return false;
         int siguiente = nivelTrucoActual + 1;
         return proponerTruco(quien, siguiente);
     }
 
-    private boolean proponerTruco(Jugador quien, int nivel){
+    private boolean proponerTruco(Jugador quien, int nivel) {
         if (nivel != nivelTrucoActual + 1) return false;
         if (nivel > 3) return false;
         if (quien.equals(ultimoCantorTruco)) return false;
@@ -295,20 +315,37 @@ public class Juego {
         return true;
     }
 
-    public boolean hayCantoTrucoPendiente(){ return cantorTrucoPendiente != null; }
-    public Jugador getCantorTrucoPendiente(){ return cantorTrucoPendiente; }
-    public boolean isPrimeraCartaQueMataAplicada() { return primeraCartaQueMataAplicada; }
-    public void marcarPrimeraCartaQueMataAplicada() { this.primeraCartaQueMataAplicada = true; }
-    public boolean isPrimeraCartaQueNoMataAplicada() { return primeraCartaQueNoMataAplicada; }
-    public void marcarPrimeraCartaQueNoMataAplicada() { this.primeraCartaQueNoMataAplicada = true; }
+    public boolean hayCantoTrucoPendiente() {
+        return cantorTrucoPendiente != null;
+    }
 
-    public boolean puedeEscalarTruco(Jugador quien){
+    public Jugador getCantorTrucoPendiente() {
+        return cantorTrucoPendiente;
+    }
+
+    public boolean isPrimeraCartaQueMataAplicada() {
+        return primeraCartaQueMataAplicada;
+    }
+
+    public void marcarPrimeraCartaQueMataAplicada() {
+        this.primeraCartaQueMataAplicada = true;
+    }
+
+    public boolean isPrimeraCartaQueNoMataAplicada() {
+        return primeraCartaQueNoMataAplicada;
+    }
+
+    public void marcarPrimeraCartaQueNoMataAplicada() {
+        this.primeraCartaQueNoMataAplicada = true;
+    }
+
+    public boolean puedeEscalarTruco(Jugador quien) {
         return cantorTrucoPendiente != null
             && !quien.equals(cantorTrucoPendiente)
             && nivelTrucoActual < 3;
     }
 
-    public int proximoNivelTrucoDisponible(Jugador quien){
+    public int proximoNivelTrucoDisponible(Jugador quien) {
         if (cantorTrucoPendiente != null) return -1;
         int siguiente = nivelTrucoActual + 1;
         if (siguiente > 3) return -1;
@@ -316,7 +353,7 @@ public class Juego {
         return siguiente;
     }
 
-    public void responderTruco(boolean quiero){
+    public void responderTruco(boolean quiero) {
         if (cantorTrucoPendiente == null) return;
         Jugador canter = cantorTrucoPendiente;
         agregarCantoTruco(nivelTrucoPendiente);
@@ -326,9 +363,9 @@ public class Juego {
             jugador.aumentarMultiplicadorTrucoTemporal(puntosCanto);
             rival.aumentarMultiplicadorTrucoTemporal(puntosCanto);
             gestorJokers.disparar(EventoJuego.AL_DECIR_QUIERO_TRUCO, crearContexto(), this);
-        }else {
-        resolverNoQuieroTruco(canter);
-        gestorJokers.disparar(EventoJuego.AL_DECIR_NO_QUIERO_TRUCO, crearContexto(), this); // NUEVO
+        } else {
+            resolverNoQuieroTruco(canter);
+            gestorJokers.disparar(EventoJuego.AL_DECIR_NO_QUIERO_TRUCO, crearContexto(), this); // NUEVO
         }
         cantorTrucoPendiente = null;
         nivelTrucoPendiente = null;
@@ -339,16 +376,19 @@ public class Juego {
         return ultimaRespuestaTrucoFueNoQuiero;
     }
 
-    private double valorNivelTruco(int nivel){
-        switch(nivel){
-            case 1: return CantoTruco.TRUCO.getPuntos();
-            case 2: return CantoTruco.RETRUCO.getPuntos();
-            case 3: return CantoTruco.VALE_CUATRO.getPuntos();
+    private double valorNivelTruco(int nivel) {
+        switch (nivel) {
+            case 1:
+                return CantoTruco.TRUCO.getPuntos();
+            case 2:
+                return CantoTruco.RETRUCO.getPuntos();
+            case 3:
+                return CantoTruco.VALE_CUATRO.getPuntos();
         }
         return 0;
     }
 
-    private void resolverNoQuieroTruco(Jugador canter){
+    private void resolverNoQuieroTruco(Jugador canter) {
         double total = calcularPuntosTruco();
         double otorgado = total * 0.5;
         if (canter.equals(jugador)) puntosJugador += otorgado;
@@ -361,27 +401,33 @@ public class Juego {
         return total;
     }
 
-    private void agregarCantoTruco(int i){
-        switch(i){
-            case 1: cantosTruco.add(CantoTruco.TRUCO); break;
-            case 2: cantosTruco.add(CantoTruco.RETRUCO); break;
-            case 3: cantosTruco.add(CantoTruco.VALE_CUATRO); break;
+    private void agregarCantoTruco(int i) {
+        switch (i) {
+            case 1:
+                cantosTruco.add(CantoTruco.TRUCO);
+                break;
+            case 2:
+                cantosTruco.add(CantoTruco.RETRUCO);
+                break;
+            case 3:
+                cantosTruco.add(CantoTruco.VALE_CUATRO);
+                break;
         }
     }
 
-    public boolean cantarEnvido(Jugador quien, int nivel){
+    public boolean cantarEnvido(Jugador quien, int nivel) {
         if (nivelEnvidoActual != 0) return false;
         return proponerEnvido(quien, nivel);
     }
 
-    public boolean escalarEnvido(Jugador quien){
+    public boolean escalarEnvido(Jugador quien) {
         if (cantorEnvidoPendiente == null) return false;
         if (quien.equals(cantorEnvidoPendiente)) return false;
         int siguiente = nivelEnvidoActual + 1;
         return proponerEnvido(quien, siguiente);
     }
 
-    private boolean proponerEnvido(Jugador quien, int nivel){
+    private boolean proponerEnvido(Jugador quien, int nivel) {
         if (!estaEnVentanaDeEnvido()) return false;
         if (nivel <= nivelEnvidoActual) return false;
         if (quien.equals(ultimoCantorEnvido)) return false;
@@ -397,23 +443,28 @@ public class Juego {
         return mesa.getMesaJugador().isEmpty() || mesa.getMesaRival().isEmpty();
     }
 
-    public boolean hayCantoEnvidoPendiente(){ return cantorEnvidoPendiente != null; }
-    public Jugador getCantorEnvidoPendiente(){ return cantorEnvidoPendiente; }
+    public boolean hayCantoEnvidoPendiente() {
+        return cantorEnvidoPendiente != null;
+    }
 
-    public boolean puedeEscalarEnvido(Jugador quien){
+    public Jugador getCantorEnvidoPendiente() {
+        return cantorEnvidoPendiente;
+    }
+
+    public boolean puedeEscalarEnvido(Jugador quien) {
         return cantorEnvidoPendiente != null
             && !quien.equals(cantorEnvidoPendiente)
             && nivelEnvidoActual < 3;
     }
 
-    public boolean puedeCantarEnvidoNivel(Jugador quien, int nivel){
+    public boolean puedeCantarEnvidoNivel(Jugador quien, int nivel) {
         return estaEnVentanaDeEnvido()
             && cantorEnvidoPendiente == null
             && nivel > nivelEnvidoActual
             && !quien.equals(ultimoCantorEnvido);
     }
 
-    public void responderEnvido(boolean quiero){
+    public void responderEnvido(boolean quiero) {
         if (cantorEnvidoPendiente == null) return;
         Jugador canter = cantorEnvidoPendiente;
         agregarCantoEnvido(nivelEnvidoPendiente);
@@ -427,7 +478,7 @@ public class Juego {
         verificarEstadoCombate();
     }
 
-    private void resolverNoQuieroEnvido(Jugador canter){
+    private void resolverNoQuieroEnvido(Jugador canter) {
         double sumMult = calcularPuntosEnvido();
         double puntosCantor = canter.getPuntosEnvido();
         double total = puntosCantor * sumMult;
@@ -436,10 +487,15 @@ public class Juego {
         else puntosRival += otorgado;
     }
 
-    public void agregarCartaJugador(Carta carta){ mesa.agregarCartaJugador(carta); }
-    public void agregarCartaRival(Carta carta){ mesa.agregarCartaRival(carta); }
+    public void agregarCartaJugador(Carta carta) {
+        mesa.agregarCartaJugador(carta);
+    }
 
-    public void vaciarTruco(){
+    public void agregarCartaRival(Carta carta) {
+        mesa.agregarCartaRival(carta);
+    }
+
+    public void vaciarTruco() {
         this.resultados.clear();
         this.cantosTruco.clear();
         this.nivelTrucoActual = 0;
@@ -452,7 +508,7 @@ public class Juego {
         rival.multTrucoOriginal();
     }
 
-    public void vaciarCantos(){
+    public void vaciarCantos() {
         this.cantosEnvido.clear();
         this.nivelEnvidoActual = 0;
         this.ultimoCantorEnvido = null;
@@ -462,30 +518,57 @@ public class Juego {
         rival.multEnvidoOriginal();
     }
 
-    public Mesa getMesa(){ return this.mesa; }
-    public Jugador getTurnoActual(){ return this.turnoActual; }
-    public Jugador getJugador(){ return this.jugador; }
-    public Jugador getRival(){ return this.rival; }
+    public Mesa getMesa() {
+        return this.mesa;
+    }
 
-    public void agregarCantoEnvido(int i){
-        switch(i){
-            case 1: this.cantosEnvido.add(CantoEnvido.ENVIDO); break;
-            case 2: this.cantosEnvido.add(CantoEnvido.REAL_ENVIDO); break;
-            case 3: this.cantosEnvido.add(CantoEnvido.FALTA_ENVIDO); break;
+    public Jugador getTurnoActual() {
+        return this.turnoActual;
+    }
+
+    public Jugador getJugador() {
+        return this.jugador;
+    }
+
+    public Jugador getRival() {
+        return this.rival;
+    }
+
+    public void agregarCantoEnvido(int i) {
+        switch (i) {
+            case 1:
+                this.cantosEnvido.add(CantoEnvido.ENVIDO);
+                break;
+            case 2:
+                this.cantosEnvido.add(CantoEnvido.REAL_ENVIDO);
+                break;
+            case 3:
+                this.cantosEnvido.add(CantoEnvido.FALTA_ENVIDO);
+                break;
         }
     }
 
-    public void avanzarMano(){
+    public void avanzarMano() {
         jugadorEsMano = !jugadorEsMano;
         faseActual += 1;
         rondaActual = 1;
     }
 
-    public double getPuntosJugador(){ return puntosJugador; }
-    public double getPuntosRival(){ return puntosRival; }
+    public double getPuntosJugador() {
+        return puntosJugador;
+    }
 
-    public void setRival(Jugador rival){ this.rival = rival; }
-    public void setPuntajeMeta(double i){ this.puntajeMeta = i; }
+    public double getPuntosRival() {
+        return puntosRival;
+    }
+
+    public void setRival(Jugador rival) {
+        this.rival = rival;
+    }
+
+    public void setPuntajeMeta(double i) {
+        this.puntajeMeta = i;
+    }
 
     public EstadoCombate verificarEstadoCombate() {
         if (puntosJugador >= puntajeMeta) {
@@ -499,11 +582,15 @@ public class Juego {
         return EstadoCombate.EN_PROGRESO;
     }
 
-    public double getPuntajeMeta(){
+    public double getPuntajeMeta() {
         return this.puntajeMeta;
     }
 
-    public int getManosGanadasConsecutivas() { return manosGanadasConsecutivas; }
+    public int getManosGanadasConsecutivas() {
+        return manosGanadasConsecutivas;
+    }
 
-    public int getDescartesActuales(){ return this.descartesActuales; }
+    public int getDescartesActuales() {
+        return this.descartesActuales;
+    }
 }

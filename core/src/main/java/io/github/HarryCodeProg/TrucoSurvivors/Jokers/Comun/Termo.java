@@ -23,7 +23,7 @@ public class Termo extends Joker {
             Rareza.comun,
             1,
             AL_JUGAR,
-            CategoriaJoker.NACIONAL
+            CategoriaJoker.NACIONAL, CategoriaJoker.AGUA
         );
     }
 

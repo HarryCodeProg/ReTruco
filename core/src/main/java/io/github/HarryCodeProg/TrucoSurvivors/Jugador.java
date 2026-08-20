@@ -40,6 +40,11 @@ public class Jugador {
     private final List<Consumer<Joker>> jokerRemovedListeners = new CopyOnWriteArrayList<>();
     private final List<Consumer<Santo>> santoAddedListeners = new CopyOnWriteArrayList<>();
     private final List<Consumer<Santo>> santoRemovedListeners = new CopyOnWriteArrayList<>();
+    private int espacioJokersTiendaExtra = 0;
+    private int espacioCartasTiendaExtra = 0;
+    private int espacioSantosTiendaExtra = 0;
+    private double multiplicadorPrecioTienda = 1.0;
+    private int rerollsGratisTienda = 0;
 
     public Jugador(String nombre) {
         this.nombre = nombre;
@@ -264,4 +269,23 @@ public class Jugador {
     public void removeSantoAddedListener(Consumer<Santo> l) { santoAddedListeners.remove(l); }
     public void addSantoRemovedListener(Consumer<Santo> l) { santoRemovedListeners.add(l); }
     public void removeSantoRemovedListener(Consumer<Santo> l) { santoRemovedListeners.remove(l); }
+
+    public void sumarEspacioJokersTiendaPersistente(int c) { espacioJokersTiendaExtra += c; }
+    public void sumarEspacioCartasTiendaPersistente(int c) { espacioCartasTiendaExtra += c; }
+    public void sumarEspacioSantosTiendaPersistente(int c) { espacioSantosTiendaExtra += c; }
+    public void aplicarDescuentoTiendaPersistente(double factor) { multiplicadorPrecioTienda *= factor; }
+    public void sumarRerollsGratisTienda(int c) { rerollsGratisTienda += c; }
+
+    public int getEspacioJokersTiendaExtra() { return espacioJokersTiendaExtra; }
+    public int getEspacioCartasTiendaExtra() { return espacioCartasTiendaExtra; }
+    public int getEspacioSantosTiendaExtra() { return espacioSantosTiendaExtra; }
+    public double getMultiplicadorPrecioTienda() { return multiplicadorPrecioTienda; }
+    public int getRerollsGratisTienda() { return rerollsGratisTienda; }
+
+    /** Consume un reroll gratis persistente si hay. Devuelve true si lo consumió. */
+    public boolean consumirRerollGratisTienda() {
+        if (rerollsGratisTienda <= 0) return false;
+        rerollsGratisTienda--;
+        return true;
+    }
 }

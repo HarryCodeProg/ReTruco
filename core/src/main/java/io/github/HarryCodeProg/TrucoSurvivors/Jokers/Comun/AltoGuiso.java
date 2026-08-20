@@ -13,7 +13,8 @@ public class AltoGuiso extends Joker {
 
     public AltoGuiso(){
         super(40, "Alto Guiso", "AltoGuiso", "La primer carta no figura que active otorga x1.5 multiplicador truco",
-            Rareza.comun, 1, Joker.FaseActivacion.AL_PUNTUAR_CARTA, CategoriaJoker.NACIONAL);
+            Rareza.comun, 1, Joker.FaseActivacion.AL_PUNTUAR_CARTA,
+            CategoriaJoker.TV, CategoriaJoker.SECUENCIA);
     }
 
     @Override
@@ -26,10 +27,10 @@ public class AltoGuiso extends Joker {
     @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego){
         if (evento != EventoJuego.AL_PUNTUAR_CARTA) return;
-        if (ctx.isPrimerNoFiguraPuntuadaAplicada()) return;
+        if (ctx.isPrimerNoFiguraPuntuadaAplicada(this)) return;
         Carta c = ctx.getCartaEnResolucion();
         if (c == null || c.getNumero() >= 10) return;
-        ctx.marcarPrimerNoFiguraPuntuadaAplicada();
-        ctx.getResolucionActual().multiplicarMult(1.5, getNombre());
+        ctx.marcarPrimerNoFiguraPuntuadaAplicada(this);
+        ctx.getResolucionActual().multiplicarMult(1.5, getNombre(), this);
     }
 }

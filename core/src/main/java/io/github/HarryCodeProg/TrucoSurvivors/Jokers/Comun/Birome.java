@@ -13,7 +13,8 @@ public class Birome extends Joker {
 
     public Birome(){
         super(37, "Birome", "Birome", "Las cartas de espada que ganen envido reciben +15 puntos envido",
-            Rareza.comun, 1, Joker.FaseActivacion.INDEPENDIENTE, CategoriaJoker.NACIONAL);
+            Rareza.comun, 1, Joker.FaseActivacion.INDEPENDIENTE,
+            CategoriaJoker.NACIONAL, CategoriaJoker.TRADICIONAL, CategoriaJoker.HISTORIA);
     }
 
     @Override

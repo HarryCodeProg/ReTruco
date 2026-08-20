@@ -26,7 +26,6 @@ public class GestorJokers {
             }
         }
         ctx.setColaActivaciones(cola);
-
         while (!cola.isEmpty()) {
             Activacion act = cola.poll();
             act.joker.aplicarEfecto(act.evento, ctx, juego);

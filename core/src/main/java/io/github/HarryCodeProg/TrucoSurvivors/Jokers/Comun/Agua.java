@@ -13,7 +13,8 @@ public class Agua extends Joker {
 
     public Agua(){
         super(39, "Agua?", "Agua", "La primer carta figura que active otorga x2 multiplicador truco",
-            Rareza.comun, 1, Joker.FaseActivacion.AL_PUNTUAR_CARTA, CategoriaJoker.NACIONAL);
+            Rareza.comun, 1, Joker.FaseActivacion.AL_PUNTUAR_CARTA,
+            CategoriaJoker.TV, CategoriaJoker.SECUENCIA);
     }
 
     @Override
@@ -26,10 +27,10 @@ public class Agua extends Joker {
     @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego){
         if (evento != EventoJuego.AL_PUNTUAR_CARTA) return;
-        if (ctx.isPrimerFiguraPuntuadaAplicada()) return;
+        if (ctx.isPrimerFiguraPuntuadaAplicada(this)) return;
         Carta c = ctx.getCartaEnResolucion();
         if (c == null || c.getNumero() < 10) return;
-        ctx.marcarPrimerFiguraPuntuadaAplicada();
-        ctx.getResolucionActual().multiplicarMult(2, getNombre());
+        ctx.marcarPrimerFiguraPuntuadaAplicada(this);
+        ctx.getResolucionActual().multiplicarMult(2, getNombre(), this);
     }
 }

@@ -13,7 +13,8 @@ public class NoMeMidas extends Joker {
 
     public NoMeMidas(){
         super(48, "No Me Midas", "NoMeMidas", "Cada espada que mata vuelve a activarse",
-            Rareza.comun, 1, Joker.FaseActivacion.AL_PUNTUAR_CARTA, CategoriaJoker.NACIONAL);
+            Rareza.comun, 1, Joker.FaseActivacion.AL_PUNTUAR_CARTA,
+            CategoriaJoker.TV, CategoriaJoker.SECUENCIA);
     }
 
     @Override
@@ -30,7 +31,7 @@ public class NoMeMidas extends Joker {
         Carta c = ctx.getCartaEnResolucion();
         if (c == null || c.getPalo() != Palo.ESPADA) return;
         if (!ctx.cartaMato(c)) return;
-        if (!ctx.marcarCartaReactivada(c)) return;
+        if (!ctx.marcarUsado(this, c)) return;
         ctx.reencolarActivacionCarta(c, EventoJuego.AL_PUNTUAR_CARTA);
     }
 }

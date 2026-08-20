@@ -13,7 +13,8 @@ public class NoEstaTanMal extends Joker {
 
     public NoEstaTanMal(){
         super(50, "No Esta Tan Mal", "NoEstaTanMal", "Si perdés la mano, aumenta +4 multiplicador truco",
-            Rareza.comun, 1, Joker.FaseActivacion.INDEPENDIENTE, CategoriaJoker.NACIONAL);
+            Rareza.comun, 1, Joker.FaseActivacion.INDEPENDIENTE,
+            CategoriaJoker.TV, CategoriaJoker.SECUENCIA);
     }
 
     @Override
@@ -36,6 +37,6 @@ public class NoEstaTanMal extends Joker {
             return;
         }
         if (evento != EventoJuego.ANTES_DE_SUMAR_TRUCO) return;
-        ctx.getResolucionActual().sumarMult(getAcumulado(), getNombre());
+        ctx.getResolucionActual().sumarMult(getAcumulado(), getNombre(), this);
     }
 }

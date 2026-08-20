@@ -11,7 +11,8 @@ public class Flan extends Joker {
 
     public Flan() {
         super(25, "Flan", "Flan", "+50 puntos truco y +50 puntos envido por cada otro joker con categoria POSTRE",
-            Rareza.comun, 4, Joker.FaseActivacion.INDEPENDIENTE, CategoriaJoker.POSTRE);
+            Rareza.comun, 4, Joker.FaseActivacion.INDEPENDIENTE,
+            CategoriaJoker.POSTRE, CategoriaJoker.COMIDA, CategoriaJoker.DULCE);
     }
 
     @Override

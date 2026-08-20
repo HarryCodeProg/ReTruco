@@ -13,7 +13,8 @@ public class Sacramento extends Joker {
 
     public Sacramento(){
         super(18, "Sacramento", "Sacramento", "Las cartas de basto que maten reciben +15 puntos truco",
-            Rareza.comun, 1, FaseActivacion.AL_PUNTUAR_CARTA, CategoriaJoker.NACIONAL);
+            Rareza.comun, 1, FaseActivacion.AL_PUNTUAR_CARTA,
+            CategoriaJoker.NACIONAL, CategoriaJoker.COMIDA, CategoriaJoker.DULCE);
     }
 
     @Override

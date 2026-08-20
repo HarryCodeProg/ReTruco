@@ -37,7 +37,7 @@ public class Cerveza extends Joker {
         double bonus = 300;
         int otrosConAlcohol = ctx.contarJokersConCategoria(CategoriaJoker.ALCOHOL, this);
         bonus -= 50 * otrosConAlcohol;
-        ctx.getResolucionActual().sumarChips(bonus, this.getNombre());
+        ctx.getResolucionActual().sumarChips(bonus, this.getNombre(), this);
     }
 
 }

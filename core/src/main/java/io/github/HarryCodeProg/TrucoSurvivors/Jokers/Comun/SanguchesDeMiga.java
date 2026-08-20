@@ -18,7 +18,7 @@ public class SanguchesDeMiga extends Joker {
             Rareza.comun,
             1,
             Joker.FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.COMIDA
+            CategoriaJoker.COMIDA, CategoriaJoker.NACIONAL, CategoriaJoker.SALADO
         );
     }
 
@@ -49,10 +49,7 @@ public class SanguchesDeMiga extends Joker {
         }
         if (evento == EventoJuego.ANTES_DE_SUMAR_TRUCO) {
             if (getAcumulado() <= 0) return;
-            ctx.getResolucionActual().sumarChips(
-                getAcumulado(),
-                getNombre()
-            );
+            ctx.getResolucionActual().sumarChips(getAcumulado(), getNombre(), this);
         }
     }
 }

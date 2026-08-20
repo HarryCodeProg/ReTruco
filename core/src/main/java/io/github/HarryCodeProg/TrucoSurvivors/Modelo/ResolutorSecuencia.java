@@ -41,14 +41,12 @@ public class ResolutorSecuencia {
         for (Carta carta : cartasGanadoras) {
             cola.addLast(Activacion.deCarta(carta, eventoPorCarta));
         }
-
         // 2. Jokers independientes al final, de izquierda a derecha
         for (Joker j : ctx.getJugador().getJokers()) {
             if (j.getFase() == Joker.FaseActivacion.INDEPENDIENTE) {
                 cola.addLast(Activacion.deJoker(j, eventoIndependiente));
             }
         }
-
         ctx.setColaActivaciones(cola);
         procesarCola(cola, ctx);
     }
@@ -69,7 +67,7 @@ public class ResolutorSecuencia {
         Carta carta = act.carta;
         String nombreCarta = carta.getNumero() + " de " + carta.paloToString();
         ctx.setCartaEnResolucion(carta);
-        ctx.getResolucionActual().sumarChips(carta.getPuntosTrucoAporteEfectivo(), nombreCarta); // <-- CAMBIO: aporte, no poder
+        ctx.getResolucionActual().sumarChips(carta.getPuntosTrucoAporteEfectivo(), nombreCarta, carta); // <-- agregar carta como origenRef
         for (Joker j : ctx.getJugador().getJokers()) {
             if (j.getFase() == Joker.FaseActivacion.AL_PUNTUAR_CARTA) {
                 j.aplicarEfecto(act.evento, ctx, juego);

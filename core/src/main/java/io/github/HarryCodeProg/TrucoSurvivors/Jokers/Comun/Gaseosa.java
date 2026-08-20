@@ -40,7 +40,7 @@ public class Gaseosa extends Joker {
         if (ctx.tieneJoker(Fernet.class)) {
             bonus += 200;
         }
-        ctx.getResolucionActual().sumarChips(bonus, this.getNombre());
+        ctx.getResolucionActual().sumarChips(bonus, this.getNombre(),this);
     }
 }
 

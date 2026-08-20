@@ -24,7 +24,10 @@ public enum CategoriaJoker {
     MASCOTA,
     TRANSPORTE,
     HERRAMIENTA,
-    POSTRE;
+    POSTRE,
+    SECUENCIA,
+    TV,
+    SALADO;
 
     public String getTexto() {
         return Main.getTexto("categoria." + this.name());

@@ -14,7 +14,8 @@ public class Damajuana extends Joker {
 
     public Damajuana(){
         super(41, "Damajuana", "Damajuana", "Si tenés 3 jokers 'Bebida', x3 multiplicador truco",
-            Rareza.comun, 1, Joker.FaseActivacion.INDEPENDIENTE, CategoriaJoker.NACIONAL);
+            Rareza.comun, 1, Joker.FaseActivacion.INDEPENDIENTE,
+            CategoriaJoker.NACIONAL, CategoriaJoker.BEBIDA, CategoriaJoker.ALCOHOL);
     }
 
     @Override
@@ -28,6 +29,6 @@ public class Damajuana extends Joker {
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego){
         if (evento != EventoJuego.ANTES_DE_SUMAR_TRUCO) return;
         if (ctx.contarJokersConCategoria(CategoriaJoker.BEBIDA, this) < BEBIDAS_REQUERIDAS) return;
-        ctx.getResolucionActual().multiplicarMult(3, getNombre());
+        ctx.getResolucionActual().multiplicarMult(3, getNombre(), this);
     }
 }

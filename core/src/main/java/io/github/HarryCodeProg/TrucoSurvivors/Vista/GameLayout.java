@@ -23,8 +23,15 @@ public final class GameLayout {
     public static final float ANCHO_JOKER = 71f;
     public static final float ALTO_JOKER = 95f;
     public static final float SEPARACION_JOKER = 8f;
-    public static final float Y_JOKERS = TECHO_MANO_RIVAL + MARGEN_MANO_RIVAL_JOKERS;
-    public static final float PANEL_PUNTAJES_X = 20f;
+
+    // --- CAMBIOS DE POSICIÓN ---
+    // Ubica Jokers y Santos en la parte superior (720px de alto total)
+    public static final float Y_JOKERS = 610f;
+
+    // Alinea el panel de puntajes contra el borde izquierdo
+    public static final float PANEL_PUNTAJES_X = 0f;
+    // ---------------------------
+
     public static final float PANEL_PUNTAJES_Y = TECHO_MESA - 20f;
     public static final float Y_BOTONES_CANTOS = Y_BOTONES + ALTO_BOTON + 10f;
     public static final float ANCHO_AREA_JUGADOR = 800f;

@@ -14,7 +14,8 @@ public class Cañoncito extends Joker {
 
     public Cañoncito(){
         super(19, "Cañoncito", "Cañoncito", "Las cartas de oro que maten reciben +15 puntos truco",
-            Rareza.comun, 1, Joker.FaseActivacion.AL_PUNTUAR_CARTA, CategoriaJoker.NACIONAL);
+            Rareza.comun, 1, Joker.FaseActivacion.AL_PUNTUAR_CARTA,
+            CategoriaJoker.NACIONAL, CategoriaJoker.COMIDA, CategoriaJoker.DULCE);
     }
 
     @Override

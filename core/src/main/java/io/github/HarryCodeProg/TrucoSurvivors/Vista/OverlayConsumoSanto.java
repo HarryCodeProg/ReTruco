@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class OverlayConsumoSanto {
-
     public enum Estado {
         OCULTO,
         ENTRANDO,
@@ -23,29 +22,19 @@ public class OverlayConsumoSanto {
         APLICANDO_EFECTO,
         CERRADO
     }
-
     private Estado estado = Estado.OCULTO;
-
     private Santo santo;
     private TextureRegion region;
-
     private float x = 640;
     private float y = 360;
-
     private float scale = 0.3f;
     private float alpha = 1f;
     private float tiempo = 0f;
-
     private Runnable alAplicar;
-
     private static final float DURACION_ENTRADA = 0.35f;
     private static final float DURACION_QUEMA = 0.9f;
 
-    public void abrir(
-        Santo santo,
-        TextureRegion region,
-        Runnable alAplicar
-    ) {
+    public void abrir(Santo santo, TextureRegion region, Runnable alAplicar) {
         this.santo = santo;
         this.region = region;
         this.alAplicar = alAplicar;
@@ -100,10 +89,7 @@ public class OverlayConsumoSanto {
         batch.setColor(1, 1, 1, 1);
     }
 
-    public boolean estaActivo() {
-        return estado != Estado.OCULTO
-            && estado != Estado.CERRADO;
-    }
+    public boolean estaActivo() {return estado != Estado.OCULTO && estado != Estado.CERRADO;}
 
     public boolean estaCerrado() {
         return estado == Estado.CERRADO;
