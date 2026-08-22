@@ -58,13 +58,12 @@ public class MainMenuScreen implements Screen {
         botonJugar.update(mouseWorld.x, mouseWorld.y);
         botonSalir.update(mouseWorld.x, mouseWorld.y);
         // --- LÓGICA DE CLICKS ---
-        if (botonJugar.fueCliqueado()) {
-            //game.setScreen(new SeleccionRivalScreen(game));
+        if (botonJugar.fueCliqueado(mouseWorld.x, mouseWorld.y)) {;
             game.setScreen(new GameScreenV2(game));
             this.dispose();
             return;
         }
-        if (botonSalir.fueCliqueado()) {
+        if (botonSalir.fueCliqueado(mouseWorld.x, mouseWorld.y)) {
             Gdx.app.exit();
             return;
         }

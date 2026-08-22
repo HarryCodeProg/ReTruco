@@ -56,7 +56,10 @@ public class Juego {
         this.descartesActuales = jugador.getDescartesMaximos();
 
         limpiarEstadoResidualDeCombateAnterior();
-
+        jugador.multTrucoOriginal();
+        jugador.multEnvidoOriginal();
+        rival.multTrucoOriginal();
+        rival.multEnvidoOriginal();
         repartir();
     }
 
@@ -97,8 +100,8 @@ public class Juego {
             ResolucionPuntaje resolucion = new ResolucionPuntaje(puntosEJ, jugador.getMultiplicadorEnvido());
             ContextoJuego ctx = crearContexto();
             ctx.setResolucionActual(resolucion);
-            gestorJokers.disparar(EventoJuego.AL_GANAR_ENVIDO_CANTO, ctx, this); // reaccion especifica a ganar
-            gestorJokers.disparar(EventoJuego.ANTES_DE_SUMAR_ENVIDO, ctx, this); // jokers independientes de envido
+            gestorJokers.disparar(EventoJuego.AL_GANAR_ENVIDO_CANTO, ctx, this);
+            gestorJokers.disparar(EventoJuego.ANTES_DE_SUMAR_ENVIDO, ctx, this);
             this.ultimaResolucionEnvido = resolucion;
             puntosJugador += resolucion.calcularPuntajeFinal();
             gestorJokers.disparar(EventoJuego.AL_GANAR_ENVIDO, crearContexto(), this);
@@ -130,6 +133,11 @@ public class Juego {
 
     public void setManoFinalizada(boolean b) {
         this.manoFinalizada = b;
+    }
+
+    private void resetearEstadoTemporalDeMano() {
+        vaciarTruco();
+        vaciarCantos();
     }
 
     public ArrayList<Carta> descartarCartas(ArrayList<Carta> cartas) {
@@ -340,9 +348,7 @@ public class Juego {
     }
 
     public boolean puedeEscalarTruco(Jugador quien) {
-        return cantorTrucoPendiente != null
-            && !quien.equals(cantorTrucoPendiente)
-            && nivelTrucoActual < 3;
+        return cantorTrucoPendiente != null && !quien.equals(cantorTrucoPendiente) && nivelTrucoActual < 3;
     }
 
     public int proximoNivelTrucoDisponible(Jugador quien) {

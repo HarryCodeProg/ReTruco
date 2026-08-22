@@ -13,11 +13,6 @@ import io.github.HarryCodeProg.TrucoSurvivors.Santos.Santo;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 
-/**
- * Panel de tienda que se dibuja SOBRE la mesa de GameScreenV2, ocupando solo
- * la zona central/inferior, dejando visible la fila de jokers y el panel de
- * puntajes — igual que en Balatro, nunca hay pantallazo completo.
- */
 public class PanelTienda {
     private final Main game;
     private final Jugador jugador;
@@ -52,6 +47,7 @@ public class PanelTienda {
     private final Consumer<Santo> alComprarYUsarSanto;
     private final Runnable onBeforeReroll;
     private Juego juego;
+    private boolean bloqueadoPorModalExterno = false;
 
     public PanelTienda(Main game, Jugador jugador, Runnable alContinuar, Consumer<VistaItemTienda> alComprarJoker,
         Consumer<Santo> alComprarYUsarSanto, Runnable onBeforeReroll, Juego juego) {
@@ -130,9 +126,7 @@ public class PanelTienda {
     }
 
     public void update(float mouseWorldX, float mouseWorldY, float delta) {
-        if (isAnimando()) {
-            return;
-        }
+        if (isAnimando() || bloqueadoPorModalExterno) return;
         boolean justTouched = Gdx.input.justTouched();
         for (VistaItemTienda v : vistasCartas) {
             v.update(mouseWorldX, mouseWorldY, delta);
@@ -242,6 +236,8 @@ public class PanelTienda {
             }
         }
     }
+
+    public void setBloqueadoPorModalExterno(boolean b) { this.bloqueadoPorModalExterno = b; }
 
     private void comprar(VistaItemTienda vista) {
         ItemTienda item = vista.getItem();

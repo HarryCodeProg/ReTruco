@@ -8,7 +8,6 @@ import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Rareza;
 import io.github.HarryCodeProg.TrucoSurvivors.Jugador;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 
-// Dame La Mochila: +2 mult envido por cada reroll hecho en la tienda desde que se compro el joker
 public class DameLaMochila extends Joker {
 
     private static final double MULT_POR_REROLL = 2.0;
@@ -31,19 +30,49 @@ public class DameLaMochila extends Joker {
     }
 
     @Override
+    public String getDescripcionRenderizada(Juego juego) {
+        if (juego != null && juego.getJugador() != null) {
+            int rerolls = juego.getJugador().getRerollsTienda() - rerollsAlComprarse;
+            double actual = Math.max(0, rerolls) * MULT_POR_REROLL;
+            return "+2 multiplicador envido por cada roll en la tienda (Actual: +" + (int) actual + ")";
+        }
+        return getDescripcionRenderizada();
+    }
+
+    @Override
     public Joker copiar() {
         DameLaMochila copia = new DameLaMochila();
         copiarEstado(copia);
         copia.setAcumulado(this.getAcumulado());
+        copia.rerollsAlComprarse = this.rerollsAlComprarse;
         return copia;
     }
 
-    @Override
+    /*@Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego){
         if (evento != EventoJuego.ANTES_DE_SUMAR_ENVIDO) return;
         int rerolls = ctx.getJugador().getRerollsTienda() - rerollsAlComprarse;
         double acumuladoNuevo = Math.max(0, rerolls) * MULT_POR_REROLL;
-        while (getAcumulado() < acumuladoNuevo) sumarAcumulado(MULT_POR_REROLL);
-        ctx.getResolucionActual().sumarMult(getAcumulado(), getNombre(), this);
+        setAcumulado(acumuladoNuevo);
+        if (getAcumulado() > 0) {
+            ctx.getResolucionActual().sumarMult(getAcumulado(), getNombre(), this);
+        }
+    }*/
+
+    @Override
+    public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego) {
+        System.out.println("DameLaMochila -> evento=" + evento + " | rerollsAlComprarse=" + rerollsAlComprarse + " | rerollsActuales=" + ctx.getJugador().getRerollsTienda() + " | resolucion=" + ctx.getResolucionActual());
+        if (evento != EventoJuego.ANTES_DE_SUMAR_ENVIDO) {
+            return;
+        }
+        int rerolls = ctx.getJugador().getRerollsTienda() - rerollsAlComprarse;
+        double acumuladoNuevo = Math.max(0, rerolls) * MULT_POR_REROLL;
+        setAcumulado(acumuladoNuevo);
+        System.out.println("DameLaMochila -> rerolls=" + rerolls + " | acumuladoNuevo=" + acumuladoNuevo + " | acumuladoActual=" + getAcumulado());
+        if (getAcumulado() > 0) {
+            System.out.println("DameLaMochila -> SUMANDO MULT: +" + getAcumulado());
+            ctx.getResolucionActual().sumarMult(getAcumulado(), getNombre(), this);
+            System.out.println("DameLaMochila -> MULT DESPUES: " + ctx.getResolucionActual().getMult());
+        }
     }
 }

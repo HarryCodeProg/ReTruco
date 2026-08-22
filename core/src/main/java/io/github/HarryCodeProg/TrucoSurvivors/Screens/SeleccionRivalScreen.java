@@ -103,7 +103,7 @@ public class SeleccionRivalScreen implements Screen {
                 Boton btn = botonesJugar.get(slot);
                 btn.setHabilitado(rival.isDesbloqueado());
                 btn.update(mouseWorld.x, mouseWorld.y);
-                if (btn.fueCliqueado()) {
+                if (btn.fueCliqueado(mouseWorld.x, mouseWorld.y)) {
                     game.setScreen(new GameScreenV2(game, rival));
                     return;
                 }

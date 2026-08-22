@@ -116,4 +116,8 @@ public class GestorSantos {
             area.distribuir(santos, null);
         }
     }
+
+    public boolean hayOverlayActivo() {
+        return overlayConsumo.estaActivo() || overlaySeleccion.estaVisible();
+    }
 }

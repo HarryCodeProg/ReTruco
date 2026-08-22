@@ -8,12 +8,16 @@ import java.util.List;
 
 public class GestorBotones {
     private final List<Boton> botones = new ArrayList<>();
+    private float ultimoMouseX;
+    private float ultimoMouseY;
 
     public void agregar(Boton boton) {
         botones.add(boton);
     }
 
     public void update(float mouseX, float mouseY) {
+        this.ultimoMouseX = mouseX;
+        this.ultimoMouseY = mouseY;
         for (Boton boton : botones) {
             boton.update(mouseX, mouseY);
         }
@@ -21,7 +25,7 @@ public class GestorBotones {
 
     public Boton obtenerBotonCliqueado() {
         for (Boton boton : botones) {
-            if (boton.fueCliqueado()) {
+            if (boton.fueCliqueado(ultimoMouseX, ultimoMouseY)) {
                 return boton;
             }
         }
