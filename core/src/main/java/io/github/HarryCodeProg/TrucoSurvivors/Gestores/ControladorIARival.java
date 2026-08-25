@@ -16,25 +16,34 @@ public class ControladorIARival {
         this.iaRival = new IARival(juego);
         this.controladorCombate = controladorCombate;
         this.screen = screen;
+
+        // FIX: cuando la IA gana un envido, animar igual que si lo hubiera ganado el jugador,
+        // y bloquear input (como el truco) mientras dura.
+        this.iaRival.setSolicitarAnimacionEnvido((resolucion, alTerminar) -> {
+            screen.setEsperandoTransicion(true); // bloquea botones y reordenamiento, permite mover cartas libremente
+            screen.iniciarAnimacionResolucion(resolucion, false, () -> {
+                screen.setEsperandoTransicion(false);
+                alTerminar.run();
+                controladorCombate.comprobarFinDelCombate();
+            });
+        });
     }
 
-    /**
-     * Actualiza las decisiones de la IA y procesa los cambios de estado en las apuestas.
-     */
     public void update(boolean puedeInteractuar) {
         if (!puedeInteractuar) return;
+        if (iaRival.isAnimandoEnvido()) return; // FIX: no seguir procesando IA mientras se anima su propio envido
+
         boolean huboRespuestaEnvido = juego.hayCantoEnvidoPendiente();
         boolean huboRespuestaTruco = juego.hayCantoTrucoPendiente();
-        // 1. Ejecutar frame de la IA
+
         iaRival.actualizar();
-        // 2. Verificar resolución de Envido
-        if (huboRespuestaEnvido && !juego.hayCantoEnvidoPendiente()) {
+
+        if (huboRespuestaEnvido && !juego.hayCantoEnvidoPendiente() && !iaRival.isAnimandoEnvido()) {
+            // solo comprobar acá si NO quedó una animación en curso — si quedó, el propio callback ya lo hace
             controladorCombate.comprobarFinDelCombate();
         }
-        // 3. Verificar resolución de Truco
         if (huboRespuestaTruco && !juego.hayCantoTrucoPendiente()) {
             controladorCombate.comprobarFinDelCombate();
-            // Si alguien dijo "No quiero" al Truco, programar inicio de nueva ronda
             if (juego.verificarEstadoCombate() == EstadoCombate.EN_PROGRESO
                 && juego.isUltimaRespuestaTrucoFueNoQuiero()) {
                 screen.setEsperandoTransicion(true);
@@ -42,7 +51,6 @@ public class ControladorIARival {
                 screen.setTiempoNuevaRonda(2.5f);
             }
         }
-        // 4. Comprobar si le toca jugar carta al rival
         controladorCombate.comprobarRival();
     }
 

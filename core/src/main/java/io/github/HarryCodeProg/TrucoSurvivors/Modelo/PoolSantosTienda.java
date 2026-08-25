@@ -39,4 +39,8 @@ public class PoolSantosTienda {
             fabricas.get(random.nextInt(fabricas.size()));
         return fabrica.get();
     }
+
+    public Santo tomarAleatorio() {
+        return tomarAleatorio(new Random());
+    }
 }

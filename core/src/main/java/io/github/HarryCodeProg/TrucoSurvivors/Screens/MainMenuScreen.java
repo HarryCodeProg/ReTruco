@@ -80,7 +80,7 @@ public class MainMenuScreen implements Screen {
         // Dibujar Textos y Botones
         game.batch.begin();
         // Un texto de título fachero
-        font.draw(game.batch, "TRUCO SURVIVORS", 1280 / 2f - 240, 580);
+        font.draw(game.batch, "ReTruco", 530, 580);
         // Dibujamos tus botones (Podés setearles texto adentro si tu clase Boton lo permite,
         // o dibujar un font.draw encima de cada botón temporalmente)
         botonJugar.render(game.batch);

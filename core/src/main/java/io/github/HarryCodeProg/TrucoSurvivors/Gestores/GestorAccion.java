@@ -4,6 +4,7 @@ import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Carta;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.Accion;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.EstadoCombate;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
+import io.github.HarryCodeProg.TrucoSurvivors.Modelo.ResolucionPuntaje;
 import io.github.HarryCodeProg.TrucoSurvivors.Screens.GameScreenV2;
 import io.github.HarryCodeProg.TrucoSurvivors.Vista.VistaCarta;
 
@@ -48,8 +49,19 @@ public class GestorAccion {
                 break;
             case QUIERO:
                 if (juego.hayCantoEnvidoPendiente()) {
-                    juego.responderEnvido(true);
-                    cCombate.comprobarFinDelCombate();
+                    juego.responderEnvido(true); // calcula resolución con jokers y cartas ya aplicados, no suma todavía
+                    ResolucionPuntaje resolucionEnvido = juego.getUltimaResolucionEnvido();
+                    if (resolucionEnvido != null && !resolucionEnvido.getLog().isEmpty()) {
+                        gScreen.setEsperandoTransicion(true);
+                        gScreen.iniciarAnimacionResolucion(resolucionEnvido, false, () -> {
+                            gScreen.setEsperandoTransicion(false);
+                            juego.aplicarResultadoEnvido();
+                            cCombate.comprobarFinDelCombate();
+                        });
+                    } else {
+                        juego.aplicarResultadoEnvido();
+                        cCombate.comprobarFinDelCombate();
+                    }
                 } else if (juego.hayCantoTrucoPendiente()) {
                     juego.responderTruco(true);
                 }

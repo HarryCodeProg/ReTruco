@@ -214,6 +214,15 @@ public class GameScreenV2 implements Screen {
         this.controladorCombate = new ControladorCombate(this, juego);
         this.controladorIARival = new ControladorIARival(juego, controladorCombate, this);
         this.cartasJugador = new ArrayList<>();
+        gestorSantos.setBuscadorVistaCarta(carta -> {
+            for (VistaCarta v : cartasJugador) {
+                if (v.getCarta() == carta) return v;
+            }
+            for (VistaCarta v : cartasMesaJugador) { // por si la carta de envido ya fue jugada a mesa
+                if (v.getCarta() == carta) return v;
+            }
+            return null;
+        });
         this.cartasRival = new ArrayList<>();
         // Reusar vistas de jokers si es posible, sino recrear silenciosamente
         ArrayList<Joker> jokersModelo = jugador.getJokers();
@@ -240,11 +249,7 @@ public class GameScreenV2 implements Screen {
         this.gestorCartas = new GestorInputArrastrable<>(cartasJugador);
         this.gestorJokers = new GestorInputArrastrable<>(jokers);
         // inicializar gestorAnimaciones con datos reales
-        this.gestorAnimaciones = new GestorAnimacionesMano(
-            cartasJugador, cartasRival,
-            cartasMesaJugador, cartasMesaRival,
-            this::organizarCartas
-        );
+        this.gestorAnimaciones = new GestorAnimacionesMano(cartasJugador, cartasRival, cartasMesaJugador, cartasMesaRival, this::organizarCartas);
         this.gestorAccion = new GestorAccion(juego, this, controladorCombate, gestorCartas, gestorAnimaciones);
         // Posicionar jokers sin animación al iniciar/reiniciar
         organizarJokers(true);
@@ -271,9 +276,9 @@ public class GameScreenV2 implements Screen {
         tocoJugar = 0;
         juego.setManoFinalizada(false);
         juego.irAlMazo();
-        ArrayList<Carta> nuevasJugador = new ArrayList<>(jugador.getMano());
-        ArrayList<Carta> nuevasRival   = new ArrayList<>(rival.getMano());
-        gestorAnimaciones.iniciarTransicion(nuevasJugador, nuevasRival);
+        ArrayList<Carta> manoJugadorActual = new ArrayList<>(jugador.getMano());
+        ArrayList<Carta> nuevasRival = new ArrayList<>(rival.getMano());
+        gestorAnimaciones.iniciarTransicionConservandoMano(manoJugadorActual, nuevasRival);
     }
 
     @Override
@@ -653,6 +658,12 @@ public class GameScreenV2 implements Screen {
             vj.setResaltado(activo);
         }
         for (VistaCarta vc : cartasMesaJugador) {
+            String nombreCarta = vc.getCarta().getNumero() + " de " + vc.getCarta().paloToString();
+            boolean activo = origenRef != null ? vc.getCarta() == origenRef
+                : (origen != null && nombreCarta.equals(origen));
+            vc.setResaltado(activo);
+        }
+        for (VistaCarta vc : cartasJugador) {
             String nombreCarta = vc.getCarta().getNumero() + " de " + vc.getCarta().paloToString();
             boolean activo = origenRef != null ? vc.getCarta() == origenRef
                 : (origen != null && nombreCarta.equals(origen));

@@ -41,6 +41,7 @@ public class Juego {
     private boolean primeraCartaQueNoMataAplicada = false;
     private int manosGanadasConsecutivas = 0;
     private boolean recompensaFinDeRondaAplicada = false;
+    private boolean ultimoGanadorEnvidoFueJugador = false;
 
     public Juego(Jugador jugador, Jugador rival, Mazo mazoRival) {
         this.jugador = jugador;
@@ -70,9 +71,15 @@ public class Juego {
     public void repartir() {
         this.jugador.getMazo().barajar();
         this.rival.getMazo().barajar();
-        jugador.robar(jugador.getMazo(), jugador.getTamañoMano());
+        int faltanJugador = jugador.getTamañoMano() - jugador.getMano().size();
+        if (faltanJugador > 0) {
+            jugador.robar(jugador.getMazo(), faltanJugador); // roba lo que falte; si el mazo tiene menos, robar() ya corta solo (tomarCarta() devuelve null y el loop no agrega)
+        }
         jugador.ordenarMano();
-        rival.robar(rival.getMazo(), rival.getTamañoMano());
+        int faltanRival = rival.getTamañoMano() - rival.getMano().size();
+        if (faltanRival > 0) {
+            rival.robar(rival.getMazo(), faltanRival);
+        }
         gestorJokers.disparar(EventoJuego.POST_REPARTO, crearContexto(), this);
     }
 
@@ -89,6 +96,8 @@ public class Juego {
         return mazo;
     }
 
+    private double puntosPendientesEnvidoRival = 0;
+
     public void ganadorEnvido() {
         double puntosEJ = jugador.getPuntosEnvido();
         double puntosER = rival.getPuntosEnvido();
@@ -96,19 +105,35 @@ public class Juego {
         jugador.aumentarMultiplicadorEnvidoTemporal(sumMult);
         rival.aumentarMultiplicadorEnvidoTemporal(sumMult);
         boolean ganaJugador = (puntosEJ == puntosER) ? jugadorEsMano : (puntosEJ > puntosER);
+        this.ultimoGanadorEnvidoFueJugador = ganaJugador; // Guardamos quién ganó para saber a quién darle los puntos después
         if (ganaJugador) {
-            ResolucionPuntaje resolucion = new ResolucionPuntaje(puntosEJ, jugador.getMultiplicadorEnvido());
+            ArrayList<Carta> cartasEnvido = jugador.getCartasEnvidoGanador();
+            double chipsBase = (cartasEnvido.size() == 2) ? 20 : 0;
+            ResolucionPuntaje resolucion = new ResolucionPuntaje(chipsBase, jugador.getMultiplicadorEnvido());
             ContextoJuego ctx = crearContexto();
             ctx.setResolucionActual(resolucion);
+            ctx.setCartasContribuyentesEnvido(cartasEnvido);
             gestorJokers.disparar(EventoJuego.AL_GANAR_ENVIDO_CANTO, ctx, this);
-            gestorJokers.disparar(EventoJuego.ANTES_DE_SUMAR_ENVIDO, ctx, this);
+            resolutorSecuencia.resolverEnvido(cartasEnvido, ctx, EventoJuego.AL_PUNTUAR_CARTA_ENVIDO, EventoJuego.ANTES_DE_SUMAR_ENVIDO);
             this.ultimaResolucionEnvido = resolucion;
-            puntosJugador += resolucion.calcularPuntajeFinal();
-            gestorJokers.disparar(EventoJuego.AL_GANAR_ENVIDO, crearContexto(), this);
         } else {
-            this.ultimaResolucionEnvido = null;
-            puntosRival += puntosER * rival.getMultiplicadorEnvido();
+            // FIX: Ahora el rival también crea una resolución para disparar la animación visual
+            ResolucionPuntaje resolucion = new ResolucionPuntaje(0, rival.getMultiplicadorEnvido());
+            resolucion.sumarChips(puntosER, "Cartas Rival", null); // Esto hace que aparezca "+33 (Cartas Rival)" en pantalla
+            this.ultimaResolucionEnvido = resolucion;
             gestorJokers.disparar(EventoJuego.AL_PERDER_ENVIDO, crearContexto(), this);
+        }
+    }
+
+    public void aplicarResultadoEnvido() {
+        if (ultimaResolucionEnvido != null) {
+            double puntosFinales = ultimaResolucionEnvido.calcularPuntajeFinal();
+            if (ultimoGanadorEnvidoFueJugador) {
+                puntosJugador += puntosFinales;
+                gestorJokers.disparar(EventoJuego.AL_GANAR_ENVIDO, crearContexto(), this);
+            } else {
+                puntosRival += puntosFinales;
+            }
         }
         verificarEstadoCombate();
     }
@@ -126,9 +151,12 @@ public class Juego {
         vaciarCantos();
         devolverCartas();
         avanzarMano();
-        this.descartesActuales = jugador.getDescartesMaximos();
         this.turnoActual = jugadorEsMano ? jugador : rival;
         repartir();
+    }
+
+    public void recargarDescartes() {
+        this.descartesActuales = jugador.getDescartesMaximos();
     }
 
     public void setManoFinalizada(boolean b) {
@@ -138,6 +166,13 @@ public class Juego {
     private void resetearEstadoTemporalDeMano() {
         vaciarTruco();
         vaciarCantos();
+    }
+
+    public void responderEnvidoSinAnimacion(boolean quiero) {
+        responderEnvido(quiero);
+        if (quiero) {
+            aplicarResultadoEnvido(); // aplica inmediato, sin esperar animación
+        }
     }
 
     public ArrayList<Carta> descartarCartas(ArrayList<Carta> cartas) {
@@ -181,6 +216,10 @@ public class Juego {
         return ultimaResolucion;
     }
 
+    public ResolucionPuntaje getUltimaResolucionEnvido() {
+        return ultimaResolucionEnvido;
+    }
+
     public void devolverCartas() {
         for (Carta c : mesa.getMesaJugador()) {
             c.resetearValores();
@@ -189,14 +228,12 @@ public class Juego {
             c.resetearValores();
         }
         for (Carta c : jugador.getMano()) {
-            c.resetearValores();
+            c.resetearValores(); // cartas que quedaron sin jugar, conservan su lugar en mano
         }
         for (Carta c : rival.getMano()) {
             c.resetearValores();
         }
         mesa.limpiarMesa();
-        jugador.limpiarMano();
-        rival.limpiarMano();
     }
 
     public void jugarMano(int i) {
@@ -464,10 +501,7 @@ public class Juego {
     }
 
     public boolean puedeCantarEnvidoNivel(Jugador quien, int nivel) {
-        return estaEnVentanaDeEnvido()
-            && cantorEnvidoPendiente == null
-            && nivel > nivelEnvidoActual
-            && !quien.equals(ultimoCantorEnvido);
+        return estaEnVentanaDeEnvido() && cantorEnvidoPendiente == null && nivel > nivelEnvidoActual && !quien.equals(ultimoCantorEnvido);
     }
 
     public void responderEnvido(boolean quiero) {
@@ -481,7 +515,7 @@ public class Juego {
         }
         cantorEnvidoPendiente = null;
         nivelEnvidoPendiente = null;
-        verificarEstadoCombate();
+        if (!quiero) verificarEstadoCombate();
     }
 
     private void resolverNoQuieroEnvido(Jugador canter) {
@@ -494,10 +528,12 @@ public class Juego {
     }
 
     public void agregarCartaJugador(Carta carta) {
+        jugador.eliminarCarta(carta);
         mesa.agregarCartaJugador(carta);
     }
 
     public void agregarCartaRival(Carta carta) {
+        rival.eliminarCarta(carta);
         mesa.agregarCartaRival(carta);
     }
 

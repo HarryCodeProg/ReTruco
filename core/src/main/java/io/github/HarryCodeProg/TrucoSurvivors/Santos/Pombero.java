@@ -33,8 +33,8 @@ public class Pombero extends Santo {
         int limite = Math.min(2, seleccionadas.size());
         for (int i = 0; i < limite; i++) {
             Carta carta = seleccionadas.get(i);
-            if (carta.getNumero() > 1) {
-                carta.cambiarNumero(carta.getNumero() - 1);
+            if (carta.getNumero() < 12) {
+                diferirCambioVisual(carta, () -> carta.cambiarNumero(carta.getNumero() - 1));
             }
         }
     }

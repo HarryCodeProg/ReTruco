@@ -144,4 +144,12 @@ public class ContextoJuego {
         Set<Object> marcas = marcasPorJoker.get(joker);
         return marcas != null && marcas.contains(objetivo);
     }
+
+    /** Devuelve el joker inmediatamente a la izquierda del dado, en el orden actual de la fila, o null si no hay. */
+    public Joker obtenerJokerALaIzquierda(Joker referencia) {
+        ArrayList<Joker> lista = jugador.getJokers();
+        int idx = lista.indexOf(referencia);
+        if (idx <= 0) return null;
+        return lista.get(idx - 1);
+    }
 }

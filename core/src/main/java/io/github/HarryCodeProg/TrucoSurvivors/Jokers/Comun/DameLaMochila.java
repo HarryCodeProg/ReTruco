@@ -61,18 +61,14 @@ public class DameLaMochila extends Joker {
 
     @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego) {
-        System.out.println("DameLaMochila -> evento=" + evento + " | rerollsAlComprarse=" + rerollsAlComprarse + " | rerollsActuales=" + ctx.getJugador().getRerollsTienda() + " | resolucion=" + ctx.getResolucionActual());
-        if (evento != EventoJuego.ANTES_DE_SUMAR_ENVIDO) {
+       if (evento != EventoJuego.ANTES_DE_SUMAR_ENVIDO) {
             return;
         }
         int rerolls = ctx.getJugador().getRerollsTienda() - rerollsAlComprarse;
         double acumuladoNuevo = Math.max(0, rerolls) * MULT_POR_REROLL;
         setAcumulado(acumuladoNuevo);
-        System.out.println("DameLaMochila -> rerolls=" + rerolls + " | acumuladoNuevo=" + acumuladoNuevo + " | acumuladoActual=" + getAcumulado());
         if (getAcumulado() > 0) {
-            System.out.println("DameLaMochila -> SUMANDO MULT: +" + getAcumulado());
             ctx.getResolucionActual().sumarMult(getAcumulado(), getNombre(), this);
-            System.out.println("DameLaMochila -> MULT DESPUES: " + ctx.getResolucionActual().getMult());
         }
     }
 }

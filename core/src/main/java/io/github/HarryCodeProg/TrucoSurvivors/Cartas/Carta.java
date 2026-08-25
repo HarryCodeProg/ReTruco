@@ -262,14 +262,39 @@ public class Carta {
     }
 
     public void cambiarPalo(Palo nuevoPalo) {
+        // Capturamos TODO el valor actual (base + bonus permanentes previos) antes de perderlo
+        int trucoPoderActualPrevio = this.valorTrucoPoderActual;
+        int trucoAporteActualPrevio = this.puntosTrucoAporteActual;
+        int envidoPoderActualPrevio = this.valorEnvidoPoderActual;
+        int envidoAporteActualPrevio = this.puntosEnvidoAporteActual;
+
         this.palo = nuevoPalo;
-        calcularValoresBase();
-        resetearValores();
+        calcularValoresBase(); // recalcula *Base según el nuevo palo (con el número actual)
+
+        // FIX: el valor completo que tenía la carta pasa a ser el nuevo bonus permanente,
+        // así el resultado final es baseNueva + todoLoQueTeniaAntes
+        this.bonusPoderTrucoPermanente = trucoPoderActualPrevio;
+        this.bonusAporteTrucoPermanente = trucoAporteActualPrevio;
+        this.bonusPoderEnvidoPermanente = envidoPoderActualPrevio;
+        this.bonusAporteEnvidoPermanente = envidoAporteActualPrevio;
+
+        resetearValores(); // aplica: nuevaBase + bonusPermanente(=valorActualPrevio)
     }
 
     public void cambiarNumero(int nuevoNumero) {
+        int trucoPoderActualPrevio = this.valorTrucoPoderActual;
+        int trucoAporteActualPrevio = this.puntosTrucoAporteActual;
+        int envidoPoderActualPrevio = this.valorEnvidoPoderActual;
+        int envidoAporteActualPrevio = this.puntosEnvidoAporteActual;
+
         this.numero = nuevoNumero;
         calcularValoresBase();
+
+        this.bonusPoderTrucoPermanente = trucoPoderActualPrevio;
+        this.bonusAporteTrucoPermanente = trucoAporteActualPrevio;
+        this.bonusPoderEnvidoPermanente = envidoPoderActualPrevio;
+        this.bonusAporteEnvidoPermanente = envidoAporteActualPrevio;
+
         resetearValores();
     }
 }

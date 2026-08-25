@@ -2,21 +2,33 @@ package io.github.HarryCodeProg.TrucoSurvivors.Rival;
 
 import io.github.HarryCodeProg.TrucoSurvivors.Jugador;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
-
+import io.github.HarryCodeProg.TrucoSurvivors.Modelo.ResolucionPuntaje;
 
 import java.util.Random;
+import java.util.function.BiConsumer;
 
 public class IARival {
     private final Juego juego;
     private final Random random;
+    /** Recibe (resolucion, alTerminar) para pedirle a la pantalla que anime. Null-safe: si es null, se aplica sin animar. */
+    private BiConsumer<ResolucionPuntaje, Runnable> solicitarAnimacionEnvido;
 
     public IARival(Juego juego) {
         this.juego = juego;
         this.random = new Random();
     }
 
-    /** Llamar una vez por frame o tick de lógica mientras el combate está activo. */
+    public void setSolicitarAnimacionEnvido(BiConsumer<ResolucionPuntaje, Runnable> callback) {
+        this.solicitarAnimacionEnvido = callback;
+    }
+
+    /** true si la IA está en medio de una resolución de envido animada (bloquea el resto de la IA ese frame). */
+    private boolean animandoEnvido = false;
+
+    public boolean isAnimandoEnvido() { return animandoEnvido; }
+
     public void actualizar() {
+        if (animandoEnvido) return; // no tomar más decisiones mientras se anima su propio envido
         responderEnvidoSiCorresponde();
         responderTrucoSiCorresponde();
     }
@@ -49,9 +61,27 @@ public class IARival {
     private void aplicarDecisionEnvido(Decision decision) {
         Jugador rival = juego.getRival();
         switch (decision) {
-            case ESCALAR:    juego.escalarEnvido(rival); break;
-            case QUIERO:     juego.responderEnvido(true); break;
-            case NO_QUIERO:  juego.responderEnvido(false); break;
+            case ESCALAR:
+                juego.escalarEnvido(rival);
+                break;
+            case QUIERO: {
+                juego.responderEnvido(true); // calcula, no aplica todavía
+                ResolucionPuntaje resolucion = juego.getUltimaResolucionEnvido();
+                if (resolucion != null && solicitarAnimacionEnvido != null) {
+                    animandoEnvido = true;
+                    solicitarAnimacionEnvido.accept(resolucion, () -> {
+                        juego.aplicarResultadoEnvido();
+                        animandoEnvido = false;
+                    });
+                } else {
+                    // sin callback disponible o ganó el rival (resolucion null): aplicar directo, sin animación
+                    juego.aplicarResultadoEnvido();
+                }
+                break;
+            }
+            case NO_QUIERO:
+                juego.responderEnvido(false); // este camino no calcula resolución con jokers, se aplica solo
+                break;
         }
     }
 

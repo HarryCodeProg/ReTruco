@@ -12,6 +12,8 @@ public abstract class Santo {
     private final String nombreArchivo;
     private final String descripcion;
     private final int coste;
+    private final ArrayList<Carta> cartasDiferidas = new ArrayList<>();
+    private final ArrayList<Runnable> accionesDiferidas = new ArrayList<>();
 
     public Santo(int id, String nombre, String nombreArchivo, String descripcion, int coste) {
         this.id = id;
@@ -34,4 +36,14 @@ public abstract class Santo {
     public abstract void aplicarEfecto(Jugador jugador, ArrayList<Carta> seleccionadas, ContextoJuego ctxOpcional);
 
     public abstract int maxCartasSeleccionables();
+
+    protected void diferirCambioVisual(Carta carta, Runnable accion) {
+        cartasDiferidas.add(carta);
+        accionesDiferidas.add(accion);
+    }
+
+    public boolean tieneCambiosDiferidos() { return !cartasDiferidas.isEmpty(); }
+    public ArrayList<Carta> getCartasDiferidas() { return cartasDiferidas; }
+    public ArrayList<Runnable> getAccionesDiferidas() { return accionesDiferidas; }
+    public void limpiarDiferidos() { cartasDiferidas.clear(); accionesDiferidas.clear(); }
 }

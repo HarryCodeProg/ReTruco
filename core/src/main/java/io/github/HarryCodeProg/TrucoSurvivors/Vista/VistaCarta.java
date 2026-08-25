@@ -56,6 +56,15 @@ public class VistaCarta implements Arrastrable{
     private boolean enModal = false;
     private boolean resaltado = false;
     private float pulso = 0f;
+    // --- nuevos campos en VistaCarta ---
+    private enum EstadoFlip { NINGUNO, GIRANDO_A_DORSO, MOSTRANDO_DORSO, GIRANDO_A_FRENTE }
+    private EstadoFlip estadoFlip = EstadoFlip.NINGUNO;
+    private float flipProgreso = 0f; // 0 a 1
+    private static final float DURACION_MEDIO_FLIP = 0.25f;
+    private Runnable onCargarNuevaVista; // callback: aplicar nuevo palo/número/región mientras está de dorso
+    private TextureRegion regionDorso; // el "back" del atlas, necesita seteo desde afuera o atlas guardado
+    private static final float PAUSA_EN_DORSO = 0.15f;
+    private float tiempoEnDorso = 0f;
 
     /** Ahora recibe el TextureAtlas compartido en vez de crear su propia Texture. */
     public VistaCarta(Carta carta, boolean bocaAbajo, TextureAtlas atlas) {
@@ -73,6 +82,10 @@ public class VistaCarta implements Arrastrable{
     }
 
     public void render(SpriteBatch batch, io.github.HarryCodeProg.TrucoSurvivors.Main game) {
+        if (estadoFlip != EstadoFlip.NINGUNO) {
+            renderFlip(batch);
+            return;
+        }
         float drawY = y + visualOffsetY;
         float scaleExtra = resaltado ? 1f + (float)(Math.sin(pulso) * 0.06f) : 1f;
         if (resaltado) {
@@ -85,6 +98,18 @@ public class VistaCarta implements Arrastrable{
         if (hover && !bocaAbajo && !dragging && carta != null) {
             dibujarCartelStats(batch, game, drawY);
         }
+    }
+
+    private void renderFlip(SpriteBatch batch) {
+        batch.setColor(1f, 1f, 1f, 1f);
+        float drawY = y + visualOffsetY;
+        TextureRegion regionAMostrar = (estadoFlip == EstadoFlip.GIRANDO_A_DORSO) ? this.region : regionDorso;
+        if (estadoFlip == EstadoFlip.GIRANDO_A_FRENTE) regionAMostrar = this.region;
+        float progresoClamp = Math.min(flipProgreso, 1f);
+        float scaleXFlip = (estadoFlip == EstadoFlip.GIRANDO_A_DORSO) ? (1f - progresoClamp) : progresoClamp;
+        scaleXFlip = Math.max(scaleXFlip, 0.02f);
+        batch.draw(regionAMostrar, x, drawY, width / 2f, height / 2f, width * scaleXFlip, height, 1f, 1f, 0f);
+        batch.setColor(1f, 1f, 1f, 1f);
     }
 
     public void animarHacia(float destX, float destY, Runnable alTerminar) {
@@ -195,6 +220,10 @@ public class VistaCarta implements Arrastrable{
     public boolean soltoCarta() { return draggingAnterior && !dragging; }
 
     public void update(float mouseX, float mouseY, float delta) {
+        if (estadoFlip != EstadoFlip.NINGUNO) {
+            actualizarFlip(delta);
+            return; // mientras flipea, no procesar hover/drag normal
+        }
         if (resaltado) {
             pulso += delta * 6f;
         }
@@ -244,6 +273,43 @@ public class VistaCarta implements Arrastrable{
             scale = moverHacia(scale, 1.2f, VELOCIDAD_ESCALA * delta);
             visualOffsetY = moverHacia(visualOffsetY, 0f, VELOCIDAD_OFFSET * delta);
         }
+    }
+
+    private void actualizarFlip(float delta) {
+        flipProgreso += delta / DURACION_MEDIO_FLIP;
+        switch (estadoFlip) {
+            case GIRANDO_A_DORSO:
+                if (flipProgreso >= 1f) {
+                    flipProgreso = 0f;
+                    estadoFlip = EstadoFlip.MOSTRANDO_DORSO;
+                    tiempoEnDorso = 0f;
+                    if (onCargarNuevaVista != null) { onCargarNuevaVista.run(); onCargarNuevaVista = null; }
+                }
+                break;
+            case MOSTRANDO_DORSO:
+                tiempoEnDorso += delta;
+                if (tiempoEnDorso >= PAUSA_EN_DORSO) {
+                    estadoFlip = EstadoFlip.GIRANDO_A_FRENTE;
+                    flipProgreso = 0f;
+                }
+                break;
+            case GIRANDO_A_FRENTE:
+                if (flipProgreso >= 1f) {
+                    flipProgreso = 1f;
+                    estadoFlip = EstadoFlip.NINGUNO; // termina el flip, vuelve al render normal
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+    public void actualizarRegionDesdeCarta(TextureAtlas atlas) {
+        TextureRegion nueva = bocaAbajo ? atlas.findRegion("back") : atlas.findRegion(carta.getNombreRegion());
+        if (nueva != null) {
+            this.region = nueva;
+        }
+        // si no se encuentra, se mantiene la región anterior en vez de quedar en null (evita crash/corrupción visual)
     }
 
     private float moverHacia(float value, float target, float maxDelta) {
@@ -358,4 +424,17 @@ public class VistaCarta implements Arrastrable{
     public float getAncho() {
         return this.width;
     }
+
+    /**
+     * Inicia la animación de flip: gira a dorso, ejecuta onCargarNuevaVista (para actualizar la región
+     * a la nueva carta), y gira de vuelta a frente. Igual patrón para cambio de palo o de número.
+     */
+    public void iniciarFlip(TextureRegion regionDorso, Runnable onCargarNuevaVista) {
+        this.regionDorso = regionDorso;
+        this.onCargarNuevaVista = onCargarNuevaVista;
+        this.estadoFlip = EstadoFlip.GIRANDO_A_DORSO;
+        this.flipProgreso = 0f;
+    }
+
+    public boolean isFlipeando() { return estadoFlip != EstadoFlip.NINGUNO; }
 }
