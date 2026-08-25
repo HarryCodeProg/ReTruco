@@ -32,20 +32,21 @@ public class OverlaySeleccionCartaSanto {
     private static final float ANCHO_BOTON = 180f;
     private static final float ALTO_BOTON = 50f;
     private final Boton botonConfirmar;
-
     // --- sistema de arrastre/reordenamiento, mismo patrón que la mano del jugador ---
     private static final float MARGEN_AREA = 220f;
     private final AreaElementos<VistaCarta> area =
         new AreaElementos<>(MARGEN_AREA, Y_CARTAS, 1280f - MARGEN_AREA * 2, CARTA_ALTO, CARTA_ANCHO, CARTA_ALTO, SEPARACION);
     private final GestorInputArrastrable<VistaCarta> gestorInput = new GestorInputArrastrable<>(vistasCartas);
     private final GestorReordenamiento gestorReordenamiento = new GestorReordenamiento();
-
     // destino "mazo" al cerrar
     private static final float DECK_X = 1195f;
     private static final float DECK_Y = 130f;
     private boolean cerrando = false;
     private int animacionesPendientes = 0;
     private ArrayList<Carta> resultadoPendiente;
+    private int flipsPendientes = 0;
+    private boolean esperandoFlips = false;
+    private Runnable alTerminarFlipsYCerrar;
 
     public OverlaySeleccionCartaSanto() {
         botonConfirmar = new Boton(550f, 120f, ANCHO_BOTON, ALTO_BOTON,
@@ -86,34 +87,37 @@ public class OverlaySeleccionCartaSanto {
 
     public void update(float mouseWorldX, float mouseWorldY, float delta) {
         if (!visible) return;
-
         if (cerrando) {
             for (VistaCarta vista : new ArrayList<>(vistasCartas)) {
                 vista.update(mouseWorldX, mouseWorldY, delta);
             }
             return;
         }
-
+        if (esperandoFlips) {
+            for (VistaCarta vista : new ArrayList<>(vistasCartas)) {
+                vista.update(mouseWorldX, mouseWorldY, delta); // deja progresar todos los flips
+            }
+            if (!hayAlgunaCartaFlipeando()) {
+                esperandoFlips = false;
+                iniciarCierre();
+            }
+            return; // bloqueado: sin drag, reordenamiento, clicks ni botón mientras espera
+        }
         VistaCarta arrastradoAntes = gestorInput.getArrastrado();
         gestorInput.update(mouseWorldX, mouseWorldY, delta, true);
-
         for (VistaCarta v : vistasCartas) v.update(mouseWorldX, mouseWorldY, delta);
-
         // reordenamiento en vivo (mismo mecanismo que la mano)
         boolean cambio = gestorReordenamiento.previsualizarReordenamiento(gestorInput, vistasCartas);
         if (cambio) reorganizar();
         // al soltar, recalcular distribución final
         if (arrastradoAntes != null && gestorInput.getArrastrado() == null) reorganizar();
-
         botonConfirmar.update(mouseWorldX, mouseWorldY);
-
         // click simple (sin arrastre real) togglea selección — lo maneja VistaCarta.input() vía gestorInput
         for (VistaCarta vista : vistasCartas) {
             boolean quiereSeleccionar = vista.isSeleccionada();
             boolean yaEstaba = seleccionadas.contains(vista.getCarta());
             if (quiereSeleccionar != yaEstaba) sincronizarSeleccion(vista, quiereSeleccionar);
         }
-
         if (Gdx.input.justTouched() && botonConfirmar.fueCliqueado(mouseWorldX, mouseWorldY)) {
             confirmar();
         }
@@ -159,10 +163,81 @@ public class OverlaySeleccionCartaSanto {
         botonConfirmar.setHabilitado(seleccionValida());
     }
 
+    public void render(SpriteBatch batch, Main game) {
+        if (!visible) return;
+        batch.setColor(0f, 0f, 0f, 0.75f);
+        batch.draw(game.getPixelBlanco(), 0, 0, 1280f, 720f);
+        batch.setColor(Color.WHITE);
+        game.getFuentePrincipal().draw(batch, santo.getNombre(), 500f, 660f);
+        game.getFuentePrincipal().draw(batch, santo.getDescripcion(), 400f, 620f);
+        VistaCarta arrastrado = gestorInput.getArrastrado();
+        for (VistaCarta vista : vistasCartas) {
+            if (vista != arrastrado) vista.render(batch, game);
+        }
+        if (arrastrado != null) arrastrado.render(batch, game); // arrastrada al final: queda por encima
+        String texto = seleccionadas.size() + "/" + obtenerTextoMaximo();
+        game.getFuentePrincipal().draw(batch, texto, 600f, 190f);
+        botonConfirmar.render(batch);
+        batch.setColor(Color.WHITE);
+    }
+
+    private String obtenerTextoMaximo() {
+        if (santo.cartasRequeridas() == -1) return String.valueOf(santo.maxCartasSeleccionables());
+        return String.valueOf(santo.cartasRequeridas());
+    }
+
+    public boolean estaVisible() { return visible; }
+
+    public void cerrar() {
+        visible = false;
+        cerrando = false;
+        seleccionadas.clear();
+        vistasCartas.clear();
+    }
+
+    /** Llamado externamente (por GestorSantos) una vez que el Santo ya aplicó su efecto y los flips
+     * (si los hubo) ya terminaron. Recién ahí empiezan a volar las cartas de vuelta al mazo. */
+    public void cerrarConVuelta() {
+        if (cerrando) return;
+        iniciarCierre();
+    }
+
+    public VistaCarta buscarVistaPorCarta(Carta carta) {
+        for (VistaCarta v : vistasCartas) {
+            if (v.getCarta() == carta) return v;
+        }
+        return null;
+    }
+
     private void confirmar() {
         if (!seleccionValida() || cerrando) return;
-        resultadoPendiente = new ArrayList<>(seleccionadas);
-        iniciarCierre();
+        ArrayList<Carta> resultado = new ArrayList<>(seleccionadas);
+        botonConfirmar.setHabilitado(false);
+        if (alConfirmar != null) {
+            alConfirmar.accept(resultado);
+        }
+    }
+
+    public void esperarFlipsYLuegoVolver(Runnable alCerrarFinal) {
+        this.alTerminarFlipsYCerrar = alCerrarFinal;
+        this.esperandoFlips = true;
+    }
+
+    /** Llamar una vez por cada flip individual que termina (desde el callback de iniciarFlip). */
+    public void notificarFlipTerminado() {
+        if (!esperandoFlips) return;
+        flipsPendientes--;
+        if (flipsPendientes <= 0) {
+            esperandoFlips = false;
+            iniciarCierre();
+        }
+    }
+
+    private boolean hayAlgunaCartaFlipeando() {
+        for (VistaCarta v : vistasCartas) {
+            if (v.isFlipeando()) return true;
+        }
+        return false;
     }
 
     private void iniciarCierre() {
@@ -186,46 +261,11 @@ public class OverlaySeleccionCartaSanto {
         visible = false;
         cerrando = false;
         vistasCartas.clear();
-        if (alConfirmar != null && resultadoPendiente != null) {
-            Consumer<ArrayList<Carta>> callback = alConfirmar;
-            ArrayList<Carta> resultado = resultadoPendiente;
-            alConfirmar = null;
-            resultadoPendiente = null;
-            callback.accept(resultado);
-        }
+        alConfirmar = null;
+        Runnable callback = alTerminarFlipsYCerrar;
+        alTerminarFlipsYCerrar = null;
+        if (callback != null) callback.run();
     }
 
-    public void render(SpriteBatch batch, Main game) {
-        if (!visible) return;
-        batch.setColor(0f, 0f, 0f, 0.75f);
-        batch.draw(game.getPixelBlanco(), 0, 0, 1280f, 720f);
-        batch.setColor(Color.WHITE);
-        game.getFuentePrincipal().draw(batch, santo.getNombre(), 500f, 660f);
-        game.getFuentePrincipal().draw(batch, santo.getDescripcion(), 400f, 620f);
 
-        VistaCarta arrastrado = gestorInput.getArrastrado();
-        for (VistaCarta vista : vistasCartas) {
-            if (vista != arrastrado) vista.render(batch, game);
-        }
-        if (arrastrado != null) arrastrado.render(batch, game); // arrastrada al final: queda por encima
-
-        String texto = seleccionadas.size() + "/" + obtenerTextoMaximo();
-        game.getFuentePrincipal().draw(batch, texto, 600f, 190f);
-        botonConfirmar.render(batch);
-        batch.setColor(Color.WHITE);
-    }
-
-    private String obtenerTextoMaximo() {
-        if (santo.cartasRequeridas() == -1) return String.valueOf(santo.maxCartasSeleccionables());
-        return String.valueOf(santo.cartasRequeridas());
-    }
-
-    public boolean estaVisible() { return visible; }
-
-    public void cerrar() {
-        visible = false;
-        cerrando = false;
-        seleccionadas.clear();
-        vistasCartas.clear();
-    }
 }

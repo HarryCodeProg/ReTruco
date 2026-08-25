@@ -22,18 +22,10 @@ public class ResolucionPuntaje {
         log.add(new PasoResolucion(origen, TipoPaso.SUMA_CHIPS, cantidad, chips, mult, origenRef));
     }
 
-    /*public void sumarMult(double cantidad, String origen) {
-        sumarMult(cantidad, origen, null);
-    }*/
-
     public void sumarMult(double cantidad, String origen, Object origenRef) {
         mult += cantidad;
         log.add(new PasoResolucion(origen, TipoPaso.SUMA_MULT, cantidad, chips, mult, origenRef));
     }
-
-    /*public void multiplicarMult(double factor, String origen) {
-        multiplicarMult(factor, origen, null);
-    }*/
 
     public void multiplicarMult(double factor, String origen, Object origenRef) {
         mult *= factor;

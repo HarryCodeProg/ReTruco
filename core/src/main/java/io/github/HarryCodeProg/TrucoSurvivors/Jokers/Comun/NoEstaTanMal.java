@@ -23,6 +23,11 @@ public class NoEstaTanMal extends Joker {
     }
 
     @Override
+    public String getDescripcionRenderizada(Juego juego) {
+        return "Si perdés la mano, aumenta +4 multiplicador truco (Actual: +" + (int) getAcumulado() + ")";
+    }
+
+    @Override
     public Joker copiar() {
         NoEstaTanMal copia = new NoEstaTanMal();
         copiarEstado(copia);
@@ -37,6 +42,9 @@ public class NoEstaTanMal extends Joker {
             return;
         }
         if (evento != EventoJuego.ANTES_DE_SUMAR_TRUCO) return;
-        ctx.getResolucionActual().sumarMult(getAcumulado(), getNombre(), this);
+
+        if (getAcumulado() > 0) {
+            ctx.getResolucionActual().sumarMult(getAcumulado(), getNombre(), this);
+        }
     }
 }

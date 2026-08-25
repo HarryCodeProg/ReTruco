@@ -180,4 +180,96 @@ public class GestorAnimacionesMano {
         }
         return true;
     }
+
+    /**
+     * Como iniciarTransicion, pero solo anima "ida al mazo y vuelta" para las cartas del jugador
+     * que efectivamente son nuevas (robadas). Las cartas que ya estaban en mano se mantienen en su
+     * VistaCarta existente, sin recrearla ni animarla — simplemente permanecen donde están.
+     */
+    public void iniciarTransicionConservandoMano(
+        ArrayList<Carta> manoJugadorNueva, // jugador.getMano() después de repartir(): conservadas + robadas
+        ArrayList<Carta> nuevasRival) {
+        if (esperandoTransicion) return;
+        esperandoTransicion = true;
+
+        // 1. Separar: qué VistaCarta de cartasJugador sigue representando una carta que continúa en mano
+        ArrayList<VistaCarta> vistasConservadas = new ArrayList<>();
+        ArrayList<Carta> cartasRealmenteNuevas = new ArrayList<>();
+        for (Carta c : manoJugadorNueva) {
+            VistaCarta existente = buscarVistaPorCarta(cartasJugador, c);
+            if (existente != null) {
+                vistasConservadas.add(existente);
+            } else {
+                cartasRealmenteNuevas.add(c); // no había VistaCarta para esta carta: es robada nueva
+            }
+        }
+
+        // 2. Todo lo demás (mesa jugador, mesa rival, mano rival, y cualquier VistaCarta de cartasJugador
+        // que ya no está en la mano nueva) sí vuela al mazo y se destruye, como antes.
+        ArrayList<VistaCarta> viejasAVolar = new ArrayList<>();
+        for (VistaCarta v : cartasJugador) {
+            if (!vistasConservadas.contains(v)) viejasAVolar.add(v);
+        }
+        viejasAVolar.addAll(cartasMesaJugador);
+        viejasAVolar.addAll(cartasMesaRival);
+        viejasAVolar.addAll(cartasRival);
+
+        if (viejasAVolar.isEmpty()) {
+            limpiarVistaExcepto(vistasConservadas);
+            prepararColasParciales(cartasRealmenteNuevas, nuevasRival, vistasConservadas);
+            return;
+        }
+        final int[] pendientes = {viejasAVolar.size()};
+        for (VistaCarta carta : viejasAVolar) {
+            carta.animarHacia(MAZO_VISUAL_X, MAZO_VISUAL_Y, () -> {
+                pendientes[0]--;
+                if (pendientes[0] == 0) {
+                    limpiarVistaExcepto(vistasConservadas);
+                    prepararColasParciales(cartasRealmenteNuevas, nuevasRival, vistasConservadas);
+                }
+            });
+        }
+    }
+
+    private VistaCarta buscarVistaPorCarta(ArrayList<VistaCarta> lista, Carta carta) {
+        for (VistaCarta v : lista) {
+            if (v.getCarta() == carta) return v;
+        }
+        return null;
+    }
+
+    private void limpiarVistaExcepto(ArrayList<VistaCarta> conservar) {
+        for (VistaCarta c : cartasJugador) {
+            if (!conservar.contains(c)) c.dispose();
+        }
+        for (VistaCarta c : cartasRival) c.dispose();
+        for (VistaCarta c : cartasMesaJugador) c.dispose();
+        for (VistaCarta c : cartasMesaRival) c.dispose();
+        cartasJugador.clear();
+        cartasJugador.addAll(conservar); // las conservadas vuelven a la lista tal cual, sin recrear
+        cartasRival.clear();
+        cartasMesaJugador.clear();
+        cartasMesaRival.clear();
+    }
+
+    private void prepararColasParciales(ArrayList<Carta> nuevasJugador, ArrayList<Carta> nuevasRival, ArrayList<VistaCarta> yaConservadas) {
+        colaJugador.clear();
+        colaRival.clear();
+        for (Carta carta : nuevasJugador) { // solo las robadas nuevas entran en la cola de reparto animado
+            VistaCarta vista = new VistaCarta(carta, false, Main.getInstance().getAtlasCartas());
+            vista.setPosition(MAZO_VISUAL_X, MAZO_VISUAL_Y);
+            vista.setHandPosition(MAZO_VISUAL_X, MAZO_VISUAL_Y);
+            colaJugador.add(vista);
+        }
+        for (Carta carta : nuevasRival) {
+            VistaCarta vista = new VistaCarta(carta, true, Main.getInstance().getAtlasCartas());
+            vista.setTamaño(70f, 80f);
+            vista.setPosition(MAZO_VISUAL_X, MAZO_VISUAL_Y);
+            vista.setHandPosition(MAZO_VISUAL_X, MAZO_VISUAL_Y);
+            colaRival.add(vista);
+        }
+        cronometro = 0;
+        turnoJugador = true;
+        callbackOrganizarCartas.run(); // reposiciona ya mismo las conservadas, mientras entran las nuevas de a poco
+    }
 }

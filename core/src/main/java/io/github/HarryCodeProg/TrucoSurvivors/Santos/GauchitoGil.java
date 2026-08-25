@@ -9,7 +9,7 @@ import java.util.ArrayList;
 public class GauchitoGil extends Santo {
 
     public GauchitoGil() {
-        super(3, "Gauchito Gil", "GauchitoGil", "Otorga 30 pesos", 2);
+        super(3, "Gauchito Gil", "GauchitoGil", "Otorga 30 pesos", 0);
     }
 
     @Override public int cartasRequeridas() { return 0; }

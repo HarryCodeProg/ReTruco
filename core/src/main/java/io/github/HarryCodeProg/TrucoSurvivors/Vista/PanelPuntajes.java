@@ -78,6 +78,8 @@ public class PanelPuntajes {
         dibujarCajaBaseYMultiplicador(x, currentY, TURQUESA, TURQUESA_SOMBRA); // Jugador Truco
         currentY -= ESPACIO_LINEA;
         dibujarCajaBaseYMultiplicador(x, currentY, BRONCE, BRONCE_SOMBRA); // Jugador Envido
+        currentY -= ESPACIO_LINEA;
+        dibujarCajaSimple(x, currentY, ROJO, ROJO_SOMBRA);
 
         shapeRenderer.end();
     }
@@ -151,6 +153,9 @@ public class PanelPuntajes {
         dibujarTextoCentrado(batch, fuente, "X", xSeparador, ESPACIO_X, currentY, Color.WHITE);
         dibujarTextoCentrado(batch, fuente, String.valueOf((int) multEnvidoAMostrar),
             xSeparador + ESPACIO_X, ANCHO_CAJA_MULT, currentY, Color.WHITE);
+        currentY -= ESPACIO_LINEA;
+        int descartesActuales = (juego != null) ? juego.getDescartesActuales() : 0;
+        dibujarTextoCentrado(batch, fuente, String.valueOf(descartesActuales), x, ANCHO_CAJA_SIMPLE + 100f, currentY, Color.WHITE);
         currentY -= ESPACIO_LINEA;
         if (jugador != null) {
             String textoPesos = "$" + jugador.getPesos();

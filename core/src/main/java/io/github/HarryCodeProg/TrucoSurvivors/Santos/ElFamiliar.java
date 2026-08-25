@@ -2,6 +2,7 @@ package io.github.HarryCodeProg.TrucoSurvivors.Santos;
 
 import io.github.HarryCodeProg.TrucoSurvivors.Activacion.ContextoJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Carta;
+import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Palo;
 import io.github.HarryCodeProg.TrucoSurvivors.Jugador;
 
 import java.util.ArrayList;
@@ -24,7 +25,11 @@ public class ElFamiliar extends Santo {
         if (seleccionadas.size() != 2) return;
         Carta izquierda = seleccionadas.get(0);
         Carta derecha = seleccionadas.get(1);
-        izquierda.cambiarPalo(derecha.getPalo());
-        izquierda.cambiarNumero(derecha.getNumero());
+        Palo paloDestino = derecha.getPalo();
+        int numeroDestino = derecha.getNumero();
+        diferirCambioVisual(izquierda, () -> {
+            izquierda.cambiarPalo(paloDestino);
+            izquierda.cambiarNumero(numeroDestino);
+        });
     }
 }

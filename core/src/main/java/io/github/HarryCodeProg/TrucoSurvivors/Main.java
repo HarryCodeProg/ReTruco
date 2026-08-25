@@ -55,7 +55,8 @@ public class Main extends Game {
         inicializarFuentes();
         // 1. Cargamos el archivo .wav desde tu nueva estructura de carpetas.
         // Reemplazá "NombreDeTuCarpeta" y "cancion_completa.wav" por los nombres reales de tus archivos.
-        musicaFondo = Gdx.audio.newMusic(Gdx.files.internal("music/The Shadows of Tango/The Shadows of Tango - 48kHz_fixed.wav"));
+        //musicaFondo = Gdx.audio.newMusic(Gdx.files.internal("music/The Shadows of Tango/The Shadows of Tango - 48kHz_fixed.wav"));
+        musicaFondo = Gdx.audio.newMusic(Gdx.files.internal("music/Second_Dealing/second_dealing_full.ogg"));
         // 2. Configuraciones de la música de fondo
         musicaFondo.setLooping(true); // Hace que cuando termine, vuelva a empezar automáticamente
         musicaFondo.setVolume(0.05f);  // Volumen entre 0.0 (muto) y 1.0 (máximo). 0.25f es ideal para que no tape los sonidos.

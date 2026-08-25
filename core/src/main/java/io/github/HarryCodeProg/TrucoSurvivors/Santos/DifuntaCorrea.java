@@ -24,7 +24,8 @@ public class DifuntaCorrea extends Santo {
     public void aplicarEfecto(Jugador jugador, ArrayList<Carta> seleccionadas, ContextoJuego ctx) {
         int limite = Math.min(3, seleccionadas.size());
         for (int i = 0; i < limite; i++) {
-            seleccionadas.get(i).cambiarPalo(Palo.COPA);
+            Carta carta = seleccionadas.get(i);
+            diferirCambioVisual(carta, () -> carta.cambiarPalo(Palo.COPA));
         }
     }
 }

@@ -22,9 +22,6 @@ public class HUDController {
         this.vistaMazo = vistaMazo;
     }
 
-    /**
-     * Sincroniza la lista de elementos seleccionados (cartas y jokers) y actualiza el estado de los botones.
-     */
     public void actualizarSeleccion(Juego juego, boolean puedeInteractuar,
                                     GestorInputArrastrable<VistaCarta> gestorCartas,
         GestorInputArrastrable<VistaJoker> gestorJokers, Iterable<VistaCarta> cartasJugador,
@@ -44,19 +41,10 @@ public class HUDController {
         botones.actualizarEstados(juego, puedeInteractuar, gestorCartas.getSeleccionados().size());
     }
 
-    /**
-     * Procesa la interacción del usuario con el mazo, menú de envido y botones de acción.
-     */
     public void update(Vector3 mouseWorld, boolean puedeInteractuar, GestorAccion gestorAccion) {
-        if (vistaMazo != null) {
-            vistaMazo.update(mouseWorld.x, mouseWorld.y);
-            if (Gdx.input.justTouched() && vistaMazo.tocar(mouseWorld.x, mouseWorld.y)) {
-                return;
-            }
-            if (vistaMazo.isModalAbierto()) {
-                botones.gestor.update(-1000, -1000);
-                return;
-            }
+        if (vistaMazo != null && vistaMazo.isModalAbierto()) {
+            botones.gestor.update(-1000, -1000);
+            return;
         }
         if (puedeInteractuar) {
             Boton boton = botones.gestor.obtenerBotonCliqueado();

@@ -110,7 +110,6 @@ public class EstadoTienda {
         filaSantos.clear();
         for (int i = 0; i < cantidadSantos; i++) {
             Santo santo = poolSantos.tomarAleatorio(random);
-            System.out.println("Santo tienda: " + (santo != null ? santo.getNombre() : "NULL"));
             if (santo != null) {
                 filaSantos.add(
                     ItemTienda.deSanto(santo, santo.getCoste())

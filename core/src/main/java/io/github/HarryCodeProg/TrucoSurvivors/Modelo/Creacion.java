@@ -25,21 +25,6 @@ public class Creacion {
             mazo.agregarCarta(cartaCopa);
             mazo.agregarCarta(cartaOro);
         }
-        crearJokers();
-    }
-
-    public void crearJokers(){
-        this.tienda.agregarJoker(new JokerEspañol());
-        this.tienda.agregarJoker(new Mate());
-        this.tienda.agregarJoker(new Gaseosa());
-        this.tienda.agregarJoker(new BotellaCortada());
-        this.tienda.agregarJoker(new Fernet());
-        this.tienda.agregarJoker(new VinoCaja());
-        this.tienda.agregarJoker(new Milanesa());
-        this.tienda.agregarJoker(new Pastafrola());
-        this.tienda.agregarJoker(new Pastelitos());
-        this.tienda.agregarJoker(new Churros());
-        this.tienda.agregarJoker(new BolasDeFraile());
 
     }
 

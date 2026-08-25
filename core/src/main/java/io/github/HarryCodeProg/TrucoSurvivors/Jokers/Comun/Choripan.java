@@ -8,6 +8,9 @@ import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Rareza;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 
 public class Choripan extends Joker {
+
+    private static final double MULT_POR_RECHAZO = 4.0;
+
     public Choripan(){
         super(28, "Choripan", "Choripan", "Gana +4 Multiplicador truco cada vez que cantás \"No Quiero\"",
             Rareza.comun, 1, Joker.FaseActivacion.INDEPENDIENTE,
@@ -16,6 +19,11 @@ public class Choripan extends Joker {
 
     @Override
     public String getDescripcionRenderizada() {
+        return "Gana +4 Multiplicador truco cada vez que cantás \"No Quiero\" (Actual: +" + (int) getAcumulado() + ")";
+    }
+
+    @Override
+    public String getDescripcionRenderizada(Juego juego) {
         return "Gana +4 Multiplicador truco cada vez que cantás \"No Quiero\" (Actual: +" + (int) getAcumulado() + ")";
     }
 
@@ -30,10 +38,12 @@ public class Choripan extends Joker {
     @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego){
         if (evento == EventoJuego.AL_DECIR_NO_QUIERO_TRUCO) {
-            sumarAcumulado(4);
+            sumarAcumulado(MULT_POR_RECHAZO);
             return;
         }
         if (evento != EventoJuego.ANTES_DE_SUMAR_TRUCO) return;
-        ctx.getResolucionActual().sumarMult(getAcumulado(), getNombre(), this);
+        if (getAcumulado() > 0) {
+            ctx.getResolucionActual().sumarMult(getAcumulado(), getNombre(), this);
+        }
     }
 }

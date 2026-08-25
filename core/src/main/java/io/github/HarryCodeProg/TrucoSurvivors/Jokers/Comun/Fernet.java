@@ -34,8 +34,7 @@ public class Fernet extends Joker {
 
     @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego){
-        if (evento != EventoJuego.ANTES_DE_SUMAR_ENVIDO
-            && evento != EventoJuego.ANTES_DE_SUMAR_TRUCO) return;
+        if (evento != EventoJuego.ANTES_DE_SUMAR_ENVIDO && evento != EventoJuego.ANTES_DE_SUMAR_TRUCO) return;
         double bonus = 100;
         if (ctx.tieneJoker(Gaseosa.class)) {
             bonus += 200;

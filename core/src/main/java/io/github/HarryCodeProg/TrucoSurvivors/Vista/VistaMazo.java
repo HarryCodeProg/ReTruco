@@ -134,35 +134,30 @@ public class VistaMazo {
         return false;
     }
 
-
-    // Dibuja el mazo en la mesa + la ventana modal si está abierta
     public void render(SpriteBatch batch, List<Carta> cartasRestantes, int totalInicial) {
         this.cartasModalRestantes = cartasRestantes;
+        renderMazoFisico(batch, cartasRestantes, totalInicial);
+    }
+
+    private void renderMazoFisico(SpriteBatch batch, List<Carta> cartasRestantes, int totalInicial) {
         int cantidad = cartasRestantes.size();
         int cartasVisiblesEfecto = Math.min(cantidad, 4);
-        //  1. Si está en hover, le aplicamos un tinte más oscuro al batch
-        if (isHovered) {
-            batch.setColor(0.7f, 0.7f, 0.7f, 1f); // Oscurece al 70% de brillo
-        } else {
-            batch.setColor(Color.WHITE); // Normal
-        }
-        // 2. Dibujamos las cartas encimadas del mazo
+        if (isHovered) batch.setColor(0.7f, 0.7f, 0.7f, 1f); else batch.setColor(Color.WHITE);
         for (int i = 0; i < cartasVisiblesEfecto; i++) {
             float offsetY = i * 2f;
             float offsetX = i * 1f;
             batch.draw(dorso, x + offsetX, y + offsetY, width, height);
         }
-        //  3. RESTAURAR el color normal del batch para no oscurecer el texto ni otros elementos
         batch.setColor(Color.WHITE);
-        // 4. Texto con las cartas restantes (Ej: "36/52")
         String textoMazo = cantidad + "/" + totalInicial;
         font.setColor(Color.WHITE);
         GlyphLayout layout = new GlyphLayout(font, textoMazo);
-        // Volvemos a posicionarlo ABAJO del mazo (y - 8f o -12f según el margen que quieras)
         font.draw(batch, textoMazo, x + (width / 2f) - (layout.width / 2f), y - 10f);
-        // 5. Dibujar ventana modal si está abierta
+    }
+
+    public void renderModalSiCorresponde(SpriteBatch batch) {
         if (modalAbierto) {
-            dibujarVentanaModal(batch, cartasRestantes);
+            dibujarVentanaModal(batch, cartasModalRestantes);
         }
     }
 

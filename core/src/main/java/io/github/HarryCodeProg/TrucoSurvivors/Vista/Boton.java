@@ -171,22 +171,6 @@ public class Boton {
         pressed = hover && Gdx.input.isButtonPressed(Input.Buttons.LEFT);
     }
 
-    public void update() {
-        float mouseX = Gdx.input.getX();
-        float mouseY = Gdx.graphics.getHeight() - Gdx.input.getY();
-        hover = mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + height;
-        pressed = hover && Gdx.input.isButtonPressed(Input.Buttons.LEFT);
-    }
-
-    public boolean fueCliqueado() {
-        if (!visible) return false;
-        if (!habilitado) return false;
-        float mouseX = Gdx.input.getX();
-        float mouseY = Gdx.graphics.getHeight() - Gdx.input.getY();
-        boolean encima = mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + height;
-        return encima && Gdx.input.isButtonJustPressed(Input.Buttons.LEFT);
-    }
-
     public boolean fueCliqueado(float mouseWorldX, float mouseWorldY) {
         if (!visible) return false;
         if (!habilitado) return false;

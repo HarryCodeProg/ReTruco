@@ -214,6 +214,15 @@ public class GameScreenV2 implements Screen {
         this.controladorCombate = new ControladorCombate(this, juego);
         this.controladorIARival = new ControladorIARival(juego, controladorCombate, this);
         this.cartasJugador = new ArrayList<>();
+        gestorSantos.setBuscadorVistaCarta(carta -> {
+            for (VistaCarta v : cartasJugador) {
+                if (v.getCarta() == carta) return v;
+            }
+            for (VistaCarta v : cartasMesaJugador) { // por si la carta de envido ya fue jugada a mesa
+                if (v.getCarta() == carta) return v;
+            }
+            return null;
+        });
         this.cartasRival = new ArrayList<>();
         // Reusar vistas de jokers si es posible, sino recrear silenciosamente
         ArrayList<Joker> jokersModelo = jugador.getJokers();
@@ -240,11 +249,7 @@ public class GameScreenV2 implements Screen {
         this.gestorCartas = new GestorInputArrastrable<>(cartasJugador);
         this.gestorJokers = new GestorInputArrastrable<>(jokers);
         // inicializar gestorAnimaciones con datos reales
-        this.gestorAnimaciones = new GestorAnimacionesMano(
-            cartasJugador, cartasRival,
-            cartasMesaJugador, cartasMesaRival,
-            this::organizarCartas
-        );
+        this.gestorAnimaciones = new GestorAnimacionesMano(cartasJugador, cartasRival, cartasMesaJugador, cartasMesaRival, this::organizarCartas);
         this.gestorAccion = new GestorAccion(juego, this, controladorCombate, gestorCartas, gestorAnimaciones);
         // Posicionar jokers sin animación al iniciar/reiniciar
         organizarJokers(true);
@@ -271,9 +276,9 @@ public class GameScreenV2 implements Screen {
         tocoJugar = 0;
         juego.setManoFinalizada(false);
         juego.irAlMazo();
-        ArrayList<Carta> nuevasJugador = new ArrayList<>(jugador.getMano());
-        ArrayList<Carta> nuevasRival   = new ArrayList<>(rival.getMano());
-        gestorAnimaciones.iniciarTransicion(nuevasJugador, nuevasRival);
+        ArrayList<Carta> manoJugadorActual = new ArrayList<>(jugador.getMano());
+        ArrayList<Carta> nuevasRival = new ArrayList<>(rival.getMano());
+        gestorAnimaciones.iniciarTransicionConservandoMano(manoJugadorActual, nuevasRival);
     }
 
     @Override
@@ -282,24 +287,23 @@ public class GameScreenV2 implements Screen {
         actualizarJokersYVenta(delta);
         Joker jokerAgregado = gestorCompraJoker.update(delta, jokers, areaJokers);
         if (jokerAgregado != null) {
-            // Evitamos que el listener global cree una segunda vista mientras actualizamos el modelo.
             suppressJugadorJokerListener = true;
-            try {
-                jugador.agregarJoker(jokerAgregado); // actualiza el modelo (sin crear vista desde el listener)
-            } finally {
-                suppressJugadorJokerListener = false;
-            }
-            // Asegurarnos de que la UI esté alineada con la vista animada que ya fue añadida.
+            try { jugador.agregarJoker(jokerAgregado); }
+            finally { suppressJugadorJokerListener = false; }
             organizarJokers(true);
-            // Si la tienda está abierta, reanudamos sus listeners para que vuelva a reaccionar a cambios futuros.
+        }
+        boolean modalBloqueante = (vistaMazo != null && vistaMazo.isModalAbierto()) || gestorSantos.hayOverlayActivo();
+        if (vistaMazo != null) {
+            vistaMazo.update(mouseWorld.x, mouseWorld.y);
+            if (Gdx.input.justTouched() && vistaMazo.tocar(mouseWorld.x, mouseWorld.y)) {return;}
         }
         if (estado == EstadoPantalla.TIENDA) {
-            renderConTienda(delta);
+            renderConTienda(delta, modalBloqueante);
             if (pendingEstado != null) { enterState(pendingEstado); pendingEstado = null; }
             return;
         }
         if (estado == EstadoPantalla.SELECCION_RIVAL) {
-            renderConSeleccionRival(delta);
+            renderConSeleccionRival(delta, modalBloqueante);
             if (pendingEstado != null) { enterState(pendingEstado); pendingEstado = null; }
             return;
         }
@@ -315,27 +319,28 @@ public class GameScreenV2 implements Screen {
         }
         if (gestorAnimaciones != null) gestorAnimaciones.update(delta);
         gestorAnimacionResolucion.update(delta);
-        boolean puedeInteract = puedeInteractuar();
+        boolean puedeInteract = puedeInteractuar() && !modalBloqueante; // <-- FIX: modal bloquea interacción de fondo
         hudController.update(mouseWorld, puedeInteract, gestorAccion);
-        if (controladorIARival != null) controladorIARival.update(puedeInteract);
-        // Actualizaciones comunes
+        if (controladorIARival != null && !modalBloqueante) controladorIARival.update(puedeInteract); // <-- no avanza IA con modal abierto
         VistaCarta cartaArrastradaAntes = gestorCartas.getArrastrado();
-        //VistaJoker jokerArrastradoAntes = gestorJokers.getArrastrado();
-        gestorCartas.update(mouseWorld.x, mouseWorld.y, delta, puedeInteract);
-        // En JUGANDO permitimos drops/reorder; aquí usamos canDrop según estado
+        if (!modalBloqueante) {
+            gestorCartas.update(mouseWorld.x, mouseWorld.y, delta, puedeInteract); // <-- solo si no hay modal
+        }
         if (!puedeInteract) {
             for (VistaCarta c : new ArrayList<>(cartasJugador)) c.update(mouseWorld.x, mouseWorld.y, delta);
         }
         for (VistaCarta c : new ArrayList<>(cartasRival)) c.update(mouseWorld.x, mouseWorld.y, delta);
         actualizarCartasMesa(delta);
-        actualizarPreviewsCartas(puedeInteract);
+        if (!modalBloqueante) {
+            actualizarPreviewsCartas(puedeInteract); // <-- no reordenar mano de fondo con modal abierto
+        }
         hudController.actualizarSeleccion(juego, puedeInteract, gestorCartas, gestorJokers, cartasJugador, jokers);
         if (cartaArrastradaAntes != null && gestorCartas.getArrastrado() == null) organizarCartas();
-        //if (jokerArrastradoAntes != null && gestorJokers.getArrastrado() == null) organizarJokers(true);
-        gestorSantos.update(mouseWorld.x, mouseWorld.y, delta);
+        gestorSantos.update(mouseWorld.x, mouseWorld.y, delta); // el propio overlay de santos ya se autobloquea internamente
         gestorUsoSanto.update(mouseWorld.x, mouseWorld.y, gestorSantos.getSantos(), jugador, (vistaSanto, jug) -> {
             gestorSantos.usarSeleccionado(vistaSanto, jug);
         });
+        if (vistaMazo != null) vistaMazo.update(mouseWorld.x, mouseWorld.y); // vistaMazo también se autobloquea (ver modalAbierto en su update)
         renderizar(delta);
         if (pendingEstado != null) { enterState(pendingEstado); pendingEstado = null; }
     }
@@ -353,10 +358,11 @@ public class GameScreenV2 implements Screen {
         renderContadorSantos(game.batch);
         gestorSantos.render(game.batch, game);
         gestorUsoSanto.render(game.batch);
+        if (vistaMazo != null) vistaMazo.renderModalSiCorresponde(game.batch);
         game.batch.end();
     }
 
-    private void renderConSeleccionRival(float delta) {
+    private void renderConSeleccionRival(float delta, boolean modalBloqueante) {
         if (panelSeleccionRival != null && panelSeleccionVisible) {
             panelSeleccionRival.updateAnimacion(delta);
             panelSeleccionRival.update(mouseWorld.x, mouseWorld.y);
@@ -365,13 +371,14 @@ public class GameScreenV2 implements Screen {
         gestorUsoSanto.update(mouseWorld.x, mouseWorld.y, gestorSantos.getSantos(), jugador, (vistaSanto, jug) -> {
             gestorSantos.usarSeleccionado(vistaSanto, jug);
         });
-        renderComun(delta, false,
+        //if (vistaMazo != null) vistaMazo.update(mouseWorld.x, mouseWorld.y);
+        renderComun(delta, true,
             () -> { if (panelSeleccionRival != null && panelSeleccionVisible) panelSeleccionRival.render(game.batch); },
             () -> {}
         );
     }
 
-    private void renderConTienda(float delta) {
+    private void renderConTienda(float delta, boolean modalBloqueante) {
         if (panelTienda == null) {
             if (jugador == null) jugador = game.getPerfilJugador() != null ? game.getPerfilJugador().getJugador() : null;
             panelTienda = new PanelTienda(game, jugador, this::iniciarSalidaDeTienda, this::iniciarAnimacionCompraJoker,
@@ -379,10 +386,11 @@ public class GameScreenV2 implements Screen {
                 () -> {
                     if (gestorCompraJoker != null) {gestorCompraJoker.cancel();}
                     organizarJokers(true);}
-            ,juego);
+                ,juego);
         }
         if (panelTienda != null && panelTiendaVisible) {
             panelTienda.updateAnimacion(delta);
+            panelTienda.setBloqueadoPorModalExterno(modalBloqueante);
             panelTienda.update(mouseWorld.x, mouseWorld.y, delta);
         }
         gestorSantos.update(mouseWorld.x, mouseWorld.y, delta);
@@ -420,6 +428,7 @@ public class GameScreenV2 implements Screen {
         gestorSantos.render(game.batch, game);
         gestorUsoSanto.render(game.batch);
         renderOverlaysFinal.run();
+        if (vistaMazo != null) vistaMazo.renderModalSiCorresponde(game.batch);
         game.batch.end();
     }
 
@@ -534,6 +543,8 @@ public class GameScreenV2 implements Screen {
     }
 
     private void actualizarJokersYVenta(float delta) {
+        boolean modalBloqueante = (vistaMazo != null && vistaMazo.isModalAbierto()) || gestorSantos.hayOverlayActivo();
+        if (modalBloqueante) return;
         actualizarJokers(delta);
         gestorVentaJoker.update(mouseWorld.x, mouseWorld.y, jokers, jugador, (v) -> organizarJokers());
     }
@@ -647,6 +658,12 @@ public class GameScreenV2 implements Screen {
             vj.setResaltado(activo);
         }
         for (VistaCarta vc : cartasMesaJugador) {
+            String nombreCarta = vc.getCarta().getNumero() + " de " + vc.getCarta().paloToString();
+            boolean activo = origenRef != null ? vc.getCarta() == origenRef
+                : (origen != null && nombreCarta.equals(origen));
+            vc.setResaltado(activo);
+        }
+        for (VistaCarta vc : cartasJugador) {
             String nombreCarta = vc.getCarta().getNumero() + " de " + vc.getCarta().paloToString();
             boolean activo = origenRef != null ? vc.getCarta() == origenRef
                 : (origen != null && nombreCarta.equals(origen));

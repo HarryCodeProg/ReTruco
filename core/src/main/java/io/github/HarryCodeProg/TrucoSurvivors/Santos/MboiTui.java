@@ -34,7 +34,7 @@ public class MboiTui extends Santo {
         for (int i = 0; i < limite; i++) {
             Carta carta = seleccionadas.get(i);
             if (carta.getNumero() < 12) {
-                carta.cambiarNumero(carta.getNumero() + 1);
+                diferirCambioVisual(carta, () -> carta.cambiarNumero(carta.getNumero() + 1));
             }
         }
     }
