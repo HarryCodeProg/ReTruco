@@ -38,6 +38,7 @@ public class Main extends Game {
     private TextureAtlas atlasZodiaco;
     private Texture texturaRuletaFondo;
     private TextureAtlas atlasSantos;
+    private BitmapFont fuenteUI;
 
     @Override
     public void create() {
@@ -110,6 +111,8 @@ public class Main extends Game {
 
     public static Main getInstance() {return instancia;}
 
+    public BitmapFont getFuenteUI() {return fuenteUI;}
+
     public void crearRivales(){
         listaRivales.add(new DatosRival("Maty", "Vive en chaco, pobre tipo", 30, true,0));
         listaRivales.add(new DatosRival("Enzo", "El incel definitivo", 60, false,1));
@@ -169,6 +172,9 @@ public class Main extends Game {
         // Fuente grande para títulos (reutilizamos el generador)
         parameter.size = 48;
         fuenteTitulo = generator.generateFont(parameter);
+        fuenteUI = new BitmapFont();
+        fuenteUI.getData().setScale(0.9f);
+        fuenteUI.setColor(Color.WHITE);
         generator.dispose(); // Liberamos memoria
     }
 
@@ -205,5 +211,6 @@ public class Main extends Game {
         if (atlasJokers != null) atlasJokers.dispose();
         if (atlasZodiaco != null) atlasZodiaco.dispose();
         if (texturaRuletaFondo != null) texturaRuletaFondo.dispose();
+        if (fuenteUI != null) fuenteUI.dispose();
     }
 }

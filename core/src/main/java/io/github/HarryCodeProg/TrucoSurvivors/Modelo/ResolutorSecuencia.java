@@ -6,6 +6,7 @@ import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Carta;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.EventoJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Activacion.GestorJokers;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.JokerCopiaVecino;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -80,7 +81,10 @@ public class ResolutorSecuencia {
         double puntos = extractorPuntos.apply(carta);
         ctx.getResolucionActual().sumarChips(puntos, nombreCarta, carta);
         for (Joker j : ctx.getJugador().getJokers()) {
-            if (j.getFase() == Joker.FaseActivacion.AL_PUNTUAR_CARTA) {
+            boolean esDeEstaFase = j.getFase() == Joker.FaseActivacion.AL_PUNTUAR_CARTA;
+            boolean esCopiaDeEstaFase = (j instanceof JokerCopiaVecino) && ((JokerCopiaVecino) j).getVecinoActual(ctx) != null
+                && ((JokerCopiaVecino) j).getVecinoActual(ctx).getFase() == Joker.FaseActivacion.AL_PUNTUAR_CARTA;
+            if (esDeEstaFase || esCopiaDeEstaFase) {
                 j.aplicarEfecto(act.evento, ctx, juego);
             }
         }

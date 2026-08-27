@@ -68,8 +68,19 @@ public class GestorAccion {
                 break;
             case NO_QUIERO:
                 if (juego.hayCantoEnvidoPendiente()) {
-                    juego.responderEnvido(false);
-                    cCombate.comprobarFinDelCombate();
+                    juego.responderEnvido(false); // arma resolución simple, no aplica todavía
+                    ResolucionPuntaje resolucionEnvido = juego.getUltimaResolucionEnvido();
+                    if (resolucionEnvido != null && !resolucionEnvido.getLog().isEmpty()) {
+                        gScreen.setEsperandoTransicion(true);
+                        gScreen.iniciarAnimacionResolucion(resolucionEnvido, false, () -> {
+                            gScreen.setEsperandoTransicion(false);
+                            juego.aplicarResultadoEnvido();
+                            cCombate.comprobarFinDelCombate();
+                        });
+                    } else {
+                        juego.aplicarResultadoEnvido();
+                        cCombate.comprobarFinDelCombate();
+                    }
                 } else if (juego.hayCantoTrucoPendiente()) {
                     juego.responderTruco(false);
                     cCombate.comprobarFinDelCombate();

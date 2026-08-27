@@ -65,23 +65,28 @@ public class IARival {
                 juego.escalarEnvido(rival);
                 break;
             case QUIERO: {
-                juego.responderEnvido(true); // calcula, no aplica todavía
-                ResolucionPuntaje resolucion = juego.getUltimaResolucionEnvido();
-                if (resolucion != null && solicitarAnimacionEnvido != null) {
-                    animandoEnvido = true;
-                    solicitarAnimacionEnvido.accept(resolucion, () -> {
-                        juego.aplicarResultadoEnvido();
-                        animandoEnvido = false;
-                    });
-                } else {
-                    // sin callback disponible o ganó el rival (resolucion null): aplicar directo, sin animación
-                    juego.aplicarResultadoEnvido();
-                }
+                juego.responderEnvido(true);
+                dispararAnimacionOAplicar();
                 break;
             }
-            case NO_QUIERO:
-                juego.responderEnvido(false); // este camino no calcula resolución con jokers, se aplica solo
+            case NO_QUIERO: {
+                juego.responderEnvido(false); // ahora arma resolución simple, no aplica
+                dispararAnimacionOAplicar();
                 break;
+            }
+        }
+    }
+
+    private void dispararAnimacionOAplicar() {
+        ResolucionPuntaje resolucion = juego.getUltimaResolucionEnvido();
+        if (resolucion != null && solicitarAnimacionEnvido != null) {
+            animandoEnvido = true;
+            solicitarAnimacionEnvido.accept(resolucion, () -> {
+                juego.aplicarResultadoEnvido();
+                animandoEnvido = false;
+            });
+        } else {
+            juego.aplicarResultadoEnvido();
         }
     }
 

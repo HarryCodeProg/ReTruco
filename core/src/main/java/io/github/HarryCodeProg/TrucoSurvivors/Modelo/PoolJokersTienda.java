@@ -3,8 +3,10 @@ package io.github.HarryCodeProg.TrucoSurvivors.Modelo;
 
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Comun.BotellaCortada;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Rareza;
 import io.github.HarryCodeProg.TrucoSurvivors.Jugador;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Comun.*;
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Epico.*;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -65,6 +67,11 @@ public class PoolJokersTienda {
         fabricas.add(DameLaMochila::new);
         fabricas.add(NoEstaTanMal::new);
         fabricas.add(Empanada::new);
+        fabricas.add(MatoAlJuez::new);
+
+        //epico
+        fabricas.add(Aconcagua::new);
+        fabricas.add(Andes::new);
     }
 
     /** Devuelve un joker nuevo al azar, evitando (si es posible) los que el jugador ya tiene por clase. */
@@ -79,4 +86,29 @@ public class PoolJokersTienda {
         if (disponibles.isEmpty()) disponibles = fabricas; // si ya tiene todos, permite repetidos
         return disponibles.get(random.nextInt(disponibles.size())).get();
     }
+
+    public Joker tomarAleatorioDeRareza(Rareza rareza, Jugador jugador) {
+        Random random = new Random();
+        ArrayList<Supplier<Joker>> disponibles = new ArrayList<>();
+        ArrayList<Supplier<Joker>> todosDeRareza = new ArrayList<>();
+        for (Supplier<Joker> f : fabricas) {
+            Joker candidato = f.get();
+            if (candidato.getRareza() == rareza) {
+                todosDeRareza.add(f);
+                boolean yaLoTiene = jugador.getJokers().stream()
+                    .anyMatch(j -> j.getClass().equals(candidato.getClass()));
+                if (!yaLoTiene) disponibles.add(f);
+            }
+        }
+        // Si ya tiene todos los jokers de esta rareza, permitimos repetidos
+        if (disponibles.isEmpty()) {
+            disponibles = todosDeRareza;
+        }
+        // Si no hay Jokers de esta rareza cargados en el pool, devolvemos null para no romper nada
+        if (disponibles.isEmpty()) {
+            return null;
+        }
+        return disponibles.get(random.nextInt(disponibles.size())).get();
+    }
 }
+

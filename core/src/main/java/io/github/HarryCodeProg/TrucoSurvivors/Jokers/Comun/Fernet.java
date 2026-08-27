@@ -16,7 +16,7 @@ public class Fernet extends Joker {
             5,
             "Fernet",
             "Fernet",
-            "+100 puntos truco, +100 puntos envido. Si tienes una 'Cola', obtienes +200 puntos mas de cada uno.",
+            "+20 puntos truco, +20 puntos envido. Si tienes una 'Cola', obtienes +20 puntos mas de cada uno.",
             Rareza.comun,
             1,
             INDEPENDIENTE,
@@ -35,9 +35,9 @@ public class Fernet extends Joker {
     @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego){
         if (evento != EventoJuego.ANTES_DE_SUMAR_ENVIDO && evento != EventoJuego.ANTES_DE_SUMAR_TRUCO) return;
-        double bonus = 100;
+        double bonus = 20;
         if (ctx.tieneJoker(Gaseosa.class)) {
-            bonus += 200;
+            bonus += 20;
         }
         ctx.getResolucionActual().sumarChips(bonus, this.getNombre(), this);
     }
