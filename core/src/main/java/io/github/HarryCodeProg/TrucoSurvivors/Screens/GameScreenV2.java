@@ -684,7 +684,19 @@ public class GameScreenV2 implements Screen {
         gestorJokers.update(mouseWorld.x, mouseWorld.y, delta, true);
         boolean cambio = gestorReordenamiento.previsualizarReordenamientoJokers(gestorJokers, jokers);
         if (cambio) organizarJokers();
-        if (antes != null && gestorJokers.getArrastrado() == null) organizarJokers();
+        if (antes != null && gestorJokers.getArrastrado() == null) {
+            organizarJokers();
+            sincronizarOrdenJokersModelo();
+        }
+    }
+
+    private void sincronizarOrdenJokersModelo() {
+        if (jugador != null) {
+            jugador.getJokers().clear();
+            for (VistaJoker vj : jokers) {
+                jugador.getJokers().add(vj.getJoker()); // La rearmamos con el orden visual actual
+            }
+        }
     }
 
     private void onPrimeraSeleccionRival(DatosRival rivalElegido) {

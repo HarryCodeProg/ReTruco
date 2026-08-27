@@ -55,8 +55,8 @@ public class GameRenderSystem {
         if (textoFlotanteActual != null) {
             BitmapFont fuente = game.getFuentePrincipal();
             layout.setText(fuente, textoFlotanteActual);
-            float tx = (Gdx.graphics.getWidth() - layout.width) / 2f;
-            float ty = GameLayout.TECHO_MESA + 60f;
+            float tx = ((Gdx.graphics.getWidth() - layout.width) / 2f) + 200f;
+            float ty = GameLayout.TECHO_MESA - 30f;
             fuente.setColor(Color.GOLD);
             fuente.draw(game.batch, textoFlotanteActual, tx, ty);
             fuente.setColor(Color.WHITE);

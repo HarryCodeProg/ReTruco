@@ -1,6 +1,9 @@
 package io.github.HarryCodeProg.TrucoSurvivors;
 
 import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Carta;
+import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Palo;
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Raro.Salta;
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Raro.Tucuman;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Mazo;
 import io.github.HarryCodeProg.TrucoSurvivors.Santos.Santo;
@@ -27,7 +30,7 @@ public class Jugador {
     private int pesos = 10000;
     private static final int INTERVALO_INTERES = 5;
     private static final int TOPE_INTERES = 5;
-    private int descartesBase = 4;
+    private int descartesBase = 6;
     private int descartesExtra = 0;
     private int tamañoManoExtra = 0;
     private int espacioSantosExtra = 0;
@@ -45,6 +48,9 @@ public class Jugador {
     private int espacioSantosTiendaExtra = 0;
     private double multiplicadorPrecioTienda = 1.0;
     private int rerollsGratisTienda = 0;
+    private Santo ultimoSantoUsado;
+    private int manosMaximas = 6;
+    private int manosActuales = manosMaximas;
 
     public Jugador(String nombre) {
         this.nombre = nombre;
@@ -138,7 +144,7 @@ public class Jugador {
         for (int i = 0; i < mano.size(); i++) {
             for (int j = 0; j < mano.size(); j++) {
                 if (i != j) {
-                    if (mano.get(i).getPalo() == mano.get(j).getPalo()) {
+                    if (paloEfectivo(mano.get(i).getPalo()) == paloEfectivo(mano.get(j).getPalo())) { // FIX
                         hayMismoPalo = true;
                         envidoActualG = this.envidoActual + mano.get(i).getValorEnvidoActual() + mano.get(j).getValorEnvidoActual();
                         if (envidoActualG > puntosEnvido) {
@@ -160,7 +166,7 @@ public class Jugador {
         boolean hayMismoPalo = false;
         for (int i = 0; i < mano.size(); i++) {
             for (int j = 0; j < mano.size(); j++) {
-                if (i != j && mano.get(i).getPalo() == mano.get(j).getPalo()) {
+                if (i != j && paloEfectivo(mano.get(i).getPalo()) == paloEfectivo(mano.get(j).getPalo())) { // FIX
                     hayMismoPalo = true;
                     double suma = envidoActual + mano.get(i).getValorEnvidoActual() + mano.get(j).getValorEnvidoActual();
                     if (suma > mejor) {
@@ -285,5 +291,47 @@ public class Jugador {
         if (rerollsGratisTienda <= 0) return false;
         rerollsGratisTienda--;
         return true;
+    }
+
+    public Santo getUltimoSantoUsado() { return ultimoSantoUsado; }
+    public void setUltimoSantoUsado(Santo santo) { this.ultimoSantoUsado = santo; }
+
+    public int getManosActuales() { return manosActuales; }
+    public int getManosMaximas() { return manosMaximas; }
+
+    public void consumirMano() {
+        if (manosActuales > 0) manosActuales--;
+    }
+
+    /** Restaura una mano, sin superar el máximo. Usado por SanNicolas. */
+    public void restaurarUnaMano() {
+        if (manosActuales < manosMaximas) manosActuales++;
+    }
+
+    /** Reinicia el contador al máximo — se llama al empezar un combate nuevo (mismo patrón que multTrucoOriginal). */
+    public void reiniciarManos() {
+        this.manosActuales = manosMaximas;
+    }
+
+    public Palo paloEfectivo(Palo palo) {
+        if ((palo == Palo.BASTO || palo == Palo.COPA) && tieneJoker(Salta.class)) {
+            return Palo.BASTO; // representante canónico del grupo Basto/Copa
+        }
+        if ((palo == Palo.ESPADA || palo == Palo.ORO) && tieneJoker(Tucuman.class)) {
+            return Palo.ESPADA; // representante canónico del grupo Espada/Oro
+        }
+        return palo;
+    }
+
+    /** Conveniencia: ¿esta carta cuenta como el palo objetivo, considerando fusiones activas? */
+    public boolean cartaCuentaComoPalo(Carta carta, Palo paloObjetivo) {
+        return paloEfectivo(carta.getPalo()) == paloEfectivo(paloObjetivo);
+    }
+
+    private boolean tieneJoker(Class<? extends io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker> clase) {
+        for (io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker j : jokers) {
+            if (clase.isInstance(j)) return true;
+        }
+        return false;
     }
 }

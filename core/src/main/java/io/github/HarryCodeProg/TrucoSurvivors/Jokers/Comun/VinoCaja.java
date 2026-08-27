@@ -16,7 +16,7 @@ public class VinoCaja extends Joker {
             7,
             "Vino en caja",
             "VinoCaja",
-            "+300 puntos de truco. Por cada otro joker con la categoria 'Alcohol' -50 puntos",
+            "+50 puntos de truco. Por cada otro joker con la categoria 'Alcohol' -5 puntos",
             Rareza.comun,
             1,
             INDEPENDIENTE,
@@ -35,9 +35,9 @@ public class VinoCaja extends Joker {
     @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego){
         if (evento != EventoJuego.ANTES_DE_SUMAR_TRUCO) return;
-        double bonus = 300;
+        double bonus = 50;
         int otrosConAlcohol = ctx.contarJokersConCategoria(CategoriaJoker.ALCOHOL, this);
-        bonus -= 50 * otrosConAlcohol;
+        bonus -= 5 * otrosConAlcohol;
         ctx.getResolucionActual().sumarChips(bonus, this.getNombre(), this);
     }
 

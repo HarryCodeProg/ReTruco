@@ -38,10 +38,8 @@ public class Pachamama extends Santo {
         if (jugador.getJokers().size() >= jugador.getTamañoJokers()) {
             return;
         }
-
         PoolJokersTienda pool = new PoolJokersTienda();
         Joker joker = pool.tomarAleatorio(random, jugador);
-
         if (joker != null) {
             jugador.agregarJoker(joker);
         }

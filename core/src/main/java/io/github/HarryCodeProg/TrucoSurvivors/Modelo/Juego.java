@@ -61,6 +61,7 @@ public class Juego {
         jugador.multEnvidoOriginal();
         rival.multTrucoOriginal();
         rival.multEnvidoOriginal();
+        jugador.reiniciarManos();
         repartir();
     }
 
@@ -123,19 +124,6 @@ public class Juego {
             this.ultimaResolucionEnvido = resolucion;
             gestorJokers.disparar(EventoJuego.AL_PERDER_ENVIDO, crearContexto(), this);
         }
-    }
-
-    public void aplicarResultadoEnvido() {
-        if (ultimaResolucionEnvido != null) {
-            double puntosFinales = ultimaResolucionEnvido.calcularPuntajeFinal();
-            if (ultimoGanadorEnvidoFueJugador) {
-                puntosJugador += puntosFinales;
-                gestorJokers.disparar(EventoJuego.AL_GANAR_ENVIDO, crearContexto(), this);
-            } else {
-                puntosRival += puntosFinales;
-            }
-        }
-        verificarEstadoCombate();
     }
 
     public double calcularPuntosEnvido() {
@@ -298,6 +286,7 @@ public class Juego {
         Jugador ganador = obtenerGanadorTruco();
         if (ganador == null) return;
         manoFinalizada = true;
+        consumirHand();
         int bazasJugadas = resultados.size();
         if (ganador.equals(jugador)) {
             ArrayList<Carta> cartasGanadoras = new ArrayList<>();
@@ -495,9 +484,7 @@ public class Juego {
     }
 
     public boolean puedeEscalarEnvido(Jugador quien) {
-        return cantorEnvidoPendiente != null
-            && !quien.equals(cantorEnvidoPendiente)
-            && nivelEnvidoActual < 3;
+        return cantorEnvidoPendiente != null && !quien.equals(cantorEnvidoPendiente) && nivelEnvidoActual < 3;
     }
 
     public boolean puedeCantarEnvidoNivel(Jugador quien, int nivel) {
@@ -511,11 +498,40 @@ public class Juego {
         if (quiero) {
             ganadorEnvido();
         } else {
-            resolverNoQuieroEnvido(canter);
+            prepararResolucionNoQuieroEnvido(canter); // FIX: arma una ResolucionPuntaje simple, no aplica todavía
         }
         cantorEnvidoPendiente = null;
         nivelEnvidoPendiente = null;
-        if (!quiero) verificarEstadoCombate();
+    }
+
+    private Jugador canterNoQuieroPendiente;
+
+    private void prepararResolucionNoQuieroEnvido(Jugador canter) {
+        double sumMult = calcularPuntosEnvido();
+        double puntosCantor = canter.getPuntosEnvido();
+        double total = puntosCantor * sumMult;
+        double otorgado = total * 0.5;
+
+        this.canterNoQuieroPendiente = canter;
+        this.ultimoGanadorEnvidoFueJugador = canter.equals(jugador);
+
+        ResolucionPuntaje resolucion = new ResolucionPuntaje(0, 1); // sin mult real, chips=otorgado directo
+        resolucion.sumarChips(otorgado, "No Quiero", null);
+        this.ultimaResolucionEnvido = resolucion;
+    }
+
+    public void aplicarResultadoEnvido() {
+        if (ultimaResolucionEnvido != null) {
+            double puntosFinales = ultimaResolucionEnvido.calcularPuntajeFinal();
+            if (ultimoGanadorEnvidoFueJugador) {
+                puntosJugador += puntosFinales;
+                gestorJokers.disparar(EventoJuego.AL_GANAR_ENVIDO, crearContexto(), this);
+            } else {
+                puntosRival += puntosFinales;
+            }
+        }
+        canterNoQuieroPendiente = null;
+        verificarEstadoCombate();
     }
 
     private void resolverNoQuieroEnvido(Jugador canter) {
@@ -620,8 +636,17 @@ public class Juego {
             }
             return EstadoCombate.VICTORIA_JUGADOR;
         }
-        if (puntosRival >= puntajeMeta) return EstadoCombate.VICTORIA_RIVAL;
+        if (puntosRival >= puntajeMeta) {
+            return EstadoCombate.VICTORIA_RIVAL;
+        }
+        if (jugador.getManosActuales() <= 0) {
+            return EstadoCombate.VICTORIA_RIVAL;
+        }
         return EstadoCombate.EN_PROGRESO;
+    }
+
+    public void restaurarDescartes() {
+        descartesActuales = jugador.getDescartesMaximos();
     }
 
     public double getPuntajeMeta() {
@@ -634,5 +659,9 @@ public class Juego {
 
     public int getDescartesActuales() {
         return this.descartesActuales;
+    }
+
+    public void consumirHand() {
+        jugador.consumirMano();
     }
 }

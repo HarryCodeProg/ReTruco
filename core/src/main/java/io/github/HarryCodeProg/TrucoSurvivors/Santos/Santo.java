@@ -46,4 +46,10 @@ public abstract class Santo {
     public ArrayList<Carta> getCartasDiferidas() { return cartasDiferidas; }
     public ArrayList<Runnable> getAccionesDiferidas() { return accionesDiferidas; }
     public void limpiarDiferidos() { cartasDiferidas.clear(); accionesDiferidas.clear(); }
+
+    public void transferirDiferidosDesde(Santo otro) {
+        this.cartasDiferidas.addAll(otro.getCartasDiferidas());
+        this.accionesDiferidas.addAll(otro.getAccionesDiferidas());
+        otro.limpiarDiferidos();
+    }
 }
