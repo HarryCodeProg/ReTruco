@@ -25,13 +25,13 @@ public class GameRenderSystem {
     public GameRenderSystem(Main game) {this.game = game;}
 
     public void render(float delta, OrthographicCamera camera, Background fondoPlasma, PanelPuntajes panelPuntajes,
-        float panelX, float panelY, Juego juego, Jugador jugador, Jugador rival,
-        ArrayList<VistaCarta> cartasMesaJugador, ArrayList<VistaCarta> cartasMesaRival,
-        ArrayList<VistaCarta> cartasRival, ArrayList<VistaCarta> cartasJugador, ArrayList<VistaJoker> jokers,
-        GestorInputArrastrable<VistaCarta> gestorCartas, GestorInputArrastrable<VistaJoker> gestorJokers,
-        VistaMazo vistaMazo, GestorVentaJoker gestorVentaJoker, GestorAnimacionResolucion gestorAnimacion,
-        double puntosTrucoDisplay, double multTrucoDisplay, double puntosEnvidoDisplay, double multEnvidoDisplay,
-        String textoFlotanteActual, Runnable renderBotones, Runnable renderCartelJoker
+                       float panelX, float panelY, Juego juego, Jugador jugador, Jugador rival,
+                       ArrayList<VistaCarta> cartasMesaJugador, ArrayList<VistaCarta> cartasMesaRival,
+                       ArrayList<VistaCarta> cartasRival, ArrayList<VistaCarta> cartasJugador, ArrayList<VistaJoker> jokers,
+                       GestorInputArrastrable<VistaCarta> gestorCartas, GestorInputArrastrable<VistaJoker> gestorJokers,
+                       VistaMazo vistaMazo, GestorVentaJoker gestorVentaJoker, GestorAnimacionResolucion gestorAnimacion,
+                       double puntosTrucoDisplay, double multTrucoDisplay, double puntosEnvidoDisplay, double multEnvidoDisplay,
+                       String textoFlotanteActual, Runnable renderBotones, Runnable renderCartelJoker
     ) {
         // 1. Limpieza de pantalla
         ScreenUtils.clear(0.1f, 0.12f, 0.16f, 1f);
@@ -133,6 +133,7 @@ public class GameRenderSystem {
         batch.draw(pixelBlanco, areaX, cartasY + ALTO_AREA_CARTAS - 2f, areaAncho, 2f);
         batch.draw(pixelBlanco, areaX, cartasY, 2f, ALTO_AREA_CARTAS);
         batch.draw(pixelBlanco, areaX + areaAncho - 2f, cartasY, 2f, ALTO_AREA_CARTAS);
+        dibujarEtiquetaArea(batch, "MANO", areaX + 12f, cartasY + ALTO_AREA_CARTAS - 8f, new Color(0.65f, 0.80f, 0.88f, 1f));
         // ÁREA DE JOKERS
         float jokersY = Y_JOKERS - 10f;
         batch.setColor(0.05f, 0.05f, 0.08f, 0.45f);
@@ -142,11 +143,12 @@ public class GameRenderSystem {
         batch.draw(pixelBlanco, areaX, jokersY + ALTO_AREA_JOKERS - 2f, areaAncho, 2f);
         batch.draw(pixelBlanco, areaX, jokersY, 2f, ALTO_AREA_JOKERS);
         batch.draw(pixelBlanco, areaX + areaAncho - 2f, jokersY, 2f, ALTO_AREA_JOKERS);
+        dibujarEtiquetaArea(batch, "JOKERS", areaX + 12f, jokersY + ALTO_AREA_JOKERS - 8f, new Color(0.95f, 0.75f, 0.28f, 1f));
         batch.setColor(Color.WHITE);
     }
 
     private void renderContadoresAreas(SpriteBatch batch, Jugador jugador, ArrayList<VistaCarta> cartasJugador) {
-        BitmapFont font = game.getFuentePrincipal();
+        BitmapFont font = game.getFuenteNumeros();
         String textoCartas = cartasJugador.size() + "/" + jugador.getTamañoMano();
         String textoJokers = jugador.getJokers().size() + "/" + jugador.getTamañoJokers();
         GlyphLayout layoutCartas = new GlyphLayout(font, textoCartas);
@@ -155,8 +157,20 @@ public class GameRenderSystem {
         float yCartas = Y_MANO_JUGADOR - 18f;
         float yJokers = Y_JOKERS - 18f;
         float xContadorJokers = MARGEN_AREA_LATERAL + 8f;
-        font.setColor(Color.WHITE);
+        font.setColor(new Color(0.75f, 0.88f, 0.94f, 1f));
         font.draw(batch, textoCartas, centroX - layoutCartas.width / 2f, yCartas);
+        font.setColor(new Color(0.98f, 0.82f, 0.36f, 1f));
         font.draw(batch, textoJokers, xContadorJokers, yJokers);
+        font.setColor(Color.WHITE);
+    }
+
+    private void dibujarEtiquetaArea(SpriteBatch batch, String texto, float x, float y, Color color) {
+        BitmapFont font = game.getFuentePrincipal();
+        float escalaOriginal = font.getScaleX();
+        font.getData().setScale(escalaOriginal * 0.62f);
+        font.setColor(color);
+        font.draw(batch, texto, x, y);
+        font.getData().setScale(escalaOriginal);
+        font.setColor(Color.WHITE);
     }
 }

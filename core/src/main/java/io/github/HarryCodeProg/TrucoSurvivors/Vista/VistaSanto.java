@@ -2,9 +2,7 @@ package io.github.HarryCodeProg.TrucoSurvivors.Vista;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.*;
 import io.github.HarryCodeProg.TrucoSurvivors.Gestores.GestorSonidos;
 import io.github.HarryCodeProg.TrucoSurvivors.Main;
 import io.github.HarryCodeProg.TrucoSurvivors.Santos.Santo;
@@ -141,53 +139,72 @@ public class VistaSanto implements Arrastrable {
 
     public void renderCartelStats(SpriteBatch batch, Main game) {
         if (!hover || santo == null || game == null) return;
-        com.badlogic.gdx.graphics.g2d.BitmapFont font = game.getFuentePrincipal();
-        com.badlogic.gdx.graphics.g2d.GlyphLayout layout = new com.badlogic.gdx.graphics.g2d.GlyphLayout();
+        BitmapFont font = game.getFuentePrincipal();
+        GlyphLayout layout = new GlyphLayout();
+        // --- 1. ACHICAMOS LA FUENTE Y ACTIVAMOS EL MARKUP ---
+        float originalScaleX = font.getScaleX();
+        float originalScaleY = font.getScaleY();
+        boolean markupOriginal = font.getData().markupEnabled;
+        font.getData().setScale(originalScaleX * 0.8f, originalScaleY * 0.8f);
+        font.getData().markupEnabled = true;
+        // --- 2. TEXTOS Y FILTROS ---
         String titulo = santo.getNombre();
-        String descripcion = santo.getDescripcion();
-        float maxAnchoDesc = 240f;
-        float paddingX = 12f;
-        float paddingY = 10f;
-        float altoLinea = font.getLineHeight() + 4f;
-        // Medimos texto
+        // Coloreamos los nombres de los palos si aparecen en la descripción
+        String descripcion = io.github.HarryCodeProg.TrucoSurvivors.Cartas.Palo.colorearTexto(santo.getDescripcion());
+        // --- 3. MEDIDAS COMPACTAS (Estilo Joker) ---
+        float maxAnchoDesc = 175f;
+        float paddingX = 14f;
+        float paddingY = 12f;
+        float espacioVertical = 7f;
+        float altoLinea = font.getLineHeight();
+        // Medimos el título
         layout.setText(font, titulo);
         float anchoTitulo = layout.width;
-        layout.setText(font, descripcion, com.badlogic.gdx.graphics.Color.WHITE, maxAnchoDesc, com.badlogic.gdx.utils.Align.left, true);
+        // Medimos la descripción (centrada)
+        layout.setText(font, descripcion, font.getColor(), maxAnchoDesc, com.badlogic.gdx.utils.Align.center, true);
         float altoDescripcion = layout.height;
-        float anchoCartel = Math.max(anchoTitulo, maxAnchoDesc) + paddingX * 2f;
-        float altoCartel = altoLinea + altoDescripcion + paddingY * 2f;
+        // Calculamos ancho y alto final del cartel
+        float anchoCartel = Math.max(maxAnchoDesc, anchoTitulo) + (paddingX * 2f);
+        float altoCartel = paddingY + altoLinea + espacioVertical + altoDescripcion + paddingY;
+        // --- 4. POSICIONAMIENTO INTELIGENTE ---
         float actualWidth = width * scale;
         float actualHeight = height * scale;
         float drawY = y + visualOffsetY;
         float cartelX = x + (actualWidth / 2f) - (anchoCartel / 2f);
         float cartelY = drawY + actualHeight + 12f;
-        // si sale fuera de pantalla lo colocamos abajo
-        if (cartelY + altoCartel > com.badlogic.gdx.Gdx.graphics.getHeight() - 20f) {
+        // Si sale fuera de pantalla por arriba, lo bajamos
+        if (cartelY + altoCartel > com.badlogic.gdx.Gdx.graphics.getHeight() - 10f) {
             cartelY = drawY - altoCartel - 12f;
         }
-        com.badlogic.gdx.graphics.Texture pixel = game.getPixelBlanco();
-        if (pixel != null) {
-            batch.setColor(0.05f, 0.05f, 0.08f, 0.9f);
-            batch.draw(pixel, cartelX, cartelY, anchoCartel, altoCartel);
-            batch.setColor(0.28f, 0.30f, 0.36f, 0.9f);
-            float grosor = 1.5f;
-            batch.draw(pixel, cartelX, cartelY, anchoCartel, grosor);
-            batch.draw(pixel, cartelX, cartelY + altoCartel - grosor, anchoCartel, grosor);
-            batch.draw(pixel, cartelX, cartelY, grosor, altoCartel);
-            batch.draw(pixel, cartelX + anchoCartel - grosor, cartelY, grosor, altoCartel);
-            batch.setColor(1f, 1f, 1f, 1f);
+        // --- 5. RENDER DEL FONDO (TEMA OSCURO) ---
+        com.badlogic.gdx.graphics.Texture pixelBlanco = game.getPixelBlanco();
+        if (pixelBlanco != null) {
+            batch.setColor(0.12f, 0.13f, 0.15f, 0.98f); // Fondo Negro Claro
+            batch.draw(pixelBlanco, cartelX, cartelY, anchoCartel, altoCartel);
+            batch.setColor(0.28f, 0.30f, 0.35f, 1f); // Borde
+            float grosorBorde = 2.5f;
+            batch.draw(pixelBlanco, cartelX, cartelY, anchoCartel, grosorBorde);
+            batch.draw(pixelBlanco, cartelX, cartelY + altoCartel - grosorBorde, anchoCartel, grosorBorde);
+            batch.draw(pixelBlanco, cartelX, cartelY, grosorBorde, altoCartel);
+            batch.draw(pixelBlanco, cartelX + anchoCartel - grosorBorde, cartelY, grosorBorde, altoCartel);
+            batch.setColor(0.18f, 0.20f, 0.22f, 1f); // Sombra interior
+            batch.draw(pixelBlanco, cartelX + grosorBorde, cartelY + grosorBorde, anchoCartel - (grosorBorde*2), 1.5f);
         }
-        float textX = cartelX + paddingX;
-        float textY = cartelY + altoCartel - paddingY;
-        // Título
+        // --- 6. RENDER DE TEXTOS ---
+        float currentY = cartelY + altoCartel - paddingY;
+        // Título (Usamos GOLD por defecto para los Santos)
         font.setColor(com.badlogic.gdx.graphics.Color.GOLD);
-        font.draw(batch, titulo, textX, textY);
-        // Descripción con wrap
+        layout.setText(font, titulo);
+        font.draw(batch, titulo, cartelX + (anchoCartel - layout.width) / 2f, currentY);
+        currentY -= (altoLinea + espacioVertical);
+        // Descripción (Gris platino, centrada y con markup)
+        font.setColor(0.92f, 0.92f, 0.92f, 1f);
+        font.draw(batch, descripcion, cartelX + paddingX, currentY, anchoCartel - (paddingX * 2f), com.badlogic.gdx.utils.Align.center, true);
+        // --- 7. RESTAURAR ESTADOS ---
+        font.getData().setScale(originalScaleX, originalScaleY);
+        font.getData().markupEnabled = markupOriginal;
         font.setColor(com.badlogic.gdx.graphics.Color.WHITE);
-        font.draw(batch, descripcion, textX, textY - altoLinea, maxAnchoDesc, com.badlogic.gdx.utils.Align.left, true);
-        // restaurar color
-        font.setColor(com.badlogic.gdx.graphics.Color.WHITE);
-        batch.setColor(1f, 1f, 1f, 1f);
+        batch.setColor(com.badlogic.gdx.graphics.Color.WHITE);
     }
 
     public float getHeight() { return height; }

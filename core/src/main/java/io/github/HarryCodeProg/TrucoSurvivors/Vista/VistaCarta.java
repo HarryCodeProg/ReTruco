@@ -2,10 +2,9 @@ package io.github.HarryCodeProg.TrucoSurvivors.Vista;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.Rectangle;
 import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Carta;
 import io.github.HarryCodeProg.TrucoSurvivors.Gestores.GestorSonidos;
@@ -88,6 +87,7 @@ public class VistaCarta implements Arrastrable{
         }
         float drawY = y + visualOffsetY;
         float scaleExtra = resaltado ? 1f + (float)(Math.sin(pulso) * 0.06f) : 1f;
+        dibujarProfundidadYMarco(batch, game, drawY, scaleExtra);
         if (resaltado) {
             batch.setColor(1.25f, 1.15f, 0.6f, 1f);
         } else {
@@ -98,6 +98,29 @@ public class VistaCarta implements Arrastrable{
         if (hover && !bocaAbajo && !dragging && carta != null) {
             dibujarCartelStats(batch, game, drawY);
         }
+    }
+
+    /** Feedback puramente visual: sombra, halo de hover y marco de selección. */
+    private void dibujarProfundidadYMarco(SpriteBatch batch, io.github.HarryCodeProg.TrucoSurvivors.Main game,
+                                          float drawY, float scaleExtra) {
+        Texture pixel = game != null ? game.getPixelBlanco() : null;
+        if (pixel == null || region == null) return;
+        float ancho = width * scale * scaleExtra;
+        float alto = height * scale * scaleExtra;
+        float drawX = x + (width - ancho) / 2f;
+        float baseY = drawY + (height - alto) / 2f;
+        batch.setColor(0.01f, 0.01f, 0.02f, 0.50f);
+        batch.draw(pixel, drawX + 4f, baseY - 5f, ancho, alto);
+        if (hover || seleccionada || resaltado) {
+            if (seleccionada || resaltado) batch.setColor(0.95f, 0.72f, 0.20f, 0.95f);
+            else batch.setColor(0.25f, 0.88f, 0.76f, 0.85f);
+            float grosor = seleccionada ? 3f : 2f;
+            batch.draw(pixel, drawX - grosor, baseY - grosor, ancho + grosor * 2f, grosor);
+            batch.draw(pixel, drawX - grosor, baseY + alto, ancho + grosor * 2f, grosor);
+            batch.draw(pixel, drawX - grosor, baseY, grosor, alto);
+            batch.draw(pixel, drawX + ancho, baseY, grosor, alto);
+        }
+        batch.setColor(1f, 1f, 1f, 1f);
     }
 
     private void renderFlip(SpriteBatch batch) {
@@ -121,86 +144,114 @@ public class VistaCarta implements Arrastrable{
 
     public boolean isAnimando() { return animando; }
 
-    private void dibujarCartelStats(SpriteBatch batch, io.github.HarryCodeProg.TrucoSurvivors.Main game, float drawY) {
-        if (this.bocaAbajo){return;}
-        com.badlogic.gdx.graphics.g2d.BitmapFont font = game.getFuentePrincipal();
-        com.badlogic.gdx.graphics.g2d.GlyphLayout layout = new com.badlogic.gdx.graphics.g2d.GlyphLayout();
-        com.badlogic.gdx.graphics.Color colorPTruco = Boton.TipoColor.TURQUESA.base;
-        com.badlogic.gdx.graphics.Color colorTruco = Boton.TipoColor.CIAN.base;
-        com.badlogic.gdx.graphics.Color colorPEnvido = Boton.TipoColor.BRONCE.base;
-        com.badlogic.gdx.graphics.Color colorEnvido = Boton.TipoColor.CAFE.base;
-        com.badlogic.gdx.graphics.Color blanco = com.badlogic.gdx.graphics.Color.WHITE;
-        String lineaNombre = carta.getNumero() + " de " + carta.paloToString();
-        double valorTrucoReal = carta.getValorTrucoEfectivo();
-        double puntosTrucoAporte = carta.getPuntosTrucoAporteEfectivo();
-        double valorEnvidoReal = carta.getValorEnvidoEfectivo();
-        double puntosEnvidoAporte = carta.getPuntosEnvidoAporteEfectivo();
+    private void dibujarCartelStats(SpriteBatch batch, Main game, float drawY) {
+        if (this.bocaAbajo) { return; }
+        BitmapFont font = game.getFuentePrincipal();
+        BitmapFont fontNumeros = game.getFuenteNumeros();
+        GlyphLayout layout = new GlyphLayout();
+        // --- 1. ACHICAMOS LA FUENTE Y ACTIVAMOS EL MARKUP ---
+        float originalScaleX = font.getScaleX();
+        float originalScaleY = font.getScaleY();
+        boolean markupOriginal = font.getData().markupEnabled;
+        font.getData().setScale(originalScaleX * 0.8f, originalScaleY * 0.8f);
+        font.getData().markupEnabled = true;
+        float escalaNumerosOriginal = fontNumeros.getScaleX();
+        fontNumeros.getData().setScale(escalaNumerosOriginal * 0.75f);
+        // --- 2. COLORES Y TEXTOS ---
+        Color colorPTruco = Boton.TipoColor.TURQUESA.base;
+        Color colorTruco = Boton.TipoColor.CIAN.base;
+        Color colorPEnvido = Boton.TipoColor.BRONCE.base;
+        Color colorEnvido = Boton.TipoColor.CAFE.base;
+        Color grisClaro = new com.badlogic.gdx.graphics.Color(0.92f, 0.92f, 0.92f, 1f);
+        // Armamos el título y lo pasamos por el filtro de colores (Ej: "1 de [#HEX]ESPADA[]")
+        String lineaNombrePura = carta.getNumero() + " de " + carta.paloToString();
+        String lineaNombre = io.github.HarryCodeProg.TrucoSurvivors.Cartas.Palo.colorearTexto(lineaNombrePura);
         String etiquetaValorTruco = "Valor Truco: ";
-        String numeroValorTruco = String.valueOf((int) valorTrucoReal);
+        String numeroValorTruco = String.valueOf((int) carta.getValorTrucoEfectivo());
         String etiquetaPuntosTruco = "Puntos Truco: ";
-        String numeroPuntosTruco = String.valueOf((int) puntosTrucoAporte);
+        String numeroPuntosTruco = String.valueOf((int) carta.getPuntosTrucoAporteEfectivo());
         String etiquetaValorEnvido = "Valor Envido: ";
-        String numeroValorEnvido = String.valueOf((int) valorEnvidoReal);
+        String numeroValorEnvido = String.valueOf((int) carta.getValorEnvidoEfectivo());
         String etiquetaPuntosEnvido = "Puntos Envido: ";
-        String numeroPuntosEnvido = String.valueOf((int) puntosEnvidoAporte);
-        // Medimos el ancho maximo necesario entre todas las lineas (etiqueta + numero concatenados)
+        String numeroPuntosEnvido = String.valueOf((int) carta.getPuntosEnvidoAporteEfectivo());
+        // --- 3. MEDIMOS LOS TEXTOS PARA EL TAMAÑO DE LA CAJA ---
         layout.setText(font, lineaNombre);
         float maxAnchoTexto = layout.width;
-        layout.setText(font, etiquetaValorTruco + numeroValorTruco);
-        if (layout.width > maxAnchoTexto) maxAnchoTexto = layout.width;
-        layout.setText(font, etiquetaPuntosTruco + numeroPuntosTruco);
-        if (layout.width > maxAnchoTexto) maxAnchoTexto = layout.width;
-        layout.setText(font, etiquetaValorEnvido + numeroValorEnvido);
-        if (layout.width > maxAnchoTexto) maxAnchoTexto = layout.width;
-        layout.setText(font, etiquetaPuntosEnvido + numeroPuntosEnvido);
-        if (layout.width > maxAnchoTexto) maxAnchoTexto = layout.width;
-        float paddingX = 15f;
+        maxAnchoTexto = Math.max(maxAnchoTexto, medirLineaConNumero(layout, font, fontNumeros, etiquetaValorTruco, numeroValorTruco));
+        maxAnchoTexto = Math.max(maxAnchoTexto, medirLineaConNumero(layout, font, fontNumeros, etiquetaPuntosTruco, numeroPuntosTruco));
+        maxAnchoTexto = Math.max(maxAnchoTexto, medirLineaConNumero(layout, font, fontNumeros, etiquetaValorEnvido, numeroValorEnvido));
+        maxAnchoTexto = Math.max(maxAnchoTexto, medirLineaConNumero(layout, font, fontNumeros, etiquetaPuntosEnvido, numeroPuntosEnvido));
+        // --- 4. DIMENSIONES Y POSICIONAMIENTO (Estilo Compacto) ---
+        float paddingX = 14f;
         float paddingY = 12f;
         float altoLinea = font.getLineHeight() + 4f;
         float anchoCartel = maxAnchoTexto + (paddingX * 2);
-        float altoCartel = (altoLinea * 5) + (paddingY * 1.5f); // 5 lineas ahora
+        float altoCartel = (altoLinea * 5) + (paddingY * 2f);
         float actualWidth = width * scale;
         float actualHeight = height * scale;
         float cartelX = x + (actualWidth / 2f) - (anchoCartel / 2f);
         float cartelY = drawY + actualHeight + 12f;
+        // Si se escapa por arriba de la pantalla, lo tiramos para abajo
+        if (cartelY + altoCartel > com.badlogic.gdx.Gdx.graphics.getHeight() - 10f) {
+            cartelY = drawY - altoCartel - 12f;
+        }
+        // --- 5. RENDER DEL FONDO (TEMA OSCURO) ---
         Texture pixelBlanco = game.getPixelBlanco();
         if (pixelBlanco != null) {
-            batch.setColor(0.05f, 0.05f, 0.08f, 0.9f);
+            batch.setColor(0.12f, 0.13f, 0.15f, 0.98f); // Fondo Negro Claro
             batch.draw(pixelBlanco, cartelX, cartelY, anchoCartel, altoCartel);
-            batch.setColor(0.3f, 0.3f, 0.4f, 0.8f);
-            float grosorBorde = 1.5f;
+            batch.setColor(0.28f, 0.30f, 0.35f, 1f); // Borde
+            float grosorBorde = 2.5f;
             batch.draw(pixelBlanco, cartelX, cartelY, anchoCartel, grosorBorde);
             batch.draw(pixelBlanco, cartelX, cartelY + altoCartel - grosorBorde, anchoCartel, grosorBorde);
             batch.draw(pixelBlanco, cartelX, cartelY, grosorBorde, altoCartel);
             batch.draw(pixelBlanco, cartelX + anchoCartel - grosorBorde, cartelY, grosorBorde, altoCartel);
-            batch.setColor(1, 1, 1, 1);
+            batch.setColor(0.18f, 0.20f, 0.22f, 1f); // Sombra interior
+            batch.draw(pixelBlanco, cartelX + grosorBorde, cartelY + grosorBorde, anchoCartel - (grosorBorde*2), 1.5f);
+            batch.setColor(1f, 1f, 1f, 1f);
         }
+        // --- 6. RENDER DE TEXTOS ---
         float textoX = cartelX + paddingX;
-        float textoY = cartelY + altoCartel - paddingY;
-        // Renglon 1: nombre, todo blanco
-        font.setColor(blanco);
-        font.draw(batch, lineaNombre, textoX, textoY);
-        // Renglon 2: Valor Truco (etiqueta blanca + numero en color truco)
-        dibujarLineaConNumeroColoreado(batch, font, layout, etiquetaValorTruco, numeroValorTruco, textoX, textoY - altoLinea, blanco, colorTruco);
-        // Renglon 3: Puntos Truco (etiqueta blanca + numero en color truco)
-        dibujarLineaConNumeroColoreado(batch, font, layout, etiquetaPuntosTruco, numeroPuntosTruco, textoX, textoY - altoLinea * 2, blanco, colorPTruco);
-        // Renglon 4: Valor Envido (etiqueta blanca + numero en color envido)
-        dibujarLineaConNumeroColoreado(batch, font, layout, etiquetaValorEnvido, numeroValorEnvido, textoX, textoY - altoLinea * 3, blanco, colorEnvido);
-        // Renglon 5: Puntos Envido (etiqueta blanca + numero en color envido)
-        dibujarLineaConNumeroColoreado(batch, font, layout, etiquetaPuntosEnvido, numeroPuntosEnvido, textoX, textoY - altoLinea * 4, blanco, colorPEnvido);
-        font.setColor(blanco);
+        float currentY = cartelY + altoCartel - paddingY;
+        // Renglón 1: Nombre (Centrado, el palo ya se pinta solo por el markup)
+        layout.setText(font, lineaNombre);
+        font.setColor(com.badlogic.gdx.graphics.Color.WHITE);
+        font.draw(batch, lineaNombre, cartelX + (anchoCartel - layout.width) / 2f, currentY);
+        currentY -= altoLinea;
+        // Renglones de stats (Etiquetas en gris claro y los números mantienen su color de mecánica)
+        dibujarLineaConNumeroColoreado(batch, font, fontNumeros, layout, etiquetaValorTruco, numeroValorTruco, textoX, currentY, grisClaro, colorTruco);
+        currentY -= altoLinea;
+        dibujarLineaConNumeroColoreado(batch, font, fontNumeros, layout, etiquetaPuntosTruco, numeroPuntosTruco, textoX, currentY, grisClaro, colorPTruco);
+        currentY -= altoLinea;
+        dibujarLineaConNumeroColoreado(batch, font, fontNumeros, layout, etiquetaValorEnvido, numeroValorEnvido, textoX, currentY, grisClaro, colorEnvido);
+        currentY -= altoLinea;
+        dibujarLineaConNumeroColoreado(batch, font, fontNumeros, layout, etiquetaPuntosEnvido, numeroPuntosEnvido, textoX, currentY, grisClaro, colorPEnvido);
+        // --- 7. RESTAURAR ESTADOS ---
+        font.getData().setScale(originalScaleX, originalScaleY);
+        font.getData().markupEnabled = markupOriginal;
+        font.setColor(com.badlogic.gdx.graphics.Color.WHITE);
+        fontNumeros.getData().setScale(escalaNumerosOriginal);
+        fontNumeros.setColor(com.badlogic.gdx.graphics.Color.WHITE);
     }
 
     /** Dibuja "etiqueta" en colorEtiqueta seguido de "numero" en colorNumero, en la misma linea. */
+    private float medirLineaConNumero(com.badlogic.gdx.graphics.g2d.GlyphLayout layout, BitmapFont font,
+                                      BitmapFont fontNumeros, String etiqueta, String numero) {
+        layout.setText(font, etiqueta);
+        float anchoEtiqueta = layout.width;
+        layout.setText(fontNumeros, numero);
+        return anchoEtiqueta + layout.width;
+    }
+
     private void dibujarLineaConNumeroColoreado(SpriteBatch batch, com.badlogic.gdx.graphics.g2d.BitmapFont font,
-                                                com.badlogic.gdx.graphics.g2d.GlyphLayout layout, String etiqueta, String numero,
+                                                com.badlogic.gdx.graphics.g2d.BitmapFont fontNumeros, com.badlogic.gdx.graphics.g2d.GlyphLayout layout, String etiqueta, String numero,
                                                 float x, float y, com.badlogic.gdx.graphics.Color colorEtiqueta, com.badlogic.gdx.graphics.Color colorNumero) {
         font.setColor(colorEtiqueta);
         font.draw(batch, etiqueta, x, y);
         layout.setText(font, etiqueta);
         float anchoEtiqueta = layout.width;
-        font.setColor(colorNumero);
-        font.draw(batch, numero, x + anchoEtiqueta, y);
+        fontNumeros.setColor(colorNumero);
+        fontNumeros.draw(batch, numero, x + anchoEtiqueta, y);
     }
 
     /** Ya no hace falta disponer nada: la textura del atlas es compartida y se dispone una sola vez en Main. */

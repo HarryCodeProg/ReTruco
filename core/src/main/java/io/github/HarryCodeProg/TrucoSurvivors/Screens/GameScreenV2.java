@@ -295,7 +295,9 @@ public class GameScreenV2 implements Screen {
         boolean modalBloqueante = (vistaMazo != null && vistaMazo.isModalAbierto()) || gestorSantos.hayOverlayActivo();
         if (vistaMazo != null) {
             vistaMazo.update(mouseWorld.x, mouseWorld.y);
-            if (Gdx.input.justTouched() && vistaMazo.tocar(mouseWorld.x, mouseWorld.y)) {return;}
+            if (Gdx.input.justTouched()) {
+                vistaMazo.tocar(mouseWorld.x, mouseWorld.y);
+            }
         }
         if (estado == EstadoPantalla.TIENDA) {
             renderConTienda(delta, modalBloqueante);
@@ -454,7 +456,7 @@ public class GameScreenV2 implements Screen {
     }
 
     private void renderContadoresAreas(SpriteBatch batch, Jugador jugador, boolean mostrarCartas) {
-        BitmapFont font = game.getFuentePrincipal();
+        BitmapFont font = game.getFuenteNumeros();
         String textoJokers = jokers.size() + "/" + jugador.getTamañoJokers();
         float xContador = MARGEN_AREA_LATERAL + 8f;
         float yJokers = Y_JOKERS - 18f;
@@ -484,7 +486,7 @@ public class GameScreenV2 implements Screen {
 
     private void renderContadorSantos(SpriteBatch batch) {
         AreaElementos<VistaSanto> area = gestorSantos.getArea();
-        BitmapFont font = game.getFuentePrincipal();
+        BitmapFont font = game.getFuenteNumeros();
         String texto = gestorSantos.getSantos().size() + "/" + gestorSantos.getMaximo(jugador);
         float x = area.getX() + 8f;
         float y = area.getY() - 18f;
@@ -591,8 +593,10 @@ public class GameScreenV2 implements Screen {
     }
 
     private void organizarMesa() {
-        float inicioX = (Gdx.graphics.getWidth() - ANCHO_CARTA_MESA) / 2f - 200f;
         float pasoX = ANCHO_CARTA_MESA + 20f;
+        int cantidadColumnas = Math.max(cartasMesaJugador.size(), cartasMesaRival.size());
+        float anchoFormacion = cantidadColumnas > 0 ? ANCHO_CARTA_MESA + (cantidadColumnas - 1) * pasoX : 0f;
+        float inicioX = (Gdx.graphics.getWidth() - anchoFormacion) / 2f;
         for (int i = 0; i < cartasMesaJugador.size(); i++) {
             VistaCarta view = cartasMesaJugador.get(i);
             float posX = inicioX + i * pasoX;

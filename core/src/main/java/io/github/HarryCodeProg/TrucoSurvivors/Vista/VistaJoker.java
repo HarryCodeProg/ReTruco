@@ -5,6 +5,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.*;
+import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Palo;
 import io.github.HarryCodeProg.TrucoSurvivors.Gestores.GestorSonidos;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
@@ -188,105 +189,108 @@ public class VistaJoker implements Arrastrable{
         return mx >= x && mx <= x + w && my >= y && my <= y + h;
     }
 
-    private void dibujarCartelStats(SpriteBatch batch, io.github.HarryCodeProg.TrucoSurvivors.Main game, Juego juego, float drawY){
-        com.badlogic.gdx.graphics.g2d.BitmapFont font = game.getFuentePrincipal();
-        com.badlogic.gdx.graphics.g2d.GlyphLayout layout = new com.badlogic.gdx.graphics.g2d.GlyphLayout();
-        // 1. Datos del Joker
+    private void dibujarCartelStats(SpriteBatch batch, Main game, Juego juego, float drawY) {
+        BitmapFont font = game.getFuentePrincipal();
+        GlyphLayout layout = new GlyphLayout();
+        // --- 1. ACHICAMOS LA FUENTE Y ACTIVAMOS EL MARKUP ---
+        float originalScaleX = font.getScaleX();
+        float originalScaleY = font.getScaleY();
+        boolean markupOriginal = font.getData().markupEnabled; // Guardamos cómo estaba antes
+        font.getData().setScale(originalScaleX * 0.8f, originalScaleY * 0.8f);
+        font.getData().markupEnabled = true; // ¡ESTO HACE QUE LEA LOS COLORES!
+        // Datos del Joker
         String lineaNombre = joker.getNombre();
-        String descripcion = joker.getDescripcionRenderizada(juego);
-        String rarezaStr = joker.getRareza().toString();
-        float ANCHO_MAX_DESC = 220f;
-        // Variables para el diseño de las etiquetas (badges)
-        float padEtiquetaX = 6f;
+        String descripcionPura = joker.getDescripcionRenderizada(juego);
+        String descripcion = Palo.colorearTexto(descripcionPura);
+        String rarezaStr = joker.getRareza().toString().toUpperCase();
+        // --- 2. MEDIDAS MÁS CHICAS PARA COMPACTAR EL CARTEL ---
+        float ANCHO_MAX_DESC = 175f;
+        float padEtiquetaX = 10f;
         float padEtiquetaY = 4f;
-        float espacioVerticalEntreRasgos = 6f; // Separación vertical entre las cajitas
-        // 2. Medimos Nombre, Rareza y Descripción
+        float espacioVertical = 7f;
+        // Medimos los textos para calcular el tamaño del cartel
         layout.setText(font, lineaNombre);
         float anchoNombre = layout.width;
-        layout.setText(font, rarezaStr);
-        float anchoRarezaConPad = layout.width + (padEtiquetaX * 2f);
-        layout.setText(font, descripcion, font.getColor(), ANCHO_MAX_DESC, com.badlogic.gdx.utils.Align.left, true);
+        layout.setText(font, descripcion, font.getColor(), ANCHO_MAX_DESC, com.badlogic.gdx.utils.Align.center, true);
         float altoDescripcion = layout.height;
-        //  Medimos los rasgos verticalmente buscando cuál es el más ancho individualmente
-        float maxAnchoRasgo = 0f;
+        layout.setText(font, rarezaStr);
+        float maxAnchoTexto = Math.max(ANCHO_MAX_DESC, anchoNombre);
+        float altoBadge = font.getCapHeight() + (padEtiquetaY * 2f);
+        float altoCategorias = 0;
         for (CategoriaJoker cat : joker.getCategorias()) {
-            layout.setText(font, cat.getTexto());
-            float anchoEsteRasgo = layout.width + (padEtiquetaX * 2f);
-            if (anchoEsteRasgo > maxAnchoRasgo) {
-                maxAnchoRasgo = anchoEsteRasgo;
-            }
+            layout.setText(font, cat.getTexto().toUpperCase());
+            maxAnchoTexto = Math.max(maxAnchoTexto, layout.width + (padEtiquetaX * 2f));
+            altoCategorias += altoBadge + espacioVertical;
         }
-        // El ancho final ahora controla que ningún rasgo individual desborde
-        float maxAnchoTexto = Math.max(ANCHO_MAX_DESC, Math.max(anchoNombre, Math.max(anchoRarezaConPad, maxAnchoRasgo)));
-        // Márgenes internos del cartel principal
-        float paddingX = 16f;
-        float paddingY = 14f;
-        float altoLinea = font.getLineHeight() + 6f;
+        // Dimensiones finales del cartel
+        float paddingX = 14f;
+        float paddingY = 12f;
+        float altoLinea = font.getLineHeight();
         float anchoCartel = maxAnchoTexto + (paddingX * 2f);
-        //  ALTO DINÁMICO: Sumamos un renglón por cada rasgo que tenga el Joker
-        int cantidadRasgos = joker.getCategorias().size();
-        float altoCartel = altoLinea + altoDescripcion + altoLinea + (altoLinea * cantidadRasgos) + (paddingY * 2.5f) + 20f;
-        // 3. Posicionamiento abajo del Joker
+        float altoCartel = paddingY + altoLinea + espacioVertical + altoDescripcion + (espacioVertical * 2f) + altoBadge + altoCategorias + paddingY;
+        // Posicionamiento
         float actualWidth = width * scale;
         float cartelX = x + (actualWidth / 2f) - (anchoCartel / 2f);
-        float cartelY = drawY - altoCartel - 12f;
-        // 4. Render del Fondo del Cartel Principal
+        float cartelY = drawY + (height * scale) + 12f;
+        if (cartelY + altoCartel > Gdx.graphics.getHeight()) {
+            cartelY = drawY - altoCartel - 12f;
+        }
+        // --- 3. RENDER DEL FONDO (TEMA OSCURO) ---
         Texture pixelBlanco = game.getPixelBlanco();
         if (pixelBlanco != null) {
-            batch.setColor(0.05f, 0.05f, 0.08f, 0.92f);
+            batch.setColor(0.12f, 0.13f, 0.15f, 0.98f); // Fondo Negro Claro
             batch.draw(pixelBlanco, cartelX, cartelY, anchoCartel, altoCartel);
-            batch.setColor(0.25f, 0.28f, 0.35f, 0.8f);
-            float grosorBorde = 1.5f;
+            batch.setColor(0.28f, 0.30f, 0.35f, 1f); // Borde
+            float grosorBorde = 2.5f;
             batch.draw(pixelBlanco, cartelX, cartelY, anchoCartel, grosorBorde);
             batch.draw(pixelBlanco, cartelX, cartelY + altoCartel - grosorBorde, anchoCartel, grosorBorde);
             batch.draw(pixelBlanco, cartelX, cartelY, grosorBorde, altoCartel);
             batch.draw(pixelBlanco, cartelX + anchoCartel - grosorBorde, cartelY, grosorBorde, altoCartel);
+            batch.setColor(0.18f, 0.20f, 0.22f, 1f); // Sombra interior
+            batch.draw(pixelBlanco, cartelX + grosorBorde, cartelY + grosorBorde, anchoCartel - (grosorBorde*2), 1.5f);
         }
-        // 5. Renderizado de Textos de arriba hacia abajo
-        float textoX = cartelX + paddingX;
-        float textoY = cartelY + altoCartel - paddingY;
-        // Renglón 1: Nombre (Color de la rareza)
-        font.setColor(obtenerColorRareza(joker.getRareza().toString()));
-        font.draw(batch, lineaNombre, textoX, textoY);
-        // Renglón 2: Descripción (Blanco)
-        font.setColor(1f, 1f, 1f, 1f);
-        float yDesc = textoY - altoLinea;
-        font.draw(batch, descripcion, textoX, yDesc, ANCHO_MAX_DESC, com.badlogic.gdx.utils.Align.left, true);
-        // Renglón 3: Rareza (Con rectángulo de fondo translúcido)
-        float yRareza = yDesc - altoDescripcion - 22f;
-        Color colorRareza = obtenerColorRareza(joker.getRareza().toString());
-        if (pixelBlanco != null) {
-            layout.setText(font, rarezaStr);
-            float fondoW = layout.width + (padEtiquetaX * 2f);
-            float fondoH = font.getCapHeight() + (padEtiquetaY * 2f);
-            batch.setColor(colorRareza.r, colorRareza.g, colorRareza.b, 0.15f);
-            batch.draw(pixelBlanco, textoX, yRareza - padEtiquetaY - 2f, fondoW, fondoH);
+        // --- 4. RENDER DE TEXTOS ---
+        float currentY = cartelY + altoCartel - paddingY;
+        // Obtengo el color de la rareza para usarlo en el nombre y en el badge
+        Color colorDeRareza = obtenerColorRareza(joker.getRareza().toString());
+        // Nombre
+        font.setColor(colorDeRareza);
+        layout.setText(font, lineaNombre);
+        font.draw(batch, lineaNombre, cartelX + (anchoCartel - layout.width) / 2f, currentY);
+        currentY -= (altoLinea + espacioVertical);
+        // Descripción
+        font.setColor(0.92f, 0.92f, 0.92f, 1f);
+        font.draw(batch, descripcion, cartelX + paddingX, currentY, anchoCartel - (paddingX * 2f), com.badlogic.gdx.utils.Align.center, true);
+        currentY -= (altoDescripcion + espacioVertical * 1.5f);
+        // Renderizado de Etiquetas/Badges
+        currentY = dibujarBadge(batch, font, pixelBlanco, rarezaStr, colorDeRareza, cartelX, anchoCartel, currentY, padEtiquetaX, padEtiquetaY);
+        for (CategoriaJoker cat : joker.getCategorias()) {
+            currentY -= espacioVertical;
+            currentY = dibujarBadge(batch, font, pixelBlanco, cat.getTexto().toUpperCase(), obtenerColorCategoria(cat), cartelX, anchoCartel, currentY, padEtiquetaX, padEtiquetaY);
         }
-        font.setColor(colorRareza);
-        font.draw(batch, rarezaStr, textoX + padEtiquetaX, yRareza + font.getCapHeight());
-        // Renglón 4: Rasgos/Categorías (Uno abajo del otro)
-        if (!joker.getCategorias().isEmpty()) {
-            // El primer rasgo arranca abajo de la rareza
-            float yRasgoActual = yRareza - altoLinea - 8f;
-            for (CategoriaJoker cat : joker.getCategorias()) {
-                String textoCat = cat.getTexto();
-                Color colorCat = obtenerColorCategoria(cat);
-                layout.setText(font, textoCat);
-                float fondoW = layout.width + (padEtiquetaX * 2f);
-                float fondoH = font.getCapHeight() + (padEtiquetaY * 2f);
-                if (pixelBlanco != null) {
-                    batch.setColor(colorCat.r, colorCat.g, colorCat.b, 0.18f);
-                    batch.draw(pixelBlanco, textoX, yRasgoActual - padEtiquetaY - 2f, fondoW, fondoH);
-                }
-                font.setColor(colorCat);
-                font.draw(batch, textoCat, textoX + padEtiquetaX, yRasgoActual + font.getCapHeight());
-                //  En lugar de mover la X, bajamos la Y para el siguiente rasgo
-                yRasgoActual -= (altoLinea + espacioVerticalEntreRasgos);
-            }
+        // --- 5. RESTAURAMOS EL TAMAÑO ORIGINAL DE LA FUENTE Y LOS COLORES ---
+        font.getData().setScale(originalScaleX, originalScaleY);
+        font.getData().markupEnabled = markupOriginal; // <--- APAGAMOS EL MARKUP
+        font.setColor(Color.WHITE);
+        batch.setColor(Color.WHITE);
+    }
+
+    private float dibujarBadge(SpriteBatch batch, BitmapFont font, Texture pixel, String texto, Color colorFondo, float cartelX, float cartelW, float yTop, float padX, float padY) {
+        GlyphLayout layout = new GlyphLayout(font, texto);
+        float badgeW = layout.width + (padX * 2f);
+        float badgeH = font.getCapHeight() + (padY * 2f);
+        float badgeX = cartelX + (cartelW - badgeW) / 2f;
+        float badgeY = yTop - badgeH;
+        if (pixel != null) {
+            batch.setColor(colorFondo);
+            batch.draw(pixel, badgeX, badgeY, badgeW, badgeH);
+            // Sombra del badge (un poco más oscura para destacar sobre el fondo negro)
+            batch.setColor(0f, 0f, 0f, 0.3f);
+            batch.draw(pixel, badgeX, badgeY, badgeW, 1.5f);
         }
-        // Reset de seguridad del batch e hilos
-        font.setColor(1f, 1f, 1f, 1f);
-        batch.setColor(1f, 1f, 1f, 1f);
+        font.setColor(Color.WHITE);
+        font.draw(batch, texto, badgeX + padX, yTop - padY);
+        return badgeY;
     }
 
     public void setResaltado(boolean resaltado) {

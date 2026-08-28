@@ -29,6 +29,8 @@ public class PanelPuntajes {
     private static final Color BRONCE_SOMBRA = new Color(0.38f, 0.22f, 0.08f, 1f);
     private static final Color AZUL_HANDS = new Color(0.12f, 0.25f, 0.45f, 1f);
     private static final Color AZUL_HANDS_SOMBRA = new Color(0.06f, 0.12f, 0.25f, 1f);
+    private static final Color ORO = new Color(0.92f, 0.73f, 0.25f, 1f);
+    private static final Color FONDO_PANEL = new Color(0.045f, 0.055f, 0.085f, 0.96f);
 
     // Ajuste de espaciado para que no se caiga de la pantalla
     public static final float ESPACIO_LINEA = 50f;
@@ -64,10 +66,12 @@ public class PanelPuntajes {
         // 1. Fondo general del panel
         shapeRenderer.setColor(new Color(0f, 0f, 0f, 0.4f));
         dibujarRectanguloRedondeado(fondoX + 4, 0f, anchoFondo, altoFondo, RADIO_ESQUINA * 2f);
-        shapeRenderer.setColor(new Color(0.25f, 0.25f, 0.25f, 1f));
+        shapeRenderer.setColor(new Color(0.44f, 0.34f, 0.16f, 0.95f));
         dibujarRectanguloRedondeado(fondoX - 2, 0f, anchoFondo + 4, altoFondo, RADIO_ESQUINA * 2f);
-        shapeRenderer.setColor(new Color(0.1f, 0.1f, 0.11f, 0.95f));
+        shapeRenderer.setColor(FONDO_PANEL);
         dibujarRectanguloRedondeado(fondoX, 0f, anchoFondo, altoFondo, RADIO_ESQUINA * 2f);
+        shapeRenderer.setColor(new Color(0.92f, 0.73f, 0.25f, 0.85f));
+        shapeRenderer.rect(fondoX + 12f, altoFondo - 34f, anchoFondo - 24f, 2f);
         // 2. Cajas del panel por fila (Subimos todo sumando 70f)
         float currentY = y + 70f;
         dibujarCajaBaseYMultiplicador(x, currentY, NEGRO, NEGRO_SOMBRA); // Rival Truco
@@ -100,6 +104,13 @@ public class PanelPuntajes {
                              double puntosEnvidoDisplay, double multEnvidoDisplay) {
         String nombreARender = (rival != null && rival.getNombre() != null && !rival.getNombre().isEmpty()) ? rival.getNombre() : this.rivalNombre;
         float anchoCajaDoble = ANCHO_CAJA_BASE + ESPACIO_X + ANCHO_CAJA_MULT;
+        BitmapFont fuenteNumeros = Main.getInstance().getFuenteNumeros();
+        BitmapFont fuenteUI = Main.getInstance().getFuenteUI();
+        float escalaUI = fuenteUI.getScaleX();
+        fuenteUI.getData().setScale(0.68f);
+        fuenteUI.setColor(ORO);
+        dibujarTextoCentrado(batch, fuenteUI, "MARCADOR", x, anchoCajaDoble, Gdx.graphics.getHeight() - 31f, ORO);
+        fuenteUI.getData().setScale(escalaUI);
         if (nombreARender != null && !nombreARender.isEmpty()) {
             float escalaOriginal = fuente.getScaleX();
             fuente.getData().setScale(escalaOriginal * 1.25f);
@@ -107,7 +118,7 @@ public class PanelPuntajes {
             GlyphLayout nameLayout = new GlyphLayout();
             nameLayout.setText(fuente, nombreARender);
             float nameX = x + (anchoCajaDoble - nameLayout.width) / 2f;
-            float nameY = Gdx.graphics.getHeight() - 50f;
+            float nameY = Gdx.graphics.getHeight() - 56f;
             fuente.draw(batch, nombreARender, nameX, nameY);
             fuente.getData().setScale(escalaOriginal);
         }
@@ -121,50 +132,50 @@ public class PanelPuntajes {
         float anchoCajaSimple = anchoCajaDoble; // Homologamos el ancho
         // Rival Truco
         dibujarEtiqueta(batch, "TRUCO", x, currentY, anchoCajaDoble);
-        dibujarTextoCentrado(batch, fuente, String.valueOf((int) (rival != null ? rival.getMultiplicadorTruco() : 0)), xSeparador + ESPACIO_X, ANCHO_CAJA_MULT, currentY, Color.WHITE);
+        dibujarTextoCentrado(batch, fuenteNumeros, String.valueOf((int) (rival != null ? rival.getMultiplicadorTruco() : 0)), xSeparador + ESPACIO_X, ANCHO_CAJA_MULT, currentY, Color.WHITE);
         currentY -= ESPACIO_LINEA;
         // Rival Envido
         dibujarEtiqueta(batch, "ENVIDO", x, currentY, anchoCajaDoble);
-        dibujarTextoCentrado(batch, fuente, String.valueOf((int) (rival != null ? rival.getMultiplicadorEnvido() : 0)), xSeparador + ESPACIO_X, ANCHO_CAJA_MULT, currentY, Color.WHITE);
+        dibujarTextoCentrado(batch, fuenteNumeros, String.valueOf((int) (rival != null ? rival.getMultiplicadorEnvido() : 0)), xSeparador + ESPACIO_X, ANCHO_CAJA_MULT, currentY, Color.WHITE);
         currentY -= ESPACIO_LINEA;
         // Puntos Rival
         dibujarEtiqueta(batch, "PUNTOS RIVAL", x, currentY, anchoCajaSimple);
-        dibujarTextoCentrado(batch, fuente, String.valueOf(puntosRival), x, anchoCajaSimple, currentY, Color.BLACK);
+        dibujarTextoCentrado(batch, fuenteNumeros, String.valueOf(puntosRival), x, anchoCajaSimple, currentY, Color.BLACK);
         currentY -= ESPACIO_LINEA;
         // Meta
         dibujarEtiqueta(batch, "META", x, currentY, anchoCajaSimple);
-        dibujarTextoCentrado(batch, fuente, String.valueOf(puntajeMeta), x, anchoCajaSimple, currentY, Color.BLACK);
+        dibujarTextoCentrado(batch, fuenteNumeros, String.valueOf(puntajeMeta), x, anchoCajaSimple, currentY, Color.BLACK);
         currentY -= ESPACIO_LINEA;
         // Puntos Jugador
         dibujarEtiqueta(batch, "PUNTOS JUGADOR", x, currentY, anchoCajaSimple);
-        dibujarTextoCentrado(batch, fuente, String.valueOf(puntosJugador), x, anchoCajaSimple, currentY, Color.BLACK);
+        dibujarTextoCentrado(batch, fuenteNumeros, String.valueOf(puntosJugador), x, anchoCajaSimple, currentY, Color.BLACK);
         currentY -= ESPACIO_LINEA;
         // Truco Jugador
         dibujarEtiqueta(batch, "TRUCO", x, currentY, anchoCajaDoble);
         boolean animacionActiva = gestorAnimacion != null && gestorAnimacion.isActiva();
         double puntosTrucoAMostrar = animacionActiva ? puntosTrucoDisplay : 0;
         double multTrucoAMostrar = animacionActiva ? multTrucoDisplay : (jugador != null ? jugador.getMultiplicadorTruco() : 0);
-        dibujarTextoCentrado(batch, fuente, String.valueOf((int) puntosTrucoAMostrar), x, ANCHO_CAJA_BASE, currentY, Color.WHITE);
-        dibujarTextoCentrado(batch, fuente, "X", xSeparador, ESPACIO_X, currentY, Color.WHITE);
-        dibujarTextoCentrado(batch, fuente, String.valueOf((int) multTrucoAMostrar), xSeparador + ESPACIO_X, ANCHO_CAJA_MULT, currentY, Color.WHITE);
+        dibujarTextoCentrado(batch, fuenteNumeros, String.valueOf((int) puntosTrucoAMostrar), x, ANCHO_CAJA_BASE, currentY, Color.WHITE);
+        dibujarTextoCentrado(batch, fuenteNumeros, "X", xSeparador, ESPACIO_X, currentY, Color.WHITE);
+        dibujarTextoCentrado(batch, fuenteNumeros, String.valueOf((int) multTrucoAMostrar), xSeparador + ESPACIO_X, ANCHO_CAJA_MULT, currentY, Color.WHITE);
         currentY -= ESPACIO_LINEA;
         // Envido Jugador
         dibujarEtiqueta(batch, "ENVIDO", x, currentY, anchoCajaDoble);
         double puntosEnvidoAMostrar = animacionActiva ? puntosEnvidoDisplay : 0;
         double multEnvidoAMostrar = animacionActiva ? multEnvidoDisplay : (jugador != null ? jugador.getMultiplicadorEnvido() : 0);
-        dibujarTextoCentrado(batch, fuente, String.valueOf((int) puntosEnvidoAMostrar), x, ANCHO_CAJA_BASE, currentY, Color.WHITE);
-        dibujarTextoCentrado(batch, fuente, "X", xSeparador, ESPACIO_X, currentY, Color.WHITE);
-        dibujarTextoCentrado(batch, fuente, String.valueOf((int) multEnvidoAMostrar), xSeparador + ESPACIO_X, ANCHO_CAJA_MULT, currentY, Color.WHITE);
+        dibujarTextoCentrado(batch, fuenteNumeros, String.valueOf((int) puntosEnvidoAMostrar), x, ANCHO_CAJA_BASE, currentY, Color.WHITE);
+        dibujarTextoCentrado(batch, fuenteNumeros, "X", xSeparador, ESPACIO_X, currentY, Color.WHITE);
+        dibujarTextoCentrado(batch, fuenteNumeros, String.valueOf((int) multEnvidoAMostrar), xSeparador + ESPACIO_X, ANCHO_CAJA_MULT, currentY, Color.WHITE);
         currentY -= ESPACIO_LINEA;
         // Hands
         dibujarEtiqueta(batch, "MANOS", x, currentY, anchoCajaSimple);
         int handsActuales = (juego != null) ? juego.getJugador().getManosActuales() : 0;
-        dibujarTextoCentrado(batch, fuente, String.valueOf(handsActuales), x, anchoCajaSimple, currentY, Color.WHITE);
+        dibujarTextoCentrado(batch, fuenteNumeros, String.valueOf(handsActuales), x, anchoCajaSimple, currentY, Color.WHITE);
         currentY -= ESPACIO_LINEA;
         // Descartes
         dibujarEtiqueta(batch, "DESCARTES", x, currentY, anchoCajaSimple);
         int descartesActuales = (juego != null) ? juego.getDescartesActuales() : 0;
-        dibujarTextoCentrado(batch, fuente, String.valueOf(descartesActuales), x, anchoCajaSimple, currentY, Color.WHITE);
+        dibujarTextoCentrado(batch, fuenteNumeros, String.valueOf(descartesActuales), x, anchoCajaSimple, currentY, Color.WHITE);
         currentY -= ESPACIO_LINEA;
         // Pesos
         if (jugador != null) {
@@ -221,12 +232,12 @@ public class PanelPuntajes {
 
     private void dibujarEtiqueta(SpriteBatch batch, String texto, float x, float y, float ancho) {
         BitmapFont fuenteUI = Main.getInstance().getFuenteUI();
-        fuenteUI.getData().setScale(0.55f);
-        fuenteUI.setColor(new Color(0.75f, 0.75f, 0.75f, 1f));
+        fuenteUI.getData().setScale(0.52f);
+        fuenteUI.setColor(new Color(0.70f, 0.74f, 0.84f, 1f));
         layout.setText(fuenteUI, texto.toUpperCase());
         float xTexto = x + (ancho - layout.width) / 2f;
         // Se ajustó a +12f por la compresión del espaciado
-        float yTexto = y + ALTO_CAJA + 12f;
+        float yTexto = y + ALTO_CAJA + 11f;
         fuenteUI.draw(batch, texto.toUpperCase(), xTexto, yTexto);
         fuenteUI.getData().setScale(0.9f);
         fuenteUI.setColor(Color.WHITE);

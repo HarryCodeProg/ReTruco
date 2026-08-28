@@ -26,6 +26,8 @@ public class Main extends Game {
     private ArrayList<DatosRival> listaRivales;
     private BitmapFont fuentePrincipal;
     private BitmapFont fuenteTitulo;
+    private BitmapFont fuenteBotones;
+    private BitmapFont fuenteNumeros;
     private Texture pixelBlanco;
     private GestorSonidos gestorSonidos;
     private static Main instancia;
@@ -161,26 +163,51 @@ public class Main extends Game {
     }
 
     private void inicializarFuentes() {
-        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/Cinzel-Regular.ttf"));
         FreeTypeFontParameter parameter = new FreeTypeFontParameter();
-        // Fuente normal para descripciones, botones y nombres
+        // Lectura: conserva un tono clásico para descripciones, carteles y paneles.
+        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/IMFellEnglish-Regular.ttf"));
         parameter.size = 20;
         parameter.color = Color.WHITE;
-        parameter.borderWidth = 1.5f; // Un pequeño borde negro para que se lea impecable siempre
+        parameter.borderWidth = 1.5f;
         parameter.borderColor = Color.BLACK;
         fuentePrincipal = generator.generateFont(parameter);
-        // Fuente grande para títulos (reutilizamos el generador)
+        generator.dispose();
+
+        // Títulos: ornamental, cálida y asociada a la estética tradicional del juego.
+        generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/Almendra-Bold.ttf"));
         parameter.size = 48;
         fuenteTitulo = generator.generateFont(parameter);
-        fuenteUI = new BitmapFont();
+        generator.dispose();
+
+        // Acciones: fuerte y breve para botones, con personalidad sin perder contraste.
+        generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/PirataOne-Regular.ttf"));
+        parameter.size = 22;
+        fuenteBotones = generator.generateFont(parameter);
+        generator.dispose();
+
+        // HUD: formas nítidas para contadores, multiplicadores y etiquetas compactas.
+        generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/Cinzel-VariableFont_wght.ttf"));
+        parameter.size = 20;
+        fuenteUI = generator.generateFont(parameter);
         fuenteUI.getData().setScale(0.9f);
         fuenteUI.setColor(Color.WHITE);
-        generator.dispose(); // Liberamos memoria
+        generator.dispose();
+
+        // Valores: dígitos de Cinzel con mayor tamaño para lectura inmediata en HUD y stats.
+        generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/Cinzel-VariableFont_wght.ttf"));
+        parameter.size = 22;
+        fuenteNumeros = generator.generateFont(parameter);
+        fuenteNumeros.setColor(Color.WHITE);
+        generator.dispose();
     }
 
     public BitmapFont getFuentePrincipal() { return fuentePrincipal; }
 
     public BitmapFont getFuenteTitulo() { return fuenteTitulo; }
+
+    public BitmapFont getFuenteBotones() { return fuenteBotones; }
+
+    public BitmapFont getFuenteNumeros() { return fuenteNumeros; }
 
     public Texture getPixelBlanco() {
         return this.pixelBlanco;
@@ -206,6 +233,8 @@ public class Main extends Game {
         }
         if (fuentePrincipal != null) fuentePrincipal.dispose();
         if (fuenteTitulo != null) fuenteTitulo.dispose();
+        if (fuenteBotones != null) fuenteBotones.dispose();
+        if (fuenteNumeros != null) fuenteNumeros.dispose();
         gestorSonidos.dispose();
         if (atlasCartas != null) atlasCartas.dispose();
         if (atlasJokers != null) atlasJokers.dispose();

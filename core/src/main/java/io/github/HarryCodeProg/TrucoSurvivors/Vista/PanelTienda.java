@@ -31,6 +31,18 @@ public class PanelTienda {
     private static final float PANEL_ALTO = 540f;
     private static final float PANEL_X = 260f;
     private static final float PANEL_ANCHO = 1000f - PANEL_X;
+    private static final float ANCHO_ITEM = 85f;
+    // Filas compactas para reservar aire vertical incluso cuando un ítem se eleva al seleccionarse.
+    private static final float ALTO_ITEM = 105f;
+    private static final float ESPACIO_ITEM = 20f;
+    private static final float ANCHO_BOTON = 170f;
+    private static final float ALTO_BOTON = 48f;
+    private static final float COLUMNA_ACCIONES_X = PANEL_X + PANEL_ANCHO - ANCHO_BOTON - 28f;
+    private static final float GALERIA_X = PANEL_X + 190f;
+    private static final float GALERIA_ANCHO = 360f;
+    private static final float Y_FILA_CARTAS = PANEL_Y + 350f;
+    private static final float Y_FILA_JOKERS = PANEL_Y + 190f;
+    private static final float Y_FILA_SANTOS = PANEL_Y + 30f;
     private static final float VELOCIDAD_SLIDE = 1800f;
     private float offsetY;
     private float offsetYObjetivo;
@@ -50,7 +62,7 @@ public class PanelTienda {
     private boolean bloqueadoPorModalExterno = false;
 
     public PanelTienda(Main game, Jugador jugador, Runnable alContinuar, Consumer<VistaItemTienda> alComprarJoker,
-        Consumer<Santo> alComprarYUsarSanto, Runnable onBeforeReroll, Juego juego) {
+                       Consumer<Santo> alComprarYUsarSanto, Runnable onBeforeReroll, Juego juego) {
         this.game = game;
         this.juego = juego;
         this.jugador = jugador;
@@ -62,12 +74,12 @@ public class PanelTienda {
         if (Gdx.files.internal("ui/peso.png").exists()) {
             iconoPeso = new Texture("ui/peso.png");
         }
-        botonComprar = new Boton(PANEL_X + PANEL_ANCHO - 180, PANEL_Y + 20, 160, 50, Boton.TipoColor.VERDE, Accion.COMPRAR_ITEM_TIENDA);
+        botonComprar = new Boton(COLUMNA_ACCIONES_X, PANEL_Y + 24f, ANCHO_BOTON, ALTO_BOTON, Boton.TipoColor.VERDE, Accion.COMPRAR_ITEM_TIENDA);
         botonComprar.setHabilitado(false);
-        botonReroll = new Boton(PANEL_X + 20, PANEL_Y + PANEL_ALTO - 60, 160, 40, Boton.TipoColor.AZUL, Accion.REROLL_JOKERS);
+        botonReroll = new Boton(PANEL_X + 22f, PANEL_Y + PANEL_ALTO - 62f, ANCHO_BOTON, ALTO_BOTON, Boton.TipoColor.AZUL, Accion.REROLL_JOKERS);
         botonReroll.setTexto("Reroll $" + estadoTienda.costoRerollTienda());
-        botonContinuar = new Boton(PANEL_X + PANEL_ANCHO - 180, PANEL_Y + PANEL_ALTO - 60, 160, 50, Boton.TipoColor.DORADO, Accion.CONTINUAR_TIENDA);
-        botonComprarYUsar = new Boton(PANEL_X + PANEL_ANCHO - 180, PANEL_Y + 80, 160, 50, Boton.TipoColor.DORADO, Accion.COMPRAR_Y_USAR_SANTO);
+        botonContinuar = new Boton(COLUMNA_ACCIONES_X, PANEL_Y + PANEL_ALTO - 62f, ANCHO_BOTON, ALTO_BOTON, Boton.TipoColor.DORADO, Accion.CONTINUAR_TIENDA);
+        botonComprarYUsar = new Boton(COLUMNA_ACCIONES_X, PANEL_Y + 88f, ANCHO_BOTON, ALTO_BOTON, Boton.TipoColor.DORADO, Accion.COMPRAR_Y_USAR_SANTO);
         botonComprarYUsar.setVisible(false);
         ruedaZodiaco = new RuedaZodiaco(RUEDA_X, RUEDA_Y, RUEDA_RADIO, game.getTexturaRuletaFondo());
         reconstruirVistas();
@@ -81,32 +93,38 @@ public class PanelTienda {
         vistasSantos.clear();
         deseleccionarTodo();
         // CARTAS
-        float xCartas = PANEL_X + 220;
+        float xCartas = calcularInicioFila(estadoTienda.getFilaCartas().size());
         for (ItemTienda item : estadoTienda.getFilaCartas()) {
             VistaItemTienda v = new VistaItemTienda(item, game.getAtlasCartas(), game.getAtlasJokers(), juego);
-            v.setTamaño(85f, 125f);
-            v.setPosition(xCartas, PANEL_Y + PANEL_ALTO - 200);
+            v.setTamaño(ANCHO_ITEM, ALTO_ITEM);
+            v.setPosition(xCartas, Y_FILA_CARTAS);
             vistasCartas.add(v);
-            xCartas += 105;
+            xCartas += ANCHO_ITEM + ESPACIO_ITEM;
         }
         // JOKERS DE LA TIENDA
-        float xJokers = PANEL_X + 220;
+        float xJokers = calcularInicioFila(estadoTienda.getFilaJokers().size());
         for (ItemTienda item : estadoTienda.getFilaJokers()) {
             VistaItemTienda v = new VistaItemTienda(item, game.getAtlasCartas(), game.getAtlasJokers(), juego);
-            v.setTamaño(85f, 125f);
-            v.setPosition(xJokers, PANEL_Y + 200);
+            v.setTamaño(ANCHO_ITEM, ALTO_ITEM);
+            v.setPosition(xJokers, Y_FILA_JOKERS);
             vistasJokers.add(v);
-            xJokers += 105;
+            xJokers += ANCHO_ITEM + ESPACIO_ITEM;
         }
         // SANTOS DE LA TIENDA
-        float xSantos = PANEL_X + 220;
+        float xSantos = calcularInicioFila(estadoTienda.getFilaSantos().size());
         for (ItemTienda item : estadoTienda.getFilaSantos()) {
             VistaItemTienda v = new VistaItemTienda(item, game.getAtlasCartas(), game.getAtlasJokers(), juego);
-            v.setTamaño(85f, 125f);
-            v.setPosition(xSantos, PANEL_Y + 20);
+            v.setTamaño(ANCHO_ITEM, ALTO_ITEM);
+            v.setPosition(xSantos, Y_FILA_SANTOS);
             vistasSantos.add(v);
-            xSantos += 105;
+            xSantos += ANCHO_ITEM + ESPACIO_ITEM;
         }
+    }
+
+    private float calcularInicioFila(int cantidad) {
+        if (cantidad <= 0) return GALERIA_X;
+        float anchoFila = cantidad * ANCHO_ITEM + (cantidad - 1) * ESPACIO_ITEM;
+        return GALERIA_X + Math.max(0f, (GALERIA_ANCHO - anchoFila) / 2f);
     }
 
     private void deseleccionarTodo() {
@@ -298,8 +316,19 @@ public class PanelTienda {
         batch.setProjectionMatrix(matrizConOffset);
         // Fondo
         Texture pixel = game.getPixelBlanco();
-        batch.setColor(0.06f, 0.07f, 0.1f, 0.94f);
+        batch.setColor(0.015f, 0.02f, 0.04f, 0.60f);
+        batch.draw(pixel, PANEL_X + 6f, PANEL_Y - 7f, PANEL_ANCHO, PANEL_ALTO);
+        batch.setColor(0.055f, 0.065f, 0.10f, 0.97f);
         batch.draw(pixel, PANEL_X, PANEL_Y, PANEL_ANCHO, PANEL_ALTO);
+        batch.setColor(0.78f, 0.62f, 0.22f, 0.90f);
+        batch.draw(pixel, PANEL_X, PANEL_Y + PANEL_ALTO - 4f, PANEL_ANCHO, 4f);
+        batch.setColor(0.25f, 0.32f, 0.43f, 0.9f);
+        batch.draw(pixel, PANEL_X, PANEL_Y, 2f, PANEL_ALTO);
+        batch.draw(pixel, PANEL_X + PANEL_ANCHO - 2f, PANEL_Y, 2f, PANEL_ALTO);
+        dibujarEncabezado(batch, "TIENDA DEL CAMINO", PANEL_Y + PANEL_ALTO - 32f, PANEL_ANCHO);
+        dibujarSeccion(batch, "CARTAS", Y_FILA_CARTAS + ALTO_ITEM + 14f);
+        dibujarSeccion(batch, "JOKERS", Y_FILA_JOKERS + ALTO_ITEM + 14f);
+        dibujarSeccion(batch, "SANTOS", Y_FILA_SANTOS + ALTO_ITEM + 14f);
         batch.setColor(1, 1, 1, 1);
         // CARTAS
         for (VistaItemTienda v : vistasCartas) {
@@ -328,13 +357,15 @@ public class PanelTienda {
         botonReroll.render(batch);
         botonContinuar.render(batch);
         botonComprarYUsar.render(batch);
-        float infoX = PANEL_X + PANEL_ANCHO - 350;
-        float infoY = PANEL_Y + PANEL_ALTO - 60;
-        float maxAnchoTexto = 320f;
         if (seleccionado != null) {
             ItemTienda item = seleccionado.getItem();
             String textoPrecio = "Precio: $" + item.getPrecio();
-            game.getFuentePrincipal().draw(batch, textoPrecio, PANEL_X + PANEL_ANCHO - 220, PANEL_Y + 90);
+            batch.setColor(0.09f, 0.12f, 0.18f, 0.96f);
+            batch.draw(pixel, COLUMNA_ACCIONES_X, PANEL_Y + 150f, ANCHO_BOTON, 30f);
+            game.getFuenteNumeros().setColor(0.95f, 0.78f, 0.28f, 1f);
+            game.getFuenteNumeros().draw(batch, textoPrecio, COLUMNA_ACCIONES_X, PANEL_Y + 172f,
+                ANCHO_BOTON, com.badlogic.gdx.utils.Align.center, false);
+            game.getFuenteNumeros().setColor(1f, 1f, 1f, 1f);
         }
         // Carteles de stats
         for (VistaItemTienda v : vistasCartas) {
@@ -350,6 +381,25 @@ public class PanelTienda {
         overlayConsumo.render(batch, game);
         overlaySeleccion.render(batch, game);
         batch.setProjectionMatrix(matrizOriginal);
+    }
+
+    private void dibujarEncabezado(SpriteBatch batch, String texto, float y, float ancho) {
+        com.badlogic.gdx.graphics.g2d.BitmapFont font = game.getFuentePrincipal();
+        float escalaOriginal = font.getScaleX();
+        font.getData().setScale(escalaOriginal * 1.18f);
+        font.setColor(0.95f, 0.78f, 0.28f, 1f);
+        font.draw(batch, texto, PANEL_X, y, ancho, com.badlogic.gdx.utils.Align.center, false);
+        font.getData().setScale(escalaOriginal);
+        font.setColor(1f, 1f, 1f, 1f);
+    }
+
+    private void dibujarSeccion(SpriteBatch batch, String texto, float y) {
+        Texture pixel = game.getPixelBlanco();
+        batch.setColor(0.22f, 0.30f, 0.40f, 0.75f);
+        batch.draw(pixel, PANEL_X + 22f, y - 7f, PANEL_ANCHO - 44f, 1f);
+        game.getFuentePrincipal().setColor(0.62f, 0.76f, 0.84f, 1f);
+        game.getFuentePrincipal().draw(batch, texto, PANEL_X + 32f, y + 8f);
+        game.getFuentePrincipal().setColor(1f, 1f, 1f, 1f);
     }
 
     public void updateAnimacion(float delta) {
