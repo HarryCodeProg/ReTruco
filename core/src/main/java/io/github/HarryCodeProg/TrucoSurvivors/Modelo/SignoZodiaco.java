@@ -1,6 +1,8 @@
 package io.github.HarryCodeProg.TrucoSurvivors.Modelo;
 
 import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Carta;
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Rareza;
 import io.github.HarryCodeProg.TrucoSurvivors.Jugador;
 
 public enum SignoZodiaco {
@@ -45,7 +47,15 @@ public enum SignoZodiaco {
                 jugador.sumarRerollsGratisTienda(10);
                 if (tienda != null) tienda.sumarRerollsGratis(10);
                 break;
-            case PISCIS: break;
+            case PISCIS:
+                if (jugador.getJokers().size() < jugador.getTamañoJokers()) {
+                    PoolJokersTienda pool = new PoolJokersTienda();
+                    Joker nuevoLegendario = pool.tomarAleatorioDeRareza(Rareza.legendario, jugador);
+                    if (nuevoLegendario != null) {
+                        jugador.agregarJoker(nuevoLegendario);
+                    }
+                }
+                break;
         }
     }
 }

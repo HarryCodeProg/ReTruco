@@ -72,16 +72,20 @@ public class Juego {
     public void repartir() {
         this.jugador.getMazo().barajar();
         this.rival.getMazo().barajar();
+        int manoAntes = jugador.getMano().size();
         int faltanJugador = jugador.getTamañoMano() - jugador.getMano().size();
         if (faltanJugador > 0) {
-            jugador.robar(jugador.getMazo(), faltanJugador); // roba lo que falte; si el mazo tiene menos, robar() ya corta solo (tomarCarta() devuelve null y el loop no agrega)
+            jugador.robar(jugador.getMazo(), faltanJugador);
         }
         jugador.ordenarMano();
+        int cartasRepartidasJugador = jugador.getMano().size() - manoAntes;
         int faltanRival = rival.getTamañoMano() - rival.getMano().size();
         if (faltanRival > 0) {
             rival.robar(rival.getMazo(), faltanRival);
         }
-        gestorJokers.disparar(EventoJuego.POST_REPARTO, crearContexto(), this);
+        ContextoJuego ctx = crearContexto();
+        ctx.setCartasRepartidasEsteEvento(cartasRepartidasJugador);
+        gestorJokers.disparar(EventoJuego.POST_REPARTO, ctx, this);
     }
 
     private void limpiarEstadoResidualDeCombateAnterior() {

@@ -12,7 +12,7 @@ import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 public class NoMeMidas extends Joker {
 
     public NoMeMidas(){
-        super(48, "No Me Midas", "NoMeMidas", "Cada espada que mata vuelve a activarse",
+        super(48, "No Me Midas", "NoMeMidas", "Cada Espada que mata vuelve a activarse",
             Rareza.comun, 1, Joker.FaseActivacion.AL_PUNTUAR_CARTA,
             CategoriaJoker.TV, CategoriaJoker.SECUENCIA);
     }

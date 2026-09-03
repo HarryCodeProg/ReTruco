@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.*;
 import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Palo;
+import io.github.HarryCodeProg.TrucoSurvivors.Estados.ColorMecanica;
 import io.github.HarryCodeProg.TrucoSurvivors.Gestores.GestorSonidos;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
@@ -201,7 +202,8 @@ public class VistaJoker implements Arrastrable{
         // Datos del Joker
         String lineaNombre = joker.getNombre();
         String descripcionPura = joker.getDescripcionRenderizada(juego);
-        String descripcion = Palo.colorearTexto(descripcionPura);
+        //String descripcion = Palo.colorearTexto(descripcionPura);
+        String descripcion = ColorMecanica.colorearTexto(Palo.colorearTexto(descripcionPura));
         String rarezaStr = joker.getRareza().toString().toUpperCase();
         // --- 2. MEDIDAS MÁS CHICAS PARA COMPACTAR EL CARTEL ---
         float ANCHO_MAX_DESC = 175f;
@@ -252,7 +254,7 @@ public class VistaJoker implements Arrastrable{
         // --- 4. RENDER DE TEXTOS ---
         float currentY = cartelY + altoCartel - paddingY;
         // Obtengo el color de la rareza para usarlo en el nombre y en el badge
-        Color colorDeRareza = obtenerColorRareza(joker.getRareza().toString());
+        Color colorDeRareza = joker.getRareza().getColor();
         // Nombre
         font.setColor(colorDeRareza);
         layout.setText(font, lineaNombre);
@@ -266,7 +268,7 @@ public class VistaJoker implements Arrastrable{
         currentY = dibujarBadge(batch, font, pixelBlanco, rarezaStr, colorDeRareza, cartelX, anchoCartel, currentY, padEtiquetaX, padEtiquetaY);
         for (CategoriaJoker cat : joker.getCategorias()) {
             currentY -= espacioVertical;
-            currentY = dibujarBadge(batch, font, pixelBlanco, cat.getTexto().toUpperCase(), obtenerColorCategoria(cat), cartelX, anchoCartel, currentY, padEtiquetaX, padEtiquetaY);
+            currentY = dibujarBadge(batch, font, pixelBlanco, cat.getTexto().toUpperCase(), cat.getColor(), cartelX, anchoCartel, currentY, padEtiquetaX, padEtiquetaY);
         }
         // --- 5. RESTAURAMOS EL TAMAÑO ORIGINAL DE LA FUENTE Y LOS COLORES ---
         font.getData().setScale(originalScaleX, originalScaleY);
@@ -300,34 +302,6 @@ public class VistaJoker implements Arrastrable{
 
     public boolean isResaltado() { return resaltado; }
 
-    /** Asigna colores vistosos temáticos a cada rasgo */
-    private Color obtenerColorCategoria(CategoriaJoker cat) {
-        switch (cat) {
-            case ANIMAL:      return new Color(0.3f, 0.85f, 0.4f, 1f);  // Verde Naturaleza
-            case AMIGABLE:    return new Color(1f, 0.6f, 0.75f, 1f);   // Rosa Pastel
-            case AGUA:        return new Color(0.2f, 0.6f, 1f, 1f);     // Azul Océano
-            case COMIDA:      return new Color(0.9f, 0.55f, 0.2f, 1f);  // Naranja Crujiente
-            case DULCE:       return new Color(0.85f, 0.4f, 0.9f, 1f);  // Magenta/Caramelo
-            case BEBIDA:      return new Color(0.4f, 0.9f, 0.9f, 1f);   // Turquesa/Refresco
-            case AMARGO:      return new Color(0.5f, 0.4f, 0.3f, 1f);   // Marrón Café/Mate
-            case TRADICIONAL: return new Color(0.85f, 0.85f, 0.5f, 1f); // Beige Antiguo
-            default:          return new Color(1f, 1f, 1f, 1f);
-        }
-    }
-
-    /** Método utilitario para asignar colores vistosos a la rareza al estilo Balatro */
-    private Color obtenerColorRareza(String rareza) {
-        String r = rareza.toUpperCase();
-        if (r.contains("COMUN") || r.contains("COMMON")) {
-            return new Color(0.4f, 0.7f, 1f, 1f); // Celeste / Azul claro común
-        } else if (r.contains("RARO") || r.contains("RARE")) {
-            return new Color(1f, 0.25f, 0.25f, 1f); // Rojo brillante raro
-        } else if (r.contains("LEGENDARIO") || r.contains("LEGENDARY")) {
-            return new Color(0.75f, 0.3f, 0.9f, 1f); // Púrpura épico / legendario
-        } else {
-            return new Color(0.6f, 0.6f, 0.6f, 1f); // Gris por defecto
-        }
-    }
 
     public float getCentroX() { return x + (width * scale) / 2f; }
     public float getX() { return x; }

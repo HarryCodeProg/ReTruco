@@ -195,10 +195,22 @@ public class PanelPuntajes {
             fuente.getData().setScale(1f);
         }
         fuente.setColor(color);
+        float escalaBase = fuente.getScaleX();
         layout.setText(fuente, texto);
+        float margen = 8f; // pequeño padding para que no toque el borde de la caja
+        float anchoDisponible = anchoCaja - margen;
+        // FIX: si el texto no entra en la caja, escalar hacia abajo proporcionalmente (estilo Balatro)
+        if (layout.width > anchoDisponible && anchoDisponible > 0) {
+            float factor = anchoDisponible / layout.width;
+            float escalaMinima = 0.45f; // no reducir más allá de esto, para que siga siendo legible
+            float nuevaEscala = Math.max(escalaBase * factor, escalaBase * escalaMinima);
+            fuente.getData().setScale(nuevaEscala);
+            layout.setText(fuente, texto); // recalcular layout con la escala nueva
+        }
         float xTexto = x + (anchoCaja - layout.width) / 2f;
         float yTexto = y + (ALTO_CAJA + layout.height) / 2f;
         fuente.draw(batch, texto, xTexto, yTexto);
+        fuente.getData().setScale(escalaBase); // FIX: restaurar siempre la escala original para no afectar otros draws
     }
 
     private void dibujarCajaSimple(float x, float y, Color colorFrente, Color colorSombra) {

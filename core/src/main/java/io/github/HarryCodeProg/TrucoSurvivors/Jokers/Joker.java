@@ -76,6 +76,9 @@ public abstract class Joker {
     /** Para jokers "Instantaneo": se ejecuta una sola vez al agregarse al jugador. Override si aplica. */
     public void aplicarEfectoInstantaneo(Jugador jugador) {}
 
+    /** Se ejecuta cuando cualquier joker es vendido (incluyendo este mismo). Override si aplica. */
+    public void onVendido(Joker jokerVendido, Jugador jugador) {}
+
     public void desAplicarEfectoInstantaneo(Jugador jugador) {}
 
     public int getPrecioVenta() { return precioVenta; }

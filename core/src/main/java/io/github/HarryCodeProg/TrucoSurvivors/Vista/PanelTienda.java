@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.Accion;
+import io.github.HarryCodeProg.TrucoSurvivors.Gestores.GestorSonidos;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jugador;
 import io.github.HarryCodeProg.TrucoSurvivors.Main;
@@ -39,10 +40,12 @@ public class PanelTienda {
     private static final float ALTO_BOTON = 48f;
     private static final float COLUMNA_ACCIONES_X = PANEL_X + PANEL_ANCHO - ANCHO_BOTON - 28f;
     private static final float GALERIA_X = PANEL_X + 190f;
-    private static final float GALERIA_ANCHO = 360f;
-    private static final float Y_FILA_CARTAS = PANEL_Y + 350f;
-    private static final float Y_FILA_JOKERS = PANEL_Y + 190f;
-    private static final float Y_FILA_SANTOS = PANEL_Y + 30f;
+    private static final float GALERIA_ANCHO_SUPERIOR = PANEL_ANCHO - 220f;
+    private static final float GALERIA_ANCHO_SANTOS = COLUMNA_ACCIONES_X - GALERIA_X - 28f;
+    private static final float ESPACIO_ITEM_MINIMO = 10f;
+    private static final float Y_FILA_CARTAS = PANEL_Y + 335f;
+    private static final float Y_FILA_JOKERS = PANEL_Y + 175f;
+    private static final float Y_FILA_SANTOS = PANEL_Y + 15f;
     private static final float VELOCIDAD_SLIDE = 1800f;
     private float offsetY;
     private float offsetYObjetivo;
@@ -93,38 +96,58 @@ public class PanelTienda {
         vistasSantos.clear();
         deseleccionarTodo();
         // CARTAS
-        float xCartas = calcularInicioFila(estadoTienda.getFilaCartas().size());
+        int cantidadCartas = estadoTienda.getFilaCartas().size();
+        float anchoCartas = calcularAnchoItem(cantidadCartas, GALERIA_ANCHO_SUPERIOR);
+        float altoCartas = calcularAltoItem(anchoCartas);
+        float espacioCartas = calcularEspacioItem(cantidadCartas, anchoCartas, GALERIA_ANCHO_SUPERIOR);
+        float xCartas = calcularInicioFila(cantidadCartas, anchoCartas, espacioCartas, GALERIA_ANCHO_SUPERIOR);
         for (ItemTienda item : estadoTienda.getFilaCartas()) {
             VistaItemTienda v = new VistaItemTienda(item, game.getAtlasCartas(), game.getAtlasJokers(), juego);
-            v.setTamaño(ANCHO_ITEM, ALTO_ITEM);
+            v.setTamaño(anchoCartas, altoCartas);
             v.setPosition(xCartas, Y_FILA_CARTAS);
             vistasCartas.add(v);
-            xCartas += ANCHO_ITEM + ESPACIO_ITEM;
+            xCartas += anchoCartas + espacioCartas;
         }
         // JOKERS DE LA TIENDA
-        float xJokers = calcularInicioFila(estadoTienda.getFilaJokers().size());
+        int cantidadJokers = estadoTienda.getFilaJokers().size();
+        float anchoJokers = calcularAnchoItem(cantidadJokers, GALERIA_ANCHO_SUPERIOR);
+        float altoJokers = calcularAltoItem(anchoJokers);
+        float espacioJokers = calcularEspacioItem(cantidadJokers, anchoJokers, GALERIA_ANCHO_SUPERIOR);
+        float xJokers = calcularInicioFila(cantidadJokers, anchoJokers, espacioJokers, GALERIA_ANCHO_SUPERIOR);
         for (ItemTienda item : estadoTienda.getFilaJokers()) {
             VistaItemTienda v = new VistaItemTienda(item, game.getAtlasCartas(), game.getAtlasJokers(), juego);
-            v.setTamaño(ANCHO_ITEM, ALTO_ITEM);
+            v.setTamaño(anchoJokers, altoJokers);
             v.setPosition(xJokers, Y_FILA_JOKERS);
             vistasJokers.add(v);
-            xJokers += ANCHO_ITEM + ESPACIO_ITEM;
+            xJokers += anchoJokers + espacioJokers;
         }
         // SANTOS DE LA TIENDA
-        float xSantos = calcularInicioFila(estadoTienda.getFilaSantos().size());
+        int cantidadSantos = estadoTienda.getFilaSantos().size();
+        float anchoSantos = calcularAnchoItem(cantidadSantos, GALERIA_ANCHO_SANTOS);
+        float altoSantos = calcularAltoItem(anchoSantos);
+        float espacioSantos = calcularEspacioItem(cantidadSantos, anchoSantos, GALERIA_ANCHO_SANTOS);
+        float xSantos = calcularInicioFila(cantidadSantos, anchoSantos, espacioSantos, GALERIA_ANCHO_SANTOS);
         for (ItemTienda item : estadoTienda.getFilaSantos()) {
             VistaItemTienda v = new VistaItemTienda(item, game.getAtlasCartas(), game.getAtlasJokers(), juego);
-            v.setTamaño(ANCHO_ITEM, ALTO_ITEM);
+            v.setTamaño(anchoSantos, altoSantos);
             v.setPosition(xSantos, Y_FILA_SANTOS);
             vistasSantos.add(v);
-            xSantos += ANCHO_ITEM + ESPACIO_ITEM;
+            xSantos += anchoSantos + espacioSantos;
         }
     }
 
-    private float calcularInicioFila(int cantidad) {
-        if (cantidad <= 0) return GALERIA_X;
-        float anchoFila = cantidad * ANCHO_ITEM + (cantidad - 1) * ESPACIO_ITEM;
-        return GALERIA_X + Math.max(0f, (GALERIA_ANCHO - anchoFila) / 2f);
+    private float calcularAnchoItem(int cantidad, float anchoGaleria) {
+        if (cantidad <= 1) return ANCHO_ITEM;
+        return Math.min(ANCHO_ITEM, (anchoGaleria - ESPACIO_ITEM_MINIMO * (cantidad - 1)) / cantidad);
+    }
+
+    private float calcularAltoItem(float anchoItem) {
+        return anchoItem * ALTO_ITEM / ANCHO_ITEM;
+    }
+
+    private float calcularEspacioItem(int cantidad, float anchoItem, float anchoGaleria) {
+        if (cantidad <= 1) return 0f;
+        return Math.min(ESPACIO_ITEM, (anchoGaleria - anchoItem * cantidad) / (cantidad - 1));
     }
 
     private void deseleccionarTodo() {
@@ -171,8 +194,7 @@ public class PanelTienda {
             ruedaZodiaco.click(mouseWorldX, mouseWorldY,
                 signo -> {
                     overlayConsumo.abrir(signo, game.getAtlasZodiaco().findRegion(signo.getNombreRegion()),
-                        () -> {
-                        }
+                        () -> {}
                     );
                 }
             );
@@ -231,10 +253,18 @@ public class PanelTienda {
             if (itemClickeado != null) {
                 if (seleccionado == itemClickeado) {
                     deseleccionarTodo();
+                    GestorSonidos sonidos = Main.getInstance().getGestorSonidos();
+                    if (sonidos != null) {
+                        sonidos.reproducirConVariacion("deseleccionar");
+                    }
                 } else {
                     deseleccionarTodo();
                     seleccionado = itemClickeado;
                     seleccionado.setSeleccionado(true);
+                    GestorSonidos sonidos = Main.getInstance().getGestorSonidos();
+                    if (sonidos != null) {
+                        sonidos.reproducirConVariacion("seleccionar");
+                    }
                     boolean dineroSuficiente = jugador.getPesos() >= seleccionado.getItem().getPrecio();
                     boolean esSanto = seleccionado.getItem().getTipo() == ItemTienda.Tipo.SANTO;
                     boolean espacioDisponible;
@@ -250,6 +280,10 @@ public class PanelTienda {
                     botonComprarYUsar.setHabilitado(esSanto && dineroSuficiente && espacioDisponible);
                 }
             } else {
+                if (seleccionado != null) { // FIX: solo suena si realmente había algo seleccionado antes
+                    GestorSonidos sonidos = Main.getInstance().getGestorSonidos();
+                    if (sonidos != null) sonidos.reproducirConVariacion("deseleccionar");
+                }
                 deseleccionarTodo();
             }
         }
@@ -445,7 +479,16 @@ public class PanelTienda {
         alTerminarTodo.run();
     }
 
-    public float getOffsetY() {
-        return offsetY;
+    public float getOffsetY() {return offsetY;}
+
+    private float calcularInicioFila(int cantidad, float anchoItem, float espacioItem, float anchoGaleria) {
+        if (cantidad <= 0) return GALERIA_X;
+        return GALERIA_X;
     }
+
+    /*private float calcularInicioFila(int cantidad, float anchoItem, float espacioItem, float anchoGaleria) {
+        if (cantidad <= 0) return GALERIA_X;
+        float anchoFila = cantidad * anchoItem + (cantidad - 1) * espacioItem;
+        return GALERIA_X + Math.max(0f, (anchoGaleria - anchoFila) / 2f);
+    }*/
 }

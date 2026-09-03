@@ -12,7 +12,7 @@ import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 public class NoHayPolque extends Joker {
 
     public NoHayPolque(){
-        super(46, "No Hay Polque", "NoHayPolque", "Cada basto que mata otorga +5 multiplicador truco",
+        super(46, "No Hay Polque", "NoHayPolque", "Cada Basto que mata otorga +5 multiplicador truco",
             Rareza.comun, 1, Joker.FaseActivacion.AL_PUNTUAR_CARTA,
             CategoriaJoker.TV, CategoriaJoker.SECUENCIA);
     }

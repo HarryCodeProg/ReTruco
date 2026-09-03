@@ -3,6 +3,7 @@ package io.github.HarryCodeProg.TrucoSurvivors.Gestores;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.Accion;
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jugador;
 import io.github.HarryCodeProg.TrucoSurvivors.Vista.Boton;
 import io.github.HarryCodeProg.TrucoSurvivors.Vista.GameLayout;
@@ -51,7 +52,12 @@ public class GestorVentaJoker {
     private void venderJoker(VistaJoker jokerAVender, ArrayList<VistaJoker> jokers, Jugador jugador, Consumer<Runnable> alOrganizar) {
         int precioVenta = Math.max(1, jokerAVender.getJoker().getCoste() / 2);
         jugador.sumarPesos(precioVenta);
-        jugador.eliminarJoker(jokerAVender.getJoker());
+        // Notificar a todos los jokers (incluyendo el vendido) antes de eliminarlo
+        Joker jokerVendido = jokerAVender.getJoker();
+        for (Joker j : new java.util.ArrayList<>(jugador.getJokers())) {
+            j.onVendido(jokerVendido, jugador);
+        }
+        jugador.eliminarJoker(jokerVendido);
         jokers.remove(jokerAVender);
         botonVender.setVisible(false);
         if (alOrganizar != null) {

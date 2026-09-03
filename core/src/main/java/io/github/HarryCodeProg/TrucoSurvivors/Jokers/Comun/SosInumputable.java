@@ -16,8 +16,8 @@ public class SosInumputable extends Joker {
     public SosInumputable() {
         super(
             54,
-            "Sos Inumputable",
-            "SosInumputable",
+            "Sos Inimputable",
+            "SosInimputable",
             "Genera un multiplicador truco aleatorio entre +1 y +20 al final de la mano",
             Rareza.comun,
             1,

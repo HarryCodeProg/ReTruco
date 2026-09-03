@@ -130,7 +130,6 @@ public class GameScreenV2 implements Screen {
         this.areaCartas = new AreaElementos<>(margenLateral, Y_MANO_JUGADOR, 1280f - margenLateral * 2, ALTO_CARTA, anchoCarta, ALTO_CARTA, separacion);
         this.areaJokers = new AreaElementos<>(margenLateral, Y_JOKERS, 1280f - margenLateral * 2, ALTO_JOKER, ANCHO_JOKER, ALTO_JOKER, SEPARACION_JOKER);
         this.fondoPlasma = new Background();
-        // evitar NPE en puedeInteractuar
         this.gestorAnimaciones = new GestorAnimacionesMano(
             new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(),
             this::organizarCartas
@@ -148,8 +147,12 @@ public class GameScreenV2 implements Screen {
             view.setTamaño(ANCHO_JOKER, ALTO_JOKER);
             jokers.add(view);
         }
-        // colocar instantáneamente al iniciar
         organizarJokers(true);
+        float anchoMazo = 60f;
+        float altoMazo = 88f;
+        float posX = 1280f - anchoMazo - 25f;
+        float posY = 130f;
+        this.vistaMazo = new VistaMazo(posX, posY, anchoMazo, altoMazo, game.getAtlasCartas(), game.getFuentePrincipal(), game.getPixelBlanco());
         estado = EstadoPantalla.SELECCION_RIVAL;
         panelSeleccionRival = new PanelSeleccionRival(game, this::onPrimeraSeleccionRival);
         panelSeleccionVisible = true;
@@ -373,8 +376,7 @@ public class GameScreenV2 implements Screen {
         gestorUsoSanto.update(mouseWorld.x, mouseWorld.y, gestorSantos.getSantos(), jugador, (vistaSanto, jug) -> {
             gestorSantos.usarSeleccionado(vistaSanto, jug);
         });
-        //if (vistaMazo != null) vistaMazo.update(mouseWorld.x, mouseWorld.y);
-        renderComun(delta, true,
+        renderComun(delta, true, true, juego, rival, // FIX: firma nueva, comportamiento igual al de antes acá
             () -> { if (panelSeleccionRival != null && panelSeleccionVisible) panelSeleccionRival.render(game.batch); },
             () -> {}
         );
@@ -399,28 +401,33 @@ public class GameScreenV2 implements Screen {
         gestorUsoSanto.update(mouseWorld.x, mouseWorld.y, gestorSantos.getSantos(), jugador, (vistaSanto, jug) -> {
             gestorSantos.usarSeleccionado(vistaSanto, jug);
         });
-        renderComun(delta, true,
+        renderComun(delta, true, true, null, null, // FIX: mostrar panel, pero SIN datos de la partida anterior
             () -> { if (panelTienda != null && panelTiendaVisible) panelTienda.render(game.batch); },
             () -> gestorCompraJoker.render(game.batch)
         );
     }
 
-    private void renderComun(float delta, boolean mostrarMazo, Runnable renderPanelSuperpuesto, Runnable renderOverlaysFinal) {
+    private void renderComun(float delta, boolean mostrarMazo, boolean mostrarPanelPuntajes, Juego juegoParaPanel, Jugador rivalParaPanel,
+                             Runnable renderPanelSuperpuesto, Runnable renderOverlaysFinal) {
         ScreenUtils.clear(0.1f, 0.12f, 0.16f, 1f);
         camera.update();
         game.batch.setProjectionMatrix(camera.combined);
         game.batch.begin();
         fondoPlasma.render(game.batch, delta);
         game.batch.end();
-        panelPuntajes.renderFondosYCajas(camera, PANEL_PUNTAJES_X, PANEL_PUNTAJES_Y);
+        if (mostrarPanelPuntajes) {
+            panelPuntajes.renderFondosYCajas(camera, PANEL_PUNTAJES_X, PANEL_PUNTAJES_Y);
+        }
         game.batch.begin();
         renderHUDJugador();
         renderJokers();
-        panelPuntajes.renderTextos(game.batch, game.getFuentePrincipal(), juego, jugador, rival,
-            PANEL_PUNTAJES_X, PANEL_PUNTAJES_Y, gestorAnimacionResolucion,
-            puntosTrucoDisplay, multTrucoDisplay, puntosEnvidoDisplay, multEnvidoDisplay);
-        if (mostrarMazo && juego != null && vistaMazo != null) {
-            vistaMazo.render(game.batch, juego.getMazoJugador().getCartasRestantesOrdenadas(), juego.getMazoJugador().getTamañoMazo());
+        if (mostrarPanelPuntajes) {
+            panelPuntajes.renderTextos(game.batch, game.getFuentePrincipal(), juegoParaPanel, jugador, rivalParaPanel,
+                PANEL_PUNTAJES_X, PANEL_PUNTAJES_Y, gestorAnimacionResolucion,
+                puntosTrucoDisplay, multTrucoDisplay, puntosEnvidoDisplay, multEnvidoDisplay);
+        }
+        if (mostrarMazo && vistaMazo != null && jugador != null) { // FIX: ya no exige juego != null
+            vistaMazo.render(game.batch, jugador.getMazo().getCartasRestantesOrdenadas(), jugador.getMazo().getTamañoMazo());
         }
         game.batch.end();
         game.batch.begin();
@@ -775,6 +782,9 @@ public class GameScreenV2 implements Screen {
     public void finalizarCombate(boolean victoriaJugador) {
         if (victoriaJugador) {
             game.getPerfilJugador().avanzarNivel();
+            jugador.multTrucoOriginal();
+            jugador.multEnvidoOriginal();
+            panelPuntajes.setRivalNombre("");
             pendingEstado = EstadoPantalla.TIENDA;
         } else {
             pendingEstado = EstadoPantalla.SELECCION_RIVAL;

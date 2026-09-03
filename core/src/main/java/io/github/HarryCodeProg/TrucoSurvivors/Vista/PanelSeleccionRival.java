@@ -19,11 +19,12 @@ import java.util.function.Consumer;
  * igual que PanelTienda: nunca hay cambio de Screen, solo slide up/down.
  */
 public class PanelSeleccionRival {
+    private static final float VELOCIDAD_SLIDE = 1800f;
     private static final float PANEL_X = 260f;
-    private static final float PANEL_ANCHO = 1160f - PANEL_X;
+    private static final float PANEL_ANCHO = 760f; // FIX: antes 1160f-PANEL_X=900f, dejaba ~140px libres a la derecha.
+    // 760 = margen izq(20) + 3*220 + 2*30(espacio) + margen der(20)
     private static final float PANEL_Y = 40f;
     private static final float PANEL_ALTO = 460f;
-    private static final float VELOCIDAD_SLIDE = 1800f;
 
     private final Main game;
     private final Consumer<DatosRival> alElegirRival;

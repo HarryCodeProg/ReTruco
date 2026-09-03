@@ -3,6 +3,8 @@ package io.github.HarryCodeProg.TrucoSurvivors.Vista;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.*;
+import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Palo;
+import io.github.HarryCodeProg.TrucoSurvivors.Estados.ColorMecanica;
 import io.github.HarryCodeProg.TrucoSurvivors.Gestores.GestorSonidos;
 import io.github.HarryCodeProg.TrucoSurvivors.Main;
 import io.github.HarryCodeProg.TrucoSurvivors.Santos.Santo;
@@ -150,7 +152,8 @@ public class VistaSanto implements Arrastrable {
         // --- 2. TEXTOS Y FILTROS ---
         String titulo = santo.getNombre();
         // Coloreamos los nombres de los palos si aparecen en la descripción
-        String descripcion = io.github.HarryCodeProg.TrucoSurvivors.Cartas.Palo.colorearTexto(santo.getDescripcion());
+        //String descripcion = Palo.colorearTexto(santo.getDescripcion());
+        String descripcion = ColorMecanica.colorearTexto(Palo.colorearTexto(santo.getDescripcion()));
         // --- 3. MEDIDAS COMPACTAS (Estilo Joker) ---
         float maxAnchoDesc = 175f;
         float paddingX = 14f;

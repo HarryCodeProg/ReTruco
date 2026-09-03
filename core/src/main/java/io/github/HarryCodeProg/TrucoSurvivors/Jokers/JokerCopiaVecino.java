@@ -10,14 +10,11 @@ import java.util.Set;
 
 public abstract class JokerCopiaVecino extends Joker {
 
-    // FIX: Agregamos AL_MATAR_CARTA (y deberías agregar cualquier otro evento que genere
-    // consumibles o dinero instantáneo, como AL_DESCARTAR si tenés jokers de descarte).
     private static final Set<EventoJuego> EVENTOS_COPIABLES = EnumSet.of(
         EventoJuego.ANTES_DE_SUMAR_TRUCO,
         EventoJuego.ANTES_DE_SUMAR_ENVIDO,
         EventoJuego.AL_PUNTUAR_CARTA,
-        EventoJuego.AL_PUNTUAR_CARTA_ENVIDO,
-        EventoJuego.AL_MATAR_CARTA
+        EventoJuego.AL_PUNTUAR_CARTA_ENVIDO
     );
 
     public JokerCopiaVecino(int id, String nombre, String nombreArchivo, String descripcion, Rareza rareza,
@@ -36,34 +33,27 @@ public abstract class JokerCopiaVecino extends Joker {
         if (!EVENTOS_COPIABLES.contains(evento)) return;
         Joker vecino = obtenerVecino(ctx);
         if (vecino == null || vecino == this) return;
-        if (!ctx.marcarUsado(this, evento)) return;
-        ResolucionPuntaje resolucion = ctx.getResolucionActual();
-        int pasosAntes = (resolucion != null) ? resolucion.getLog().size() : 0;
-        // Ejecutamos el efecto del vecino
-        vecino.aplicarEfecto(evento, ctx, juego);
-        // --- MAGIA VISUAL: Secuestro de identidad ---
-        // Si el vecino generó pasos de puntuación, les cambiamos la firma para que
-        // la UI haga brillar a Andes y muestre su nombre, igual que Blueprint.
-        // --- MAGIA VISUAL: Secuestro de identidad ---
-        if (resolucion != null) {
-            int pasosDespues = resolucion.getLog().size();
-            for (int i = pasosAntes; i < pasosDespues; i++) {
-                ResolucionPuntaje.PasoResolucion paso = resolucion.getLog().get(i);
-
-                // Si el paso fue generado por el vecino, lo reemplazamos por uno idéntico
-                // pero a nombre de este Joker (la copia)
-                if (paso.origenRef == vecino) {
+        if (!ctx.iniciarCopia(this)) return;
+        if (!ctx.puedeEntrarACopia()) {
+            ctx.terminarCopia(this);
+            return;
+        }
+        try {
+            ResolucionPuntaje resolucion = ctx.getResolucionActual();
+            int pasosAntes = (resolucion != null) ? resolucion.getLog().size() : 0;
+            vecino.aplicarEfecto(evento, ctx, juego);
+            if (resolucion != null) {
+                int pasosDespues = resolucion.getLog().size();
+                for (int i = pasosAntes; i < pasosDespues; i++) {
+                    ResolucionPuntaje.PasoResolucion paso = resolucion.getLog().get(i);
                     resolucion.getLog().set(i, new ResolucionPuntaje.PasoResolucion(
-                        this.getNombre(),
-                        paso.tipo,
-                        paso.valor,
-                        paso.chipsActual,
-                        paso.multActual,
-                        this
+                        this.getNombre(), paso.tipo, paso.valor, paso.chipsActual, paso.multActual, this
                     ));
                 }
             }
+        } finally {
+            ctx.salirDeCopia();
+            ctx.terminarCopia(this);
         }
     }
-
 }

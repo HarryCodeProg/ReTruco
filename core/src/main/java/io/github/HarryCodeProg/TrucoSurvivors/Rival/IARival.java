@@ -53,11 +53,9 @@ public class IARival {
 
     private Decision decidir(boolean puedeEscalar) {
         double roll = random.nextDouble();
-        if (puedeEscalar && roll < 0.25) return Decision.ESCALAR;
-        if (roll < 0.75) return Decision.QUIERO;
-        return Decision.NO_QUIERO;
+        if (puedeEscalar && roll < 1.0 / 3.0) return Decision.ESCALAR;
+        return Decision.QUIERO;
     }
-
     private void aplicarDecisionEnvido(Decision decision) {
         Jugador rival = juego.getRival();
         switch (decision) {
