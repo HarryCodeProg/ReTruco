@@ -23,7 +23,9 @@ public class GestorSantos {
     private final AreaElementos<VistaSanto> area;
     private final OverlayConsumoSanto overlayConsumo = new OverlayConsumoSanto();
     private final OverlaySeleccionCartaSanto overlaySeleccion = new OverlaySeleccionCartaSanto();
+    private final GestorVentaSanto gestorVenta = new GestorVentaSanto(); // FIX
     private Function<Carta, VistaCarta> buscadorVistaCarta;
+    private Jugador jugadorActual;
 
     public GestorSantos(Main game, float areaX, float areaY, float areaAncho, float altoSanto) {
         this.game = game;
@@ -76,10 +78,20 @@ public class GestorSantos {
         overlaySeleccion.update(mouseX, mouseY, delta);
     }
 
+    /** FIX: overload que además actualiza la venta — llamar este desde GameScreenV2 en vez del de arriba,
+     * pasando el jugador. Si preferís no tocar las llamadas existentes, ver alternativa abajo. */
+    public void update(float mouseX, float mouseY, float delta, Jugador jugador) {
+        update(mouseX, mouseY, delta);
+        if (!hayOverlayActivo()) { // no vender mientras hay un overlay de santo abierto encima
+            gestorVenta.update(mouseX, mouseY, santos, jugador, r -> area.distribuir(santos, gestorInput.getArrastrado()));
+        }
+    }
+
     public void render(SpriteBatch batch, Main game) {
         for (VistaSanto v : santos) v.render(batch);
         overlaySeleccion.render(batch, game);
         overlayConsumo.render(batch, game);
+        gestorVenta.render(batch); // FIX
     }
 
     public ArrayList<VistaSanto> getSantos() { return santos; }

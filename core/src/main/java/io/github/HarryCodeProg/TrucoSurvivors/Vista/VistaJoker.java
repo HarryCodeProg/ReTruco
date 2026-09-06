@@ -50,6 +50,13 @@ public class VistaJoker implements Arrastrable{
     private static boolean ALGUN_DRAG_ACTIVO = false;
     private boolean resaltado = false;
     private float pulso = 0f;
+    // --- Variables para el efecto Balatro Tilt ---
+    private float tiltX = 0f;
+    private float tiltY = 0f;
+    private float targetTiltX = 0f;
+    private float targetTiltY = 0f;
+    private static final float MAX_TILT = 25f;
+    private static final float VELOCIDAD_TILT = 150f;
 
     public VistaJoker(Joker joker, TextureAtlas atlas) {
         this.joker = joker;
@@ -67,6 +74,20 @@ public class VistaJoker implements Arrastrable{
     public void render(SpriteBatch batch) {
         float drawY = y + visualOffsetY;
         float scaleExtra = resaltado ? 1f + (float)(Math.sin(pulso) * 0.08f) : 1f;
+        // ------
+        batch.flush();
+        com.badlogic.gdx.math.Matrix4 matrixAnterior = batch.getTransformMatrix().cpy();
+        if (tiltX != 0 || tiltY != 0) {
+            com.badlogic.gdx.math.Matrix4 matrixTilt = new com.badlogic.gdx.math.Matrix4(matrixAnterior);
+            float cx = x + (width * scaleExtra * scale) / 2f;
+            float cy = drawY + (height * scaleExtra * scale) / 2f;
+            matrixTilt.translate(cx, cy, -50f);
+            matrixTilt.rotate(1, 0, 0, tiltX);
+            matrixTilt.rotate(0, 1, 0, tiltY);
+            matrixTilt.translate(-cx, -cy, 0f);
+            batch.setTransformMatrix(matrixTilt);
+        }
+        // -----------------------
         if (resaltado) {
             batch.setColor(1.3f, 1.15f, 0.6f, 1f); // tinte dorado/brillante mientras actua
         }
@@ -74,6 +95,8 @@ public class VistaJoker implements Arrastrable{
         if (resaltado) {
             batch.setColor(Color.WHITE); // reset
         }
+        batch.flush();
+        batch.setTransformMatrix(matrixAnterior);
     }
 
     public void renderCartelStats(SpriteBatch batch, io.github.HarryCodeProg.TrucoSurvivors.Main game, Juego juego) {
@@ -116,6 +139,21 @@ public class VistaJoker implements Arrastrable{
             hover = false;
         }
         if (hover) targetRotation = 0f;
+        if (hover && !dragging) {
+            float cx = x + (width * scale) / 2f;
+            float cy = y + visualOffsetY + (height * scale) / 2f;
+            float mouseDeltaX = (mouseX - cx) / ((width * scale) / 2f);
+            float mouseDeltaY = (mouseY - cy) / ((height * scale) / 2f);
+            mouseDeltaX = Math.max(-1f, Math.min(1f, mouseDeltaX));
+            mouseDeltaY = Math.max(-1f, Math.min(1f, mouseDeltaY));
+            targetTiltY = mouseDeltaX * MAX_TILT;
+            targetTiltX = -mouseDeltaY * MAX_TILT;
+        } else {
+            targetTiltX = 0f;
+            targetTiltY = 0f;
+        }
+        tiltX = moverHacia(tiltX, targetTiltX, VELOCIDAD_TILT * delta);
+        tiltY = moverHacia(tiltY, targetTiltY, VELOCIDAD_TILT * delta);
         if (!dragging) {
             x = moverHacia(x, targetX, VELOCIDAD_POSICION * delta);
             y = moverHacia(y, targetY, VELOCIDAD_POSICION * delta);

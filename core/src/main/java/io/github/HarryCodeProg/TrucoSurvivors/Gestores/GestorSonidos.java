@@ -25,6 +25,14 @@ public class GestorSonidos implements Disposable {
         cargar("reparto2", "sonidos/reparto2.ogg");
         cargar("activar_carta", "sonidos/activar_carta.ogg");   // NUEVO
         cargar("activar_joker", "sonidos/activar_joker.ogg");
+        cargar("ganar-peso1", "sonidos/gano-peso-1.ogg");
+        cargar("ganar-peso2", "sonidos/gano-peso-2.ogg");
+        cargar("ganar-peso3", "sonidos/gano-peso-3.ogg");
+        cargar("gastar-peso1", "sonidos/peso-gastado-1.ogg");
+        cargar("gastar-peso2", "sonidos/peso-gastado-2.ogg");
+        cargar("gano-mas-1", "sonidos/gano-mas-1.ogg");
+        cargar("gano-mas-20", "sonidos/gano-mas-20.ogg");
+        cargar("gano-mas-50", "sonidos/gano-mas-50.ogg");
     }
 
     private void cargar(String clave, String ruta) {
@@ -71,6 +79,22 @@ public class GestorSonidos implements Disposable {
 
     public void toggleMute() {
         this.silenciado = !this.silenciado;
+    }
+
+    public void reproducirSonidoGanarPeso() {
+        int idx = MathUtils.random(1, 3);
+        reproducirConVariacion("ganar-peso" + idx); // ya trae pitch aleatorio, mismo patrón que reparto
+    }
+
+    public void reproducirSonidoFinalGanancia(int totalPesos) {
+        if (totalPesos >= 50) reproducir("gano-mas-50");
+        else if (totalPesos >= 20) reproducir("gano-mas-20");
+        else if (totalPesos >= 1) reproducir("gano-mas-1");
+    }
+
+    public void reproducirSonidoGastarPeso() {
+        int idx = MathUtils.random(1, 2);
+        reproducirConVariacion("gastar-peso" + idx);
     }
 
     @Override

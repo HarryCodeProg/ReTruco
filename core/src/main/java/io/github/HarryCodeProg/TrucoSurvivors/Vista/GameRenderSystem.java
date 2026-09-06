@@ -24,57 +24,64 @@ public class GameRenderSystem {
 
     public GameRenderSystem(Main game) {this.game = game;}
 
-    public void render(float delta, OrthographicCamera camera, Background fondoPlasma, PanelPuntajes panelPuntajes,
-                       float panelX, float panelY, Juego juego, Jugador jugador, Jugador rival,
-                       ArrayList<VistaCarta> cartasMesaJugador, ArrayList<VistaCarta> cartasMesaRival,
-                       ArrayList<VistaCarta> cartasRival, ArrayList<VistaCarta> cartasJugador, ArrayList<VistaJoker> jokers,
-                       GestorInputArrastrable<VistaCarta> gestorCartas, GestorInputArrastrable<VistaJoker> gestorJokers,
-                       VistaMazo vistaMazo, GestorVentaJoker gestorVentaJoker, GestorAnimacionResolucion gestorAnimacion,
-                       double puntosTrucoDisplay, double multTrucoDisplay, double puntosEnvidoDisplay, double multEnvidoDisplay,
-                       String textoFlotanteActual, Runnable renderBotones, Runnable renderCartelJoker
-    ) {
-        // 1. Limpieza de pantalla
+    public void render(float delta,
+        OrthographicCamera camera, Background fondoPlasma, PanelPuntajes panelPuntajes, float panelX, float panelY, Juego juego, Jugador jugador, Jugador rival,
+        ArrayList<VistaCarta> cartasMesaJugador, ArrayList<VistaCarta> cartasMesaRival, ArrayList<VistaCarta> cartasRival, ArrayList<VistaCarta> cartasJugador,
+        ArrayList<VistaJoker> jokers, GestorInputArrastrable<VistaCarta> gestorCartas, GestorInputArrastrable<VistaJoker> gestorJokers, VistaMazo vistaMazo,
+        GestorVentaJoker gestorVentaJoker, GestorAnimacionResolucion gestorAnimacion, double puntosTrucoDisplay, double multTrucoDisplay,
+        double puntosEnvidoDisplay, double multEnvidoDisplay, String textoFlotanteActual, Runnable renderBotones, Runnable renderCartelJoker)
+    {
         ScreenUtils.clear(0.1f, 0.12f, 0.16f, 1f);
         camera.update();
         game.batch.setProjectionMatrix(camera.combined);
-        // 2. DIBUJAR SHADER DE FONDO
         game.batch.begin();
         fondoPlasma.render(game.batch, delta);
         game.batch.end();
-        // 3. PANEL DE PUNTAJES (Shapes con ShapeRenderer)
         panelPuntajes.renderFondosYCajas(camera, panelX, panelY);
-        // 4. SPRITES Y TEXTOS (SpriteBatch)
         game.batch.begin();
-        // Renderizado de textos del panel
         renderAreasJugador(game.batch, jugador, game.getPixelBlanco());
         renderContadoresAreas(game.batch, jugador, cartasJugador);
-        panelPuntajes.renderTextos(
-            game.batch, game.getFuentePrincipal(), juego, jugador, rival, panelX, panelY,
-            gestorAnimacion, puntosTrucoDisplay, multTrucoDisplay, puntosEnvidoDisplay, multEnvidoDisplay);
-        // Texto flotante superior (si aplica)
+        panelPuntajes.renderTextos(game.batch, game.getFuentePrincipal(), juego, jugador, rival, panelX,
+            panelY, gestorAnimacion, puntosTrucoDisplay, multTrucoDisplay, puntosEnvidoDisplay, multEnvidoDisplay);
         if (textoFlotanteActual != null) {
             BitmapFont fuente = game.getFuentePrincipal();
             layout.setText(fuente, textoFlotanteActual);
-            float tx = ((Gdx.graphics.getWidth() - layout.width) / 2f) + 200f;
+            float tx = ((Gdx.graphics.getWidth() - layout.width) / 2f) + 270f;
             float ty = GameLayout.TECHO_MESA - 30f;
-            fuente.setColor(Color.GOLD);
+            Color colorTexto = Color.WHITE;
+            if (textoFlotanteActual.toLowerCase().contains("mult")) {
+                colorTexto = io.github.HarryCodeProg.TrucoSurvivors.Estados.ColorMecanica.MULTIPLICADOR.getColor();
+            } else if (textoFlotanteActual.toLowerCase().contains("puntos")) {
+                if (textoFlotanteActual.toLowerCase().contains("envido")) {
+                    colorTexto = io.github.HarryCodeProg.TrucoSurvivors.Estados.ColorMecanica.PUNTOS_ENVIDO.getColor();
+                } else {
+                    colorTexto = io.github.HarryCodeProg.TrucoSurvivors.Estados.ColorMecanica.PUNTOS_TRUCO.getColor();
+                }
+            }
+            fuente.setColor(colorTexto);
             fuente.draw(game.batch, textoFlotanteActual, tx, ty);
             fuente.setColor(Color.WHITE);
         }
-        // Renderizado de entidades del juego
         renderMesa(cartasMesaJugador, cartasMesaRival);
         renderRival(cartasRival);
-        // Pasamos el elemento arrastrado a renderJugador y renderJokers
         VistaCarta cartaArrastrada = gestorCartas != null ? gestorCartas.getArrastrado() : null;
         VistaJoker jokerArrastrado = gestorJokers != null ? gestorJokers.getArrastrado() : null;
         renderJugador(cartasJugador, cartaArrastrada);
         renderJokers(jokers, jokerArrastrado);
-        // Venta de Jokers y Botones de acción
         gestorVentaJoker.render(game.batch);
-        if (renderBotones != null) renderBotones.run();
-        // Mazo y Carteles
-        vistaMazo.render(game.batch, juego.getMazoJugador().getCartasRestantesOrdenadas(), juego.getMazoJugador().getTamañoMazo());
-        if (renderCartelJoker != null) renderCartelJoker.run();
+        if (renderBotones != null) {
+            renderBotones.run();
+        }
+        if (vistaMazo != null && juego != null) {
+            vistaMazo.render(
+                game.batch,
+                juego.getMazoJugador().getCartasRestantesOrdenadas(),
+                juego.getMazoJugador().getTamañoMazo()
+            );
+        }
+        if (renderCartelJoker != null) {
+            renderCartelJoker.run();
+        }
         game.batch.end();
     }
 

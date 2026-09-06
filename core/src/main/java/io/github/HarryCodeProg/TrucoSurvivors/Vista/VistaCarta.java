@@ -5,6 +5,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.*;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Rectangle;
 import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Carta;
 import io.github.HarryCodeProg.TrucoSurvivors.Gestores.GestorSonidos;
@@ -64,6 +65,13 @@ public class VistaCarta implements Arrastrable{
     private TextureRegion regionDorso; // el "back" del atlas, necesita seteo desde afuera o atlas guardado
     private static final float PAUSA_EN_DORSO = 0.15f;
     private float tiempoEnDorso = 0f;
+    // --- Variables para el efecto Balatro Tilt ---
+    private float tiltX = 0f;
+    private float tiltY = 0f;
+    private float targetTiltX = 0f;
+    private float targetTiltY = 0f;
+    private static final float MAX_TILT = 25f; // Grados máximos de inclinación
+    private static final float VELOCIDAD_TILT = 150f;
 
     /** Ahora recibe el TextureAtlas compartido en vez de crear su propia Texture. */
     public VistaCarta(Carta carta, boolean bocaAbajo, TextureAtlas atlas) {
@@ -87,6 +95,25 @@ public class VistaCarta implements Arrastrable{
         }
         float drawY = y + visualOffsetY;
         float scaleExtra = resaltado ? 1f + (float)(Math.sin(pulso) * 0.06f) : 1f;
+        // =========================================================
+        batch.flush(); // Obligamos a dibujar lo que haya pendiente
+        Matrix4 matrixAnterior = batch.getTransformMatrix().cpy(); // Guardamos la cámara normal
+        if (tiltX != 0 || tiltY != 0) {
+            Matrix4 matrixTilt = new Matrix4(matrixAnterior);
+            float cx = x + (width * scaleExtra * scale) / 2f;
+            float cy = drawY + (height * scaleExtra * scale) / 2f;
+            // --- LA MAGIA ESTÁ ACÁ ---
+            // Trasladamos al centro en X e Y, y EMPUJAMOS la carta hacia adentro (Z = -50f).
+            // Así tiene espacio de sobra para rotar sin que la cámara le ampute la mitad.
+            matrixTilt.translate(cx, cy, -50f);
+            matrixTilt.rotate(1, 0, 0, tiltX); // Inclinación Arriba/Abajo
+            matrixTilt.rotate(0, 1, 0, tiltY); // Inclinación Izquierda/Derecha
+            // Volvemos a acomodar el centro X e Y, PERO dejamos la carta hundida en el eje Z (0f en vez de 50f)
+            matrixTilt.translate(-cx, -cy, 0f);
+            // -------------------------
+            batch.setTransformMatrix(matrixTilt); // Aplicamos la deformación
+        }
+        // =========================================================
         dibujarProfundidadYMarco(batch, game, drawY, scaleExtra);
         if (resaltado) {
             batch.setColor(1.25f, 1.15f, 0.6f, 1f);
@@ -95,6 +122,8 @@ public class VistaCarta implements Arrastrable{
         }
         batch.draw(region, x, drawY, width / 2f, height / 2f, width * scaleExtra, height * scaleExtra, scale, scale, rotation);
         batch.setColor(1f, 1f, 1f, 1f);
+        batch.flush(); // Dibujamos la carta inclinada
+        batch.setTransformMatrix(matrixAnterior);
         if (hover && !bocaAbajo && !dragging && carta != null) {
             dibujarCartelStats(batch, game, drawY);
         }
@@ -312,6 +341,30 @@ public class VistaCarta implements Arrastrable{
         if (hover) {
             targetRotation = 0f;
         }
+        if (hover && !animando) {
+            // 1. Calculamos la posición del mouse relativa al centro de la carta (-1 a 1)
+            float cx = x + (width * scale) / 2f;
+            float cy = y + visualOffsetY + (height * scale) / 2f;
+
+            float mouseDeltaX = (mouseX - cx) / ((width * scale) / 2f);
+            float mouseDeltaY = (mouseY - cy) / ((height * scale) / 2f);
+
+            // Limitamos a -1 y 1 por si el mouse sale muy rápido
+            mouseDeltaX = Math.max(-1f, Math.min(1f, mouseDeltaX));
+            mouseDeltaY = Math.max(-1f, Math.min(1f, mouseDeltaY));
+
+            // 2. Moverse en X rota el eje Y (izquierda/derecha). Moverse en Y rota el eje X (arriba/abajo).
+            // NOTA: Invertimos el signo dependiendo de cómo queramos que "pise" el mouse la carta.
+            targetTiltY = mouseDeltaX * MAX_TILT;
+            targetTiltX = -mouseDeltaY * MAX_TILT;
+        } else {
+            // Si no hay hover, vuelve a estar plana
+            targetTiltX = 0f;
+            targetTiltY = 0f;
+        }
+        // 3. Suavizamos el movimiento de inclinación
+        tiltX = moverHacia(tiltX, targetTiltX, VELOCIDAD_TILT * delta);
+        tiltY = moverHacia(tiltY, targetTiltY, VELOCIDAD_TILT * delta);
         if (!dragging) {
             x = moverHacia(x, targetX, VELOCIDAD_POSICION * delta);
             y = moverHacia(y, targetY, VELOCIDAD_POSICION * delta);

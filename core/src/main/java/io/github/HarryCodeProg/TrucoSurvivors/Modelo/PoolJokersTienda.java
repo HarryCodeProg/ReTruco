@@ -96,6 +96,7 @@ public class PoolJokersTienda {
         fabricas.add(Rivadavia::new);
         fabricas.add(Roca::new);
         fabricas.add(SanMartin::new);
+        fabricas.add(Belgrano::new);
     }
 
     /** Devuelve un joker nuevo al azar, evitando (si es posible) los que el jugador ya tiene por clase. */

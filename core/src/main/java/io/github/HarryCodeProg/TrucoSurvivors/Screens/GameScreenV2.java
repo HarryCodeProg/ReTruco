@@ -37,46 +37,34 @@ public class GameScreenV2 implements Screen {
     private ArrayList<VistaCarta> cartasMesaJugador;
     private ArrayList<VistaCarta> cartasMesaRival;
     private VistaMazo vistaMazo;
-    private Juego juego;
-    private ControladorCombate controladorCombate;
-    private GestorAccion gestorAccion;
-    private ControladorIARival controladorIARival;
     private GestorInputArrastrable<VistaCarta> gestorCartas;
     private GestorInputArrastrable<VistaJoker> gestorJokers;
     private final GestorReordenamiento gestorReordenamiento = new GestorReordenamiento();
     private GestorAnimacionesMano gestorAnimaciones;
     private GestorReparto gestorReparto;
-    private HUDController hudController;
     private PanelPuntajes panelPuntajes;
     private Background fondoPlasma;
     private OrthographicCamera camera;
     private Viewport viewport;
     private Vector3 mouseWorld;
-    private int tocoJugar = 0;
-    private boolean esperandoTransicion = false;
-    private boolean iniciarNuevaRondaPendiente = false;
-    private float tiempoNuevaRonda = 0f;
     private GestorAnimacionResolucion gestorAnimacionResolucion = new GestorAnimacionResolucion();
     private String textoFlotanteActual = null;
     private double puntosTrucoDisplay = 0;
     private double multTrucoDisplay = 1;
     private double puntosEnvidoDisplay = 0;
     private double multEnvidoDisplay = 1;
-    float anchoCarta = 120;
-    float separacion = 8;
     private enum EstadoPantalla { JUGANDO, VICTORIA, TIENDA, SELECCION_RIVAL }
     private PanelSeleccionRival panelSeleccionRival;
     private EstadoPantalla estado = EstadoPantalla.JUGANDO;
     private PanelTienda panelTienda;
     private boolean partidaIniciada = false;
-    private Boton botonVenderJoker;
     private VistaJoker jokerConHoverActual;
     private final GestorVentaJoker gestorVentaJoker = new GestorVentaJoker();
     private GameRenderSystem renderSystem;
     private AreaElementos<VistaCarta> areaCartas;
     private AreaElementos<VistaJoker> areaJokers;
     private EstadoPantalla pendingEstado = null;
-    private boolean aplicarAnimacionInicial = true; // evitar animación de repartos repetida
+    private boolean aplicarAnimacionInicial = true;
     private boolean panelTiendaVisible = false;
     private boolean panelSeleccionVisible = false;
     private final GestorCompraJokerAnimado gestorCompraJoker = new GestorCompraJokerAnimado();
@@ -86,7 +74,12 @@ public class GameScreenV2 implements Screen {
     private boolean suppressJugadorJokerListener = false;
     private Consumer<Santo> jugadorSantoAddedListener;
     private Consumer<Santo> jugadorSantoRemovedListener;
-
+    private GestorVisualVictoria gestorVictoria;
+    private GestorEstadoPartida gestorPartida;
+    private HUDController hudController;
+    private Boton botonVenderJoker;
+    float anchoCarta = 120;
+    float separacion = 8f;
 
     public GameScreenV2(Main game, DatosRival datosRival) {
         this.game = game;
@@ -94,22 +87,24 @@ public class GameScreenV2 implements Screen {
         this.camera = new OrthographicCamera();
         this.viewport = new FitViewport(1280, 720, camera);
         this.mouseWorld = new Vector3();
+        this.gestorPartida = new GestorEstadoPartida(this); // Inicializado
         this.panelPuntajes = new PanelPuntajes();
         this.gestorReparto = new GestorReparto();
         this.cartasMesaJugador = new ArrayList<>();
         this.cartasMesaRival = new ArrayList<>();
-        botonVenderJoker = new Boton(0, 0, 150, 45, Boton.TipoColor.ROJO, Accion.VENDER_JOKER);
+        // Inicializado como campo de la clase
+        this.botonVenderJoker = new Boton(0, 0, 150, 45, Boton.TipoColor.ROJO, Accion.VENDER_JOKER);
         botonVenderJoker.setVisible(false);
         float margenLateral = 220f;
         this.areaCartas = new AreaElementos<>(margenLateral, Y_MANO_JUGADOR, 1280f - margenLateral * 2, ALTO_CARTA, anchoCarta, ALTO_CARTA, separacion);
         this.areaJokers = new AreaElementos<>(margenLateral, Y_JOKERS, 1280f - margenLateral * 2, ALTO_JOKER, ANCHO_JOKER, ALTO_JOKER, SEPARACION_JOKER);
         this.renderSystem = new GameRenderSystem(game);
-        // evitar NPE en puedeInteractuar: inicializar gestorAnimaciones vacio mínimo
         this.gestorAnimaciones = new GestorAnimacionesMano(
             new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(),
             this::organizarCartas
         );
         gestorSantos = new GestorSantos(game, 1080f, Y_JOKERS, 170f, ALTO_JOKER);
+        this.gestorVictoria = new GestorVisualVictoria(game, () -> pendingEstado = EstadoPantalla.TIENDA);
         iniciarShader();
         inicializarJuego();
         this.partidaIniciada = true;
@@ -120,11 +115,13 @@ public class GameScreenV2 implements Screen {
         this.camera = new OrthographicCamera();
         this.viewport = new FitViewport(1280, 720, camera);
         this.mouseWorld = new Vector3();
+        this.gestorPartida = new GestorEstadoPartida(this); // Inicializado
         this.panelPuntajes = new PanelPuntajes();
         this.gestorReparto = new GestorReparto();
         this.cartasMesaJugador = new ArrayList<>();
         this.cartasMesaRival = new ArrayList<>();
-        botonVenderJoker = new Boton(0, 0, 150, 45, Boton.TipoColor.ROJO, Accion.VENDER_JOKER);
+        // Inicializado como campo de la clase
+        this.botonVenderJoker = new Boton(0, 0, 150, 45, Boton.TipoColor.ROJO, Accion.VENDER_JOKER);
         botonVenderJoker.setVisible(false);
         float margenLateral = 220f;
         this.areaCartas = new AreaElementos<>(margenLateral, Y_MANO_JUGADOR, 1280f - margenLateral * 2, ALTO_CARTA, anchoCarta, ALTO_CARTA, separacion);
@@ -141,6 +138,7 @@ public class GameScreenV2 implements Screen {
         this.jokers = new ArrayList<>();
         this.gestorJokers = new GestorInputArrastrable<>(jokers);
         gestorSantos = new GestorSantos(game, 1080f, Y_JOKERS, 170f, ALTO_JOKER);
+        this.gestorVictoria = new GestorVisualVictoria(game, () -> pendingEstado = EstadoPantalla.TIENDA);
         this.renderSystem = new GameRenderSystem(game);
         for (int i = 0; i < jugador.getJokers().size(); i++) {
             VistaJoker view = new VistaJoker(jugador.getJokers().get(i), game.getAtlasJokers());
@@ -174,8 +172,6 @@ public class GameScreenV2 implements Screen {
         this.fondoPlasma = new Background();
         this.jugador = game.getPerfilJugador().getJugador();
         jugadorJokerAddedListener = (jokerModel) -> {
-            // Si estamos suprimiendo el listener (p. ej. acabamos de terminar la animación),
-            // no crear otra vista: la animación ya colocó la vista visual.
             if (suppressJugadorJokerListener) return;
             VistaJoker vista = new VistaJoker(jokerModel, game.getAtlasJokers());
             vista.setTamaño(ANCHO_JOKER, ALTO_JOKER);
@@ -183,9 +179,7 @@ public class GameScreenV2 implements Screen {
             organizarJokers(true);
         };
         jugador.addJokerAddedListener(jugadorJokerAddedListener);
-        // también registrar eliminación (opcional)
         jugador.addJokerRemovedListener((jokerModel) -> {
-            // buscar la vista asociada y eliminarla
             VistaJoker aRemover = null;
             for (VistaJoker v : jokers) {
                 if (v.getJoker() == jokerModel) { aRemover = v; break; }
@@ -200,34 +194,24 @@ public class GameScreenV2 implements Screen {
         jugadorSantoRemovedListener = (santo) -> {gestorSantos.eliminarVistaDesdeModelo(santo);};
         jugador.addSantoAddedListener(jugadorSantoAddedListener);
         jugador.addSantoRemovedListener(jugadorSantoRemovedListener);
-        if (datosRival == null) datosRival = new DatosRival("Maty", "", 0, true, 0); // fallback
+        if (datosRival == null) datosRival = new DatosRival("Maty", "", 0, true, 0);
         this.rival = new Jugador(datosRival.getNombre());
-        this.tocoJugar = 0;
-        this.esperandoTransicion = false;
-        this.iniciarNuevaRondaPendiente = false;
-        this.tiempoNuevaRonda = 0f;
         int rivalesVencidos = datosRival.getIndice();
         if (panelPuntajes != null) {
             panelPuntajes.setRivalNombre(rival.getNombre());
         }
         this.fondoPlasma.setRivalesVencidos(rivalesVencidos);
-        Mazo mazoRival = Juego.crearMazoRival(datosRival.getNivelDificultad());
-        this.juego = new Juego(jugador, rival, mazoRival);
-        this.juego.setPuntajeMeta(datosRival.getPuntosMeta());
-        this.controladorCombate = new ControladorCombate(this, juego);
-        this.controladorIARival = new ControladorIARival(juego, controladorCombate, this);
         this.cartasJugador = new ArrayList<>();
         gestorSantos.setBuscadorVistaCarta(carta -> {
             for (VistaCarta v : cartasJugador) {
                 if (v.getCarta() == carta) return v;
             }
-            for (VistaCarta v : cartasMesaJugador) { // por si la carta de envido ya fue jugada a mesa
+            for (VistaCarta v : cartasMesaJugador) {
                 if (v.getCarta() == carta) return v;
             }
             return null;
         });
         this.cartasRival = new ArrayList<>();
-        // Reusar vistas de jokers si es posible, sino recrear silenciosamente
         ArrayList<Joker> jokersModelo = jugador.getJokers();
         if (this.jokers == null) this.jokers = new ArrayList<>();
         if (this.jokers.size() == jokersModelo.size()) {
@@ -251,12 +235,9 @@ public class GameScreenV2 implements Screen {
         this.cartasMesaRival = new ArrayList<>();
         this.gestorCartas = new GestorInputArrastrable<>(cartasJugador);
         this.gestorJokers = new GestorInputArrastrable<>(jokers);
-        // inicializar gestorAnimaciones con datos reales
         this.gestorAnimaciones = new GestorAnimacionesMano(cartasJugador, cartasRival, cartasMesaJugador, cartasMesaRival, this::organizarCartas);
-        this.gestorAccion = new GestorAccion(juego, this, controladorCombate, gestorCartas, gestorAnimaciones);
-        // Posicionar jokers sin animación al iniciar/reiniciar
+        gestorPartida.inicializar(jugador, rival, datosRival, gestorCartas, gestorAnimaciones);
         organizarJokers(true);
-        // Cartas: si queremos animación sólo la primera vez, usar flag aplicarAnimacionInicial
         if (aplicarAnimacionInicial) {
             gestorAnimaciones.iniciarTransicion(
                 new ArrayList<>(jugador.getMano()),
@@ -274,11 +255,10 @@ public class GameScreenV2 implements Screen {
     }
 
     public void iniciarNuevaRonda() {
-        if (gestorAnimaciones == null) return;
-        if (gestorAnimaciones.isEsperandoTransicion()) return;
-        tocoJugar = 0;
-        juego.setManoFinalizada(false);
-        juego.irAlMazo();
+        if (gestorAnimaciones == null || gestorAnimaciones.isEsperandoTransicion()) return;
+        gestorPartida.resetTocoJugar();
+        gestorPartida.getJuego().setManoFinalizada(false);
+        gestorPartida.getJuego().irAlMazo();
         ArrayList<Carta> manoJugadorActual = new ArrayList<>(jugador.getMano());
         ArrayList<Carta> nuevasRival = new ArrayList<>(rival.getMano());
         gestorAnimaciones.iniciarTransicionConservandoMano(manoJugadorActual, nuevasRival);
@@ -296,11 +276,24 @@ public class GameScreenV2 implements Screen {
             organizarJokers(true);
         }
         boolean modalBloqueante = (vistaMazo != null && vistaMazo.isModalAbierto()) || gestorSantos.hayOverlayActivo();
+        boolean puedeInteract = puedeInteractuar() && !modalBloqueante;
         if (vistaMazo != null) {
             vistaMazo.update(mouseWorld.x, mouseWorld.y);
             if (Gdx.input.justTouched()) {
                 vistaMazo.tocar(mouseWorld.x, mouseWorld.y);
             }
+        }
+        if (estado == EstadoPantalla.VICTORIA) {
+            gestorVictoria.update(delta, mouseWorld, modalBloqueante);
+            renderizar(delta);
+            game.batch.begin();
+            gestorVictoria.draw(game.batch);
+            game.batch.end();
+            if (pendingEstado != null) {
+                enterState(pendingEstado);
+                pendingEstado = null;
+            }
+            return;
         }
         if (estado == EstadoPantalla.TIENDA) {
             renderConTienda(delta, modalBloqueante);
@@ -312,24 +305,16 @@ public class GameScreenV2 implements Screen {
             if (pendingEstado != null) { enterState(pendingEstado); pendingEstado = null; }
             return;
         }
-        if (iniciarNuevaRondaPendiente) {
-            tiempoNuevaRonda -= delta;
-            if (tiempoNuevaRonda <= 0f) {
-                if (gestorAnimaciones == null || !gestorAnimaciones.isEsperandoTransicion()) {
-                    iniciarNuevaRondaPendiente = false;
-                    esperandoTransicion = false;
-                    iniciarNuevaRonda();
-                }
-            }
-        }
         if (gestorAnimaciones != null) gestorAnimaciones.update(delta);
         gestorAnimacionResolucion.update(delta);
-        boolean puedeInteract = puedeInteractuar() && !modalBloqueante; // <-- FIX: modal bloquea interacción de fondo
-        hudController.update(mouseWorld, puedeInteract, gestorAccion);
-        if (controladorIARival != null && !modalBloqueante) controladorIARival.update(puedeInteract); // <-- no avanza IA con modal abierto
+        gestorPartida.update(delta, puedeInteract, modalBloqueante);
+        hudController.update(mouseWorld, puedeInteract, gestorPartida.getGestorAccion());
+        if (gestorPartida.getControladorIARival() != null && !modalBloqueante) {
+            gestorPartida.getControladorIARival().update(puedeInteract);
+        }
         VistaCarta cartaArrastradaAntes = gestorCartas.getArrastrado();
         if (!modalBloqueante) {
-            gestorCartas.update(mouseWorld.x, mouseWorld.y, delta, puedeInteract); // <-- solo si no hay modal
+            gestorCartas.update(mouseWorld.x, mouseWorld.y, delta, puedeInteract);
         }
         if (!puedeInteract) {
             for (VistaCarta c : new ArrayList<>(cartasJugador)) c.update(mouseWorld.x, mouseWorld.y, delta);
@@ -337,22 +322,20 @@ public class GameScreenV2 implements Screen {
         for (VistaCarta c : new ArrayList<>(cartasRival)) c.update(mouseWorld.x, mouseWorld.y, delta);
         actualizarCartasMesa(delta);
         if (!modalBloqueante) {
-            actualizarPreviewsCartas(puedeInteract); // <-- no reordenar mano de fondo con modal abierto
+            actualizarPreviewsCartas(puedeInteract);
         }
-        hudController.actualizarSeleccion(juego, puedeInteract, gestorCartas, gestorJokers, cartasJugador, jokers);
+        hudController.actualizarSeleccion(gestorPartida.getJuego(), puedeInteract, gestorCartas, gestorJokers, cartasJugador, jokers);
         if (cartaArrastradaAntes != null && gestorCartas.getArrastrado() == null) organizarCartas();
-        gestorSantos.update(mouseWorld.x, mouseWorld.y, delta); // el propio overlay de santos ya se autobloquea internamente
-        gestorUsoSanto.update(mouseWorld.x, mouseWorld.y, gestorSantos.getSantos(), jugador, (vistaSanto, jug) -> {
-            gestorSantos.usarSeleccionado(vistaSanto, jug);
-        });
-        if (vistaMazo != null) vistaMazo.update(mouseWorld.x, mouseWorld.y); // vistaMazo también se autobloquea (ver modalAbierto en su update)
+        gestorSantos.update(mouseWorld.x, mouseWorld.y, delta, jugador);
+        gestorUsoSanto.update(mouseWorld.x, mouseWorld.y, gestorSantos.getSantos(), jugador, (vistaSanto, jug) -> {gestorSantos.usarSeleccionado(vistaSanto, jug);});
+        if (vistaMazo != null) vistaMazo.update(mouseWorld.x, mouseWorld.y);
         renderizar(delta);
         if (pendingEstado != null) { enterState(pendingEstado); pendingEstado = null; }
     }
 
     private void renderizar(float delta) {
         renderSystem.render(delta, camera, fondoPlasma, panelPuntajes, PANEL_PUNTAJES_X, PANEL_PUNTAJES_Y,
-            juego, jugador, rival, cartasMesaJugador, cartasMesaRival, cartasRival, cartasJugador, jokers,
+            gestorPartida.getJuego(), jugador, rival, cartasMesaJugador, cartasMesaRival, cartasRival, cartasJugador, jokers,
             gestorCartas, gestorJokers, vistaMazo, gestorVentaJoker, gestorAnimacionResolucion, puntosTrucoDisplay,
             multTrucoDisplay, puntosEnvidoDisplay, multEnvidoDisplay, textoFlotanteActual,
             () -> hudController.renderBotones(game.batch, game.getPixelBlancoRegion()),
@@ -372,11 +355,11 @@ public class GameScreenV2 implements Screen {
             panelSeleccionRival.updateAnimacion(delta);
             panelSeleccionRival.update(mouseWorld.x, mouseWorld.y);
         }
-        gestorSantos.update(mouseWorld.x, mouseWorld.y, delta);
+        gestorSantos.update(mouseWorld.x, mouseWorld.y, delta, jugador); // FIX
         gestorUsoSanto.update(mouseWorld.x, mouseWorld.y, gestorSantos.getSantos(), jugador, (vistaSanto, jug) -> {
             gestorSantos.usarSeleccionado(vistaSanto, jug);
         });
-        renderComun(delta, true, true, juego, rival, // FIX: firma nueva, comportamiento igual al de antes acá
+        renderComun(delta, true, true, gestorPartida.getJuego(), rival,
             () -> { if (panelSeleccionRival != null && panelSeleccionVisible) panelSeleccionRival.render(game.batch); },
             () -> {}
         );
@@ -390,18 +373,18 @@ public class GameScreenV2 implements Screen {
                 () -> {
                     if (gestorCompraJoker != null) {gestorCompraJoker.cancel();}
                     organizarJokers(true);}
-                ,juego);
+                ,gestorPartida.getJuego());
         }
         if (panelTienda != null && panelTiendaVisible) {
             panelTienda.updateAnimacion(delta);
             panelTienda.setBloqueadoPorModalExterno(modalBloqueante);
             panelTienda.update(mouseWorld.x, mouseWorld.y, delta);
         }
-        gestorSantos.update(mouseWorld.x, mouseWorld.y, delta);
+        gestorSantos.update(mouseWorld.x, mouseWorld.y, delta, jugador); // FIX
         gestorUsoSanto.update(mouseWorld.x, mouseWorld.y, gestorSantos.getSantos(), jugador, (vistaSanto, jug) -> {
             gestorSantos.usarSeleccionado(vistaSanto, jug);
         });
-        renderComun(delta, true, true, null, null, // FIX: mostrar panel, pero SIN datos de la partida anterior
+        renderComun(delta, true, true, null, null,
             () -> { if (panelTienda != null && panelTiendaVisible) panelTienda.render(game.batch); },
             () -> gestorCompraJoker.render(game.batch)
         );
@@ -426,7 +409,7 @@ public class GameScreenV2 implements Screen {
                 PANEL_PUNTAJES_X, PANEL_PUNTAJES_Y, gestorAnimacionResolucion,
                 puntosTrucoDisplay, multTrucoDisplay, puntosEnvidoDisplay, multEnvidoDisplay);
         }
-        if (mostrarMazo && vistaMazo != null && jugador != null) { // FIX: ya no exige juego != null
+        if (mostrarMazo && vistaMazo != null && jugador != null) {
             vistaMazo.render(game.batch, jugador.getMazo().getCartasRestantesOrdenadas(), jugador.getMazo().getTamañoMazo());
         }
         game.batch.end();
@@ -480,7 +463,7 @@ public class GameScreenV2 implements Screen {
         AreaElementos<VistaSanto> area = gestorSantos.getArea();
         float areaX = area.getX();
         float areaAncho = area.getAncho();
-        float areaY = area.getY() - 10f; // mismo offset que renderAreaJokers usa con Y_JOKERS - 10f
+        float areaY = area.getY() - 10f;
         batch.setColor(0.05f, 0.05f, 0.08f, 0.45f);
         batch.draw(pixelBlanco, areaX, areaY, areaAncho, ALTO_AREA_JOKERS);
         batch.setColor(0.25f, 0.28f, 0.35f, 0.7f);
@@ -512,8 +495,12 @@ public class GameScreenV2 implements Screen {
     }
 
     private boolean puedeInteractuar() {
-        boolean gestorEsperando = (gestorAnimaciones != null) ? gestorAnimaciones.isEsperandoTransicion() : false;
-        return !gestorEsperando && !esperandoTransicion;
+        boolean gestorEsperando = (gestorAnimaciones != null) && gestorAnimaciones.isEsperandoTransicion();
+        return !gestorEsperando && !gestorPartida.isEsperandoTransicion();
+    }
+
+    public boolean isEsperandoAnimacionTransicion() {
+        return gestorAnimaciones != null && gestorAnimaciones.isEsperandoTransicion();
     }
 
     private void actualizarPreviewsCartas(boolean puedeInteractuar) {
@@ -547,7 +534,7 @@ public class GameScreenV2 implements Screen {
             }
         }
         if (jokerConHover != null) {
-            jokerConHover.renderCartelStats(game.batch, game, juego);
+            jokerConHover.renderCartelStats(game.batch, game, gestorPartida.getJuego());
         }
     }
 
@@ -580,7 +567,7 @@ public class GameScreenV2 implements Screen {
         gestorCartas.getSeleccionados().remove(vistaCarta);
         cartasJugador.remove(vistaCarta);
         cartasMesaJugador.add(vistaCarta);
-        juego.agregarCartaJugador(vistaCarta.getCarta());
+        gestorPartida.getJuego().agregarCartaJugador(vistaCarta.getCarta());
         organizarCartas();
         organizarMesa();
     }
@@ -590,14 +577,12 @@ public class GameScreenV2 implements Screen {
         cartasRival.remove(vistaCarta);
         vistaCarta.cambiarBocaArriba(game.getAtlasCartas());
         cartasMesaRival.add(vistaCarta);
-        juego.agregarCartaRival(vistaCarta.getCarta());
+        gestorPartida.getJuego().agregarCartaRival(vistaCarta.getCarta());
         organizarCartas();
         organizarMesa();
     }
 
-    public void iniciarShader() {
-        this.fondoPlasma = new Background();
-    }
+    public void iniciarShader() {this.fondoPlasma = new Background();}
 
     private void organizarMesa() {
         float pasoX = ANCHO_CARTA_MESA + 20f;
@@ -705,7 +690,7 @@ public class GameScreenV2 implements Screen {
         if (jugador != null) {
             jugador.getJokers().clear();
             for (VistaJoker vj : jokers) {
-                jugador.getJokers().add(vj.getJoker()); // La rearmamos con el orden visual actual
+                jugador.getJokers().add(vj.getJoker());
             }
         }
     }
@@ -741,7 +726,7 @@ public class GameScreenV2 implements Screen {
                 panelTienda = new PanelTienda(game, jugador, this::iniciarSalidaDeTienda, this::iniciarAnimacionCompraJoker,
                     (s) -> gestorSantos.comprarYUsar(s, jugador),
                     () -> {if (gestorCompraJoker != null) {gestorCompraJoker.cancel();}
-                        organizarJokers(true);}, juego
+                        organizarJokers(true);}, gestorPartida.getJuego()
                 );
                 panelTiendaVisible = true;
                 panelSeleccionVisible = false;
@@ -760,6 +745,9 @@ public class GameScreenV2 implements Screen {
                 partidaIniciada = true;
                 break;
             case VICTORIA:
+                panelTiendaVisible = false;
+                panelSeleccionVisible = false;
+                gestorVictoria.iniciarEntrada();
                 break;
         }
         this.estado = newState;
@@ -782,10 +770,7 @@ public class GameScreenV2 implements Screen {
     public void finalizarCombate(boolean victoriaJugador) {
         if (victoriaJugador) {
             game.getPerfilJugador().avanzarNivel();
-            jugador.multTrucoOriginal();
-            jugador.multEnvidoOriginal();
-            panelPuntajes.setRivalNombre("");
-            pendingEstado = EstadoPantalla.TIENDA;
+            pendingEstado = EstadoPantalla.VICTORIA;
         } else {
             pendingEstado = EstadoPantalla.SELECCION_RIVAL;
         }
@@ -798,13 +783,23 @@ public class GameScreenV2 implements Screen {
         gestorCompraJoker.iniciar(joker, game.getAtlasJokers(), ANCHO_JOKER, ALTO_JOKER, x, y, jokers, areaJokers);
     }
 
-    public void setTiempoNuevaRonda() { tiempoNuevaRonda = 2.5f; }
-    public void setEsperandoTransicion(boolean esperandoTransicion) { this.esperandoTransicion = esperandoTransicion; }
-    public void setIniciarNuevaRondaPendiente(boolean iniciarNuevaRondaPendiente) { this.iniciarNuevaRondaPendiente = iniciarNuevaRondaPendiente; }
-    public void setTiempoNuevaRonda(float tiempoNuevaRonda) { this.tiempoNuevaRonda = tiempoNuevaRonda; }
+    public void prepararVictoria(int pesosVictoria, int pesosInteres) {
+        gestorVictoria.preparar(pesosVictoria, pesosInteres);
+    }
+
+    public void sumarPesosExtrasVictoria(int cantidad) {
+        gestorVictoria.sumarPesosExtras(cantidad);
+        if (jugador != null) jugador.sumarPesos(cantidad);
+    }
+
     public ArrayList<VistaCarta> getCartasRival() { return cartasRival; }
-    public int getTocoJugar() { return tocoJugar; }
-    public void incrementarTocoJugar() { this.tocoJugar++; }
+
+    public void setTiempoNuevaRonda() { gestorPartida.setTiempoNuevaRonda(); }
+    public void setEsperandoTransicion(boolean esperando) { gestorPartida.setEsperandoTransicion(esperando); }
+    public void setIniciarNuevaRondaPendiente(boolean pendiente) { gestorPartida.setIniciarNuevaRondaPendiente(pendiente); }
+    public void setTiempoNuevaRonda(float tiempo) { gestorPartida.setTiempoNuevaRonda(tiempo); }
+    public int getTocoJugar() { return gestorPartida.getTocoJugar(); }
+    public void incrementarTocoJugar() { gestorPartida.incrementarTocoJugar(); }
     public Main getGame() { return game; }
     public DatosRival getDatosRival() { return datosRival; }
     public Jugador getRival() { return rival; }
@@ -828,6 +823,7 @@ public class GameScreenV2 implements Screen {
             if (jugadorSantoAddedListener != null) {jugador.removeSantoAddedListener(jugadorSantoAddedListener);jugadorSantoAddedListener = null;}
             if (jugadorSantoRemovedListener != null) {jugador.removeSantoRemovedListener(jugadorSantoRemovedListener);jugadorSantoRemovedListener = null;}
         }
+        if (gestorVictoria != null) gestorVictoria.dispose();
     }
 
     @Override

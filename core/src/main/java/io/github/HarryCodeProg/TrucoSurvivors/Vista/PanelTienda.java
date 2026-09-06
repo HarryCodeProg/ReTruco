@@ -137,17 +137,17 @@ public class PanelTienda {
     }
 
     private float calcularAnchoItem(int cantidad, float anchoGaleria) {
-        if (cantidad <= 1) return ANCHO_ITEM;
-        return Math.min(ANCHO_ITEM, (anchoGaleria - ESPACIO_ITEM_MINIMO * (cantidad - 1)) / cantidad);
+        return ANCHO_ITEM;
     }
 
     private float calcularAltoItem(float anchoItem) {
-        return anchoItem * ALTO_ITEM / ANCHO_ITEM;
+        return ALTO_ITEM;
     }
 
     private float calcularEspacioItem(int cantidad, float anchoItem, float anchoGaleria) {
         if (cantidad <= 1) return 0f;
-        return Math.min(ESPACIO_ITEM, (anchoGaleria - anchoItem * cantidad) / (cantidad - 1));
+        float separacion = (anchoGaleria - anchoItem) / (cantidad - 1);
+        return Math.min(ESPACIO_ITEM, separacion - anchoItem);
     }
 
     private void deseleccionarTodo() {
@@ -221,7 +221,10 @@ public class PanelTienda {
                 onBeforeReroll.run();
             }
             boolean exito = estadoTienda.rerollearTienda(jugador);
-            if (exito) {reconstruirVistas();
+            if (exito) {
+                GestorSonidos sonidos = Main.getInstance().getGestorSonidos();
+                if (sonidos != null) sonidos.reproducirSonidoGastarPeso();
+                reconstruirVistas();
                 botonReroll.setTexto("Reroll $" + estadoTienda.costoRerollTienda());
             }
         }
@@ -302,6 +305,8 @@ public class PanelTienda {
         if (!jugador.gastarPesos(item.getPrecio())) {
             return;
         }
+        GestorSonidos sonidos = Main.getInstance().getGestorSonidos(); // FIX
+        if (sonidos != null) sonidos.reproducirSonidoGastarPeso();     // FIX
         if (item.getTipo() == ItemTienda.Tipo.CARTA) {
             jugador.getMazo().agregarCarta(item.getCarta());
             estadoTienda.removerItemComprado(item);
@@ -309,8 +314,6 @@ public class PanelTienda {
             if (alComprarJoker != null) {
                 estadoTienda.removerItemComprado(item);
                 reconstruirVistas();
-                // La animación agregará el Joker al modelo
-                // al terminar.
                 alComprarJoker.accept(vista);
             } else {
                 jugador.agregarJoker(item.getJoker());
@@ -330,15 +333,11 @@ public class PanelTienda {
     private void comprarYUsarSanto(VistaItemTienda vista) {
         ItemTienda item = vista.getItem();
         Santo santo = item.getSanto();
-        if (santo == null) {
-            return;
-        }
-        if (jugador.getSantos().size() >= jugador.getTamañoSantos()) {
-            return;
-        }
-        if (!jugador.gastarPesos(item.getPrecio())) {
-            return;
-        }
+        if (santo == null) return;
+        if (jugador.getSantos().size() >= jugador.getTamañoSantos()) return;
+        if (!jugador.gastarPesos(item.getPrecio())) return;
+        GestorSonidos sonidos = Main.getInstance().getGestorSonidos(); // FIX
+        if (sonidos != null) sonidos.reproducirSonidoGastarPeso();     // FIX
         estadoTienda.removerItemComprado(item);
         reconstruirVistas();
         alComprarYUsarSanto.accept(santo);
@@ -485,10 +484,4 @@ public class PanelTienda {
         if (cantidad <= 0) return GALERIA_X;
         return GALERIA_X;
     }
-
-    /*private float calcularInicioFila(int cantidad, float anchoItem, float espacioItem, float anchoGaleria) {
-        if (cantidad <= 0) return GALERIA_X;
-        float anchoFila = cantidad * anchoItem + (cantidad - 1) * espacioItem;
-        return GALERIA_X + Math.max(0f, (anchoGaleria - anchoFila) / 2f);
-    }*/
 }

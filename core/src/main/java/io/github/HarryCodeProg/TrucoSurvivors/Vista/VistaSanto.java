@@ -29,6 +29,13 @@ public class VistaSanto implements Arrastrable {
     private static final float VELOCIDAD_ROTACION = 360f;
     private float pressX, pressY, dragOffsetX, dragOffsetY;
     private boolean huboMovimientoSignificativo;
+    // --- Variables para el efecto Balatro Tilt ---
+    private float tiltX = 0f;
+    private float tiltY = 0f;
+    private float targetTiltX = 0f;
+    private float targetTiltY = 0f;
+    private static final float MAX_TILT = 25f;
+    private static final float VELOCIDAD_TILT = 150f;
 
     public VistaSanto(Santo santo, TextureAtlas atlasSantos) {
         this.santo = santo;
@@ -70,6 +77,21 @@ public class VistaSanto implements Arrastrable {
         targetScale = hover ? ESCALA_HOVER : 1f;
         targetOffsetY = offsetHover + offsetSel;
         if (hover) targetRotation = 0f;
+        if (hover && !dragging) {
+            float cx = x + (width * scale) / 2f;
+            float cy = y + visualOffsetY + (height * scale) / 2f;
+            float mouseDeltaX = (mouseX - cx) / ((width * scale) / 2f);
+            float mouseDeltaY = (mouseY - cy) / ((height * scale) / 2f);
+            mouseDeltaX = Math.max(-1f, Math.min(1f, mouseDeltaX));
+            mouseDeltaY = Math.max(-1f, Math.min(1f, mouseDeltaY));
+            targetTiltY = mouseDeltaX * MAX_TILT;
+            targetTiltX = -mouseDeltaY * MAX_TILT;
+        } else {
+            targetTiltX = 0f;
+            targetTiltY = 0f;
+        }
+        tiltX = moverHacia(tiltX, targetTiltX, VELOCIDAD_TILT * delta);
+        tiltY = moverHacia(tiltY, targetTiltY, VELOCIDAD_TILT * delta);
         if (!dragging) {
             x = moverHacia(x, targetX, VELOCIDAD_POSICION * delta);
             y = moverHacia(y, targetY, VELOCIDAD_POSICION * delta);
@@ -117,6 +139,20 @@ public class VistaSanto implements Arrastrable {
 
     public void render(SpriteBatch batch) {
         float drawY = y + visualOffsetY;
+        // --- ---
+        batch.flush();
+        com.badlogic.gdx.math.Matrix4 matrixAnterior = batch.getTransformMatrix().cpy();
+        if (tiltX != 0 || tiltY != 0) {
+            com.badlogic.gdx.math.Matrix4 matrixTilt = new com.badlogic.gdx.math.Matrix4(matrixAnterior);
+            float cx = x + (width * scale) / 2f;
+            float cy = drawY + (height * scale) / 2f;
+            matrixTilt.translate(cx, cy, -50f);
+            matrixTilt.rotate(1, 0, 0, tiltX);
+            matrixTilt.rotate(0, 1, 0, tiltY);
+            matrixTilt.translate(-cx, -cy, 0f);
+            batch.setTransformMatrix(matrixTilt);
+        }
+        // -----------------------
         if (region != null) {
             batch.draw(region, x, drawY, width / 2f, height / 2f, width, height, scale, scale, rotation);
         } else {
@@ -132,7 +168,8 @@ public class VistaSanto implements Arrastrable {
                 font.draw(batch, santo.getNombre(), x + 6f, drawY + height / 2f);
             }
         }
-        // Mostrar cartel de descripción al pasar el mouse (igual que VistaCarta/VistaJoker)
+        batch.flush();
+        batch.setTransformMatrix(matrixAnterior);
         if (hover && !dragging && santo != null) {
             Main game = Main.getInstance();
             renderCartelStats(batch, game);
