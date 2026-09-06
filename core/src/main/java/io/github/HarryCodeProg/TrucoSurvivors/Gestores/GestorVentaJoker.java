@@ -1,9 +1,10 @@
 package io.github.HarryCodeProg.TrucoSurvivors.Gestores;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.Accion;
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jugador;
+import io.github.HarryCodeProg.TrucoSurvivors.Main;
 import io.github.HarryCodeProg.TrucoSurvivors.Vista.Boton;
 import io.github.HarryCodeProg.TrucoSurvivors.Vista.GameLayout;
 import io.github.HarryCodeProg.TrucoSurvivors.Vista.VistaJoker;
@@ -15,7 +16,6 @@ public class GestorVentaJoker {
     private final Boton botonVender;
 
     public GestorVentaJoker() {
-        // Aprovecha directamente tu nuevo enum TipoColor.BORDO o ROJO
         this.botonVender = new Boton(0, 0, 100, GameLayout.ALTO_BOTON, Boton.TipoColor.BORDO, Accion.VENDER_JOKER);
         this.botonVender.setVisible(false);
     }
@@ -31,14 +31,12 @@ public class GestorVentaJoker {
         if (jokerSeleccionado != null) {
             int precioVenta = Math.max(1, jokerSeleccionado.getJoker().getCoste() / 2);
             botonVender.setTexto("VENDER $" + precioVenta);
-            // Centrar sobre el Joker usando las dimensiones de VistaJoker y Boton
-            float xBoton = jokerSeleccionado.getX() + (jokerSeleccionado.getWidth() - botonVender.getAncho()) / 2f;
-            float yBoton = jokerSeleccionado.getY() + jokerSeleccionado.getHeight() + 10f;
-            // Usa el nuevo setPosition que agregaste a Boton
+            // FIX: posicionado a la derecha del joker seleccionado, en vez de arriba (se salía de pantalla)
+            float xBoton = jokerSeleccionado.getX() + jokerSeleccionado.getWidth() + 10f;
+            float yBoton = jokerSeleccionado.getY() + (jokerSeleccionado.getHeight() - botonVender.getAlto()) / 2f;
             botonVender.setPosition(xBoton, yBoton);
             botonVender.setVisible(true);
             botonVender.update(mouseX, mouseY);
-            // Verifica click utilizando la colisión directa del botón
             if (botonVender.fueCliqueado(mouseX, mouseY)) {
                 venderJoker(jokerSeleccionado, jokers, jugador, alOrganizar);
             }
@@ -51,7 +49,13 @@ public class GestorVentaJoker {
     private void venderJoker(VistaJoker jokerAVender, ArrayList<VistaJoker> jokers, Jugador jugador, Consumer<Runnable> alOrganizar) {
         int precioVenta = Math.max(1, jokerAVender.getJoker().getCoste() / 2);
         jugador.sumarPesos(precioVenta);
-        jugador.eliminarJoker(jokerAVender.getJoker());
+        GestorSonidos sonidos = Main.getInstance().getGestorSonidos(); // FIX
+        if (sonidos != null) sonidos.reproducirSonidoGanarPeso();      // FIX
+        Joker jokerVendido = jokerAVender.getJoker();
+        for (Joker j : new ArrayList<>(jugador.getJokers())) {
+            j.onVendido(jokerVendido, jugador);
+        }
+        jugador.eliminarJoker(jokerVendido);
         jokers.remove(jokerAVender);
         botonVender.setVisible(false);
         if (alOrganizar != null) {

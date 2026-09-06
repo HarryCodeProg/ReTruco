@@ -20,7 +20,7 @@ public class GestorJokers {
         ArrayDeque<Activacion> cola = new ArrayDeque<>();
         for (Joker.FaseActivacion fase : Joker.FaseActivacion.values()) {
             for (Joker j : jugador.getJokers()) {
-                if (j.getFase() == fase) {
+                if (j.getFase() == fase && ctx.jokerPermitidoPorFiltro(j)) {
                     cola.add(Activacion.deJoker(j, evento));
                 }
             }
@@ -28,7 +28,9 @@ public class GestorJokers {
         ctx.setColaActivaciones(cola);
         while (!cola.isEmpty()) {
             Activacion act = cola.poll();
-            act.joker.aplicarEfecto(act.evento, ctx, juego);
+            if (act.esJoker()) {
+                act.joker.aplicarEfecto(act.evento, ctx, juego);
+            }
         }
     }
 }

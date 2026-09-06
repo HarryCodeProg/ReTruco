@@ -12,19 +12,19 @@ public class Chimichurri extends Joker {
     private static final double MULT_POR_MANO = 2.0;
 
     public Chimichurri(){
-        super(27, "Chimichurri", "Chimichurri", "+2 Mult truco por cada mano ganada de forma consecutiva",
+        super(27, "Chimichurri", "Chimichurri", "+2 Multiplicador truco por cada mano ganada de forma consecutiva",
             Rareza.comun, 1, Joker.FaseActivacion.INDEPENDIENTE,
             CategoriaJoker.NACIONAL, CategoriaJoker.COMIDA, CategoriaJoker.TRADICIONAL);
     }
 
     @Override
     public String getDescripcionRenderizada() {
-        return "+2 Mult truco por cada mano ganada de forma consecutiva (Actual: +" + (int) getAcumulado() + ")";
+        return "+2 Multiplicador truco por cada mano ganada de forma consecutiva (Actual: +" + (int) getAcumulado() + ")";
     }
 
     @Override
     public String getDescripcionRenderizada(Juego juego) {
-        return "+2 Mult truco por cada mano ganada de forma consecutiva (Actual: +" + (int) getAcumulado() + ")";
+        return "+2 Multiplicador truco por cada mano ganada de forma consecutiva (Actual: +" + (int) getAcumulado() + ")";
     }
 
     @Override

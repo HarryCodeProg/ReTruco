@@ -12,7 +12,7 @@ import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 public class Vigilante extends Joker {
 
     public Vigilante(){
-        super(20, "Vigilante", "Vigilante", "Las cartas de espada que maten reciben +15 puntos truco",
+        super(20, "Vigilante", "Vigilante", "Las cartas de Espada que maten reciben +15 puntos truco",
             Rareza.comun, 1, FaseActivacion.AL_PUNTUAR_CARTA,
             CategoriaJoker.NACIONAL, CategoriaJoker.COMIDA, CategoriaJoker.DULCE);
     }

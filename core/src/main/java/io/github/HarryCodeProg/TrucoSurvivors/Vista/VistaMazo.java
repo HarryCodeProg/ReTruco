@@ -24,6 +24,7 @@ public class VistaMazo {
     private final TextureRegion dorso;
     private final TextureAtlas atlasCartas;
     private final BitmapFont font;
+    private final BitmapFont fontNumeros;
     private final Texture pixelBlanco;
     private boolean isHovered; //  Guardamos el estado del hover
     // Posición y tamaño del mazo interactivo (Abajo a la derecha)
@@ -54,6 +55,7 @@ public class VistaMazo {
         this.atlasCartas = atlasCartas;
         this.dorso = atlasCartas.findRegion("back");
         this.font = font;
+        this.fontNumeros = Main.getInstance() != null ? Main.getInstance().getFuenteNumeros() : font;
         this.pixelBlanco = pixelBlanco;
         this.boundsMazo = new Rectangle(x, y, width, height);
         // Botón Atrás centrado en la parte inferior de la ventana
@@ -150,9 +152,9 @@ public class VistaMazo {
         }
         batch.setColor(Color.WHITE);
         String textoMazo = cantidad + "/" + totalInicial;
-        font.setColor(Color.WHITE);
-        GlyphLayout layout = new GlyphLayout(font, textoMazo);
-        font.draw(batch, textoMazo, x + (width / 2f) - (layout.width / 2f), y - 10f);
+        fontNumeros.setColor(Color.WHITE);
+        GlyphLayout layout = new GlyphLayout(fontNumeros, textoMazo);
+        fontNumeros.draw(batch, textoMazo, x + (width / 2f) - (layout.width / 2f), y - 10f);
     }
 
     public void renderModalSiCorresponde(SpriteBatch batch) {

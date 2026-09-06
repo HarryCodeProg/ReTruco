@@ -18,7 +18,7 @@ public class ControladorCombate {
         this.juego = juego;
     }
 
-    public void comprobarFinDelCombate() {
+    /*public void comprobarFinDelCombate() {
         EstadoCombate estado = juego.verificarEstadoCombate();
         if (estado == EstadoCombate.VICTORIA_JUGADOR) {
             Jugador jugadorGanador = juego.getJugador();
@@ -44,13 +44,41 @@ public class ControladorCombate {
                 }
             }, 3.0f);
         }
+    }*/
+
+    public void comprobarFinDelCombate() {
+        EstadoCombate estado = juego.verificarEstadoCombate();
+        if (estado == EstadoCombate.VICTORIA_JUGADOR) {
+            Jugador jugadorGanador = juego.getJugador();
+            int pesosVictoria = ConfiguracionEconomia.DINERO_POR_VICTORIA;
+            int pesosInteres = jugadorGanador.calcularInteres();
+            jugadorGanador.sumarPesos(pesosVictoria + pesosInteres); // FIX: se había perdido al refactorizar, el dinero real se suma acá, la animación es solo visual
+            screen.prepararVictoria(pesosVictoria, pesosInteres);
+            screen.setEsperandoTransicion(true);
+            screen.getGame().habilitarSiguiente(screen.getDatosRival().getIndice());
+            Timer.schedule(new Timer.Task() {
+                @Override
+                public void run() {
+                    screen.setEsperandoTransicion(false);
+                    screen.finalizarCombate(true); // FIX: usa pendingEstado/enterState, no llama a un método private directo
+                }
+            }, 0.2f);
+        } else if (estado == EstadoCombate.VICTORIA_RIVAL) {
+            screen.setEsperandoTransicion(true);
+            Timer.schedule(new Timer.Task() {
+                @Override
+                public void run() {
+                    screen.setEsperandoTransicion(false);
+                    screen.finalizarCombate(false);
+                }
+            }, 3.0f);
+        }
     }
 
     public void comprobarGanadorRonda() {
         if (!juego.terminoLaMano()) return;
         juego.finalizarManoTruco();
         ResolucionPuntaje resolucion = juego.getUltimaResolucion();
-
         if (resolucion != null && !resolucion.getLog().isEmpty()) {
             screen.setEsperandoTransicion(true);
             screen.iniciarAnimacionResolucion(resolucion, true, () -> { // true = es truco

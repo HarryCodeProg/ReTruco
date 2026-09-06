@@ -3,6 +3,7 @@ package io.github.HarryCodeProg.TrucoSurvivors.Activacion;
 import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Carta;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Legendario.*;
 import io.github.HarryCodeProg.TrucoSurvivors.Jugador;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Mazo;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Mesa;
@@ -30,7 +31,10 @@ public class ContextoJuego {
     private final Set<Joker> jokersPrimerFiguraPuntuadaAplicada = Collections.newSetFromMap(new IdentityHashMap<>());
     private final Set<Joker> jokersPrimerNoFiguraPuntuadaAplicada = Collections.newSetFromMap(new IdentityHashMap<>());
     private final Map<Joker, Set<Object>> marcasPorJoker = new IdentityHashMap<>();
-
+    private final Set<Joker> copiasEnCurso = Collections.newSetFromMap(new IdentityHashMap<>());
+    private int cartasRepartidasEsteEvento = 0;
+    private int profundidadCopia = 0;
+    private static final int MAX_PROFUNDIDAD_COPIA = 8;
 
     public ContextoJuego(Jugador jugador, Jugador rival, Mazo mazo, Mesa mesa, Juego juego) {
         this.jugador = jugador;
@@ -151,5 +155,41 @@ public class ContextoJuego {
         int idx = lista.indexOf(referencia);
         if (idx <= 0) return null;
         return lista.get(idx - 1);
+    }
+
+    /** true si se pudo "entrar" (no estaba ya en la pila actual). false = ciclo detectado, cortar. */
+    public boolean iniciarCopia(Joker j) {
+        return copiasEnCurso.add(j);
+    }
+
+    public void terminarCopia(Joker j) {
+        copiasEnCurso.remove(j);
+    }
+
+    public int getCartasRepartidasEsteEvento() { return cartasRepartidasEsteEvento; }
+    public void setCartasRepartidasEsteEvento(int cantidad) { this.cartasRepartidasEsteEvento = cantidad; }
+
+    /** true si el jugador tiene algún joker activo cuyo efecto desactiva jokers de otras categorías. */
+    public boolean hayFiltroDeCategoriaActivo() {
+        for (Joker j : jugador.getJokers()) {
+            if (j instanceof SanMartin) return true;
+        }
+        return false;
+    }
+
+    public boolean jokerPermitidoPorFiltro(Joker j) {
+        if (!hayFiltroDeCategoriaActivo()) return true;
+        if (j instanceof SanMartin) return true; // San Martín siempre se activa a sí mismo
+        return j.tieneCategoria(CategoriaJoker.NACIONAL);
+    }
+
+    public boolean puedeEntrarACopia() {
+        if (profundidadCopia >= MAX_PROFUNDIDAD_COPIA) return false;
+        profundidadCopia++;
+        return true;
+    }
+
+    public void salirDeCopia() {
+        profundidadCopia--;
     }
 }

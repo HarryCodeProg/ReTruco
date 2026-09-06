@@ -12,7 +12,7 @@ import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 public class MediaLuna extends Joker {
 
     public MediaLuna(){
-        super(21, "Media Luna", "MediaLuna", "Las cartas de copa que no maten reciben +20 puntos truco",
+        super(21, "Media Luna", "MediaLuna", "Las cartas de Copa que no maten reciben +20 puntos truco",
             Rareza.comun, 1, Joker.FaseActivacion.AL_PUNTUAR_CARTA,
             CategoriaJoker.NACIONAL, CategoriaJoker.COMIDA, CategoriaJoker.DULCE);
     }

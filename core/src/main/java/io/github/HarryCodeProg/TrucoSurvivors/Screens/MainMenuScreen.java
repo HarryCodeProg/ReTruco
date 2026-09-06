@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -37,8 +38,10 @@ public class MainMenuScreen implements Screen {
         //font.getData().setScale(3.0f); // Título grande
         // Creamos los botones centrados en la pantalla
         // Boton(x, y, ancho, alto, "Texto", Accion_Provisoria)
-        botonJugar = new Boton(1280 / 2f - 100, 400, 200, 60, "JUGAR", Accion.JUGAR_CARTA);
-        botonSalir = new Boton(1280 / 2f - 100, 280, 200, 60, "SALIR", Accion.IR_AL_MAZO);
+        float centroX = viewport.getWorldWidth() / 2f;
+        float anchoBoton = 200f;
+        botonJugar = new Boton(centroX - anchoBoton / 2f, 400f, anchoBoton, 60f, "JUGAR", Accion.JUGAR_CARTA);
+        botonSalir = new Boton(centroX - anchoBoton / 2f, 280f, anchoBoton, 60f, "SALIR", Accion.IR_AL_MAZO);
         prepararFondo();
     }
 
@@ -80,7 +83,10 @@ public class MainMenuScreen implements Screen {
         // Dibujar Textos y Botones
         game.batch.begin();
         // Un texto de título fachero
-        font.draw(game.batch, "ReTruco", 530, 580);
+        GlyphLayout titleLayout = new GlyphLayout(font, "ReTruco");
+        float centroX = viewport.getWorldWidth() / 2f;
+        float titleX = centroX - titleLayout.width / 2f;
+        font.draw(game.batch, "ReTruco", titleX, 580f);
         // Dibujamos tus botones (Podés setearles texto adentro si tu clase Boton lo permite,
         // o dibujar un font.draw encima de cada botón temporalmente)
         botonJugar.render(game.batch);

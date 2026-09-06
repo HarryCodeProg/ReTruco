@@ -6,6 +6,7 @@ public class ResolucionPuntaje {
     private double chips;
     private double mult;
     private final ArrayList<PasoResolucion> log = new ArrayList<>();
+    public enum TipoPaso { BASE, SUMA_CHIPS, SUMA_MULT, MULT_MULT, BALANCE }
 
     public ResolucionPuntaje(double chipsIniciales, double multInicial) {
         this.chips = chipsIniciales;
@@ -37,7 +38,14 @@ public class ResolucionPuntaje {
     public double calcularPuntajeFinal() { return chips * mult; }
     public ArrayList<PasoResolucion> getLog() { return log; }
 
-    public enum TipoPaso { BASE, SUMA_CHIPS, SUMA_MULT, MULT_MULT }
+    /** Iguala chips y mult a su media geométrica, preservando el puntaje final (chips*mult) intacto. */
+    public void igualarChipsYMult(String origen, Object origenRef) {
+        // Calculamos el promedio sumando ambos y dividiendo por 2
+        double nuevoValor = (chips + mult) / 2.0;
+        chips = nuevoValor;
+        mult = nuevoValor;
+        log.add(new PasoResolucion(origen, TipoPaso.BALANCE, nuevoValor, chips, mult, origenRef));
+    }
 
     /** Un paso individual de la resolucion. Guarda el snapshot COMPLETO de chips y mult
      * despues de aplicarse este paso, para que la UI pueda mostrar ambos valores corriendo
@@ -66,10 +74,11 @@ public class ResolucionPuntaje {
         @Override
         public String toString() {
             switch (tipo) {
-                case BASE: return "Base: " + chipsActual + " chips x " + multActual + " mult";
-                case SUMA_CHIPS: return origen + ": +" + (int) valor + " chips";
+                case BASE: return "Base: " + chipsActual + " puntos x " + multActual + " mult";
+                case SUMA_CHIPS: return origen + ": +" + (int) valor + " puntos";
                 case SUMA_MULT: return origen + ": +" + (int) valor + " mult";
                 case MULT_MULT: return origen + ": x" + valor + " mult";
+                case BALANCE: return origen + ": equilibra a " + (int) chipsActual + " puntos x " + (int) multActual + " mult";
                 default: return "";
             }
         }

@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.Accion;
+import io.github.HarryCodeProg.TrucoSurvivors.Main;
 
 import static io.github.HarryCodeProg.TrucoSurvivors.Estados.Accion.COMPRAR_ITEM_TIENDA;
 
@@ -57,10 +58,12 @@ public class Boton {
     private boolean pressed;
     private boolean habilitado = true;
     private BitmapFont font;
+    private boolean fontPropia;
     private GlyphLayout layout;
     // Guardamos el tipo de color del botón (Celeste por defecto)
     private TipoColor tipoColor = TipoColor.CELESTE;
     private final float GROSOR_BORDE = 3f; // Grosor del borde estilo panelPuntaje
+    private static final float SOMBRA_Y = 4f;
     // Colores auxiliares para el procesamiento visual
     private Color colorFondoActual = new Color();
     private Color colorBordeActual = new Color();
@@ -73,7 +76,13 @@ public class Boton {
         pixmap.fill();
         pixel = new Texture(pixmap);
         pixmap.dispose();
-        font = new BitmapFont();
+        if (Main.getInstance() != null) {
+            font = Main.getInstance().getFuenteBotones();
+            fontPropia = false;
+        } else {
+            font = new BitmapFont();
+            fontPropia = true;
+        }
         layout = new GlyphLayout();
         this.x = x;
         this.y = y;
@@ -137,6 +146,9 @@ public class Boton {
             // Oscurecemos el fondo en el click
             colorFondoActual.mul(0.7f, 0.7f, 0.7f, 1f);
         }
+        // Sombra corta: separa el control del fondo sin modificar su zona clickeable.
+        batch.setColor(0.02f, 0.025f, 0.04f, habilitado ? 0.65f : 0.35f);
+        batch.draw(pixel, drawX + 2f, drawY - SOMBRA_Y, drawWidth, drawHeight);
         // 2. DIBUJAR EL BORDE (Un rectángulo negro/oscuro de fondo más grande)
         batch.setColor(colorBordeActual);
         batch.draw(pixel, drawX, drawY, drawWidth, drawHeight);
@@ -148,16 +160,25 @@ public class Boton {
             drawWidth - (GROSOR_BORDE * 2f),
             drawHeight - (GROSOR_BORDE * 2f)
         );
+        if (hover && habilitado && !estaPresionado) {
+            batch.setColor(1f, 1f, 1f, 0.28f);
+            batch.draw(pixel, drawX + GROSOR_BORDE, drawY + drawHeight - GROSOR_BORDE - 2f,
+                drawWidth - (GROSOR_BORDE * 2f), 2f);
+        }
         // Restaurar color del batch para el texto
         batch.setColor(Color.WHITE);
         // 4. DIBUJAR EL TEXTO CENTRAL
         String textoRender = obtenerTexto();
+        float escalaOriginal = font.getScaleX();
+        font.getData().setScale(escalaOriginal * (height >= 48f ? 1.06f : 0.96f));
         layout.setText(font, textoRender);
         float textX = drawX + (drawWidth - layout.width) / 2f;
         // Si está presionado bajamos el texto 1 píxel extra para acompañar el hundimiento mecánico
         float textY = drawY + (drawHeight + layout.height) / 2f - (estaPresionado ? 1f : 0f);
         font.setColor(colorTextoActual);
         font.draw(batch, textoRender, textX, textY);
+        font.getData().setScale(escalaOriginal);
+        font.setColor(Color.WHITE);
     }
 
     public void update(float mouseX, float mouseY) {
@@ -213,6 +234,7 @@ public class Boton {
             case REAL_ENVIDO: return "REAL ENVIDO";
             case FALTA_ENVIDO: return "FALTA ENVIDO";
             case COMPRAR_ITEM_TIENDA: return "COMPRAR";
+            case COMPRAR_Y_USAR_SANTO: return "COMPRAR Y USAR";
             case REROLL_CARTAS:
             case REROLL_JOKERS: return "REROLL";
             case CONTINUAR_TIENDA: return "CONTINUAR";
@@ -222,7 +244,7 @@ public class Boton {
 
     public void dispose() {
         pixel.dispose();
-        font.dispose();
+        if (fontPropia && font != null) font.dispose();
     }
 
     public float getX() {return x;}

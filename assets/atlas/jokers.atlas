@@ -179,534 +179,520 @@ repeat: none
   orig: 142, 190
   offset: 0, 0
   index: -1
-147_Belgrano
+146_Rivadavia
   rotate: false
   xy: 578, 1346
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-148_Sarmiento
+147_Belgrano
   rotate: false
   xy: 722, 1538
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-149_Roca
+148_Sarmiento
   rotate: false
   xy: 866, 1730
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-14_Pastafrola
+149_Roca
   rotate: false
   xy: 2, 386
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-150_SanMartín
+14_Pastafrola
   rotate: false
   xy: 146, 578
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-15_Churros
+150_SanMartin
   rotate: false
   xy: 290, 770
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-16_BolasDeFraile
+15_Churros
   rotate: false
   xy: 434, 962
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-17_Pastelitos
+16_BolasDeFraile
   rotate: false
   xy: 578, 1154
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-18_Sacramento
+17_Pastelitos
   rotate: false
   xy: 722, 1346
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-19_Cañoncito
+18_Sacramento
   rotate: false
   xy: 866, 1538
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-1_JokerEspañol
+19_Cañoncito
   rotate: false
   xy: 1010, 1730
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-20_Vigilante
+1_JokerEspañol
   rotate: false
   xy: 2, 194
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-21_MediaLuna
+20_Vigilante
   rotate: false
   xy: 146, 386
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-22_Moñito
+21_MediaLuna
   rotate: false
   xy: 290, 578
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-23_TortaNegra
+22_Moñito
   rotate: false
   xy: 434, 770
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-24_Alfajor
+23_TortaNegra
   rotate: false
   xy: 578, 962
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-25_Flan
+24_Alfajor
   rotate: false
   xy: 722, 1154
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-26_Ñoquis
+25_Flan
   rotate: false
   xy: 866, 1346
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-27_Chimichurri
+26_Ñoquis
   rotate: false
   xy: 1010, 1538
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-28_Choripan
+27_Chimichurri
   rotate: false
   xy: 1154, 1730
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-29_Locro
+28_Choripan
   rotate: false
   xy: 2, 2
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-2_Mate
+29_Locro
   rotate: false
   xy: 146, 194
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-30_Pizza
+2_Mate
   rotate: false
   xy: 290, 386
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-31_GalletaConRelleno
+30_Pizza
   rotate: false
   xy: 434, 578
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-32_Oblea
+31_GalletaConRelleno
   rotate: false
   xy: 578, 770
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-33_Peso
+32_Oblea
   rotate: false
   xy: 722, 962
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-34_PastelDePapa
+33_Peso
   rotate: false
   xy: 866, 1154
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-35_Yerba
+34_PastelDePapa
   rotate: false
   xy: 1010, 1346
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-36_Vacio
+35_Yerba
   rotate: false
   xy: 1154, 1538
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-37_Birome
+36_Vacio
   rotate: false
   xy: 1298, 1730
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-38_AK-47
+37_Birome
   rotate: false
   xy: 146, 2
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-39_Agua
+38_AK-47
   rotate: false
   xy: 290, 194
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-3_Gaseosa
+39_Agua
   rotate: false
   xy: 434, 386
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-40_AltoGuiso
+3_Gaseosa
   rotate: false
   xy: 578, 578
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-41_Damajuana
+40_AltoGuiso
   rotate: false
   xy: 722, 770
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-42_AndaALaCancha
+41_Damajuana
   rotate: false
   xy: 866, 962
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-43_AtiendoBoludos
+42_AndaALaCancha
   rotate: false
   xy: 1010, 1154
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-44_DVD
+43_AtiendoBoludos
   rotate: false
   xy: 1154, 1346
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-45_FanaticoEnojado
+44_DVD
   rotate: false
   xy: 1298, 1538
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-46_NoHayPolque
+45_FanaticoEnojado
   rotate: false
   xy: 1442, 1730
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-47_SeTieneQueArrepentir
+46_NoHayPolque
   rotate: false
   xy: 290, 2
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-48_NoMeMidas
+47_SeTieneQueArrepentir
   rotate: false
   xy: 434, 194
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-49_DameLaMochila
+48_NoMeMidas
   rotate: false
   xy: 578, 386
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-4_Termo
+49_DameLaMochila
   rotate: false
   xy: 722, 578
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-50_NoEstaTanMal
+4_Termo
   rotate: false
   xy: 866, 770
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-51_Soda
+50_NoEstaTanMal
   rotate: false
   xy: 1010, 962
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-52_YoManejo
+51_Soda
   rotate: false
   xy: 1154, 1154
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-53_SanguchesDeMiga
+52_YoManejo
   rotate: false
   xy: 1298, 1346
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-54_SosInimputable
+53_SanguchesDeMiga
   rotate: false
   xy: 1442, 1538
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-55_MatoAlJuez
+54_SosInimputable
   rotate: false
   xy: 1586, 1730
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-56_Consola
+55_MatoAlJuez
   rotate: false
   xy: 434, 2
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-59_QueMiras
+56_Consola
   rotate: false
   xy: 578, 194
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-5_Fernet
+59_QueMiras
   rotate: false
   xy: 722, 386
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-62_Anteojitos
+5_Fernet
   rotate: false
   xy: 866, 578
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-63_Ardilla
+60_CañaConRuda
   rotate: false
   xy: 1010, 770
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-64_Asado
+63_Ardilla
   rotate: false
   xy: 1154, 962
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-65_Carpincho
+64_Asado
   rotate: false
   xy: 1298, 1154
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-66_Caballo
+65_Carpincho
   rotate: false
   xy: 1442, 1346
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-67_Guanaco
+66_Caballo
   rotate: false
   xy: 1586, 1538
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-68_Yagaurete
+67_Guanaco
   rotate: false
   xy: 1730, 1730
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-69_RataBlanca
+68_Yagaurete
   rotate: false
   xy: 578, 2
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-6_BotellaCortada
+69_RataBlanca
   rotate: false
   xy: 722, 194
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-70_Gaucho
+6_BotellaCortada
   rotate: false
   xy: 866, 386
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-71_Dogo
+70_Gaucho
   rotate: false
   xy: 1010, 578
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-72_Granadero
+71_Dogo
   rotate: false
   xy: 1154, 770
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-73_Gallina
+72_Granadero
   rotate: false
   xy: 1298, 962
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-74_Ñandu
+73_Gallina
   rotate: false
   xy: 1442, 1154
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-75_MartinFierro
+74_Ñandu
   rotate: false
   xy: 1586, 1346
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-76_Mafalda
+75_MartinFierro
   rotate: false
   xy: 1730, 1538
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-77_Hijitus
+79_Hornero
   rotate: false
   xy: 1874, 1730
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-78_Gaturro
+7_VinoCaja
   rotate: false
   xy: 722, 2
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-79_Hornero
+80_Constelacion
   rotate: false
   xy: 866, 194
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-7_VinoCaja
+8_Cerveza
   rotate: false
   xy: 1010, 386
   size: 142, 190
   orig: 142, 190
   offset: 0, 0
   index: -1
-80_Constelacion
-  rotate: false
-  xy: 1154, 578
-  size: 142, 190
-  orig: 142, 190
-  offset: 0, 0
-  index: -1
-8_Cerveza
-  rotate: false
-  xy: 1298, 770
-  size: 142, 190
-  orig: 142, 190
-  offset: 0, 0
-  index: -1
 9_CervezaRota
   rotate: false
-  xy: 1442, 962
+  xy: 1154, 578
   size: 142, 190
   orig: 142, 190
   offset: 0, 0

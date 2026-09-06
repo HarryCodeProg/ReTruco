@@ -299,6 +299,11 @@ public class Jugador {
     public int getManosActuales() { return manosActuales; }
     public int getManosMaximas() { return manosMaximas; }
 
+    public void aumentarManosMaximas(int cantidad) {
+        this.manosMaximas += cantidad;
+        this.manosActuales += cantidad;
+    }
+
     public void consumirMano() {
         if (manosActuales > 0) manosActuales--;
     }

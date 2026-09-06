@@ -7,7 +7,9 @@ import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Rareza;
 import io.github.HarryCodeProg.TrucoSurvivors.Jugador;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Comun.*;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Epico.*;
-
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Raro.*;
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.MuyRaro.*;
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Legendario.*;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.function.Supplier;
@@ -68,10 +70,33 @@ public class PoolJokersTienda {
         fabricas.add(NoEstaTanMal::new);
         fabricas.add(Empanada::new);
         fabricas.add(MatoAlJuez::new);
+        fabricas.add(SanguchesDeMiga::new);
+        fabricas.add(SosInumputable::new);
+        fabricas.add(YoManejo::new);
+        fabricas.add(CañaConRuda::new);
+
+        //raro
+        fabricas.add(Granadero::new);
+        //fabricas.add(Catamarca::new);
+        fabricas.add(MartinFierro::new);
 
         //epico
         fabricas.add(Aconcagua::new);
         fabricas.add(Andes::new);
+        fabricas.add(Rosas::new);
+        fabricas.add(GlaciarPeritoMoreno::new);
+        fabricas.add(Iorio::new);
+        fabricas.add(Gardel::new);
+
+        //muy raro
+        fabricas.add(VirgenItati::new);
+        fabricas.add(VirgenDeLujan::new);
+
+        //legendario
+        fabricas.add(Rivadavia::new);
+        fabricas.add(Roca::new);
+        fabricas.add(SanMartin::new);
+        fabricas.add(Belgrano::new);
     }
 
     /** Devuelve un joker nuevo al azar, evitando (si es posible) los que el jugador ya tiene por clase. */

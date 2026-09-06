@@ -18,7 +18,7 @@ public class SeTieneQueArrepentir extends Joker {
 
     public SeTieneQueArrepentir(){
         super(47, "Se Tiene Que Arrepentir", "SeTieneQueArrepentir",
-            "Cada oro que mata agrega una carta de oro aleatoria al mazo",
+            "Cada Oro que mata agrega una carta de Oro aleatoria al mazo",
             Rareza.comun, 1, Joker.FaseActivacion.AL_PUNTUAR_CARTA,
             CategoriaJoker.TV, CategoriaJoker.SECUENCIA);
     }

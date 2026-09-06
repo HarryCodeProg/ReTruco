@@ -12,7 +12,7 @@ import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 public class Pastelitos extends Joker {
 
     public Pastelitos(){
-        super(17, "Pastelitos", "Pastelitos", "Las cartas de copa que maten reciben +15 puntos truco",
+        super(17, "Pastelitos", "Pastelitos", "Las cartas de Copa que maten reciben +15 puntos truco",
             Rareza.comun, 1, FaseActivacion.AL_PUNTUAR_CARTA,
             CategoriaJoker.NACIONAL, CategoriaJoker.COMIDA, CategoriaJoker.DULCE);
     }

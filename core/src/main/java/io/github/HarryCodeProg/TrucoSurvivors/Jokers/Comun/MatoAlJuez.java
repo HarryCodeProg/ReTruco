@@ -17,7 +17,7 @@ public class MatoAlJuez extends Joker {
             55,
             "Mato Al Juez",
             "MatoAlJuez",
-            "Matar con 8 o 9 genera un santo aleatorio",
+            "Matar con 8 o 9 genera un Santo aleatorio",
             Rareza.comun,
             5,
             Joker.FaseActivacion.INDEPENDIENTE,
