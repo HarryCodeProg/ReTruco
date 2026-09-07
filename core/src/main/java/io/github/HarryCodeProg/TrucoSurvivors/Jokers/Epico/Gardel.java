@@ -11,22 +11,19 @@ public class Gardel extends Joker {
 
     public Gardel() {
         super(136, "Gardel", "Gardel",
-            "+5 puntos truco cada vez que una carta se activa (actual: +0)",
+            "+15 puntos truco cada vez que una carta se activa (actual: +0)",
             Rareza.epico, 8, Joker.FaseActivacion.INDEPENDIENTE,
             CategoriaJoker.NACIONAL, CategoriaJoker.MUSICA);
     }
 
     @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego) {
-        if (evento == EventoJuego.AL_PUNTUAR_CARTA) {
-            // Cada vez que una carta (cualquiera, del jugador o no) se activa (puntúa).
-            // Normalmente ctx.getCartaEnResolucion() no es nulo cuando esto ocurre.
+        if (evento == EventoJuego.AL_MATAR_CARTA) {
             if (ctx.getCartaEnResolucion() != null) {
-                sumarAcumulado(5);
+                sumarAcumulado(15);
             }
             return;
         }
-
         if (evento == EventoJuego.ANTES_DE_SUMAR_TRUCO) {
             if (getAcumulado() > 0) {
                 ctx.getResolucionActual().sumarChips(getAcumulado(), getNombre(), this);
@@ -36,7 +33,7 @@ public class Gardel extends Joker {
 
     @Override
     public String getDescripcionRenderizada() {
-        return "+5 puntos truco cada vez que una carta se activa (actual: +" + (int) getAcumulado() + ")";
+        return "+15 puntos truco cada vez que una carta se activa (actual: +" + (int) getAcumulado() + ")";
     }
 
     @Override

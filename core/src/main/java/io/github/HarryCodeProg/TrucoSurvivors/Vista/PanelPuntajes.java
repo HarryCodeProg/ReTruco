@@ -63,34 +63,67 @@ public class PanelPuntajes {
         float altoFondo = Gdx.graphics.getHeight();
         float fondoX = x - margenX;
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        // 1. Fondo general del panel
+        // =========================================================
+        // FONDO GENERAL
+        // =========================================================
         shapeRenderer.setColor(new Color(0f, 0f, 0f, 0.4f));
-        dibujarRectanguloRedondeado(fondoX + 4, 0f, anchoFondo, altoFondo, RADIO_ESQUINA * 2f);
+        dibujarRectanguloRedondeado(fondoX + 4f, 0f, anchoFondo, altoFondo, RADIO_ESQUINA * 2f);
         shapeRenderer.setColor(new Color(0.44f, 0.34f, 0.16f, 0.95f));
-        dibujarRectanguloRedondeado(fondoX - 2, 0f, anchoFondo + 4, altoFondo, RADIO_ESQUINA * 2f);
+        dibujarRectanguloRedondeado(fondoX - 2f, 0f, anchoFondo + 4f, altoFondo, RADIO_ESQUINA * 2f);
         shapeRenderer.setColor(FONDO_PANEL);
         dibujarRectanguloRedondeado(fondoX, 0f, anchoFondo, altoFondo, RADIO_ESQUINA * 2f);
         shapeRenderer.setColor(new Color(0.92f, 0.73f, 0.25f, 0.85f));
         shapeRenderer.rect(fondoX + 12f, altoFondo - 34f, anchoFondo - 24f, 2f);
-        // 2. Cajas del panel por fila (Subimos todo sumando 70f)
+        // =========================================================
+        // POSICIONES EXACTAS DE LAS FILAS
+        // =========================================================
         float currentY = y + 70f;
-        dibujarCajaBaseYMultiplicador(x, currentY, NEGRO, NEGRO_SOMBRA); // Rival Truco
-        currentY -= ESPACIO_LINEA;
-        dibujarCajaBaseYMultiplicador(x, currentY, NEGRO, NEGRO_SOMBRA); // Rival Envido
-        currentY -= ESPACIO_LINEA;
-        dibujarCajaSimple(x, currentY, BLANCO, BLANCO_SOMBRA); // Puntos Rival
-        currentY -= ESPACIO_LINEA;
-        dibujarCajaSimple(x, currentY, AMARILLO, AMARILLO_SOMBRA); // Meta
-        currentY -= ESPACIO_LINEA;
-        dibujarCajaSimple(x, currentY, BLANCO, BLANCO_SOMBRA); // Puntos Jugador
-        currentY -= ESPACIO_LINEA;
-        dibujarCajaBaseYMultiplicador(x, currentY, TURQUESA, TURQUESA_SOMBRA); // Jugador Truco
-        currentY -= ESPACIO_LINEA;
-        dibujarCajaBaseYMultiplicador(x, currentY, BRONCE, BRONCE_SOMBRA); // Jugador Envido
-        currentY -= ESPACIO_LINEA;
-        dibujarCajaSimple(x, currentY, AZUL_HANDS, AZUL_HANDS_SOMBRA); // Hands
-        currentY -= ESPACIO_LINEA;
-        dibujarCajaSimple(x, currentY, ROJO, ROJO_SOMBRA); // Descartes
+        float rivalTrucoY = currentY;
+        float rivalEnvidoY = rivalTrucoY - ESPACIO_LINEA;
+        float puntosRivalY = rivalEnvidoY - ESPACIO_LINEA;
+        float metaY = puntosRivalY - ESPACIO_LINEA;
+        float puntosJugadorY = metaY - ESPACIO_LINEA;
+        float jugadorTrucoY = puntosJugadorY - ESPACIO_LINEA;
+        float jugadorEnvidoY = jugadorTrucoY - ESPACIO_LINEA;
+        float manosY = jugadorEnvidoY - ESPACIO_LINEA;
+        float descartesY = manosY - ESPACIO_LINEA;
+        // =========================================================
+        // FONDO DATOS DEL RIVAL
+        // Desde arriba del panel hasta debajo de Puntos Rival
+        // =========================================================
+        float rivalFondoTop = altoFondo - 36f;
+        float rivalFondoBottom = puntosRivalY - 10f;
+        shapeRenderer.setColor(new Color(0.08f, 0.13f, 0.17f, 0.95f));
+        dibujarRectanguloRedondeado(fondoX + 8f, rivalFondoBottom, anchoFondo - 16f, rivalFondoTop - rivalFondoBottom, RADIO_ESQUINA);
+        shapeRenderer.setColor(new Color(0.25f, 0.35f, 0.40f, 0.85f));
+        dibujarRectanguloRedondeado(fondoX + 8f, rivalFondoBottom, anchoFondo - 16f, rivalFondoTop - rivalFondoBottom, RADIO_ESQUINA);
+        shapeRenderer.setColor(new Color(0.08f, 0.13f, 0.17f, 1f));
+        dibujarRectanguloRedondeado(fondoX + 10f, rivalFondoBottom + 2f, anchoFondo - 20f, rivalFondoTop - rivalFondoBottom - 4f, RADIO_ESQUINA - 1f);
+        // =========================================================
+        // FONDO DATOS DEL JUGADOR
+        // Desde Puntos Jugador hasta abajo del panel
+        // =========================================================
+        float jugadorFondoTop = puntosJugadorY + ALTO_CAJA + 10f;
+        float jugadorFondoBottom = 0f;
+        shapeRenderer.setColor(new Color(0.08f, 0.13f, 0.17f, 0.95f));
+        dibujarRectanguloRedondeado(fondoX + 8f, jugadorFondoBottom, anchoFondo - 16f, jugadorFondoTop, RADIO_ESQUINA);
+        shapeRenderer.setColor(new Color(0.25f, 0.35f, 0.40f, 0.85f));
+        dibujarRectanguloRedondeado(fondoX + 8f, jugadorFondoBottom, anchoFondo - 16f, jugadorFondoTop, RADIO_ESQUINA);
+        shapeRenderer.setColor(new Color(0.08f, 0.13f, 0.17f, 1f));
+        dibujarRectanguloRedondeado(fondoX + 10f, jugadorFondoBottom + 2f, anchoFondo - 20f, jugadorFondoTop - 2f, RADIO_ESQUINA - 1f);
+        // CAJAS
+        // Rival
+        dibujarCajaBaseYMultiplicador(x, rivalTrucoY, NEGRO, NEGRO_SOMBRA);
+        dibujarCajaBaseYMultiplicador(x, rivalEnvidoY, NEGRO, NEGRO_SOMBRA);
+        dibujarCajaSimple(x, puntosRivalY, BLANCO, BLANCO_SOMBRA);
+        // META SIN FONDO EXTRA
+        dibujarCajaSimple(x, metaY, AMARILLO, AMARILLO_SOMBRA);
+        // Jugador
+        dibujarCajaSimple(x, puntosJugadorY, BLANCO, BLANCO_SOMBRA);
+        dibujarCajaBaseYMultiplicador(x, jugadorTrucoY, TURQUESA, TURQUESA_SOMBRA);
+        dibujarCajaBaseYMultiplicador(x, jugadorEnvidoY, BRONCE, BRONCE_SOMBRA);
+        dibujarCajaSimple(x, manosY, AZUL_HANDS, AZUL_HANDS_SOMBRA);
+        dibujarCajaSimple(x, descartesY, ROJO, ROJO_SOMBRA);
         shapeRenderer.end();
     }
 

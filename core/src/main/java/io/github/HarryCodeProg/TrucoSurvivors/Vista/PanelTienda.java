@@ -28,13 +28,13 @@ public class PanelTienda {
     private final Boton botonContinuar;
     private final Boton botonComprarYUsar;
     private Texture iconoPeso;
-    private static final float PANEL_Y = 40f;
-    private static final float PANEL_ALTO = 540f;
+    private static final float PANEL_Y = -30f;
+    private static final float PANEL_ALTO = 590f;
+    private static final float ALTO_ITEM = 120f;
     private static final float PANEL_X = 260f;
     private static final float PANEL_ANCHO = 1000f - PANEL_X;
     private static final float ANCHO_ITEM = 85f;
     // Filas compactas para reservar aire vertical incluso cuando un ítem se eleva al seleccionarse.
-    private static final float ALTO_ITEM = 105f;
     private static final float ESPACIO_ITEM = 20f;
     private static final float ANCHO_BOTON = 170f;
     private static final float ALTO_BOTON = 48f;
@@ -359,6 +359,9 @@ public class PanelTienda {
         batch.draw(pixel, PANEL_X, PANEL_Y, 2f, PANEL_ALTO);
         batch.draw(pixel, PANEL_X + PANEL_ANCHO - 2f, PANEL_Y, 2f, PANEL_ALTO);
         dibujarEncabezado(batch, "TIENDA DEL CAMINO", PANEL_Y + PANEL_ALTO - 32f, PANEL_ANCHO);
+        dibujarFondoFila(batch, GALERIA_X - 12f, Y_FILA_CARTAS - 10f, GALERIA_ANCHO_SUPERIOR + 24f, ALTO_ITEM + 20f);
+        dibujarFondoFila(batch, GALERIA_X - 12f, Y_FILA_JOKERS - 10f, GALERIA_ANCHO_SUPERIOR + 24f, ALTO_ITEM + 20f);
+        dibujarFondoFila(batch, GALERIA_X - 12f, Y_FILA_SANTOS - 10f, GALERIA_ANCHO_SANTOS + 24f, ALTO_ITEM + 20f);
         dibujarSeccion(batch, "CARTAS", Y_FILA_CARTAS + ALTO_ITEM + 14f);
         dibujarSeccion(batch, "JOKERS", Y_FILA_JOKERS + ALTO_ITEM + 14f);
         dibujarSeccion(batch, "SANTOS", Y_FILA_SANTOS + ALTO_ITEM + 14f);
@@ -483,5 +486,22 @@ public class PanelTienda {
     private float calcularInicioFila(int cantidad, float anchoItem, float espacioItem, float anchoGaleria) {
         if (cantidad <= 0) return GALERIA_X;
         return GALERIA_X;
+    }
+
+    private void dibujarFondoFila(SpriteBatch batch, float x, float y, float ancho, float alto) {
+        Texture pixel = game.getPixelBlanco();
+        // Sombra
+        batch.setColor(0.01f, 0.02f, 0.03f, 0.45f);
+        batch.draw(pixel, x + 4f, y - 4f, ancho, alto);
+        // Fondo
+        batch.setColor(0.10f, 0.15f, 0.19f, 0.90f);
+        batch.draw(pixel, x, y, ancho, alto);
+        // Borde
+        batch.setColor(0.25f, 0.35f, 0.40f, 0.85f);
+        batch.draw(pixel, x, y + alto - 2f, ancho, 2f);
+        batch.draw(pixel, x, y, ancho, 2f);
+        batch.draw(pixel, x, y, 2f, alto);
+        batch.draw(pixel, x + ancho - 2f, y, 2f, alto);
+        batch.setColor(1f, 1f, 1f, 1f);
     }
 }

@@ -28,7 +28,6 @@ public class VirgenDeLujan extends Joker {
             sumarAcumulado(descartesAConsumir);
             return;
         }
-
         if (evento == EventoJuego.ANTES_DE_SUMAR_ENVIDO) {
             if (getAcumulado() > 0) {
                 ctx.getResolucionActual().sumarMult(getAcumulado(), getNombre(), this);
