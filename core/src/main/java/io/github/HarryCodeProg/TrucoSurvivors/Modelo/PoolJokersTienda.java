@@ -77,8 +77,12 @@ public class PoolJokersTienda {
 
         //raro
         fabricas.add(Granadero::new);
-        //fabricas.add(Catamarca::new);
+        fabricas.add(Catamarca::new);
         fabricas.add(MartinFierro::new);
+        fabricas.add(Yaguarete::new);
+        fabricas.add(Misiones::new);
+        fabricas.add(CuentaCorriente::new);
+        fabricas.add(Hornero::new);
 
         //epico
         fabricas.add(Aconcagua::new);
@@ -87,10 +91,15 @@ public class PoolJokersTienda {
         fabricas.add(GlaciarPeritoMoreno::new);
         fabricas.add(Iorio::new);
         fabricas.add(Gardel::new);
+        fabricas.add(Favaloro::new);
+        fabricas.add(Malvinas::new);
+        fabricas.add(Cerati::new);
+        fabricas.add(Cortazar::new);
 
         //muy raro
         fabricas.add(VirgenItati::new);
         fabricas.add(VirgenDeLujan::new);
+        fabricas.add(PlazaDeMayo::new);
 
         //legendario
         fabricas.add(Rivadavia::new);

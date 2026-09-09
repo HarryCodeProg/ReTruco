@@ -94,7 +94,7 @@ public class JokerEspañol extends Joker {
         if (evento != EventoJuego.TERMINO_MANO) return;
         Carta carta = obtenerDrop();
         if (carta != null) {
-            juego.getJugador().getMazo().agregarCarta(carta);
+            juego.agregarCartaAlMazoJugador(carta);
         }
     }
 }

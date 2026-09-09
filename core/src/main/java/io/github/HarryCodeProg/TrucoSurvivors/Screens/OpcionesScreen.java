@@ -23,11 +23,11 @@ public class OpcionesScreen implements Screen {
     private final ConfiguracionJuego config;
     private Background fondoPlasma;
 
-    private enum Panel { MENU, VIDEO, AUDIO }
+    private enum Panel { MENU, VIDEO, AUDIO, FONDO }
     private Panel panel = Panel.MENU;
 
     // Menú principal
-    private final Boton botonVideo, botonAudio, botonVolver;
+    private final Boton botonVideo, botonAudio, botonFondo, botonVolver;
 
     // Panel video
     private final Boton botonModoVentana, botonResolucion, botonVsync, botonAplicarVideo, botonDescartarVideo;
@@ -35,10 +35,12 @@ public class OpcionesScreen implements Screen {
     private boolean vsyncPendiente;
 
     // Panel audio
-    private final Boton botonGeneralMenos, botonGeneralMas;
-    private final Boton botonMusicaMenos, botonMusicaMas;
-    private final Boton botonEfectosMenos, botonEfectosMas;
-    private final Boton botonVolverAudio;
+    private final Boton botonGeneralMenos, botonGeneralMas, botonMusicaMenos, botonMusicaMas;
+    private final Boton botonEfectosMenos, botonEfectosMas, botonVolverAudio;
+
+    // Panel fondo
+    private final Boton botonFondoAnterior, botonFondoSiguiente, botonAplicarFondo, botonDescartarFondo;
+    private int fondoIndexPendiente;
 
     public OpcionesScreen(Main game) {
         this.game = game;
@@ -48,13 +50,16 @@ public class OpcionesScreen implements Screen {
         mouseWorld = new Vector3();
         font = game.getFuenteTitulo();
         fondoPlasma = new Background();
+        fondoPlasma.setTema(config.getFondoIndex()); // Cargamos el fondo guardado
 
         float centroX = viewport.getWorldWidth() / 2f;
         float anchoBoton = 220f;
+        float xCentral = centroX - anchoBoton / 2f;
 
-        botonVideo = new Boton(centroX - anchoBoton / 2f, 400f, anchoBoton, 60f, "VIDEO", Accion.OPCIONES);
-        botonAudio = new Boton(centroX - anchoBoton / 2f, 320f, anchoBoton, 60f, "AUDIO", Accion.OPCIONES);
-        botonVolver = new Boton(centroX - anchoBoton / 2f, 180f, anchoBoton, 60f, "VOLVER", Accion.IR_AL_MAZO);
+        botonVideo = new Boton(xCentral, 430f, anchoBoton, 60f, "VIDEO", Accion.OPCIONES);
+        botonAudio = new Boton(xCentral, 350f, anchoBoton, 60f, "AUDIO", Accion.OPCIONES);
+        botonFondo = new Boton(xCentral, 270f, anchoBoton, 60f, "FONDO", Accion.OPCIONES);
+        botonVolver = new Boton(xCentral, 150f, anchoBoton, 60f, "VOLVER", Accion.IR_AL_MAZO);
 
         float x = centroX - 180f;
         modoVentanaPendiente = config.getModoVentana();
@@ -75,6 +80,12 @@ public class OpcionesScreen implements Screen {
         botonEfectosMenos = new Boton(xMenos, 270f, anchoFlecha, 50f, "-", Accion.OPCIONES);
         botonEfectosMas = new Boton(xMas, 270f, anchoFlecha, 50f, "+", Accion.OPCIONES);
         botonVolverAudio = new Boton(centroX - 110f, 150f, 220f, 50f, "VOLVER", Accion.OPCIONES);
+
+        fondoIndexPendiente = config.getFondoIndex();
+        botonFondoAnterior = new Boton(centroX - 250f, 320f, 60f, 50f, "<", Accion.OPCIONES);
+        botonFondoSiguiente = new Boton(centroX + 190f, 320f, 60f, 50f, ">", Accion.OPCIONES);
+        botonAplicarFondo = new Boton(centroX - 180f, 150f, 170f, 50f, "APLICAR", Accion.OPCIONES);
+        botonDescartarFondo = new Boton(centroX + 10f, 150f, 170f, 50f, "DESCARTAR", Accion.OPCIONES);
     }
 
     @Override
@@ -89,6 +100,7 @@ public class OpcionesScreen implements Screen {
             case MENU: updateMenu(); break;
             case VIDEO: updateVideo(); break;
             case AUDIO: updateAudio(); break;
+            case FONDO: updateFondo(); break;
         }
 
         Gdx.gl.glClearColor(0, 0, 0, 1);
@@ -100,6 +112,7 @@ public class OpcionesScreen implements Screen {
             case MENU: renderMenu(); break;
             case VIDEO: renderVideo(); break;
             case AUDIO: renderAudio(); break;
+            case FONDO: renderFondo(); break;
         }
         game.batch.end();
     }
@@ -107,6 +120,7 @@ public class OpcionesScreen implements Screen {
     private void updateMenu() {
         botonVideo.update(mouseWorld.x, mouseWorld.y);
         botonAudio.update(mouseWorld.x, mouseWorld.y);
+        botonFondo.update(mouseWorld.x, mouseWorld.y);
         botonVolver.update(mouseWorld.x, mouseWorld.y);
         if (botonVideo.fueCliqueado(mouseWorld.x, mouseWorld.y)) {
             modoVentanaPendiente = config.getModoVentana();
@@ -117,8 +131,11 @@ public class OpcionesScreen implements Screen {
             botonVsync.setTexto("VSYNC: " + (vsyncPendiente ? "ACTIVADO" : "DESACTIVADO"));
             panel = Panel.VIDEO;
         }
-        if (botonAudio.fueCliqueado(mouseWorld.x, mouseWorld.y)) {
-            panel = Panel.AUDIO;
+        if (botonAudio.fueCliqueado(mouseWorld.x, mouseWorld.y)) panel = Panel.AUDIO;
+        if (botonFondo.fueCliqueado(mouseWorld.x, mouseWorld.y)) {
+            fondoIndexPendiente = config.getFondoIndex();
+            fondoPlasma.setTema(fondoIndexPendiente);
+            panel = Panel.FONDO;
         }
         if (botonVolver.fueCliqueado(mouseWorld.x, mouseWorld.y)) {
             game.setScreen(new MainMenuScreen(game));
@@ -152,37 +169,52 @@ public class OpcionesScreen implements Screen {
             config.guardar();
             panel = Panel.MENU;
         }
-        if (botonDescartarVideo.fueCliqueado(mouseWorld.x, mouseWorld.y)) {
-            panel = Panel.MENU;
-        }
+        if (botonDescartarVideo.fueCliqueado(mouseWorld.x, mouseWorld.y)) panel = Panel.MENU;
     }
 
     private void updateAudio() {
         GestorSonidos sonidos = Main.getInstance().getGestorSonidos();
-        botonGeneralMenos.update(mouseWorld.x, mouseWorld.y);
-        botonGeneralMas.update(mouseWorld.x, mouseWorld.y);
-        botonMusicaMenos.update(mouseWorld.x, mouseWorld.y);
-        botonMusicaMas.update(mouseWorld.x, mouseWorld.y);
-        botonEfectosMenos.update(mouseWorld.x, mouseWorld.y);
-        botonEfectosMas.update(mouseWorld.x, mouseWorld.y);
+        botonGeneralMenos.update(mouseWorld.x, mouseWorld.y); botonGeneralMas.update(mouseWorld.x, mouseWorld.y);
+        botonMusicaMenos.update(mouseWorld.x, mouseWorld.y); botonMusicaMas.update(mouseWorld.x, mouseWorld.y);
+        botonEfectosMenos.update(mouseWorld.x, mouseWorld.y); botonEfectosMas.update(mouseWorld.x, mouseWorld.y);
         botonVolverAudio.update(mouseWorld.x, mouseWorld.y);
-
-        float paso = 0.1f;
-        boolean cambio = false;
+        float paso = 0.1f; boolean cambio = false;
         if (botonGeneralMenos.fueCliqueado(mouseWorld.x, mouseWorld.y)) { config.setVolumenGeneral(config.getVolumenGeneral() - paso); cambio = true; }
         if (botonGeneralMas.fueCliqueado(mouseWorld.x, mouseWorld.y)) { config.setVolumenGeneral(config.getVolumenGeneral() + paso); cambio = true; }
         if (botonMusicaMenos.fueCliqueado(mouseWorld.x, mouseWorld.y)) { config.setVolumenMusica(config.getVolumenMusica() - paso); cambio = true; }
         if (botonMusicaMas.fueCliqueado(mouseWorld.x, mouseWorld.y)) { config.setVolumenMusica(config.getVolumenMusica() + paso); cambio = true; }
         if (botonEfectosMenos.fueCliqueado(mouseWorld.x, mouseWorld.y)) { config.setVolumenEfectos(config.getVolumenEfectos() - paso); cambio = true; }
         if (botonEfectosMas.fueCliqueado(mouseWorld.x, mouseWorld.y)) { config.setVolumenEfectos(config.getVolumenEfectos() + paso); cambio = true; }
-
         if (cambio) {
             config.aplicarAudio(sonidos);
-            game.getMusicaFondo().setVolume(0.05f * config.getVolumenMusica()); // FIX: aplica el slider de música a la música real
+            game.getMusicaFondo().setVolume(0.05f * config.getVolumenMusica());
             config.guardar();
             if (sonidos != null) sonidos.reproducirConVariacion("seleccionar");
         }
-        if (botonVolverAudio.fueCliqueado(mouseWorld.x, mouseWorld.y)) {
+        if (botonVolverAudio.fueCliqueado(mouseWorld.x, mouseWorld.y)) panel = Panel.MENU;
+    }
+
+    private void updateFondo() {
+        botonFondoAnterior.update(mouseWorld.x, mouseWorld.y);
+        botonFondoSiguiente.update(mouseWorld.x, mouseWorld.y);
+        botonAplicarFondo.update(mouseWorld.x, mouseWorld.y);
+        botonDescartarFondo.update(mouseWorld.x, mouseWorld.y);
+
+        if (botonFondoSiguiente.fueCliqueado(mouseWorld.x, mouseWorld.y)) {
+            fondoIndexPendiente = (fondoIndexPendiente + 1) % Background.TEMAS.length;
+            fondoPlasma.setTema(fondoIndexPendiente); // ¡Previsualiza en vivo!
+        }
+        if (botonFondoAnterior.fueCliqueado(mouseWorld.x, mouseWorld.y)) {
+            fondoIndexPendiente = (fondoIndexPendiente - 1 + Background.TEMAS.length) % Background.TEMAS.length;
+            fondoPlasma.setTema(fondoIndexPendiente); // ¡Previsualiza en vivo!
+        }
+        if (botonAplicarFondo.fueCliqueado(mouseWorld.x, mouseWorld.y)) {
+            config.setFondoIndex(fondoIndexPendiente);
+            config.guardar();
+            panel = Panel.MENU;
+        }
+        if (botonDescartarFondo.fueCliqueado(mouseWorld.x, mouseWorld.y)) {
+            fondoPlasma.setTema(config.getFondoIndex()); // Restaura el original
             panel = Panel.MENU;
         }
     }
@@ -190,30 +222,36 @@ public class OpcionesScreen implements Screen {
     private void renderMenu() {
         botonVideo.render(game.batch);
         botonAudio.render(game.batch);
+        botonFondo.render(game.batch);
         botonVolver.render(game.batch);
     }
 
     private void renderVideo() {
-        botonModoVentana.render(game.batch);
-        botonResolucion.render(game.batch);
-        botonVsync.render(game.batch);
-        botonAplicarVideo.render(game.batch);
-        botonDescartarVideo.render(game.batch);
+        botonModoVentana.render(game.batch); botonResolucion.render(game.batch);
+        botonVsync.render(game.batch); botonAplicarVideo.render(game.batch); botonDescartarVideo.render(game.batch);
     }
 
     private void renderAudio() {
         BitmapFont f = game.getFuentePrincipal();
-        float centroX = viewport.getWorldWidth() / 2f;
         dibujarFilaVolumen(f, "General", config.getVolumenGeneral(), 445f);
         dibujarFilaVolumen(f, "Música", config.getVolumenMusica(), 365f);
         dibujarFilaVolumen(f, "Efectos", config.getVolumenEfectos(), 285f);
-        botonGeneralMenos.render(game.batch);
-        botonGeneralMas.render(game.batch);
-        botonMusicaMenos.render(game.batch);
-        botonMusicaMas.render(game.batch);
-        botonEfectosMenos.render(game.batch);
-        botonEfectosMas.render(game.batch);
+        botonGeneralMenos.render(game.batch); botonGeneralMas.render(game.batch);
+        botonMusicaMenos.render(game.batch); botonMusicaMas.render(game.batch);
+        botonEfectosMenos.render(game.batch); botonEfectosMas.render(game.batch);
         botonVolverAudio.render(game.batch);
+    }
+
+    private void renderFondo() {
+        botonFondoAnterior.render(game.batch);
+        botonFondoSiguiente.render(game.batch);
+        botonAplicarFondo.render(game.batch);
+        botonDescartarFondo.render(game.batch);
+
+        // Dibujamos el nombre del tema actual seleccionado en el centro
+        BitmapFont f = game.getFuentePrincipal();
+        String nombreTema = Background.TEMAS[fondoIndexPendiente].nombre;
+        f.draw(game.batch, nombreTema, 0, 360f, 1280f, com.badlogic.gdx.utils.Align.center, false);
     }
 
     private void dibujarFilaVolumen(BitmapFont f, String etiqueta, float valor, float y) {
@@ -222,16 +260,7 @@ public class OpcionesScreen implements Screen {
         f.draw(game.batch, texto, centroX - 300f, y + 35f, 600f, com.badlogic.gdx.utils.Align.center, false);
     }
 
-    @Override
-    public void resize(int width, int height) { viewport.update(width, height, true); }
-
-    @Override public void show() {}
-    @Override public void pause() {}
-    @Override public void resume() {}
-    @Override public void hide() {}
-
-    @Override
-    public void dispose() {
-        if (fondoPlasma != null) fondoPlasma.dispose();
-    }
+    @Override public void resize(int width, int height) { viewport.update(width, height, true); }
+    @Override public void show() {} @Override public void pause() {} @Override public void resume() {} @Override public void hide() {}
+    @Override public void dispose() { if (fondoPlasma != null) fondoPlasma.dispose(); }
 }

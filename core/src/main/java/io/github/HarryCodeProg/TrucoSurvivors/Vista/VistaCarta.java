@@ -541,4 +541,8 @@ public class VistaCarta implements Arrastrable{
     }
 
     public boolean isFlipeando() { return estadoFlip != EstadoFlip.NINGUNO; }
+
+    public float getYConOffset() {
+        return y + visualOffsetY;
+    }
 }

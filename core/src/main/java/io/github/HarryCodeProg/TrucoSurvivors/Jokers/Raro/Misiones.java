@@ -1,24 +1,25 @@
-package io.github.HarryCodeProg.TrucoSurvivors.Jokers.Comun;
+package io.github.HarryCodeProg.TrucoSurvivors.Jokers.Raro;
 
 import io.github.HarryCodeProg.TrucoSurvivors.Activacion.ContextoJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.EventoJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Comun.Cerveza;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Rareza;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 
 import static io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker.FaseActivacion.INDEPENDIENTE;
 
-public class Cerveza extends Joker {
+public class Misiones extends Joker {
 
-    public Cerveza(){
+    public Misiones(){
         super(
-            8,
-            "Cerveza",
-            "Cerveza",
-            "+50 puntos de envido. Por cada otro joker con la categoria 'Alcohol' -5 puntos",
+            85,
+            "Misiones",
+            "Misiones",
+            "+400 puntos de envido.",
             Rareza.comun,
-            3,
+            5,
             INDEPENDIENTE,
             CategoriaJoker.NACIONAL, CategoriaJoker.BEBIDA, CategoriaJoker.ALCOHOL
         );
@@ -34,9 +35,7 @@ public class Cerveza extends Joker {
     @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego){
         if (evento != EventoJuego.ANTES_DE_SUMAR_ENVIDO) return;
-        double bonus = 50;
-        int otrosConAlcohol = ctx.contarJokersConCategoria(CategoriaJoker.ALCOHOL, this);
-        bonus -= 5 * otrosConAlcohol;
+        double bonus = 400;
         ctx.getResolucionActual().sumarChips(bonus, this.getNombre(), this);
     }
 

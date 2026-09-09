@@ -9,7 +9,7 @@ import java.util.HashMap;
 public class GestorSonidos implements Disposable {
     private final HashMap<String, Sound> sonidos;
     private float volumenGeneral = 1f;   // FIX: master, multiplica a todo
-    private float volumenEfectos = 1f;   // FIX: multiplica efectos (todo lo cargado acá hoy son efectos)
+    private float volumenEfectos = 0.5f;   // FIX: multiplica efectos (todo lo cargado acá hoy son efectos)
     private float volumenMusica = 1f;    // FIX: reservado para cuando haya música de fondo
     private boolean silenciado = false;
     private boolean alternarReparto = false;
@@ -88,7 +88,7 @@ public class GestorSonidos implements Disposable {
 
     public void setVolumenGeneral(float volumen) { this.volumenGeneral = MathUtils.clamp(volumen, 0f, 1f); }
     public float getVolumenGeneral() { return volumenGeneral; }
-    public void setVolumenEfectos(float volumen) { this.volumenEfectos = MathUtils.clamp(volumen, 0f, 1f); }
+    public void setVolumenEfectos(float volumen) { this.volumenEfectos = MathUtils.clamp(volumen, 0f, 0.5f); }
     public float getVolumenEfectos() { return volumenEfectos; }
     public void setVolumenMusica(float volumen) { this.volumenMusica = MathUtils.clamp(volumen, 0f, 1f); } // reservado, sin música implementada aún
     public float getVolumenMusica() { return volumenMusica; }

@@ -189,7 +189,6 @@ public class ContextoJuego {
         return true;
     }
 
-    public void salirDeCopia() {
-        profundidadCopia--;
-    }
+    public void salirDeCopia() {profundidadCopia--;}
+
 }

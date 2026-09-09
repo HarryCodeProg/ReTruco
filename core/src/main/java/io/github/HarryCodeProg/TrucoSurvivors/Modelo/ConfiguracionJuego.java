@@ -7,15 +7,14 @@ import io.github.HarryCodeProg.TrucoSurvivors.Gestores.GestorSonidos;
 public class ConfiguracionJuego {
     public static final String[] MODOS_VENTANA = {"PANTALLA COMPLETA", "VENTANA", "VENTANA SIN BORDES"};
     public static final String[] RESOLUCIONES = {"1280x720", "1360x768", "1600x900", "1920x1080"};
-
     private static final String PREFS_NOMBRE = "truco-survivors-config";
-
     private int modoVentana = 0;
     private int resolucion = 0;
     private boolean vsync = true;
     private float volumenGeneral = 1f;
     private float volumenMusica = 1f;
     private float volumenEfectos = 1f;
+    private int fondoIndex = 0;
 
     public void cargar() {
         Preferences p = Gdx.app.getPreferences(PREFS_NOMBRE);
@@ -77,4 +76,7 @@ public class ConfiguracionJuego {
     public void setVolumenEfectos(float v) { volumenEfectos = clamp(v); }
 
     private float clamp(float v) { return Math.max(0f, Math.min(1f, v)); }
+
+    public int getFondoIndex() { return fondoIndex; }
+    public void setFondoIndex(int fondoIndex) { this.fondoIndex = fondoIndex; }
 }

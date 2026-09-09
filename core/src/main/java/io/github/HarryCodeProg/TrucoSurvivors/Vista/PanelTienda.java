@@ -10,6 +10,7 @@ import io.github.HarryCodeProg.TrucoSurvivors.Jugador;
 import io.github.HarryCodeProg.TrucoSurvivors.Main;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.*;
 import io.github.HarryCodeProg.TrucoSurvivors.Santos.Santo;
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Rareza;
 
 import java.util.ArrayList;
 import java.util.function.Consumer;
@@ -43,9 +44,9 @@ public class PanelTienda {
     private static final float GALERIA_ANCHO_SUPERIOR = PANEL_ANCHO - 220f;
     private static final float GALERIA_ANCHO_SANTOS = COLUMNA_ACCIONES_X - GALERIA_X - 28f;
     private static final float ESPACIO_ITEM_MINIMO = 10f;
-    private static final float Y_FILA_CARTAS = PANEL_Y + 335f;
-    private static final float Y_FILA_JOKERS = PANEL_Y + 175f;
-    private static final float Y_FILA_SANTOS = PANEL_Y + 15f;
+    private static final float Y_FILA_CARTAS = PANEL_Y + 380f;
+    private static final float Y_FILA_JOKERS = PANEL_Y + 220f;
+    private static final float Y_FILA_SANTOS = PANEL_Y + 60f;
     private static final float VELOCIDAD_SLIDE = 1800f;
     private float offsetY;
     private float offsetYObjetivo;
@@ -63,6 +64,10 @@ public class PanelTienda {
     private final Runnable onBeforeReroll;
     private Juego juego;
     private boolean bloqueadoPorModalExterno = false;
+    private static final com.badlogic.gdx.graphics.Color COLOR_COMUN = new com.badlogic.gdx.graphics.Color(0.45f, 0.48f, 0.55f, 1f);
+    private static final com.badlogic.gdx.graphics.Color COLOR_RARO = new com.badlogic.gdx.graphics.Color(0.24f, 0.49f, 0.78f, 1f);
+    private static final com.badlogic.gdx.graphics.Color COLOR_EPICO = new com.badlogic.gdx.graphics.Color(0.63f, 0.37f, 0.88f, 1f);
+    private static final com.badlogic.gdx.graphics.Color COLOR_LEGENDARIO = new com.badlogic.gdx.graphics.Color(0.91f, 0.77f, 0.42f, 1f);
 
     public PanelTienda(Main game, Jugador jugador, Runnable alContinuar, Consumer<VistaItemTienda> alComprarJoker,
                        Consumer<Santo> alComprarYUsarSanto, Runnable onBeforeReroll, Juego juego) {
@@ -77,12 +82,13 @@ public class PanelTienda {
         if (Gdx.files.internal("ui/peso.png").exists()) {
             iconoPeso = new Texture("ui/peso.png");
         }
-        botonComprar = new Boton(COLUMNA_ACCIONES_X, PANEL_Y + 24f, ANCHO_BOTON, ALTO_BOTON, Boton.TipoColor.VERDE, Accion.COMPRAR_ITEM_TIENDA);
+        botonComprar = new Boton(0, 0, 100f, 35f, Boton.TipoColor.VERDE, Accion.COMPRAR_ITEM_TIENDA);
         botonComprar.setHabilitado(false);
+        botonComprar.setVisible(false);
         botonReroll = new Boton(PANEL_X + 22f, PANEL_Y + PANEL_ALTO - 62f, ANCHO_BOTON, ALTO_BOTON, Boton.TipoColor.AZUL, Accion.REROLL_JOKERS);
         botonReroll.setTexto("Reroll $" + estadoTienda.costoRerollTienda());
         botonContinuar = new Boton(COLUMNA_ACCIONES_X, PANEL_Y + PANEL_ALTO - 62f, ANCHO_BOTON, ALTO_BOTON, Boton.TipoColor.DORADO, Accion.CONTINUAR_TIENDA);
-        botonComprarYUsar = new Boton(COLUMNA_ACCIONES_X, PANEL_Y + 88f, ANCHO_BOTON, ALTO_BOTON, Boton.TipoColor.DORADO, Accion.COMPRAR_Y_USAR_SANTO);
+        botonComprarYUsar = new Boton(0, 0, 120f, 35f, Boton.TipoColor.DORADO, Accion.COMPRAR_Y_USAR_SANTO);
         botonComprarYUsar.setVisible(false);
         ruedaZodiaco = new RuedaZodiaco(RUEDA_X, RUEDA_Y, RUEDA_RADIO, game.getTexturaRuletaFondo());
         reconstruirVistas();
@@ -162,6 +168,7 @@ public class PanelTienda {
             v.setSeleccionado(false);
         }
         botonComprar.setHabilitado(false);
+        botonComprar.setVisible(false);
         botonComprarYUsar.setVisible(false);
         botonComprarYUsar.setHabilitado(false);
     }
@@ -278,9 +285,18 @@ public class PanelTienda {
                     } else {
                         espacioDisponible = true;
                     }
+                    botonComprar.setVisible(true);
                     botonComprar.setHabilitado(dineroSuficiente && espacioDisponible);
+                    float botX = seleccionado.getX() + (ANCHO_ITEM / 2f) - (botonComprar.getWidth() / 2f);
+                    // Solapar apenas abajo de la carta
+                    float botY = seleccionado.getY() - (botonComprar.getHeight() / 2f);
+                    botonComprar.setPosition(botX, botY);
                     botonComprarYUsar.setVisible(esSanto);
                     botonComprarYUsar.setHabilitado(esSanto && dineroSuficiente && espacioDisponible);
+                    if (esSanto) {
+                        float botYUsarX = seleccionado.getX() + (ANCHO_ITEM / 2f) - (botonComprarYUsar.getWidth() / 2f);
+                        botonComprarYUsar.setPosition(botYUsarX, botY - botonComprarYUsar.getHeight() - 5f);
+                    }
                 }
             } else {
                 if (seleccionado != null) { // FIX: solo suena si realmente había algo seleccionado antes
@@ -308,7 +324,7 @@ public class PanelTienda {
         GestorSonidos sonidos = Main.getInstance().getGestorSonidos(); // FIX
         if (sonidos != null) sonidos.reproducirSonidoGastarPeso();     // FIX
         if (item.getTipo() == ItemTienda.Tipo.CARTA) {
-            jugador.getMazo().agregarCarta(item.getCarta());
+            juego.agregarCartaAlMazoJugador(item.getCarta()); // FIX: antes era jugador.getMazo().agregarCarta(item.getCarta())
             estadoTienda.removerItemComprado(item);
         } else if (item.getTipo() == ItemTienda.Tipo.JOKER) {
             if (alComprarJoker != null) {
@@ -347,95 +363,86 @@ public class PanelTienda {
         com.badlogic.gdx.math.Matrix4 matrizOriginal = batch.getProjectionMatrix().cpy();
         com.badlogic.gdx.math.Matrix4 matrizConOffset = matrizOriginal.cpy().translate(0, offsetY, 0);
         batch.setProjectionMatrix(matrizConOffset);
-        // Fondo
         Texture pixel = game.getPixelBlanco();
-        batch.setColor(0.015f, 0.02f, 0.04f, 0.60f);
-        batch.draw(pixel, PANEL_X + 6f, PANEL_Y - 7f, PANEL_ANCHO, PANEL_ALTO);
-        batch.setColor(0.055f, 0.065f, 0.10f, 0.97f);
-        batch.draw(pixel, PANEL_X, PANEL_Y, PANEL_ANCHO, PANEL_ALTO);
-        batch.setColor(0.78f, 0.62f, 0.22f, 0.90f);
-        batch.draw(pixel, PANEL_X, PANEL_Y + PANEL_ALTO - 4f, PANEL_ANCHO, 4f);
-        batch.setColor(0.25f, 0.32f, 0.43f, 0.9f);
-        batch.draw(pixel, PANEL_X, PANEL_Y, 2f, PANEL_ALTO);
-        batch.draw(pixel, PANEL_X + PANEL_ANCHO - 2f, PANEL_Y, 2f, PANEL_ALTO);
-        dibujarEncabezado(batch, "TIENDA DEL CAMINO", PANEL_Y + PANEL_ALTO - 32f, PANEL_ANCHO);
-        dibujarFondoFila(batch, GALERIA_X - 12f, Y_FILA_CARTAS - 10f, GALERIA_ANCHO_SUPERIOR + 24f, ALTO_ITEM + 20f);
-        dibujarFondoFila(batch, GALERIA_X - 12f, Y_FILA_JOKERS - 10f, GALERIA_ANCHO_SUPERIOR + 24f, ALTO_ITEM + 20f);
-        dibujarFondoFila(batch, GALERIA_X - 12f, Y_FILA_SANTOS - 10f, GALERIA_ANCHO_SANTOS + 24f, ALTO_ITEM + 20f);
-        dibujarSeccion(batch, "CARTAS", Y_FILA_CARTAS + ALTO_ITEM + 14f);
-        dibujarSeccion(batch, "JOKERS", Y_FILA_JOKERS + ALTO_ITEM + 14f);
-        dibujarSeccion(batch, "SANTOS", Y_FILA_SANTOS + ALTO_ITEM + 14f);
+        // FONDO CON PROFUNDIDAD
+        dibujarFondoProfundo(batch, pixel);
+        // MARCO DEL PANEL
+        dibujarMarcoPanelProfundo(batch, pixel);
+        // ENCABEZADO
+        dibujarEncabezadoAvanzado(batch, "TIENDA", PANEL_Y + PANEL_ALTO - 30f, PANEL_ANCHO);
+        // SECCIONES CON FILAS VISUALES
+        dibujarFilaProfunda(batch, pixel, GALERIA_X - 12f, Y_FILA_CARTAS - 15f, GALERIA_ANCHO_SUPERIOR + 24f, ALTO_ITEM + 30f, tema.acento_raro);
+        dibujarSeccionTitulo(batch, "CARTAS", Y_FILA_CARTAS + ALTO_ITEM - 45f);
+        dibujarFilaProfunda(batch, pixel, GALERIA_X - 12f, Y_FILA_JOKERS - 15f, GALERIA_ANCHO_SUPERIOR + 24f, ALTO_ITEM + 30f, tema.acento_epico);
+        dibujarSeccionTitulo(batch, "JOKERS", Y_FILA_JOKERS + ALTO_ITEM - 45f);
+        dibujarFilaProfunda(batch, pixel, GALERIA_X - 12f, Y_FILA_SANTOS - 15f, GALERIA_ANCHO_SANTOS + 24f, ALTO_ITEM + 30f, tema.acento_legendario);
+        dibujarSeccionTitulo(batch, "SANTOS", Y_FILA_SANTOS + ALTO_ITEM - 45f);
         batch.setColor(1, 1, 1, 1);
-        // CARTAS
+        // RENDERIZAR ITEMS NO SELECCIONADOS
         for (VistaItemTienda v : vistasCartas) {
-            if (v != seleccionado) {
-                v.render(batch, game);
-            }
+            if (v != seleccionado) v.render(batch, game);
+            dibujarPrecioAvanzado(batch, v, pixel);
         }
-        // JOKERS DE LA TIENDA
         for (VistaItemTienda v : vistasJokers) {
             if (v != seleccionado) {
+                dibujarMarcoRarezaAvanzado(batch, v, pixel);
                 v.render(batch, game);
             }
+            dibujarPrecioAvanzado(batch, v, pixel);
         }
-        // SANTOS DE LA TIENDA
         for (VistaItemTienda v : vistasSantos) {
-            if (v != seleccionado) {
-                v.render(batch, game);
-            }
+            if (v != seleccionado) v.render(batch, game);
+            dibujarPrecioAvanzado(batch, v, pixel);
         }
-        // ITEM SELECCIONADO
+        // ITEM SELECCIONADO AL FRENTE
         if (seleccionado != null) {
+            if (seleccionado.getItem().getTipo() == ItemTienda.Tipo.JOKER) {
+                dibujarMarcoRarezaAvanzado(batch, seleccionado, pixel);
+            }
             seleccionado.render(batch, game);
+            dibujarPrecioAvanzado(batch, seleccionado, pixel);
         }
-        // Botones
+        // BOTONES
         botonComprar.render(batch);
         botonReroll.render(batch);
         botonContinuar.render(batch);
         botonComprarYUsar.render(batch);
-        if (seleccionado != null) {
-            ItemTienda item = seleccionado.getItem();
-            String textoPrecio = "Precio: $" + item.getPrecio();
-            batch.setColor(0.09f, 0.12f, 0.18f, 0.96f);
-            batch.draw(pixel, COLUMNA_ACCIONES_X, PANEL_Y + 150f, ANCHO_BOTON, 30f);
-            game.getFuenteNumeros().setColor(0.95f, 0.78f, 0.28f, 1f);
-            game.getFuenteNumeros().draw(batch, textoPrecio, COLUMNA_ACCIONES_X, PANEL_Y + 172f,
-                ANCHO_BOTON, com.badlogic.gdx.utils.Align.center, false);
-            game.getFuenteNumeros().setColor(1f, 1f, 1f, 1f);
-        }
-        // Carteles de stats
-        for (VistaItemTienda v : vistasCartas) {
-            v.renderCartelStats(batch, game);
-        }
-        for (VistaItemTienda v : vistasJokers) {
-            v.renderCartelStats(batch, game);
-        }
-        for (VistaItemTienda v : vistasSantos) {
-            v.renderCartelStats(batch, game);
-        }
+        // CARTELES DE STATS
+        for (VistaItemTienda v : vistasCartas) v.renderCartelStats(batch, game);
+        for (VistaItemTienda v : vistasJokers) v.renderCartelStats(batch, game);
+        for (VistaItemTienda v : vistasSantos) v.renderCartelStats(batch, game);
+        // OVERLAYS
         ruedaZodiaco.render(batch);
         overlayConsumo.render(batch, game);
         overlaySeleccion.render(batch, game);
         batch.setProjectionMatrix(matrizOriginal);
     }
 
-    private void dibujarEncabezado(SpriteBatch batch, String texto, float y, float ancho) {
+    private void dibujarEncabezadoAvanzado(SpriteBatch batch, String texto, float y, float ancho) {
         com.badlogic.gdx.graphics.g2d.BitmapFont font = game.getFuentePrincipal();
+        Texture pixel = game.getPixelBlanco();
+        // Fondo del encabezado
+        batch.setColor(tema.sombra_media);
+        batch.draw(pixel, PANEL_X, y - 30f, ancho, 45f);
+        // Línea decorativa inferior del encabezado
+        batch.setColor(tema.borde_dorado);
+        batch.draw(pixel, PANEL_X, y - 5f, ancho, 2f);
+        // Texto GRANDE del título
         float escalaOriginal = font.getScaleX();
-        font.getData().setScale(escalaOriginal * 1.18f);
-        font.setColor(0.95f, 0.78f, 0.28f, 1f);
-        font.draw(batch, texto, PANEL_X, y, ancho, com.badlogic.gdx.utils.Align.center, false);
+        font.getData().setScale(escalaOriginal * 1.35f);
+        font.setColor(tema.borde_dorado);
+        font.draw(batch, texto, PANEL_X + 20f, y + 8f);
         font.getData().setScale(escalaOriginal);
         font.setColor(1f, 1f, 1f, 1f);
     }
 
-    private void dibujarSeccion(SpriteBatch batch, String texto, float y) {
-        Texture pixel = game.getPixelBlanco();
-        batch.setColor(0.22f, 0.30f, 0.40f, 0.75f);
-        batch.draw(pixel, PANEL_X + 22f, y - 7f, PANEL_ANCHO - 44f, 1f);
-        game.getFuentePrincipal().setColor(0.62f, 0.76f, 0.84f, 1f);
-        game.getFuentePrincipal().draw(batch, texto, PANEL_X + 32f, y + 8f);
-        game.getFuentePrincipal().setColor(1f, 1f, 1f, 1f);
+    private void dibujarSeccionTitulo(SpriteBatch batch, String texto, float y) {
+        com.badlogic.gdx.graphics.g2d.BitmapFont font = game.getFuentePrincipal();
+        font.setColor(tema.txt_secundario);
+        font.getData().setScale(0.9f);
+        font.draw(batch, texto, PANEL_X + 35f, y + 8f);
+        font.getData().setScale(1f);
+        font.setColor(1f, 1f, 1f, 1f);
     }
 
     public void updateAnimacion(float delta) {
@@ -475,12 +482,6 @@ public class PanelTienda {
         }
     }
 
-    public void consumir(SignoZodiaco signo, Jugador jugador, Juego juego,
-                         EstadoTienda tienda, OverlaySeleccionCarta overlaySeleccion, Runnable alTerminarTodo) {
-        signo.aplicarEfecto(jugador, juego, tienda, null);
-        alTerminarTodo.run();
-    }
-
     public float getOffsetY() {return offsetY;}
 
     private float calcularInicioFila(int cantidad, float anchoItem, float espacioItem, float anchoGaleria) {
@@ -488,20 +489,153 @@ public class PanelTienda {
         return GALERIA_X;
     }
 
-    private void dibujarFondoFila(SpriteBatch batch, float x, float y, float ancho, float alto) {
-        Texture pixel = game.getPixelBlanco();
-        // Sombra
-        batch.setColor(0.01f, 0.02f, 0.03f, 0.45f);
-        batch.draw(pixel, x + 4f, y - 4f, ancho, alto);
-        // Fondo
-        batch.setColor(0.10f, 0.15f, 0.19f, 0.90f);
-        batch.draw(pixel, x, y, ancho, alto);
-        // Borde
-        batch.setColor(0.25f, 0.35f, 0.40f, 0.85f);
-        batch.draw(pixel, x, y + alto - 2f, ancho, 2f);
-        batch.draw(pixel, x, y, ancho, 2f);
-        batch.draw(pixel, x, y, 2f, alto);
-        batch.draw(pixel, x + ancho - 2f, y, 2f, alto);
+    // === TEMA DE COLORES PROFESIONAL ===
+    private static final class TemaUI {
+        // Fondos principales
+        final com.badlogic.gdx.graphics.Color bgPrincipal = new com.badlogic.gdx.graphics.Color(0.06f, 0.08f, 0.10f, 1f);
+        final com.badlogic.gdx.graphics.Color bgSecundario = new com.badlogic.gdx.graphics.Color(0.10f, 0.12f, 0.15f, 1f);
+        final com.badlogic.gdx.graphics.Color bgPanel = new com.badlogic.gdx.graphics.Color(0.09f, 0.11f, 0.14f, 0.97f);
+        // Acentos por rareza
+        final com.badlogic.gdx.graphics.Color acento_comun = new com.badlogic.gdx.graphics.Color(0.45f, 0.48f, 0.55f, 1f);
+        final com.badlogic.gdx.graphics.Color acento_raro = new com.badlogic.gdx.graphics.Color(0.24f, 0.49f, 0.78f, 1f);
+        final com.badlogic.gdx.graphics.Color acento_epico = new com.badlogic.gdx.graphics.Color(0.70f, 0.35f, 0.95f, 1f);
+        final com.badlogic.gdx.graphics.Color acento_legendario = new com.badlogic.gdx.graphics.Color(1.00f, 0.80f, 0.20f, 1f);
+        // Textos
+        final com.badlogic.gdx.graphics.Color txt_principal = new com.badlogic.gdx.graphics.Color(0.96f, 0.97f, 0.98f, 1f);
+        final com.badlogic.gdx.graphics.Color txt_secundario = new com.badlogic.gdx.graphics.Color(0.72f, 0.78f, 0.84f, 1f);
+        final com.badlogic.gdx.graphics.Color txt_deshabilitado = new com.badlogic.gdx.graphics.Color(0.45f, 0.48f, 0.52f, 0.6f);
+        // Dinero y valor
+        final com.badlogic.gdx.graphics.Color dinero = new com.badlogic.gdx.graphics.Color(0.80f, 0.95f, 0.40f, 1f);
+        final com.badlogic.gdx.graphics.Color dinero_glow = new com.badlogic.gdx.graphics.Color(0.80f, 0.95f, 0.40f, 0.35f);
+        // Botones
+        final com.badlogic.gdx.graphics.Color btn_comprar = new com.badlogic.gdx.graphics.Color(0.28f, 0.75f, 0.38f, 1f);
+        final com.badlogic.gdx.graphics.Color btn_comprar_hover = new com.badlogic.gdx.graphics.Color(0.35f, 0.85f, 0.45f, 1f);
+        final com.badlogic.gdx.graphics.Color btn_comprar_press = new com.badlogic.gdx.graphics.Color(0.22f, 0.60f, 0.32f, 1f);
+        final com.badlogic.gdx.graphics.Color btn_reroll = new com.badlogic.gdx.graphics.Color(0.32f, 0.55f, 0.80f, 1f);
+        final com.badlogic.gdx.graphics.Color btn_reroll_hover = new com.badlogic.gdx.graphics.Color(0.40f, 0.62f, 0.92f, 1f);
+        final com.badlogic.gdx.graphics.Color btn_continuar = new com.badlogic.gdx.graphics.Color(1.00f, 0.80f, 0.20f, 1f);
+        final com.badlogic.gdx.graphics.Color btn_continuar_hover = new com.badlogic.gdx.graphics.Color(1.00f, 0.90f, 0.35f, 1f);
+        // Sombras y profundidad
+        final com.badlogic.gdx.graphics.Color sombra_fuerte = new com.badlogic.gdx.graphics.Color(0.01f, 0.01f, 0.02f, 0.65f);
+        final com.badlogic.gdx.graphics.Color sombra_media = new com.badlogic.gdx.graphics.Color(0.05f, 0.06f, 0.10f, 0.45f);
+        final com.badlogic.gdx.graphics.Color sombra_suave = new com.badlogic.gdx.graphics.Color(0.10f, 0.12f, 0.18f, 0.25f);
+        // Bordes y separadores
+        final com.badlogic.gdx.graphics.Color borde_dorado = new com.badlogic.gdx.graphics.Color(1.00f, 0.82f, 0.25f, 1f);
+        final com.badlogic.gdx.graphics.Color borde_sutil = new com.badlogic.gdx.graphics.Color(0.25f, 0.35f, 0.45f, 0.5f);
+    }
+
+    private final TemaUI tema = new TemaUI();
+
+    // Métodos de rendering mejorado
+    private void dibujarFondoProfundo(SpriteBatch batch, Texture pixel) {
+        // Capa 1: Sombra lejana (efecto de profundidad)
+        batch.setColor(tema.sombra_fuerte);
+        batch.draw(pixel, PANEL_X + 12f, PANEL_Y - 12f, PANEL_ANCHO - 12f, PANEL_ALTO - 12f);
+        // Capa 2: Sombra media
+        batch.setColor(tema.sombra_media);
+        batch.draw(pixel, PANEL_X + 6f, PANEL_Y - 6f, PANEL_ANCHO - 6f, PANEL_ALTO - 6f);
+        // Capa 3: Fondo principal con degradé (arriba oscuro, abajo claro)
+        batch.setColor(tema.bgPanel);
+        batch.draw(pixel, PANEL_X, PANEL_Y, PANEL_ANCHO, PANEL_ALTO * 0.5f);
+        batch.setColor(0.11f, 0.13f, 0.16f, 0.97f);
+        batch.draw(pixel, PANEL_X, PANEL_Y + PANEL_ALTO * 0.5f, PANEL_ANCHO, PANEL_ALTO * 0.5f);
+    }
+
+    private void dibujarMarcoPanelProfundo(SpriteBatch batch, Texture pixel) {
+        // Borde dorado superior (grosor: 5px, con highlight interno)
+        batch.setColor(tema.borde_dorado);
+        batch.draw(pixel, PANEL_X - 2f, PANEL_Y + PANEL_ALTO - 5f, PANEL_ANCHO + 4f, 5f);
+        batch.setColor(1.0f, 0.90f, 0.35f, 0.6f);
+        batch.draw(pixel, PANEL_X - 2f, PANEL_Y + PANEL_ALTO - 2f, PANEL_ANCHO + 4f, 1f);
+        // Bordes laterales sutiles
+        batch.setColor(tema.borde_sutil);
+        batch.draw(pixel, PANEL_X, PANEL_Y, 2f, PANEL_ALTO);
+        batch.draw(pixel, PANEL_X + PANEL_ANCHO - 2f, PANEL_Y, 2f, PANEL_ALTO);
+        // Línea inferior muy sutil
+        batch.setColor(tema.borde_sutil);
+        batch.draw(pixel, PANEL_X, PANEL_Y, PANEL_ANCHO, 1f);
+    }
+
+    private void dibujarFilaProfunda(SpriteBatch batch, Texture pixel, float x, float y, float ancho, float alto,
+                                     com.badlogic.gdx.graphics.Color acento) {
+        // Fondo de la fila con esquinas visuales
+        batch.setColor(0.08f, 0.10f, 0.13f, 0.8f);
+        batch.draw(pixel, x - 10f, y - 12f, ancho + 20f, alto + 20f);
+        // Borde superior con color de acento
+        batch.setColor(acento.r, acento.g, acento.b, 0.7f);
+        batch.draw(pixel, x - 10f, y + alto + 5f, ancho + 20f, 2f);
+        // Línea de resaltado
+        batch.setColor(acento.r, acento.g, acento.b, 0.3f);
+        batch.draw(pixel, x - 10f, y, 2f, alto + 2f);
+    }
+
+    private void dibujarPrecioAvanzado(SpriteBatch batch, VistaItemTienda v, Texture pixel) {
+        String texto = "$" + v.getItem().getPrecio();
+        float etiqW = 50f;
+        float etiqH = 26f;
+        float etiqX = v.getX() + (ANCHO_ITEM / 2f) - (etiqW / 2f);
+        // Ahora usa getYConOffset() para incluir el offset visual
+        float etiqY = v.getYConOffset() + ALTO_ITEM - 18f;
+        // Sombra de la etiqueta
+        batch.setColor(tema.sombra_fuerte);
+        batch.draw(pixel, etiqX + 2f, etiqY - 2f, etiqW, etiqH);
+        // Fondo de la etiqueta (oscuro con transparencia)
+        batch.setColor(0.06f, 0.08f, 0.12f, 0.95f);
+        batch.draw(pixel, etiqX, etiqY, etiqW, etiqH);
+        // Borde dorado superior
+        batch.setColor(tema.borde_dorado);
+        batch.draw(pixel, etiqX, etiqY + etiqH - 2f, etiqW, 2f);
+        // Borde dorado inferior sutil
+        batch.setColor(tema.dinero_glow);
+        batch.draw(pixel, etiqX, etiqY, etiqW, 1f);
+        // Texto con color dinero
+        game.getFuenteNumeros().setColor(tema.dinero);
+        game.getFuenteNumeros().getData().setScale(0.90f);
+        game.getFuenteNumeros().draw(batch, texto, etiqX, etiqY + etiqH - 6f, etiqW, com.badlogic.gdx.utils.Align.center, false);
+        game.getFuenteNumeros().getData().setScale(1f);
+        game.getFuenteNumeros().setColor(1f, 1f, 1f, 1f);
         batch.setColor(1f, 1f, 1f, 1f);
     }
+
+    private void dibujarMarcoRarezaAvanzado(SpriteBatch batch, VistaItemTienda v, Texture pixel) {
+        if (v.getItem().getTipo() != ItemTienda.Tipo.JOKER) return;
+        Joker joker = v.getItem().getJoker();
+        if (joker == null) return;
+        com.badlogic.gdx.graphics.Color color = colorPorRareza(joker.getRareza());
+        boolean esRara = !esComun(joker.getRareza());
+        float margen = 5f;
+        float mx = v.getX() - margen;
+        float my = v.getY() - margen;
+        float mw = ANCHO_ITEM + margen * 2f;
+        float mh = ALTO_ITEM + margen * 2f;
+        if (esRara) {
+            // Glow multicapa para rareza alta
+            batch.setColor(color.r, color.g, color.b, 0.08f);
+            batch.draw(pixel, mx - 15f, my - 15f, mw + 30f, mh + 30f);
+            batch.setColor(color.r, color.g, color.b, 0.12f);
+            batch.draw(pixel, mx - 8f, my - 8f, mw + 16f, mh + 16f);
+        }
+        // Marco principal
+        batch.setColor(color.r * 0.7f, color.g * 0.7f, color.b * 0.7f, 0.9f);
+        batch.draw(pixel, mx, my, mw, mh);
+        // Highlight del marco (esquina superior izquierda)
+        batch.setColor(color.r, color.g, color.b, 0.4f);
+        batch.draw(pixel, mx, my + mh - 3f, mw, 3f);
+        batch.setColor(1f, 1f, 1f, 1f);
+    }
+
+    private com.badlogic.gdx.graphics.Color colorPorRareza(Rareza rareza) {
+        if (rareza == null) return tema.acento_comun;
+        String nombre = rareza.name().toLowerCase().replace("_", "");
+        if (nombre.contains("legendario")) return tema.acento_legendario;
+        if (nombre.contains("epico")) return tema.acento_epico;
+        if (nombre.contains("raro")) return tema.acento_raro;
+        return tema.acento_comun;
+    }
+
+    private boolean esComun(Rareza rareza) {
+        if (rareza == null) return true;
+        return rareza.name().toLowerCase().contains("comun");
+    }
+
 }

@@ -15,22 +15,24 @@ import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 
 public class PanelPuntajes {
     // Colores del estilo Balatro
-    private static final Color ROJO = new Color(1f, 0.25f, 0.2f, 1f);
-    private static final Color ROJO_SOMBRA = new Color(0.7f, 0.15f, 0.1f, 1f);
-    private static final Color BLANCO = new Color(0.85f, 0.85f, 0.85f, 1f);
-    private static final Color BLANCO_SOMBRA = new Color(0.35f, 0.35f, 0.35f, 1f);
-    private static final Color AMARILLO = new Color(0.85f, 0.65f, 0.1f, 1f);
-    private static final Color AMARILLO_SOMBRA = new Color(0.35f, 0.23f, 0.02f, 1f);
-    private static final Color NEGRO = new Color(0.05f, 0.05f, 0.05f, 1f);
-    private static final Color NEGRO_SOMBRA = new Color(0f, 0f, 0f, 1f);
-    private static final Color TURQUESA = new Color(0.15f, 0.70f, 0.60f, 1f);
-    private static final Color TURQUESA_SOMBRA = new Color(0.05f, 0.32f, 0.28f, 1f);
-    private static final Color BRONCE = new Color(0.70f, 0.45f, 0.22f, 1f);
-    private static final Color BRONCE_SOMBRA = new Color(0.38f, 0.22f, 0.08f, 1f);
-    private static final Color AZUL_HANDS = new Color(0.12f, 0.25f, 0.45f, 1f);
-    private static final Color AZUL_HANDS_SOMBRA = new Color(0.06f, 0.12f, 0.25f, 1f);
+    private static final Color NEGRO_IZQ = new Color(0.04f, 0.05f, 0.06f, 1f);
+    private static final Color NEGRO_IZQ_S = new Color(0.02f, 0.02f, 0.03f, 1f);
+    private static final Color GRIS_AZULADO = new Color(0.24f, 0.31f, 0.40f, 1f);
+    private static final Color GRIS_AZULADO_S = new Color(0.12f, 0.15f, 0.20f, 1f);
+    private static final Color AZUL_PUNTOS = new Color(0.22f, 0.28f, 0.35f, 1f);
+    private static final Color AZUL_PUNTOS_S = new Color(0.11f, 0.14f, 0.18f, 1f);
+    private static final Color MARRON_AREA = new Color(0.45f, 0.25f, 0.05f, 1f);
+    private static final Color MARRON_AREA_S = new Color(0.22f, 0.12f, 0.02f, 1f);
+    private static final Color OLIVA_PUNTOS = new Color(0.35f, 0.3f, 0.2f, 1f);
+    private static final Color OLIVA_PUNTOS_S = new Color(0.17f, 0.15f, 0.1f, 1f);
+    private static final Color VERDE_OSCURO = new Color(0.18f, 0.32f, 0.22f, 1f);
+    private static final Color VERDE_OSCURO_S = new Color(0.09f, 0.16f, 0.11f, 1f);
+    private static final Color MARRON_OSCURO = new Color(0.38f, 0.25f, 0.1f, 1f);
+    private static final Color MARRON_OSCURO_S = new Color(0.19f, 0.12f, 0.05f, 1f);
+    private static final Color GRIS_OSCURO_DER = new Color(0.15f, 0.16f, 0.18f, 1f);
+    private static final Color GRIS_OSCURO_DER_S = new Color(0.07f, 0.08f, 0.09f, 1f);
     private static final Color ORO = new Color(0.92f, 0.73f, 0.25f, 1f);
-    private static final Color FONDO_PANEL = new Color(0.045f, 0.055f, 0.085f, 0.96f);
+    private static final Color FONDO_PANEL = new Color(0.08f, 0.11f, 0.14f, 1f);
 
     // Ajuste de espaciado para que no se caiga de la pantalla
     public static final float ESPACIO_LINEA = 50f;
@@ -64,16 +66,14 @@ public class PanelPuntajes {
         float fondoX = x - margenX;
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         // =========================================================
-        // FONDO GENERAL
+        // FONDO GENERAL LISO
         // =========================================================
-        shapeRenderer.setColor(new Color(0f, 0f, 0f, 0.4f));
-        dibujarRectanguloRedondeado(fondoX + 4f, 0f, anchoFondo, altoFondo, RADIO_ESQUINA * 2f);
-        shapeRenderer.setColor(new Color(0.44f, 0.34f, 0.16f, 0.95f));
-        dibujarRectanguloRedondeado(fondoX - 2f, 0f, anchoFondo + 4f, altoFondo, RADIO_ESQUINA * 2f);
         shapeRenderer.setColor(FONDO_PANEL);
         dibujarRectanguloRedondeado(fondoX, 0f, anchoFondo, altoFondo, RADIO_ESQUINA * 2f);
-        shapeRenderer.setColor(new Color(0.92f, 0.73f, 0.25f, 0.85f));
-        shapeRenderer.rect(fondoX + 12f, altoFondo - 34f, anchoFondo - 24f, 2f);
+        // Linea dorada en el borde derecho
+        shapeRenderer.setColor(new Color(0.85f, 0.65f, 0.2f, 1f));
+        shapeRenderer.rect(fondoX + anchoFondo - 2f, 0f, 2f, altoFondo);
+        
         // =========================================================
         // POSICIONES EXACTAS DE LAS FILAS
         // =========================================================
@@ -87,43 +87,23 @@ public class PanelPuntajes {
         float jugadorEnvidoY = jugadorTrucoY - ESPACIO_LINEA;
         float manosY = jugadorEnvidoY - ESPACIO_LINEA;
         float descartesY = manosY - ESPACIO_LINEA;
-        // =========================================================
-        // FONDO DATOS DEL RIVAL
-        // Desde arriba del panel hasta debajo de Puntos Rival
-        // =========================================================
-        float rivalFondoTop = altoFondo - 36f;
-        float rivalFondoBottom = puntosRivalY - 10f;
-        shapeRenderer.setColor(new Color(0.08f, 0.13f, 0.17f, 0.95f));
-        dibujarRectanguloRedondeado(fondoX + 8f, rivalFondoBottom, anchoFondo - 16f, rivalFondoTop - rivalFondoBottom, RADIO_ESQUINA);
-        shapeRenderer.setColor(new Color(0.25f, 0.35f, 0.40f, 0.85f));
-        dibujarRectanguloRedondeado(fondoX + 8f, rivalFondoBottom, anchoFondo - 16f, rivalFondoTop - rivalFondoBottom, RADIO_ESQUINA);
-        shapeRenderer.setColor(new Color(0.08f, 0.13f, 0.17f, 1f));
-        dibujarRectanguloRedondeado(fondoX + 10f, rivalFondoBottom + 2f, anchoFondo - 20f, rivalFondoTop - rivalFondoBottom - 4f, RADIO_ESQUINA - 1f);
-        // =========================================================
-        // FONDO DATOS DEL JUGADOR
-        // Desde Puntos Jugador hasta abajo del panel
-        // =========================================================
-        float jugadorFondoTop = puntosJugadorY + ALTO_CAJA + 10f;
-        float jugadorFondoBottom = 0f;
-        shapeRenderer.setColor(new Color(0.08f, 0.13f, 0.17f, 0.95f));
-        dibujarRectanguloRedondeado(fondoX + 8f, jugadorFondoBottom, anchoFondo - 16f, jugadorFondoTop, RADIO_ESQUINA);
-        shapeRenderer.setColor(new Color(0.25f, 0.35f, 0.40f, 0.85f));
-        dibujarRectanguloRedondeado(fondoX + 8f, jugadorFondoBottom, anchoFondo - 16f, jugadorFondoTop, RADIO_ESQUINA);
-        shapeRenderer.setColor(new Color(0.08f, 0.13f, 0.17f, 1f));
-        dibujarRectanguloRedondeado(fondoX + 10f, jugadorFondoBottom + 2f, anchoFondo - 20f, jugadorFondoTop - 2f, RADIO_ESQUINA - 1f);
+        float pesosY = descartesY - ESPACIO_LINEA - 5f;
+
         // CAJAS
         // Rival
-        dibujarCajaBaseYMultiplicador(x, rivalTrucoY, NEGRO, NEGRO_SOMBRA);
-        dibujarCajaBaseYMultiplicador(x, rivalEnvidoY, NEGRO, NEGRO_SOMBRA);
-        dibujarCajaSimple(x, puntosRivalY, BLANCO, BLANCO_SOMBRA);
-        // META SIN FONDO EXTRA
-        dibujarCajaSimple(x, metaY, AMARILLO, AMARILLO_SOMBRA);
+        dibujarCajaBaseYMultiplicador(x, rivalTrucoY, NEGRO_IZQ, NEGRO_IZQ_S, GRIS_AZULADO, GRIS_AZULADO_S);
+        dibujarCajaBaseYMultiplicador(x, rivalEnvidoY, NEGRO_IZQ, NEGRO_IZQ_S, GRIS_AZULADO, GRIS_AZULADO_S);
+        dibujarCajaSimple(x, puntosRivalY, AZUL_PUNTOS, AZUL_PUNTOS_S);
+        // META Y LIGA
+        dibujarCajaSimple(x, metaY, MARRON_AREA, MARRON_AREA_S);
+        dibujarCajaSimple(x, puntosJugadorY, OLIVA_PUNTOS, OLIVA_PUNTOS_S);
         // Jugador
-        dibujarCajaSimple(x, puntosJugadorY, BLANCO, BLANCO_SOMBRA);
-        dibujarCajaBaseYMultiplicador(x, jugadorTrucoY, TURQUESA, TURQUESA_SOMBRA);
-        dibujarCajaBaseYMultiplicador(x, jugadorEnvidoY, BRONCE, BRONCE_SOMBRA);
-        dibujarCajaSimple(x, manosY, AZUL_HANDS, AZUL_HANDS_SOMBRA);
-        dibujarCajaSimple(x, descartesY, ROJO, ROJO_SOMBRA);
+        dibujarCajaBaseYMultiplicador(x, jugadorTrucoY, VERDE_OSCURO, VERDE_OSCURO_S, MARRON_OSCURO, MARRON_OSCURO_S);
+        dibujarCajaBaseYMultiplicador(x, jugadorEnvidoY, MARRON_OSCURO, MARRON_OSCURO_S, GRIS_OSCURO_DER, GRIS_OSCURO_DER_S);
+        dibujarCajaSimple(x, manosY, VERDE_OSCURO, VERDE_OSCURO_S);
+        dibujarCajaSimple(x, descartesY, MARRON_OSCURO, MARRON_OSCURO_S);
+        // Borde dorado para el dinero
+        dibujarCajaConBorde(x, pesosY, new Color(0.9f, 0.7f, 0.2f, 1f), new Color(0.5f, 0.3f, 0.05f, 1f), new Color(0.1f, 0.1f, 0.1f, 1f));
         shapeRenderer.end();
     }
 
@@ -212,13 +192,14 @@ public class PanelPuntajes {
         currentY -= ESPACIO_LINEA;
         // Pesos
         if (jugador != null) {
+            float pesosY = currentY - 5f;
             String textoPesos = "$" + jugador.getPesos();
             fuente.setColor(Color.WHITE);
             if (iconoPeso != null) {
-                batch.draw(iconoPeso, x + 20, currentY - 5, 28, 28);
-                fuente.draw(batch, textoPesos, x + 55, currentY + 18);
+                batch.draw(iconoPeso, x + 8, pesosY + 2, 30, 30);
+                dibujarTextoCentrado(batch, fuente, textoPesos, x + 25, anchoCajaDoble - 25, pesosY, Color.WHITE);
             } else {
-                dibujarTextoCentrado(batch, fuente, textoPesos, x, anchoCajaDoble, currentY, Color.GOLD);
+                dibujarTextoCentrado(batch, fuente, textoPesos, x, anchoCajaDoble, pesosY, Color.WHITE);
             }
         }
     }
@@ -254,16 +235,26 @@ public class PanelPuntajes {
         dibujarRectanguloRedondeado(x, y, anchoTotal, ALTO_CAJA, RADIO_ESQUINA);
     }
 
-    private void dibujarCajaBaseYMultiplicador(float x, float y, Color colorFrente, Color colorSombra) {
-        shapeRenderer.setColor(colorSombra);
+    private void dibujarCajaBaseYMultiplicador(float x, float y, Color f1, Color s1, Color f2, Color s2) {
+        shapeRenderer.setColor(s1);
         dibujarRectanguloRedondeado(x, y - 3, ANCHO_CAJA_BASE, ALTO_CAJA, RADIO_ESQUINA);
-        shapeRenderer.setColor(colorFrente);
+        shapeRenderer.setColor(f1);
         dibujarRectanguloRedondeado(x, y, ANCHO_CAJA_BASE, ALTO_CAJA, RADIO_ESQUINA);
         float xCajaRoja = x + ANCHO_CAJA_BASE + ESPACIO_X;
-        shapeRenderer.setColor(ROJO_SOMBRA);
+        shapeRenderer.setColor(s2);
         dibujarRectanguloRedondeado(xCajaRoja, y - 3, ANCHO_CAJA_MULT, ALTO_CAJA, RADIO_ESQUINA);
-        shapeRenderer.setColor(ROJO);
+        shapeRenderer.setColor(f2);
         dibujarRectanguloRedondeado(xCajaRoja, y, ANCHO_CAJA_MULT, ALTO_CAJA, RADIO_ESQUINA);
+    }
+    
+    private void dibujarCajaConBorde(float x, float y, Color borde, Color bordeOscuro, Color fondo) {
+        float anchoTotal = ANCHO_CAJA_BASE + ESPACIO_X + ANCHO_CAJA_MULT;
+        shapeRenderer.setColor(bordeOscuro);
+        dibujarRectanguloRedondeado(x - 2f, y - 5f, anchoTotal + 4f, ALTO_CAJA + 4f, RADIO_ESQUINA);
+        shapeRenderer.setColor(borde);
+        dibujarRectanguloRedondeado(x - 2f, y - 2f, anchoTotal + 4f, ALTO_CAJA + 4f, RADIO_ESQUINA);
+        shapeRenderer.setColor(fondo);
+        dibujarRectanguloRedondeado(x, y, anchoTotal, ALTO_CAJA, RADIO_ESQUINA - 1f);
     }
 
     private void dibujarRectanguloRedondeado(float x, float y, float width, float height, float radius) {

@@ -538,6 +538,13 @@ public class Juego {
         verificarEstadoCombate();
     }
 
+
+    public void agregarCartaAlMazoJugador(Carta carta) {
+        jugador.getMazo().agregarCarta(carta);
+        ContextoJuego ctx = crearContexto();
+        gestorJokers.disparar(EventoJuego.AL_AGREGAR_CARTA_AL_MAZO, ctx, this);
+    }
+
     private void resolverNoQuieroEnvido(Jugador canter) {
         double sumMult = calcularPuntosEnvido();
         double puntosCantor = canter.getPuntosEnvido();
@@ -622,6 +629,10 @@ public class Juego {
 
     public double getPuntosRival() {
         return puntosRival;
+    }
+
+    public void sumarPuntosJugador(double puntos) {
+        this.puntosJugador += puntos;
     }
 
     public void setRival(Jugador rival) {

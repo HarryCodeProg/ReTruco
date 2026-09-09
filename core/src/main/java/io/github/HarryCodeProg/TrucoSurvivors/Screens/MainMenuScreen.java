@@ -48,8 +48,8 @@ public class MainMenuScreen implements Screen {
     }
 
     private void prepararFondo() {
-        // Inicializamos el fondo reutilizable encapsulado
         this.fondoPlasma = new Background();
+        this.fondoPlasma.setTema(game.getConfiguracionJuego().getFondoIndex());
     }
 
     @Override

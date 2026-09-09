@@ -18,34 +18,6 @@ public class ControladorCombate {
         this.juego = juego;
     }
 
-    /*public void comprobarFinDelCombate() {
-        EstadoCombate estado = juego.verificarEstadoCombate();
-        if (estado == EstadoCombate.VICTORIA_JUGADOR) {
-            Jugador jugadorGanador = juego.getJugador();
-            int interes = jugadorGanador.calcularInteres();
-            jugadorGanador.sumarPesos(ConfiguracionEconomia.DINERO_POR_VICTORIA + interes);
-
-            screen.setEsperandoTransicion(true);
-            screen.getGame().habilitarSiguiente(screen.getDatosRival().getIndice());
-
-            Timer.schedule(new Timer.Task() {
-                @Override public void run() {
-                    screen.setEsperandoTransicion(false);
-                    // Pasa el control a la tienda o finaliza la partida
-                    screen.finalizarCombate(true);
-                }
-            }, 3.0f);
-        } else if (estado == EstadoCombate.VICTORIA_RIVAL) {
-            screen.setEsperandoTransicion(true);
-            Timer.schedule(new Timer.Task() {
-                @Override public void run() {
-                    screen.setEsperandoTransicion(false);
-                    screen.finalizarCombate(false);
-                }
-            }, 3.0f);
-        }
-    }*/
-
     public void comprobarFinDelCombate() {
         EstadoCombate estado = juego.verificarEstadoCombate();
         if (estado == EstadoCombate.VICTORIA_JUGADOR) {
@@ -93,7 +65,6 @@ public class ControladorCombate {
     private void continuarDespuesDeResolucion() {
         comprobarFinDelCombate();
         if (juego.verificarEstadoCombate() != EstadoCombate.EN_PROGRESO) return;
-
         screen.setEsperandoTransicion(true);
         screen.setIniciarNuevaRondaPendiente(true);
         screen.setTiempoNuevaRonda(2.5f);
@@ -105,10 +76,8 @@ public class ControladorCombate {
             return;
         }
         if (screen.getCartasRival().isEmpty()) return;
-
         VistaCarta cartaRivalATirar = screen.getCartasRival().get(0);
         screen.jugarCartaRival(cartaRivalATirar);
-
         if (juego.getMesa().getMesaJugador().size() == juego.getMesa().getMesaRival().size()) {
             juego.jugarMano(screen.getTocoJugar());
             screen.incrementarTocoJugar();
