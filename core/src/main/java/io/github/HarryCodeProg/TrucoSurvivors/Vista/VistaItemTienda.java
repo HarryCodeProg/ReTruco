@@ -163,4 +163,8 @@ public class VistaItemTienda {
             vistaCartaInterna.setTamaño(width, height);
         }
     }
+
+    public float getYConOffset() {
+        return y + visualOffsetY;
+    }
 }

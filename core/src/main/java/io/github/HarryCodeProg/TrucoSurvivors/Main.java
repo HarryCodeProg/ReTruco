@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.utils.I18NBundle;
 import io.github.HarryCodeProg.TrucoSurvivors.Gestores.GestorSonidos;
+import io.github.HarryCodeProg.TrucoSurvivors.Modelo.ConfiguracionJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.DatosRival;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.PerfilJugador;
 import io.github.HarryCodeProg.TrucoSurvivors.Screens.LoadingScreenCentered;
@@ -41,6 +42,7 @@ public class Main extends Game {
     private Texture texturaRuletaFondo;
     private TextureAtlas atlasSantos;
     private BitmapFont fuenteUI;
+    private ConfiguracionJuego configuracionJuego;
 
     @Override
     public void create() {
@@ -50,27 +52,25 @@ public class Main extends Game {
         batch = new SpriteBatch();
         listaRivales = new ArrayList<>();
         crearRivales();
+        configuracionJuego = new ConfiguracionJuego(); // FIX
+        configuracionJuego.cargar();                   // FIX: lee lo guardado la sesión anterior
+        configuracionJuego.aplicarVideo();              // FIX: aplica modo ventana/resolución/vsync guardados
         Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
-        pixmap.setColor(1, 1, 1, 1); // Color blanco sólido (R, G, B, A)
+        pixmap.setColor(1, 1, 1, 1);
         pixmap.fill();
         pixelBlanco = new Texture(pixmap);
         pixelBlancoRegion = new TextureRegion(pixelBlanco);
         inicializarFuentes();
-        // 1. Cargamos el archivo .wav desde tu nueva estructura de carpetas.
-        // Reemplazá "NombreDeTuCarpeta" y "cancion_completa.wav" por los nombres reales de tus archivos.
-        //musicaFondo = Gdx.audio.newMusic(Gdx.files.internal("music/The Shadows of Tango/The Shadows of Tango - 48kHz_fixed.wav"));
         musicaFondo = Gdx.audio.newMusic(Gdx.files.internal("music/Second_Dealing/second_dealing_full.ogg"));
-        // 2. Configuraciones de la música de fondo
-        musicaFondo.setLooping(true); // Hace que cuando termine, vuelva a empezar automáticamente
-        musicaFondo.setVolume(0.05f);  // Volumen entre 0.0 (muto) y 1.0 (máximo). 0.25f es ideal para que no tape los sonidos.
-        // 3. ¡Le damos Play! Empezará a sonar apenas se abra el juego
+        musicaFondo.setLooping(true);
+        musicaFondo.setVolume(0.05f * configuracionJuego.getVolumenMusica()); // FIX: base * config guardada
         musicaFondo.play();
         gestorSonidos = new GestorSonidos();
+        configuracionJuego.aplicarAudio(gestorSonidos); // FIX: aplica volumen general/efectos guardados
         assets = new AssetManager();
         setScreen(new LoadingScreenCentered(this, assets, "ui/unpeso-spritesheet.png", 12, 1.0f, () -> {
             this.setScreen(new MainMenuScreen(this));
         }));
-        //this.setScreen(new MainMenuScreen(this));
         atlasCartas = new TextureAtlas(Gdx.files.internal("atlas/cartas.atlas"));
         for (Texture texture : atlasCartas.getTextures()) {
             texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
@@ -85,7 +85,6 @@ public class Main extends Game {
         }
         atlasZodiaco = new TextureAtlas(Gdx.files.internal("atlas/zodiaco.atlas"));
         texturaRuletaFondo = new Texture("ui/zodiaco_ruleta.png");
-
         cambiarIdioma("es");
     }
 
@@ -114,6 +113,8 @@ public class Main extends Game {
     public static Main getInstance() {return instancia;}
 
     public BitmapFont getFuenteUI() {return fuenteUI;}
+
+    public ConfiguracionJuego getConfiguracionJuego() { return configuracionJuego; }
 
     public void crearRivales(){
         listaRivales.add(new DatosRival("Maty", "Vive en chaco, pobre tipo", 30, true,0));

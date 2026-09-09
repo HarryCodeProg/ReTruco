@@ -169,7 +169,7 @@ public class GameScreenV2 implements Screen {
                 this.jugador.removeSantoRemovedListener(jugadorSantoRemovedListener);
             }
         }
-        this.fondoPlasma = new Background();
+        iniciarShader();
         this.jugador = game.getPerfilJugador().getJugador();
         jugadorJokerAddedListener = (jokerModel) -> {
             if (suppressJugadorJokerListener) return;
@@ -582,7 +582,10 @@ public class GameScreenV2 implements Screen {
         organizarMesa();
     }
 
-    public void iniciarShader() {this.fondoPlasma = new Background();}
+    public void iniciarShader() {
+        this.fondoPlasma = new Background();
+        this.fondoPlasma.setTema(game.getConfiguracionJuego().getFondoIndex());
+    }
 
     private void organizarMesa() {
         float pasoX = ANCHO_CARTA_MESA + 20f;

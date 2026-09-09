@@ -286,15 +286,19 @@ public class Carta {
         int trucoAporteActualPrevio = this.puntosTrucoAporteActual;
         int envidoPoderActualPrevio = this.valorEnvidoPoderActual;
         int envidoAporteActualPrevio = this.puntosEnvidoAporteActual;
-
         this.numero = nuevoNumero;
         calcularValoresBase();
-
         this.bonusPoderTrucoPermanente = trucoPoderActualPrevio;
         this.bonusAporteTrucoPermanente = trucoAporteActualPrevio;
         this.bonusPoderEnvidoPermanente = envidoPoderActualPrevio;
         this.bonusAporteEnvidoPermanente = envidoAporteActualPrevio;
-
         resetearValores();
+    }
+
+    public boolean isFigura(io.github.HarryCodeProg.TrucoSurvivors.Activacion.ContextoJuego ctx) {
+        if (ctx != null && ctx.tieneJoker(io.github.HarryCodeProg.TrucoSurvivors.Jokers.Raro.Yaguarete.class)) {
+            return true;
+        }
+        return this.numero == 10 || this.numero == 11 || this.numero == 12;
     }
 }

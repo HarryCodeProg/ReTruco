@@ -51,6 +51,7 @@ public class Jugador {
     private Santo ultimoSantoUsado;
     private int manosMaximas = 6;
     private int manosActuales = manosMaximas;
+    private int deudaMaxima = 0; // 0 = sin deuda permitida; jokers como CuentaCorriente la aumentan
 
     public Jugador(String nombre) {
         this.nombre = nombre;
@@ -116,11 +117,6 @@ public class Jugador {
 
     public int getPesos() { return pesos; }
     public void sumarPesos(int cantidad) { this.pesos += cantidad; }
-    public boolean gastarPesos(int cantidad) {
-        if (pesos < cantidad) return false;
-        pesos -= cantidad;
-        return true;
-    }
 
     public int calcularInteres() {
         return Math.min(pesos / INTERVALO_INTERES, TOPE_INTERES);
@@ -338,5 +334,15 @@ public class Jugador {
             if (clase.isInstance(j)) return true;
         }
         return false;
+    }
+
+    public void sumarDeudaMaxima(int cantidad) { deudaMaxima += cantidad; }
+    public int getDeudaMaxima() { return deudaMaxima; }
+
+    // modificar gastarPesos existente:
+    public boolean gastarPesos(int cantidad) {
+        if (pesos - cantidad < -deudaMaxima) return false; // FIX: permite bajar hasta -deudaMaxima
+        pesos -= cantidad;
+        return true;
     }
 }

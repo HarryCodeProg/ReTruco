@@ -8,7 +8,6 @@ import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Rareza;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 
-// Alto Guiso: la primera carta no figura que puntua en la resolucion otorga x1.5 mult truco
 public class AltoGuiso extends Joker {
 
     public AltoGuiso(){
@@ -29,7 +28,7 @@ public class AltoGuiso extends Joker {
         if (evento != EventoJuego.AL_PUNTUAR_CARTA) return;
         if (ctx.isPrimerNoFiguraPuntuadaAplicada(this)) return;
         Carta c = ctx.getCartaEnResolucion();
-        if (c == null || c.getNumero() >= 10) return;
+        if (c == null || c.isFigura(ctx)) return;
         ctx.marcarPrimerNoFiguraPuntuadaAplicada(this);
         ctx.getResolucionActual().multiplicarMult(1.5, getNombre(), this);
     }

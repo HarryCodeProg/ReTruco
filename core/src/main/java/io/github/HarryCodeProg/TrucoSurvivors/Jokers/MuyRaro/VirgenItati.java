@@ -28,7 +28,6 @@ public class VirgenItati extends Joker {
             sumarAcumulado(descartesAConsumir);
             return;
         }
-
         if (evento == EventoJuego.ANTES_DE_SUMAR_TRUCO) {
             if (getAcumulado() > 0) {
                 ctx.getResolucionActual().sumarMult(getAcumulado(), getNombre(), this);

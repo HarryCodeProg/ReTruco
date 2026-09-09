@@ -7,33 +7,41 @@ import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Rareza;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 
-public class Gardel extends Joker {
+public class Malvinas extends Joker {
 
-    public Gardel() {
-        super(136, "Gardel", "Gardel",
-            "+15 puntos truco cada vez que una carta se activa (actual: +0)",
+    public Malvinas() {
+        super(133, "Malvinas", "Malvinas",
+            "Obtiene multiplicador truco igual al Valor Truco de la primer carta que mate (actual: x1)",
             Rareza.epico, 8, Joker.FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.NACIONAL, CategoriaJoker.MUSICA);
+            CategoriaJoker.NACIONAL);
+        setAcumulado(1.0);
     }
 
     @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego) {
         if (evento == EventoJuego.AL_MATAR_CARTA) {
-            if (ctx.getCartaEnResolucion() != null) {
-                sumarAcumulado(15);
+            // Se activa solo una vez por mano cuando el jugador mata la primer carta
+            if (!juego.isPrimeraCartaQueMataAplicada()) {
+                juego.marcarPrimeraCartaQueMataAplicada();
+                if (ctx.getCartaEnResolucion() != null) {
+                    double valorTruco = ctx.getCartaEnResolucion().getValorTrucoActual();
+                    setAcumulado(1.0 + valorTruco);
+                }
             }
             return;
         }
+
         if (evento == EventoJuego.ANTES_DE_SUMAR_TRUCO) {
-            if (getAcumulado() > 0) {
-                ctx.getResolucionActual().sumarChips(getAcumulado(), getNombre(), this);
+            if (getAcumulado() > 1.0) {
+                ctx.getResolucionActual().multiplicarMult(getAcumulado(), getNombre(), this);
             }
         }
     }
 
     @Override
     public String getDescripcionRenderizada() {
-        return "+15 puntos truco cada vez que una carta se activa (actual: +" + (int) getAcumulado() + ")";
+        return "Obtiene multiplicador truco igual al Valor Truco de la primer carta que mate (actual: x"
+            + String.format("%.2f", getAcumulado()) + ")";
     }
 
     @Override
@@ -43,8 +51,9 @@ public class Gardel extends Joker {
 
     @Override
     public Joker copiar() {
-        Gardel copia = new Gardel();
+        Malvinas copia = new Malvinas();
         copiarEstado(copia);
         return copia;
     }
 }
+

@@ -29,7 +29,8 @@ public class Agua extends Joker {
         if (evento != EventoJuego.AL_PUNTUAR_CARTA) return;
         if (ctx.isPrimerFiguraPuntuadaAplicada(this)) return;
         Carta c = ctx.getCartaEnResolucion();
-        if (c == null || c.getNumero() < 10) return;
+        if (c == null) return;
+        if (!c.isFigura(ctx)) return;
         ctx.marcarPrimerFiguraPuntuadaAplicada(this);
         ctx.getResolucionActual().multiplicarMult(2, getNombre(), this);
     }

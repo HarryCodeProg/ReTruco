@@ -20,22 +20,18 @@ public class Favaloro extends Joker {
     @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego) {
         if (evento != EventoJuego.TERMINO_MANO) return;
-
         Jugador jugador = ctx.getJugador();
         double puntajeMeta = juego.getPuntajeMeta();
-
         // Solo se activa si el jugador no alcanzó el puntaje meta y se quedó sin manos
         if (juego.getPuntosJugador() >= puntajeMeta || jugador.getManosActuales() > 0) {
             return;
         }
-
-        // El joker se consume: le pasamos la victoria al jugador
-        juego.getPuntosJugador(); // Simulamos que alcanzó el puntaje
-        
-        // Otorgamos 100 pesos al jugador por el efecto del joker
+        // El joker se consume: le gana al rival sumando los puntos necesarios para alcanzar la meta
+        double puntosNecesarios = puntajeMeta - juego.getPuntosJugador();
+        juego.sumarPuntosJugador(puntosNecesarios);
+        // Otorgamos 100 pesos al jugador
         jugador.sumarPesos(100);
-
-        // Marcamos que el joker se consumió (se vende automáticamente)
+        // Se elimina automáticamente el joker
         jugador.eliminarJoker(this);
     }
 

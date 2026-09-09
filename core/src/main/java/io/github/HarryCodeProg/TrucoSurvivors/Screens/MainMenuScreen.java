@@ -28,6 +28,7 @@ public class MainMenuScreen implements Screen {
     private Texture texturaVacia;
     private BitmapFont miFuentePersonalizada;
     private Background fondoPlasma;
+    private Boton botonOpciones;
 
     public MainMenuScreen(Main game) {
         this.game = game;
@@ -41,13 +42,14 @@ public class MainMenuScreen implements Screen {
         float centroX = viewport.getWorldWidth() / 2f;
         float anchoBoton = 200f;
         botonJugar = new Boton(centroX - anchoBoton / 2f, 400f, anchoBoton, 60f, "JUGAR", Accion.JUGAR_CARTA);
-        botonSalir = new Boton(centroX - anchoBoton / 2f, 280f, anchoBoton, 60f, "SALIR", Accion.IR_AL_MAZO);
+        botonOpciones = new Boton(centroX - anchoBoton / 2f, 280f, anchoBoton, 60f, "OPCIONES", Accion.OPCIONES);
+        botonSalir = new Boton(centroX - anchoBoton / 2f, 160f, anchoBoton, 60f, "SALIR", Accion.IR_AL_MAZO);
         prepararFondo();
     }
 
     private void prepararFondo() {
-        // Inicializamos el fondo reutilizable encapsulado
         this.fondoPlasma = new Background();
+        this.fondoPlasma.setTema(game.getConfiguracionJuego().getFondoIndex());
     }
 
     @Override
@@ -59,10 +61,16 @@ public class MainMenuScreen implements Screen {
         camera.unproject(mouseWorld);
         // Actualizar entrada de los botones
         botonJugar.update(mouseWorld.x, mouseWorld.y);
+        botonOpciones.update(mouseWorld.x, mouseWorld.y);
         botonSalir.update(mouseWorld.x, mouseWorld.y);
         // --- LÓGICA DE CLICKS ---
         if (botonJugar.fueCliqueado(mouseWorld.x, mouseWorld.y)) {;
             game.setScreen(new GameScreenV2(game));
+            this.dispose();
+            return;
+        }
+        if (botonOpciones.fueCliqueado(mouseWorld.x, mouseWorld.y)) {
+            game.setScreen(new OpcionesScreen(game));
             this.dispose();
             return;
         }
@@ -90,6 +98,7 @@ public class MainMenuScreen implements Screen {
         // Dibujamos tus botones (Podés setearles texto adentro si tu clase Boton lo permite,
         // o dibujar un font.draw encima de cada botón temporalmente)
         botonJugar.render(game.batch);
+        botonOpciones.render(game.batch);
         botonSalir.render(game.batch);
         // Textos provisionales sobre los botones si tu botón no dibuja texto:
         // font.draw(game.batch, "JUGAR", X, Y);
