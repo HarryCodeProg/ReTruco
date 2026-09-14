@@ -83,6 +83,8 @@ public class PoolJokersTienda {
         fabricas.add(Misiones::new);
         fabricas.add(CuentaCorriente::new);
         fabricas.add(Hornero::new);
+        fabricas.add(RioNegro::new);
+        fabricas.add(Cordoba::new);
 
         //epico
         fabricas.add(Aconcagua::new);
@@ -100,6 +102,7 @@ public class PoolJokersTienda {
         fabricas.add(VirgenItati::new);
         fabricas.add(VirgenDeLujan::new);
         fabricas.add(PlazaDeMayo::new);
+        fabricas.add(Obelisco::new);
 
         //legendario
         fabricas.add(Rivadavia::new);
@@ -143,6 +146,14 @@ public class PoolJokersTienda {
             return null;
         }
         return disponibles.get(random.nextInt(disponibles.size())).get();
+    }
+
+    public ArrayList<Joker> crearTodos() {
+        ArrayList<Joker> resultado = new ArrayList<>();
+        for (Supplier<Joker> fabrica : fabricas) {
+            resultado.add(fabrica.get());
+        }
+        return resultado;
     }
 }
 

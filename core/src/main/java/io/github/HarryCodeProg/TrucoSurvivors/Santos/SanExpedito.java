@@ -13,7 +13,7 @@ public class SanExpedito extends Santo {
             16,
             "San Expedito",
             "SanExpedito",
-            "Gana 1 peso por cada carta que tengas",
+            "Gana $1 por cada carta que tengas",
             4
         );
     }

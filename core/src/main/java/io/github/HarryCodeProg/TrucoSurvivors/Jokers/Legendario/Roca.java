@@ -19,7 +19,7 @@ public class Roca extends Joker {
             "Roca",
             "x0.1 por cada peso que tengas (Actual: x1)",
             Rareza.legendario,
-            1,
+            15,
             Joker.FaseActivacion.INDEPENDIENTE,
             CategoriaJoker.NACIONAL, CategoriaJoker.HISTORIA
         );

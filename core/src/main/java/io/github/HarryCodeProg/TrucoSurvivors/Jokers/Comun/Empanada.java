@@ -13,7 +13,7 @@ public class Empanada extends Joker {
 
     public Empanada(){
         super(11, "Empanada", "Empanada", "+10 al valor envido final",
-            Rareza.comun, 1, Joker.FaseActivacion.INDEPENDIENTE,
+            Rareza.comun, 3, Joker.FaseActivacion.INDEPENDIENTE,
             CategoriaJoker.COMIDA);
     }
 

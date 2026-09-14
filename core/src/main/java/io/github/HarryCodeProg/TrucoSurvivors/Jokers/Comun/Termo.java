@@ -21,7 +21,7 @@ public class Termo extends Joker {
             "Termo",
             "La primera carta que juegues cada mano obtiene +15 Valor Envido",
             Rareza.comun,
-            1,
+            3,
             AL_JUGAR,
             CategoriaJoker.NACIONAL, CategoriaJoker.AGUA
         );

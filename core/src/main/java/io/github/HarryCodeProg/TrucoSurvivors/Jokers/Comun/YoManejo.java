@@ -12,7 +12,7 @@ public class YoManejo extends Joker {
 
     public YoManejo() {
         super(52, "YoManejo", "YoManejo", "Reactiva 3 veces la primera carta que mata",
-            Rareza.comun, 1, Joker.FaseActivacion.AL_PUNTUAR_CARTA,
+            Rareza.comun, 4, Joker.FaseActivacion.AL_PUNTUAR_CARTA,
             CategoriaJoker.SECUENCIA, CategoriaJoker.TV);
     }
 

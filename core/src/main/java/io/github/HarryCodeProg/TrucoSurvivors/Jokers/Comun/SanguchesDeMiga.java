@@ -16,7 +16,7 @@ public class SanguchesDeMiga extends Joker {
             "SanguchesDeMiga",
             "Gana +25 puntos truco por cada joker 'Comida'",
             Rareza.comun,
-            1,
+            3,
             Joker.FaseActivacion.INDEPENDIENTE,
             CategoriaJoker.COMIDA, CategoriaJoker.NACIONAL, CategoriaJoker.SALADO
         );

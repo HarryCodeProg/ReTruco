@@ -8,21 +8,15 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
-import io.github.HarryCodeProg.TrucoSurvivors.Jugador;
 import io.github.HarryCodeProg.TrucoSurvivors.Main;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.Accion;
 import io.github.HarryCodeProg.TrucoSurvivors.Vista.Boton;
 
-/**
- * Encapsula todo el estado, lógica de actualización y renderizado del panel de Victoria.
- * Se encarga del slide-in, slide-out, el conteo animado de monedas y el botón continuar.
- */
 public class GestorVisualVictoria {
     private final Main game;
-    private final Boton botonContinuarVictoria;
+    private final Boton botonCobrar; // Botón principal superior estilo Balatro
     private Texture iconoPesoVictoria;
 
-    // Estado y variables extraídas de GameScreenV2
     private int pesosVictoria = 0;
     private int pesosInteres = 0;
     private int pesosExtras = 0;
@@ -37,20 +31,20 @@ public class GestorVisualVictoria {
     private boolean conteoMonedasTerminado = false;
     private float iconoMonedaEscala = 1f;
 
-    // Callback para notificar a GameScreenV2 cuando el panel termina de salir
     private Runnable alTerminarSalida;
 
     public GestorVisualVictoria(Main game, Runnable alTerminarSalida) {
         this.game = game;
         this.alTerminarSalida = alTerminarSalida;
-        this.botonContinuarVictoria = new Boton(1280 / 2f - 100f, 55f, 200f, 55f, "CONTINUAR", Accion.CONTINUAR_TIENDA);
+
+        // Botón principal superior "Cobrar: $X" (Se inicializa con texto temporal, se actualiza en el render/update)
+        this.botonCobrar = new Boton(0f, 0f, 420f, 65f, "COBRAR", Boton.TipoColor.DORADO, Accion.CONTINUAR_TIENDA);
 
         if (Gdx.files.internal("ui/peso.png").exists()) {
             this.iconoPesoVictoria = new Texture("ui/peso.png");
         }
     }
 
-    /** Prepara los números antes de iniciar la animación de entrada. */
     public void preparar(int pesosVictoria, int pesosInteres) {
         this.pesosVictoria = pesosVictoria;
         this.pesosInteres = pesosInteres;
@@ -60,7 +54,6 @@ public class GestorVisualVictoria {
         this.cronometroMoneda = 0f;
     }
 
-    /** Inicia la animación de slide-in. */
     public void iniciarEntrada() {
         victoriaY = -720f;
         victoriaObjetivoY = 0f;
@@ -70,13 +63,11 @@ public class GestorVisualVictoria {
         cronometroMoneda = 0f;
     }
 
-    /** Inicia la animación de slide-out. */
     public void iniciarSalida() {
         if (victoriaEntrando || victoriaSaliendo) return;
         victoriaSaliendo = true;
     }
 
-    /** Suma pesos extras (de jokers) al total de la victoria. */
     public void sumarPesosExtras(int cantidad) {
         this.pesosExtras += cantidad;
     }
@@ -85,9 +76,7 @@ public class GestorVisualVictoria {
         return pesosVictoria + pesosInteres + pesosExtras;
     }
 
-    /** Maneja la lógica de slide, conteo de monedas e inputs del botón. */
     public void update(float delta, Vector3 mouseWorld, boolean modalBloqueante) {
-        // 1. Lógica de transiciones
         if (victoriaEntrando) {
             victoriaY += victoriaVelocidad * delta;
             if (victoriaY >= victoriaObjetivoY) {
@@ -105,7 +94,6 @@ public class GestorVisualVictoria {
             }
         }
 
-        // 2. Lógica de conteo animado de monedas (solo si no estamos transicionando)
         if (!victoriaEntrando && !victoriaSaliendo && !conteoMonedasTerminado) {
             cronometroMoneda += delta;
             if (cronometroMoneda >= DELAY_MONEDA) {
@@ -113,7 +101,7 @@ public class GestorVisualVictoria {
                 int total = totalVictoria();
                 if (pesosVictoriaMostrados < total) {
                     pesosVictoriaMostrados++;
-                    iconoMonedaEscala = 1.4f; // pulso
+                    iconoMonedaEscala = 1.4f;
                     GestorSonidos sonidos = game.getGestorSonidos();
                     if (sonidos != null) sonidos.reproducirSonidoGanarPeso();
                 }
@@ -125,108 +113,119 @@ public class GestorVisualVictoria {
             }
         }
 
-        // Decaimiento del pulso del icono
         if (iconoMonedaEscala > 1f) {
             iconoMonedaEscala -= delta * 3f;
             if (iconoMonedaEscala < 1f) iconoMonedaEscala = 1f;
         }
 
-        // 3. Inputs del Botón
-        if (!modalBloqueante && botonContinuarVictoria != null) {
-            // Compensamos el slide para el hit-testing del botón
+        // Actualizamos el texto del botón dinámicamente según el progreso de las monedas
+        botonCobrar.setTexto("Cobrar: $" + pesosVictoriaMostrados);
+
+        if (!modalBloqueante && botonCobrar != null) {
             float mundoX = mouseWorld.x;
             float mundoY = mouseWorld.y - victoriaY;
 
-            botonContinuarVictoria.update(mundoX, mundoY);
+            botonCobrar.update(mundoX, mundoY);
 
             if (Gdx.input.justTouched()) {
                 if (!conteoMonedasTerminado) {
-                    // Click salta el conteo instantáneamente
                     pesosVictoriaMostrados = totalVictoria();
                     conteoMonedasTerminado = true;
                     GestorSonidos sonidos = game.getGestorSonidos();
                     if (sonidos != null) sonidos.reproducirSonidoFinalGanancia(totalVictoria());
-                } else if (botonContinuarVictoria.fueCliqueado(mundoX, mundoY)) {
+                } else if (botonCobrar.fueCliqueado(mundoX, mundoY)) {
                     iniciarSalida();
                 }
             }
         }
     }
 
-    /** Renderiza el panel completo con slide. */
     public void draw(SpriteBatch batch) {
         Matrix4 original = batch.getProjectionMatrix().cpy();
-        // Aplicamos la matriz de transformación para el slide
         batch.setProjectionMatrix(original.cpy().translate(0, victoriaY, 0));
         dibujarPanelContenido(batch);
-        batch.setProjectionMatrix(original); // Restauramos
+        batch.setProjectionMatrix(original);
     }
 
     private void dibujarPanelContenido(SpriteBatch batch) {
         Texture pixel = game.getPixelBlanco();
-        float panelX = 340f, panelY = 30f, panelAncho = 600f, panelAlto = 650f;
 
-        // Fondo oscuro
-        batch.setColor(0.06f, 0.07f, 0.1f, 0.96f);
-        batch.draw(pixel, panelX, panelY, panelAncho, panelAlto);
+        // Dimensiones del panel compacto (centrado en la pantalla)
+        float panelAncho = 640f;
+        float panelAlto = 360f;
+        float panelX = (1280f - panelAncho) / 2f;
+        float panelY = (720f - panelAlto) / 2f;
 
-        // Borde superior dorado
-        batch.setColor(0.95f, 0.78f, 0.28f, 1f);
-        batch.draw(pixel, panelX, panelY + panelAlto - 6f, panelAncho, 6f);
+        // 1. Sombra exterior del panel
+        dibujarRectRedondeado(batch, pixel, panelX + 8f, panelY - 8f, panelAncho, panelAlto, 16f, new Color(0f, 0f, 0f, 0.5f));
+
+        // 2. Borde negro grueso exterior
+        dibujarRectRedondeado(batch, pixel, panelX - 4f, panelY - 4f, panelAncho + 8f, panelAlto + 8f, 18f, new Color(0.1f, 0.1f, 0.1f, 1f));
+
+        // 3. Fondo interior gris pizarra oscuro (estilo Balatro)
+        dibujarRectRedondeado(batch, pixel, panelX, panelY, panelAncho, panelAlto, 14f, new Color(0.18f, 0.20f, 0.23f, 1f));
+
+        // 4. Posicionar y Renderizar el Botón Gigante "Cobrar: $X" arriba de todo
+        float botonW = 440f;
+        float botonH = 65f;
+        float botonX = panelX + (panelAncho - botonW) / 2f;
+        float botonY = panelY + panelAlto - 85f;
+
+        botonCobrar.setPosition(botonX, botonY);
+        botonCobrar.render(batch);
+
+        // 5. Línea divisora punteada/sólida debajo del botón
+        batch.setColor(0.12f, 0.12f, 0.14f, 1f);
+        batch.draw(pixel, panelX + 35f, panelY + 130f, panelAncho - 70f, 3f);
         batch.setColor(Color.WHITE);
 
-        // Título
-        BitmapFont titulo = game.getFuenteTitulo();
-        String textoTitulo = "¡VICTORIA!";
-        GlyphLayout layout = new GlyphLayout(titulo, textoTitulo);
-        titulo.setColor(Color.GOLD);
-        titulo.draw(batch, textoTitulo, panelX + (panelAncho - layout.width) / 2f, panelY + panelAlto - 40f);
-        titulo.setColor(Color.WHITE);
-
-        // Filas detalladas
+        // 6. Filas detalladas (Victoria, Interés, Extra) usando fuente pixelada
         BitmapFont fuente = game.getFuentePrincipal();
-        float filaY = panelY + panelAlto - 130f;
-        dibujarFilaDetalle(batch, fuente, "Victoria", pesosVictoria, panelX, filaY, panelAncho);
+        float filaY = panelY + 105f;
 
-        filaY -= 50f;
-        dibujarFilaDetalle(batch, fuente, "Interés", pesosInteres, panelX, filaY, panelAncho);
+        dibujarFilaDetalle(batch, fuente, "Victoria", pesosVictoria, panelX + 45f, filaY, panelAncho - 90f);
+
+        if (pesosInteres > 0) {
+            filaY -= 35f;
+            dibujarFilaDetalle(batch, fuente, "Interés", pesosInteres, panelX + 45f, filaY, panelAncho - 90f);
+        }
 
         if (pesosExtras > 0) {
-            filaY -= 50f;
-            dibujarFilaDetalle(batch, fuente, "Extra", pesosExtras, panelX, filaY, panelAncho);
-        }
-
-        // Total grande centrado con icono
-        float totalY = panelY + 170f;
-        String textoTotal = "$" + pesosVictoriaMostrados;
-        BitmapFont fuenteNumeros = game.getFuenteNumeros();
-        GlyphLayout layoutTotal = new GlyphLayout(fuenteNumeros, textoTotal);
-
-        float iconoSize = 40f * iconoMonedaEscala;
-        float anchoConjunto = layoutTotal.width + 10f + iconoSize;
-        float xConjunto = panelX + (panelAncho - anchoConjunto) / 2f;
-
-        if (iconoPesoVictoria != null) {
-            batch.draw(iconoPesoVictoria, xConjunto, totalY - iconoSize / 2f, iconoSize, iconoSize);
-        }
-
-        fuenteNumeros.setColor(Color.GOLD);
-        fuenteNumeros.draw(batch, textoTotal, xConjunto + iconoSize + 10f, totalY + layoutTotal.height / 2f);
-        fuenteNumeros.setColor(Color.WHITE);
-
-        // Botón Continuar
-        if (botonContinuarVictoria != null) {
-            botonContinuarVictoria.render(batch);
+            filaY -= 35f;
+            dibujarFilaDetalle(batch, fuente, "Extra", pesosExtras, panelX + 45f, filaY, panelAncho - 90f);
         }
     }
 
-    private void dibujarFilaDetalle(SpriteBatch batch, BitmapFont fuente, String etiqueta, int valor, float panelX, float y, float panelAncho) {
-        fuente.setColor(Color.LIGHT_GRAY);
-        fuente.draw(batch, etiqueta, panelX + 60f, y);
-        fuente.setColor(Color.WHITE);
+    private void dibujarFilaDetalle(SpriteBatch batch, BitmapFont fuente, String etiqueta, int valor, float xIzq, float y, float anchoUtil) {
+        fuente.setColor(0.85f, 0.85f, 0.85f, 1f);
+        fuente.draw(batch, etiqueta, xIzq, y);
+
+        fuente.setColor(0.95f, 0.75f, 0.2f, 1f); // Dorado pixelado para los montos parciales
         String textoValor = "+$" + valor;
         GlyphLayout layout = new GlyphLayout(fuente, textoValor);
-        fuente.draw(batch, textoValor, panelX + panelAncho - 60f - layout.width, y);
+        fuente.draw(batch, textoValor, xIzq + anchoUtil - layout.width, y);
+        fuente.setColor(Color.WHITE);
+    }
+
+    // Método auxiliar para mantener bordes redondeados limpios y "chunky"
+    private void dibujarRectRedondeado(SpriteBatch batch, Texture pixel, float x, float y, float width, float height, float radio, Color color) {
+        if (width <= 0f || height <= 0f) return;
+        radio = Math.min(radio, Math.min(width, height) / 2f);
+        batch.setColor(color);
+        batch.draw(pixel, x + radio, y, width - radio * 2f, height);
+        batch.draw(pixel, x, y + radio, radio, height - radio * 2f);
+        batch.draw(pixel, x + width - radio, y + radio, radio, height - radio * 2f);
+
+        int pasos = Math.max(2, (int) radio);
+        for (int i = 0; i < pasos; i++) {
+            float dy = i + 0.5f;
+            float distancia = radio - dy;
+            float raiz = (float) Math.sqrt(Math.max(0f, radio * radio - distancia * distancia));
+            float inset = radio - raiz;
+            batch.draw(pixel, x + inset, y + i, width - inset * 2f, 1f);
+            batch.draw(pixel, x + inset, y + height - i - 1f, width - inset * 2f, 1f);
+        }
+        batch.setColor(Color.WHITE);
     }
 
     public void dispose() {

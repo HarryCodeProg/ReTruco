@@ -18,7 +18,7 @@ public class CervezaRota extends Joker {
             "CervezaRota",
             "+20 puntos truco y envido. +15 por cada otro joker con la categoria 'Alcohol'",
             Rareza.comun,
-            1,
+            3,
             INDEPENDIENTE,
             CategoriaJoker.NACIONAL, CategoriaJoker.ALCOHOL
         );

@@ -20,7 +20,7 @@ public class SosInumputable extends Joker {
             "SosInimputable",
             "Genera un multiplicador truco aleatorio entre +1 y +20 al final de la mano",
             Rareza.comun,
-            1,
+            3,
             Joker.FaseActivacion.INDEPENDIENTE,
             CategoriaJoker.TV, CategoriaJoker.SECUENCIA
         );

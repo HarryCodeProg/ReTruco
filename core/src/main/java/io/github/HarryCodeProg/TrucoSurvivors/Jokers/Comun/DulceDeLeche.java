@@ -18,7 +18,7 @@ public class DulceDeLeche extends Joker {
             "DulceDeLeche",
             "+10 puntos truco por cada carta del mazo",
             Rareza.comun,
-            1,
+            4,
             INDEPENDIENTE,
             CategoriaJoker.NACIONAL, CategoriaJoker.COMIDA, CategoriaJoker.DULCE, CategoriaJoker.POSTRE
         );

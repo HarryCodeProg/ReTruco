@@ -118,6 +118,9 @@ public class Jugador {
     public int getPesos() { return pesos; }
     public void sumarPesos(int cantidad) { this.pesos += cantidad; }
 
+    /** Devuelve la cantidad de dinero que tiene el jugador (pesos). */
+    public int getDinero() { return pesos; }
+
     public int calcularInteres() {
         return Math.min(pesos / INTERVALO_INTERES, TOPE_INTERES);
     }

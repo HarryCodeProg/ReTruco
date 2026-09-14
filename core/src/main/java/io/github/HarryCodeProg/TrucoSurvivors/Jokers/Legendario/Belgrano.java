@@ -12,7 +12,7 @@ public class Belgrano extends Joker {
     public Belgrano() {
         super(147, "Belgrano", "Belgrano",
             "Al final de las activaciones, equilibra los puntos y el multiplicador",
-            Rareza.legendario, 20, Joker.FaseActivacion.INDEPENDIENTE,
+            Rareza.legendario, 15, Joker.FaseActivacion.INDEPENDIENTE,
             CategoriaJoker.NACIONAL, CategoriaJoker.HISTORIA);
     }
 

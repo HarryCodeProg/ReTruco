@@ -13,7 +13,7 @@ public class NoEstaTanMal extends Joker {
 
     public NoEstaTanMal(){
         super(50, "No Esta Tan Mal", "NoEstaTanMal", "Si perdés la mano, aumenta +4 multiplicador truco",
-            Rareza.comun, 1, Joker.FaseActivacion.INDEPENDIENTE,
+            Rareza.comun, 4, Joker.FaseActivacion.INDEPENDIENTE,
             CategoriaJoker.TV, CategoriaJoker.SECUENCIA);
     }
 

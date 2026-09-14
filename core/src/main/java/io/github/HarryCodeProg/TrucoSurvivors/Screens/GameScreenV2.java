@@ -81,35 +81,6 @@ public class GameScreenV2 implements Screen {
     float anchoCarta = 120;
     float separacion = 8f;
 
-    public GameScreenV2(Main game, DatosRival datosRival) {
-        this.game = game;
-        this.datosRival = datosRival;
-        this.camera = new OrthographicCamera();
-        this.viewport = new FitViewport(1280, 720, camera);
-        this.mouseWorld = new Vector3();
-        this.gestorPartida = new GestorEstadoPartida(this); // Inicializado
-        this.panelPuntajes = new PanelPuntajes();
-        this.gestorReparto = new GestorReparto();
-        this.cartasMesaJugador = new ArrayList<>();
-        this.cartasMesaRival = new ArrayList<>();
-        // Inicializado como campo de la clase
-        this.botonVenderJoker = new Boton(0, 0, 150, 45, Boton.TipoColor.ROJO, Accion.VENDER_JOKER);
-        botonVenderJoker.setVisible(false);
-        float margenLateral = 220f;
-        this.areaCartas = new AreaElementos<>(margenLateral, Y_MANO_JUGADOR, 1280f - margenLateral * 2, ALTO_CARTA, anchoCarta, ALTO_CARTA, separacion);
-        this.areaJokers = new AreaElementos<>(margenLateral, Y_JOKERS, 1280f - margenLateral * 2, ALTO_JOKER, ANCHO_JOKER, ALTO_JOKER, SEPARACION_JOKER);
-        this.renderSystem = new GameRenderSystem(game);
-        this.gestorAnimaciones = new GestorAnimacionesMano(
-            new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(),
-            this::organizarCartas
-        );
-        gestorSantos = new GestorSantos(game, 1080f, Y_JOKERS, 170f, ALTO_JOKER);
-        this.gestorVictoria = new GestorVisualVictoria(game, () -> pendingEstado = EstadoPantalla.TIENDA);
-        iniciarShader();
-        inicializarJuego();
-        this.partidaIniciada = true;
-    }
-
     public GameScreenV2(Main game) {
         this.game = game;
         this.camera = new OrthographicCamera();
@@ -319,6 +290,7 @@ public class GameScreenV2 implements Screen {
         if (!puedeInteract) {
             for (VistaCarta c : new ArrayList<>(cartasJugador)) c.update(mouseWorld.x, mouseWorld.y, delta);
         }
+        resolverHoverExclusivo(cartasJugador);
         for (VistaCarta c : new ArrayList<>(cartasRival)) c.update(mouseWorld.x, mouseWorld.y, delta);
         actualizarCartasMesa(delta);
         if (!modalBloqueante) {
@@ -346,6 +318,7 @@ public class GameScreenV2 implements Screen {
         renderContadorSantos(game.batch);
         gestorSantos.render(game.batch, game);
         gestorUsoSanto.render(game.batch);
+        renderCartelCartaSiCorresponde();
         if (vistaMazo != null) vistaMazo.renderModalSiCorresponde(game.batch);
         game.batch.end();
     }
@@ -398,6 +371,10 @@ public class GameScreenV2 implements Screen {
         game.batch.begin();
         fondoPlasma.render(game.batch, delta);
         game.batch.end();
+        // TIENDA / PANEL SUPERPUESTO: se dibuja primero para quedar detrás
+        game.batch.begin();
+        renderPanelSuperpuesto.run();
+        game.batch.end();
         if (mostrarPanelPuntajes) {
             panelPuntajes.renderFondosYCajas(camera, PANEL_PUNTAJES_X, PANEL_PUNTAJES_Y);
         }
@@ -412,15 +389,14 @@ public class GameScreenV2 implements Screen {
         if (mostrarMazo && vistaMazo != null && jugador != null) {
             vistaMazo.render(game.batch, jugador.getMazo().getCartasRestantesOrdenadas(), jugador.getMazo().getTamañoMazo());
         }
-        game.batch.end();
-        game.batch.begin();
-        renderPanelSuperpuesto.run();
         gestorVentaJoker.render(game.batch);
         renderCartelJokerSiCorresponde();
         gestorSantos.render(game.batch, game);
         gestorUsoSanto.render(game.batch);
         renderOverlaysFinal.run();
-        if (vistaMazo != null) vistaMazo.renderModalSiCorresponde(game.batch);
+        if (vistaMazo != null) {
+            vistaMazo.renderModalSiCorresponde(game.batch);
+        }
         game.batch.end();
     }
 
@@ -596,15 +572,25 @@ public class GameScreenV2 implements Screen {
             VistaCarta view = cartasMesaJugador.get(i);
             float posX = inicioX + i * pasoX;
             float posY = Y_MESA_JUGADOR;
-            view.setPosition(posX, posY);
             view.setHandPosition(posX, posY);
         }
         for (int i = 0; i < cartasMesaRival.size(); i++) {
             VistaCarta view = cartasMesaRival.get(i);
             float posX = inicioX + i * pasoX;
             float posY = Y_MESA_RIVAL;
-            view.setPosition(posX, posY);
-            view.setHandPosition(posX, posY);
+            view.setHandPosition(posX, posY); // FIX: idem
+        }
+    }
+
+    private void renderCartelCartaSiCorresponde() {
+        for (VistaCarta c : cartasJugador) {
+            if (c.isHover()) { c.renderCartelStats(game.batch, game); return; }
+        }
+        for (VistaCarta c : cartasMesaJugador) {
+            if (c.isHover()) { c.renderCartelStats(game.batch, game); return; }
+        }
+        for (VistaCarta c : cartasMesaRival) {
+            if (c.isHover()) { c.renderCartelStats(game.batch, game); return; }
         }
     }
 
@@ -680,12 +666,33 @@ public class GameScreenV2 implements Screen {
         for (VistaJoker vj : jokers) {
             vj.update(mouseWorld.x, mouseWorld.y, delta);
         }
+        resolverHoverExclusivoJokers(); // FIX
         gestorJokers.update(mouseWorld.x, mouseWorld.y, delta, true);
         boolean cambio = gestorReordenamiento.previsualizarReordenamientoJokers(gestorJokers, jokers);
         if (cambio) organizarJokers();
         if (antes != null && gestorJokers.getArrastrado() == null) {
             organizarJokers();
             sincronizarOrdenJokersModelo();
+        }
+    }
+
+    private void resolverHoverExclusivo(ArrayList<VistaCarta> lista) {
+        VistaCarta ganador = null;
+        for (VistaCarta c : lista) {
+            if (c.isHover()) ganador = c;
+        }
+        for (VistaCarta c : lista) {
+            if (c != ganador) c.limpiarHover();
+        }
+    }
+
+    private void resolverHoverExclusivoJokers() {
+        VistaJoker ganador = null;
+        for (VistaJoker vj : jokers) {
+            if (vj.isHover()) ganador = vj;
+        }
+        for (VistaJoker vj : jokers) {
+            if (vj != ganador) vj.limpiarHover();
         }
     }
 

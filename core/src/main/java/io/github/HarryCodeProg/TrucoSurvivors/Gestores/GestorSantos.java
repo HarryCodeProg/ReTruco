@@ -72,18 +72,29 @@ public class GestorSantos {
         overlaySeleccion.esperarFlipsYLuegoVolver(alTerminarTodo);
     }
 
-    public void update(float mouseX, float mouseY, float delta) {
-        gestorInput.update(mouseX, mouseY, delta, true);
-        overlayConsumo.update(delta);
-        overlaySeleccion.update(mouseX, mouseY, delta);
-    }
-
     /** FIX: overload que además actualiza la venta — llamar este desde GameScreenV2 en vez del de arriba,
      * pasando el jugador. Si preferís no tocar las llamadas existentes, ver alternativa abajo. */
     public void update(float mouseX, float mouseY, float delta, Jugador jugador) {
         update(mouseX, mouseY, delta);
         if (!hayOverlayActivo()) { // no vender mientras hay un overlay de santo abierto encima
             gestorVenta.update(mouseX, mouseY, santos, jugador, r -> area.distribuir(santos, gestorInput.getArrastrado()));
+        }
+    }
+
+    public void update(float mouseX, float mouseY, float delta) {
+        gestorInput.update(mouseX, mouseY, delta, true);
+        resolverHoverExclusivoSantos();
+        overlayConsumo.update(delta);
+        overlaySeleccion.update(mouseX, mouseY, delta);
+    }
+
+    private void resolverHoverExclusivoSantos() {
+        VistaSanto ganador = null;
+        for (VistaSanto v : santos) {
+            if (v.isHover()) ganador = v;
+        }
+        for (VistaSanto v : santos) {
+            if (v != ganador) v.limpiarHover();
         }
     }
 

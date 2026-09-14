@@ -13,7 +13,7 @@ public class Chimichurri extends Joker {
 
     public Chimichurri(){
         super(27, "Chimichurri", "Chimichurri", "+2 Multiplicador truco por cada mano ganada de forma consecutiva",
-            Rareza.comun, 1, Joker.FaseActivacion.INDEPENDIENTE,
+            Rareza.comun, 4, Joker.FaseActivacion.INDEPENDIENTE,
             CategoriaJoker.NACIONAL, CategoriaJoker.COMIDA, CategoriaJoker.TRADICIONAL);
     }
 

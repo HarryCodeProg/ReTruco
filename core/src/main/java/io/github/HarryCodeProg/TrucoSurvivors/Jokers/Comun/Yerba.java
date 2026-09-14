@@ -12,7 +12,7 @@ import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 public class Yerba extends Joker {
     public Yerba(){
         super(35, "Yerba", "Yerba", "Las cartas de Basto que ganen envido reciben +15 puntos envido",
-            Rareza.comun, 1, Joker.FaseActivacion.INDEPENDIENTE,
+            Rareza.comun, 3, Joker.FaseActivacion.INDEPENDIENTE,
             CategoriaJoker.NACIONAL);
     }
 

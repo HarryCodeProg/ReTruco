@@ -31,7 +31,7 @@ public class EstadoTienda {
     public EstadoTienda(Jugador jugador) {
         this.jugador = jugador;
         this.cantidadCartas = 2 + jugador.getEspacioCartasTiendaExtra();
-        this.cantidadJokers = 2 + jugador.getEspacioJokersTiendaExtra();
+        this.cantidadJokers = 3 + jugador.getEspacioJokersTiendaExtra();
         this.cantidadSantos = 2 + jugador.getEspacioSantosTiendaExtra();
         this.multiplicadorPrecio = jugador.getMultiplicadorPrecioTienda();
         this.rerollsGratis = jugador.getRerollsGratisTienda();

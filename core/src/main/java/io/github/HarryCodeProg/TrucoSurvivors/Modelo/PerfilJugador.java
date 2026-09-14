@@ -24,10 +24,6 @@ public class PerfilJugador {
         ArrayList<Joker> jokersIniciales = creacion.getTienda().getJokers();
         int limiteInicial = Math.min(jokersIniciales.size(), jugador.getTamañoJokers());
 
-        // Agrega los jokers iniciales al jugador para probar
-        /*for (int i = 0; i < limiteInicial; i++) {
-            jugador.agregarJoker(jokersIniciales.get(i));
-        }*/
     }
 
     /** Incrementa el nivel alcanzado en la run actual */

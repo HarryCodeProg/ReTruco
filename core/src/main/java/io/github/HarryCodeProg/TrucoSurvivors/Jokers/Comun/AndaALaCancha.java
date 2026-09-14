@@ -13,7 +13,7 @@ public class AndaALaCancha extends Joker {
 
     public AndaALaCancha(){
         super(42, "Anda A La Cancha", "AndaALaCancha", "+5 multiplicador truco y envido por cada descarte restante",
-            Rareza.comun, 1, Joker.FaseActivacion.INDEPENDIENTE,
+            Rareza.comun, 4, Joker.FaseActivacion.INDEPENDIENTE,
             CategoriaJoker.TV, CategoriaJoker.SECUENCIA);
     }
 

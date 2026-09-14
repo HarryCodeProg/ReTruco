@@ -43,4 +43,12 @@ public class PoolSantosTienda {
     public Santo tomarAleatorio() {
         return tomarAleatorio(new Random());
     }
+
+    public ArrayList<Santo> crearTodos() {
+        ArrayList<Santo> resultado = new ArrayList<>();
+        for (Supplier<Santo> fabrica : fabricas) {
+            resultado.add(fabrica.get());
+        }
+        return resultado;
+    }
 }

@@ -13,7 +13,7 @@ public class NoMeMidas extends Joker {
 
     public NoMeMidas(){
         super(48, "No Me Midas", "NoMeMidas", "Cada Espada que mata vuelve a activarse",
-            Rareza.comun, 1, Joker.FaseActivacion.AL_PUNTUAR_CARTA,
+            Rareza.comun, 4, Joker.FaseActivacion.AL_PUNTUAR_CARTA,
             CategoriaJoker.TV, CategoriaJoker.SECUENCIA);
     }
 

@@ -10,7 +10,7 @@ public class Andes extends JokerCopiaVecino {
 
     public Andes() {
         super(145, "Andes", "Andes", "Copia el efecto del joker a la derecha",
-            Rareza.epico, 10, CategoriaJoker.NACIONAL, CategoriaJoker.NATURALEZA);
+            Rareza.epico, 8, CategoriaJoker.NACIONAL, CategoriaJoker.NATURALEZA);
     }
 
     @Override

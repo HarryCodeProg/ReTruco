@@ -18,7 +18,7 @@ public class Consola extends Joker {
             "Consola",
             "Las cartas de Copa que pierden envido reciben +15 puntos envido",
             Rareza.comun,
-            1,
+            3,
             Joker.FaseActivacion.INDEPENDIENTE,
             CategoriaJoker.INTERNACIONAL, CategoriaJoker.HISTORIA
         );

@@ -21,7 +21,7 @@ public class BotellaCortada extends Joker {
             "BotellaCortada",
             "La segunda carta que juegues, obtiene +5 multiplicador truco",
             Rareza.comun,
-            1,
+            4,
             AL_JUGAR,
             CategoriaJoker.INTERNACIONAL, CategoriaJoker.BEBIDA, CategoriaJoker.ALCOHOL
         );

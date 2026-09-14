@@ -21,7 +21,7 @@ public class Mate extends Joker {
             "Mate",
             "La primera carta que juegues cada mano obtiene +2 Valor Truco",
             Rareza.comun,
-            1,
+            3,
             AL_JUGAR,
             CategoriaJoker.NACIONAL,CategoriaJoker.BEBIDA,CategoriaJoker.AMARGO
         );

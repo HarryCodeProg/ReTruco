@@ -13,7 +13,7 @@ public class AtiendoBoludos extends Joker {
 
     public AtiendoBoludos(){
         super(43, "Atiendo Boludos", "AtiendoBoludos", "+2 multiplicador envido por cada mano ganada de forma consecutiva",
-            Rareza.comun, 1, Joker.FaseActivacion.INDEPENDIENTE,
+            Rareza.comun, 4, Joker.FaseActivacion.INDEPENDIENTE,
             CategoriaJoker.TV, CategoriaJoker.SECUENCIA);
     }
 
