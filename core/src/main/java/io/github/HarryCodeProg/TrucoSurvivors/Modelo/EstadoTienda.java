@@ -27,6 +27,7 @@ public class EstadoTienda {
     private int cantidadSantos;
     private int rerollsTienda = 0;
     private final Jugador jugador;
+    private static final int ID_MENDOZA = 92;
 
     public EstadoTienda(Jugador jugador) {
         this.jugador = jugador;
@@ -49,10 +50,15 @@ public class EstadoTienda {
 
     public void generarFilaJokers(Jugador jugador) {
         filaJokers.clear();
+        boolean permitirDuplicados = tieneMendoza(jugador);
+        ArrayList<Integer> idsEnFila = new ArrayList<>();
         for (int i = 0; i < cantidadJokers; i++) {
-            Joker joker = poolJokers.tomarAleatorio(random, jugador);
+            Joker joker = poolJokers.tomarAleatorio(random, jugador, permitirDuplicados, idsEnFila);
             if (joker != null) {
                 filaJokers.add(ItemTienda.deJoker(joker, joker.getCoste()));
+                if (!permitirDuplicados) {
+                    idsEnFila.add(joker.getId());
+                }
             }
         }
     }
@@ -159,5 +165,9 @@ public class EstadoTienda {
     public int costoRerollTienda() {
         if (jugador != null) { } // ya no depende de rerollsGratis local
         return ConfiguracionEconomia.COSTO_REROLL_BASE + rerollsTienda;
+    }
+
+    private boolean tieneMendoza(Jugador jugador) {
+        return jugador.getJokers().stream().anyMatch(j -> j.getId() == ID_MENDOZA);
     }
 }

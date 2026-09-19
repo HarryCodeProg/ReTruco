@@ -77,6 +77,7 @@ public class VistaCarta implements Arrastrable{
     private static final float GROSOR_MARCO = 2f;
     private boolean cartelHaciaAbajo = false;
     private boolean tooltipLateral = false;
+    private final FisicaTiltArrastre fisicaTiltArrastre = new FisicaTiltArrastre();
 
     /** Ahora recibe el TextureAtlas compartido en vez de crear su propia Texture. */
     public VistaCarta(Carta carta, boolean bocaAbajo, TextureAtlas atlas) {
@@ -93,42 +94,35 @@ public class VistaCarta implements Arrastrable{
         }
     }
 
-    public void render(SpriteBatch batch, io.github.HarryCodeProg.TrucoSurvivors.Main game) {
+    public void render(SpriteBatch batch, Main game) {
         if (estadoFlip != EstadoFlip.NINGUNO) {
             renderFlip(batch);
             return;
         }
         float drawY = y + visualOffsetY;
         float scaleExtra = resaltado ? 1f + (float)(Math.sin(pulso) * 0.06f) : 1f;
-        // =========================================================
-        batch.flush(); // Obligamos a dibujar lo que haya pendiente
-        Matrix4 matrixAnterior = batch.getTransformMatrix().cpy(); // Guardamos la cámara normal
-        if (tiltX != 0 || tiltY != 0) {
-            Matrix4 matrixTilt = new Matrix4(matrixAnterior);
-            float cx = x + (width * scaleExtra * scale) / 2f;
-            float cy = drawY + (height * scaleExtra * scale) / 2f;
-            matrixTilt.translate(cx, cy, -50f);
-            matrixTilt.rotate(1, 0, 0, tiltX); // Inclinación Arriba/Abajo
-            matrixTilt.rotate(0, 1, 0, tiltY); // Inclinación Izquierda/Derecha
-            // Volvemos a acomodar el centro X e Y, PERO dejamos la carta hundida en el eje Z (0f en vez de 50f)
-            matrixTilt.translate(-cx, -cy, 0f);
-            // -------------------------
-            batch.setTransformMatrix(matrixTilt); // Aplicamos la deformación
-        }
-        // =========================================================
+        batch.flush();
+        Matrix4 matrixAnterior = batch.getTransformMatrix().cpy();
+        Matrix4 matrixModificada = new Matrix4(matrixAnterior);
+        float cx = x + (width * scaleExtra * scale) / 2f;
+        float cy = drawY + (height * scaleExtra * scale) / 2f;
+        matrixModificada.translate(cx, cy, -50f); // Empujamos en Z
+        // Efecto 3D (Hover)
+        if (tiltX != 0) matrixModificada.rotate(1, 0, 0, tiltX);
+        if (tiltY != 0) matrixModificada.rotate(0, 1, 0, tiltY);
+        // Efecto Péndulo 2D (Drag)
+        if (rotation != 0) matrixModificada.rotate(0, 0, 1, rotation);
+        matrixModificada.translate(-cx, -cy, 0f); // Volvemos
+        batch.setTransformMatrix(matrixModificada);
+        // 1. Dibujamos la sombra y el marco (¡Ahora van a girar junto con la cámara!)
         dibujarProfundidadYMarco(batch, game, drawY, scaleExtra);
-
-        if (resaltado) {
-            batch.setColor(1.08f, 1.02f, 0.82f, 1f);
-        } else {
-            batch.setColor(1f, 1f, 1f, 1f);
-        }
-        batch.draw(region, x, drawY, width / 2f, height / 2f, width * scaleExtra, height * scaleExtra, scale, scale, rotation);
+        // 2. Dibujamos la carta
         batch.setColor(1f, 1f, 1f, 1f);
-        batch.flush(); // Dibujamos la carta inclinada
-        batch.setTransformMatrix(matrixAnterior);
-        // FIX: Ya no se dibuja el cartel acá.
-        // Ahora se dibuja externamente llamando a renderCartelStats()
+        // FIX: Le pasamos 0f a la rotación acá, porque la rotación ya está en la matriz!
+        batch.draw(region, x, drawY, width / 2f, height / 2f, width * scaleExtra, height * scaleExtra, scale, scale, 0f);
+        batch.setColor(1f, 1f, 1f, 1f);
+        batch.flush();
+        batch.setTransformMatrix(matrixAnterior); // Restauramos la cámara
     }
 
     private void dibujarCartelStats(SpriteBatch batch, Main game, float drawY) {
@@ -357,10 +351,47 @@ public class VistaCarta implements Arrastrable{
     public boolean isDragging() { return this.dragging; }
     public boolean soltoCarta() { return draggingAnterior && !dragging; }
 
+    public void input(float mouseX, float mouseY) {
+        draggingAnterior = dragging;
+        if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT) && contiene(mouseX, mouseY)) {
+            dragging = true;
+            pressX = mouseX;
+            pressY = mouseY;
+            huboMovimientoSignificativo = false;
+            dragOffsetX = mouseX - x;
+            dragOffsetY = mouseY - y;
+            ALGUN_DRAG_ACTIVO = true;
+            fisicaTiltArrastre.iniciarArrastre(mouseX);
+        }
+        if (dragging) {
+            float dx = mouseX - pressX;
+            float dy = mouseY - pressY;
+            if (!huboMovimientoSignificativo && (Math.abs(dx) > UMBRAL_CLICK || Math.abs(dy) > UMBRAL_CLICK)) {
+                huboMovimientoSignificativo = true;
+            }
+        }
+        if (!Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
+            if (dragging && !huboMovimientoSignificativo) {
+                seleccionada = !seleccionada;
+                GestorSonidos sonidos = Main.getInstance().getGestorSonidos();
+                if (sonidos != null) {
+                    if (seleccionada) sonidos.reproducirConVariacion("seleccionar");
+                    else sonidos.reproducirConVariacion("deseleccionar");
+                }
+            }
+            if (dragging) ALGUN_DRAG_ACTIVO = false;
+            dragging = false;
+        }
+        if (dragging) {
+            targetX = mouseX - dragOffsetX;
+            targetY = mouseY - dragOffsetY;
+        }
+    }
+
     public void update(float mouseX, float mouseY, float delta) {
         if (estadoFlip != EstadoFlip.NINGUNO) {
             actualizarFlip(delta);
-            return; // mientras flipea, no procesar hover/drag normal
+            return;
         }
         if (resaltado) {
             pulso += delta * 6f;
@@ -390,47 +421,62 @@ public class VistaCarta implements Arrastrable{
                 hover = false;
             }
         } else {
-            hover = contiene(mouseX, mouseY); // cada carta calcula su hover individual
+            hover = contiene(mouseX, mouseY);
         }
         float offsetHover = hover ? OFFSET_HOVER : 0f;
         float offsetSeleccion = seleccionada ? OFFSET_SELECCIONADA : 0f;
         targetScale = hover ? ESCALA_HOVER : 1f;
         targetOffsetY = offsetHover + offsetSeleccion;
-        if (hover) {
-            targetRotation = 0f;
-        }
-        if (hover && !animando) {
-            // 1. Calculamos la posición del mouse relativa al centro de la carta (-1 a 1)
-            float cx = x + (width * scale) / 2f;
-            float cy = y + visualOffsetY + (height * scale) / 2f;
-            float mouseDeltaX = (mouseX - cx) / ((width * scale) / 2f);
-            float mouseDeltaY = (mouseY - cy) / ((height * scale) / 2f);
-            // Limitamos a -1 y 1 por si el mouse sale muy rápido
-            mouseDeltaX = Math.max(-1f, Math.min(1f, mouseDeltaX));
-            mouseDeltaY = Math.max(-1f, Math.min(1f, mouseDeltaY));
-            // 2. Moverse en X rota el eje Y (izquierda/derecha). Moverse en Y rota el eje X (arriba/abajo).
-            // NOTA: Invertimos el signo dependiendo de cómo queramos que "pise" el mouse la carta.
-            targetTiltY = mouseDeltaX * MAX_TILT;
-            targetTiltX = -mouseDeltaY * MAX_TILT;
-        } else {
-            // Si no hay hover, vuelve a estar plana
+        // --- LÓGICA SEPARADA: ARRASTRE (Rotación 2D Z) vs HOVER (Inclinación 3D X/Y) ---
+        if (dragging) {
+            fisicaTiltArrastre.actualizarArrastre(mouseX, delta);
+            targetRotation = fisicaTiltArrastre.getAngulo(); // El péndulo usa Z (Rotation normal)
             targetTiltX = 0f;
-            targetTiltY = 0f;
+            targetTiltY = 0f; // Apagamos el 3D al arrastrar
+        } else {
+            fisicaTiltArrastre.actualizarSoltada(delta);
+            if (fisicaTiltArrastre.estaActiva()) {
+                targetRotation = fisicaTiltArrastre.getAngulo();
+                targetTiltX = 0f;
+                targetTiltY = 0f;
+            } else if (hover && !animando) {
+                targetRotation = 0f;
+                float cx = x + (width * scale) / 2f;
+                float cy = y + visualOffsetY + (height * scale) / 2f;
+                float mouseDeltaX = (mouseX - cx) / ((width * scale) / 2f);
+                float mouseDeltaY = (mouseY - cy) / ((height * scale) / 2f);
+                mouseDeltaX = Math.max(-1f, Math.min(1f, mouseDeltaX));
+                mouseDeltaY = Math.max(-1f, Math.min(1f, mouseDeltaY));
+                targetTiltY = mouseDeltaX * MAX_TILT;  // Inclinación 3D
+                targetTiltX = -mouseDeltaY * MAX_TILT; // Inclinación 3D
+            } else {
+                targetRotation = 0f;
+                targetTiltX = 0f;
+                targetTiltY = 0f;
+            }
         }
-        // 3. Suavizamos el movimiento de inclinación
+        // Aplicamos suavizado al 3D
         tiltX = moverHacia(tiltX, targetTiltX, VELOCIDAD_TILT * delta);
         tiltY = moverHacia(tiltY, targetTiltY, VELOCIDAD_TILT * delta);
+        // Aplicamos movimiento
         if (!dragging) {
             x = moverHacia(x, targetX, VELOCIDAD_POSICION * delta);
             y = moverHacia(y, targetY, VELOCIDAD_POSICION * delta);
             scale = moverHacia(scale, targetScale, VELOCIDAD_ESCALA * delta);
             visualOffsetY = moverHacia(visualOffsetY, targetOffsetY, VELOCIDAD_OFFSET * delta);
-            rotation = moverHacia(rotation, targetRotation, VELOCIDAD_ROTACION * delta);
+            // Si la física está soltándose, ya viene suavizada. Si no, suavizamos manual.
+            if (fisicaTiltArrastre.estaActiva()) {
+                rotation = targetRotation;
+            } else {
+                rotation = moverHacia(rotation, targetRotation, VELOCIDAD_ROTACION * delta);
+            }
         } else {
             x = targetX;
             y = targetY;
             scale = moverHacia(scale, 1.2f, VELOCIDAD_ESCALA * delta);
             visualOffsetY = moverHacia(visualOffsetY, 0f, VELOCIDAD_OFFSET * delta);
+            // FIX: Durante el arrastre, la rotación copia directamente a la física (que ya tiene inercia)
+            rotation = targetRotation;
         }
     }
 
@@ -474,42 +520,6 @@ public class VistaCarta implements Arrastrable{
         float diferencia = target - value;
         if (Math.abs(diferencia) <= maxDelta) return target;
         return value + Math.signum(diferencia) * maxDelta;
-    }
-
-    public void input(float mouseX, float mouseY) {
-        draggingAnterior = dragging;
-        if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT) && contiene(mouseX, mouseY)) {
-            dragging = true;
-            pressX = mouseX;
-            pressY = mouseY;
-            huboMovimientoSignificativo = false;
-            dragOffsetX = mouseX - x;
-            dragOffsetY = mouseY - y;
-            ALGUN_DRAG_ACTIVO = true;
-        }
-        if (dragging) {
-            float dx = mouseX - pressX;
-            float dy = mouseY - pressY;
-            if (!huboMovimientoSignificativo && (Math.abs(dx) > UMBRAL_CLICK || Math.abs(dy) > UMBRAL_CLICK)) {
-                huboMovimientoSignificativo = true;
-            }
-        }
-        if (!Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
-            if (dragging && !huboMovimientoSignificativo) {
-                seleccionada = !seleccionada;
-                GestorSonidos sonidos = Main.getInstance().getGestorSonidos();
-                if (sonidos != null) {
-                    if (seleccionada) sonidos.reproducirConVariacion("seleccionar");
-                    else sonidos.reproducirConVariacion("deseleccionar");
-                }
-            }
-            if (dragging) ALGUN_DRAG_ACTIVO = false;
-            dragging = false;
-        }
-        if (dragging) {
-            targetX = mouseX - dragOffsetX;
-            targetY = mouseY - dragOffsetY;
-        }
     }
 
     public void setResaltado(boolean resaltado) {

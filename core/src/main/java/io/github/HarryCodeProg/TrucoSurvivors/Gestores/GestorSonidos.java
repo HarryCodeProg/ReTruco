@@ -34,6 +34,7 @@ public class GestorSonidos implements Disposable {
         cargar("gano-mas-1", "sonidos/gano-mas-1.ogg");
         cargar("gano-mas-20", "sonidos/gano-mas-20.ogg");
         cargar("gano-mas-50", "sonidos/gano-mas-50.ogg");
+        cargar("button-click", "sonidos/button-click.ogg");
     }
 
     private void cargar(String clave, String ruta) {
@@ -43,6 +44,10 @@ public class GestorSonidos implements Disposable {
         } catch (Exception e) {
             Gdx.app.error("GestorSonidos", "Error al cargar el sonido: " + ruta, e);
         }
+    }
+
+    public void reproducirSonidoClick() {
+        reproducirConVariacion("button-click");
     }
 
     public void reproducir(String clave) {

@@ -179,12 +179,11 @@ public class PanelTienda {
         if (isAnimando() || bloqueadoPorModalExterno) return;
         boolean justTouched = Gdx.input.justTouched();
         // 1. DETERMINAR HOVER EXCLUSIVO GLOBAL
-        // Evaluamos en el mismo orden en el que se dibujan, así el último evaluado es el que queda arriba de todo.
         VistaItemTienda ganadorHover = null;
         for (VistaItemTienda v : vistasCartas) { if (v.contiene(mouseWorldX, mouseWorldY)) ganadorHover = v; }
         for (VistaItemTienda v : vistasJokers) { if (v.contiene(mouseWorldX, mouseWorldY)) ganadorHover = v; }
         for (VistaItemTienda v : vistasSantos) { if (v.contiene(mouseWorldX, mouseWorldY)) ganadorHover = v; }
-        // 2. ACTUALIZAR ITEMS (Solo el ganador recibe el mouse, el resto recibe coordenadas falsas para apagarse)
+        // 2. ACTUALIZAR ITEMS
         for (VistaItemTienda v : vistasCartas) {
             if (v == ganadorHover) v.update(mouseWorldX, mouseWorldY, delta);
             else v.update(-1000f, -1000f, delta);
@@ -197,6 +196,7 @@ public class PanelTienda {
             if (v == ganadorHover) v.update(mouseWorldX, mouseWorldY, delta);
             else v.update(-1000f, -1000f, delta);
         }
+        // ACTUALIZAR BOTONES E INTERFAZ
         botonComprar.update(mouseWorldX, mouseWorldY);
         botonComprarYUsar.update(mouseWorldX, mouseWorldY);
         botonReroll.update(mouseWorldX, mouseWorldY);
@@ -209,33 +209,28 @@ public class PanelTienda {
             s.aplicarEfecto(jugador, null, estadoTienda, null);
             overlayConsumo.confirmarCierre();
         }
-        if (Gdx.input.justTouched()) {
+        if (justTouched) {
             ruedaZodiaco.click(mouseWorldX, mouseWorldY,
                 signo -> {
-                    overlayConsumo.abrir(signo, game.getAtlasZodiaco().findRegion(signo.getNombreRegion()),
-                        () -> {}
-                    );
+                    overlayConsumo.abrir(signo, game.getAtlasZodiaco().findRegion(signo.getNombreRegion()), () -> {});
                 }
             );
             overlaySeleccion.click(mouseWorldX, mouseWorldY, jugador, null);
         }
-        boolean cliqueoAlgunElemento = false;
-        // COMPRAR Y USAR SANTO
-        if (botonComprarYUsar.fueCliqueado(mouseWorldX, mouseWorldY) && seleccionado != null && seleccionado.getItem().getTipo() == ItemTienda.Tipo.SANTO) {
+        // --- EJECUCIÓN DE BOTONES AL SOLTAR (RELEASE) ---
+        if (botonComprarYUsar.consumirClick() && seleccionado != null && seleccionado.getItem().getTipo() == ItemTienda.Tipo.SANTO) {
             comprarYUsarSanto(seleccionado);
             return;
         }
-        // CONTINUAR
-        if (botonContinuar.fueCliqueado(mouseWorldX, mouseWorldY)) {
+        if (botonContinuar.consumirClick()) {
             alContinuar.run();
             return;
         }
-        // COMPRAR
-        if (botonComprar.fueCliqueado(mouseWorldX, mouseWorldY) && seleccionado != null) {
-            cliqueoAlgunElemento = true;
+        if (botonComprar.consumirClick() && seleccionado != null) {
             comprar(seleccionado);
-        } else if (botonReroll.fueCliqueado(mouseWorldX, mouseWorldY)) {
-            cliqueoAlgunElemento = true;
+            return;
+        }
+        if (botonReroll.consumirClick()) {
             if (onBeforeReroll != null) {
                 onBeforeReroll.run();
             }
@@ -246,25 +241,25 @@ public class PanelTienda {
                 reconstruirVistas();
                 botonReroll.setTexto("Reroll $" + estadoTienda.costoRerollTienda());
             }
+            return;
         }
-        if (justTouched && !cliqueoAlgunElemento) {
-            // Utilizamos directamente al ganador del Hover como el ítem clickeado
+        // --- LÓGICA DE SELECCIÓN / DESELECCIÓN AL PRESIONAR (PRESS) ---
+        // Verificamos si estamos presionando un botón de la UI para no deseleccionar el ítem por error
+        boolean mouseSobreBotonUI = botonComprar.isHovered() || botonReroll.isHovered() || botonContinuar.isHovered() || botonComprarYUsar.isHovered();
+        // Solo procesamos selección/deselección si tocamos y NO estamos encima de un botón
+        if (justTouched && !mouseSobreBotonUI) {
             VistaItemTienda itemClickeado = ganadorHover;
             if (itemClickeado != null) {
                 if (seleccionado == itemClickeado) {
                     deseleccionarTodo();
                     GestorSonidos sonidos = Main.getInstance().getGestorSonidos();
-                    if (sonidos != null) {
-                        sonidos.reproducirConVariacion("deseleccionar");
-                    }
+                    if (sonidos != null) sonidos.reproducirConVariacion("deseleccionar");
                 } else {
                     deseleccionarTodo();
                     seleccionado = itemClickeado;
                     seleccionado.setSeleccionado(true);
                     GestorSonidos sonidos = Main.getInstance().getGestorSonidos();
-                    if (sonidos != null) {
-                        sonidos.reproducirConVariacion("seleccionar");
-                    }
+                    if (sonidos != null) sonidos.reproducirConVariacion("seleccionar");
                     boolean dineroSuficiente = jugador.getPesos() >= seleccionado.getItem().getPrecio();
                     boolean esSanto = seleccionado.getItem().getTipo() == ItemTienda.Tipo.SANTO;
                     boolean espacioDisponible;
@@ -280,6 +275,7 @@ public class PanelTienda {
                     float botX = seleccionado.getX() + (ANCHO_ITEM / 2f) - (botonComprar.getWidth() / 2f);
                     float botY = seleccionado.getY() - (botonComprar.getHeight() / 2f);
                     botonComprar.setPosition(botX, botY);
+
                     botonComprarYUsar.setVisible(esSanto);
                     botonComprarYUsar.setHabilitado(esSanto && dineroSuficiente && espacioDisponible);
                     if (esSanto) {
@@ -425,7 +421,11 @@ public class PanelTienda {
     }
 
     private void dibujarEtiquetaPrecio(SpriteBatch batch, VistaItemTienda v) {
-        EtiquetaPrecio.dibujar(batch, game.getPixelBlanco(), game.getFuenteNumeros(), v.getX() + ANCHO_ITEM / 2f, v.getTopeY(), v.getItem().getPrecio());
+        String textoPrecio = "$" + v.getItem().getPrecio();
+        float paddingY = 4f;
+        float badgeH = game.getFuenteNumeros().getCapHeight() + (paddingY * 2f) + 6f;
+        float yTop = v.getTopeY() + badgeH + 6f;
+        TooltipUI.dibujarBadge(batch, game.getFuenteNumeros(), game.getPixelBlanco(), textoPrecio, UITheme.DORADO, v.getX() + ANCHO_ITEM / 2f, yTop, 8f, paddingY);
     }
 
     public void updateAnimacion(float delta) {

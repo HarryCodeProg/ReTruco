@@ -48,18 +48,18 @@ public enum ColorMecanica {
         texto = reemplazarNumero(texto, VALOR_ENVIDO, "(?i)([+−-]?\\s*\\d+(?:[.,]\\d+)?)\\s+(valor(?:\\s+de)?\\s+envido)");
         texto = reemplazarNumero(texto, PUNTOS_ENVIDO, "(?i)([+−-]?\\s*\\d+(?:[.,]\\d+)?)\\s+(puntos?\\s+(?:de\\s+)?envido)");
         texto = reemplazarNumero(texto, PESOS, "(\\$\\s*\\d+(?:[.,]\\d+)?)");
+        String patronNumero = "(?<![\\w#])\\d+(?:[.,]\\d+)?(?![\\w])";
         StringBuilder resultado = new StringBuilder();
-        String[] partes = texto.split("(\\[#[0-9A-Fa-f]{6}\\].*?\\[\\])", -1);
         java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("(\\[#[0-9A-Fa-f]{6}\\].*?\\[\\])").matcher(texto);
         int ultimo = 0;
         while (matcher.find()) {
             String textoNormal = texto.substring(ultimo, matcher.start());
-            resultado.append(textoNormal.replaceAll("(?<![\\w#])\\d+(?![\\w])", NUMERO.colorHex() + "$0[]"));
+            resultado.append(textoNormal.replaceAll(patronNumero, NUMERO.colorHex() + "$0[]"));
             resultado.append(matcher.group());
             ultimo = matcher.end();
         }
         String textoFinal = texto.substring(ultimo);
-        resultado.append(textoFinal.replaceAll("(?<![\\w#])\\d+(?![\\w])", NUMERO.colorHex() + "$0[]"));
+        resultado.append(textoFinal.replaceAll(patronNumero, NUMERO.colorHex() + "$0[]"));
         return resultado.toString();
     }
 

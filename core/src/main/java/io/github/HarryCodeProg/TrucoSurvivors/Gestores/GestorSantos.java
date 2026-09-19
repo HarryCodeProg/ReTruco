@@ -26,6 +26,7 @@ public class GestorSantos {
     private final GestorVentaSanto gestorVenta = new GestorVentaSanto(); // FIX
     private Function<Carta, VistaCarta> buscadorVistaCarta;
     private Jugador jugadorActual;
+    private Runnable alConsumirSantoCallback;
 
     public GestorSantos(Main game, float areaX, float areaY, float areaAncho, float altoSanto) {
         this.game = game;
@@ -154,11 +155,11 @@ public class GestorSantos {
         ArrayList<Carta> cartas = jugador.getMazo().getCartasAleatoriasParaSanto(10);
         overlaySeleccion.abrir(santo, cartas, game.getAtlasCartas(), seleccion ->
             overlayConsumo.abrir(santo, region, () -> {
-                santo.aplicarEfecto(jugador, seleccion, null);
+                santo.aplicarEfecto(jugador, new ArrayList<>(), null);
                 registrarUsoParaTracking(santo, jugador);
                 aplicarCambiosDiferidosConFlipYEsperar(santo, () -> {
                     overlayConsumo.confirmarCierre();
-                    overlaySeleccion.cerrarConVuelta();
+                    if (alConsumirSantoCallback != null) alConsumirSantoCallback.run();
                 });
             })
         );
@@ -207,5 +208,9 @@ public class GestorSantos {
     private void registrarUsoParaTracking(Santo santo, Jugador jugador) {
         if (santo instanceof SantaRita) return;
         jugador.setUltimoSantoUsado(santo);
+    }
+
+    public void setAlConsumirSanto(Runnable callback) {
+        this.alConsumirSantoCallback = callback;
     }
 }

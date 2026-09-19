@@ -23,7 +23,7 @@ public class Rivadavia extends Joker {
 
     @Override
     public String getDescripcionRenderizada() {
-        return "Cada ["+cartasRestantes+"] cartas repartidas ganas x1.5 multiplicador truco (actual: x"
+        return "Cada "+cartasRestantes+" cartas repartidas ganas x1.5 multiplicador truco (actual: x"
             + String.format("%.1f", multiplicadorAcumulado);
     }
 

@@ -122,24 +122,19 @@ public class VistaItemTienda {
             dibujarRectRedondeado(batch, x - 12f, drawY - 12f, drawW + 24f, drawH + 24f, RADIO + 5f, colorGlow);
         }
         dibujarRectRedondeado(batch, x - 2f, drawY - 2f, drawW + 4f, drawH + 4f, RADIO, new Color(0.025f, 0.035f, 0.055f, 0.65f));
-
-        // --- SE APLICA EL OFFSET A LAS VISTAS INTERNAS ---
         if (vistaJokerInterna != null) {
-            vistaJokerInterna.setPosition(x, drawY);
+            vistaJokerInterna.setPosition(x, y);
             vistaJokerInterna.render(batch);
         } else if (vistaCartaInterna != null) {
-            vistaCartaInterna.setPosition(x, drawY);
+            vistaCartaInterna.setPosition(x, y);
             vistaCartaInterna.render(batch, game);
+        } else if (vistaSantoInterna != null) {
+            vistaSantoInterna.setPosition(x, y);
+            vistaSantoInterna.render(batch);
         } else if (region != null) {
             batch.draw(region, x, drawY, drawW, drawH);
         }
-        if (vistaSantoInterna != null) {
-            // Santos ya parecía dibujarse bien, pero aseguramos la posición
-            vistaSantoInterna.setPosition(x, drawY);
-            vistaSantoInterna.render(batch);
-        }
-        // -------------------------------------------------
-
+        // -----------------------------------------------------------------------------------
         if (seleccionado) {
             float lineaX = x + 8f;
             float lineaW = drawW - 16f;

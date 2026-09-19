@@ -147,6 +147,10 @@ public class Juego {
         repartir();
     }
 
+    public void reciclarMazoAlGanar() {
+        jugador.getMazo().reciclarCartasTomadas();
+    }
+
     public void recargarDescartes() {
         this.descartesActuales = jugador.getDescartesMaximos();
     }
@@ -647,6 +651,19 @@ public class Juego {
         if (puntosJugador >= puntajeMeta) {
             if (!recompensaFinDeRondaAplicada) {
                 recompensaFinDeRondaAplicada = true;
+                ContextoJuego ctx = crearContexto();
+                // Buscamos cuál fue la última resolución generada (Truco o Envido) para encadenarle las animaciones de victoria
+                ResolucionPuntaje resolucionActiva = this.ultimaResolucion;
+                if (resolucionActiva == null && this.ultimaResolucionEnvido != null) {
+                    resolucionActiva = this.ultimaResolucionEnvido;
+                }
+                // Si por algún motivo no hay ninguna, creamos una en blanco
+                if (resolucionActiva == null) {
+                    resolucionActiva = new ResolucionPuntaje(0, 1);
+                    this.ultimaResolucion = resolucionActiva;
+                }
+                ctx.setResolucionActual(resolucionActiva);
+                gestorJokers.disparar(EventoJuego.AL_GANAR_COMBATE, ctx, this);
                 gestorJokers.disparar(EventoJuego.TERMINO_MANO, crearContexto(), this);
             }
             return EstadoCombate.VICTORIA_JUGADOR;
@@ -678,5 +695,10 @@ public class Juego {
 
     public void consumirHand() {
         jugador.consumirMano();
+    }
+
+    public void notificarSantoConsumido() {
+        ContextoJuego ctx = crearContexto();
+        gestorJokers.disparar(EventoJuego.AL_CONSUMIR_SANTO, ctx, this);
     }
 }

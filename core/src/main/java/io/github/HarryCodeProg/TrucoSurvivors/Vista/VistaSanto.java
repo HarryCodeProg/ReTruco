@@ -41,6 +41,7 @@ public class VistaSanto implements Arrastrable {
     private static final float RADIO_MARCO = 8f;
     private static final float GROSOR_MARCO = 2f;
     private boolean tooltipLateral = false;
+    private final FisicaTiltArrastre fisicaTiltArrastre = new FisicaTiltArrastre();
 
     public VistaSanto(Santo santo, TextureAtlas atlasSantos) {
         this.santo = santo;
@@ -82,19 +83,31 @@ public class VistaSanto implements Arrastrable {
         targetScale = hover ? ESCALA_HOVER : 1f;
         targetOffsetY = offsetHover + offsetSel;
         if (hover) targetRotation = 0f;
-        if (hover && !dragging) {
-            float cx = x + (width * scale) / 2f;
-            float cy = y + visualOffsetY + (height * scale) / 2f;
-            float mouseDeltaX = (mouseX - cx) / ((width * scale) / 2f);
-            float mouseDeltaY = (mouseY - cy) / ((height * scale) / 2f);
-            mouseDeltaX = Math.max(-1f, Math.min(1f, mouseDeltaX));
-            mouseDeltaY = Math.max(-1f, Math.min(1f, mouseDeltaY));
-            targetTiltY = mouseDeltaX * MAX_TILT;
-            targetTiltX = -mouseDeltaY * MAX_TILT;
+        // --- NUEVO BLOQUE DE TILT CON FÍSICA ---
+        if (dragging) {
+            fisicaTiltArrastre.actualizarArrastre(mouseX, delta);
+            targetTiltY = fisicaTiltArrastre.getAngulo();
+            targetTiltX = 0f; // Reiniciamos el tiltX mientras se arrastra
         } else {
-            targetTiltX = 0f;
-            targetTiltY = 0f;
+            fisicaTiltArrastre.actualizarSoltada(delta);
+            if (fisicaTiltArrastre.estaActiva()) {
+                targetTiltY = fisicaTiltArrastre.getAngulo();
+                targetTiltX = 0f;
+            } else if (hover) {
+                float cx = x + (width * scale) / 2f;
+                float cy = y + visualOffsetY + (height * scale) / 2f;
+                float mouseDeltaX = (mouseX - cx) / ((width * scale) / 2f);
+                float mouseDeltaY = (mouseY - cy) / ((height * scale) / 2f);
+                mouseDeltaX = Math.max(-1f, Math.min(1f, mouseDeltaX));
+                mouseDeltaY = Math.max(-1f, Math.min(1f, mouseDeltaY));
+                targetTiltY = mouseDeltaX * MAX_TILT;
+                targetTiltX = -mouseDeltaY * MAX_TILT;
+            } else {
+                targetTiltY = 0f;
+                targetTiltX = 0f;
+            }
         }
+        // ---------------------------------------
         tiltX = moverHacia(tiltX, targetTiltX, VELOCIDAD_TILT * delta);
         tiltY = moverHacia(tiltY, targetTiltY, VELOCIDAD_TILT * delta);
         if (!dragging) {
@@ -104,31 +117,32 @@ public class VistaSanto implements Arrastrable {
             visualOffsetY = moverHacia(visualOffsetY, targetOffsetY, VELOCIDAD_OFFSET * delta);
             rotation = moverHacia(rotation, targetRotation, VELOCIDAD_ROTACION * delta);
         } else {
-            x = targetX; y = targetY;
+            x = targetX;
+            y = targetY;
             scale = moverHacia(scale, 1.2f, VELOCIDAD_ESCALA * delta);
             visualOffsetY = moverHacia(visualOffsetY, 0f, VELOCIDAD_OFFSET * delta);
         }
-    }
-
-    private float moverHacia(float v, float t, float max) {
-        float d = t - v;
-        if (Math.abs(d) <= max) return t;
-        return v + Math.signum(d) * max;
     }
 
     @Override
     public void input(float mouseX, float mouseY) {
         draggingAnterior = dragging;
         if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT) && contiene(mouseX, mouseY)) {
-            dragging = true; pressX = mouseX; pressY = mouseY;
+            dragging = true;
+            pressX = mouseX;
+            pressY = mouseY;
             huboMovimientoSignificativo = false;
-            dragOffsetX = mouseX - x; dragOffsetY = mouseY - y;
+            dragOffsetX = mouseX - x;
+            dragOffsetY = mouseY - y;
             ALGUN_DRAG_ACTIVO = true;
+            // --- INICIAR ARRASTRE FÍSICO ---
+            fisicaTiltArrastre.iniciarArrastre(mouseX);
         }
         if (dragging) {
             float dx = mouseX - pressX, dy = mouseY - pressY;
-            if (!huboMovimientoSignificativo && (Math.abs(dx) > UMBRAL_CLICK || Math.abs(dy) > UMBRAL_CLICK))
+            if (!huboMovimientoSignificativo && (Math.abs(dx) > UMBRAL_CLICK || Math.abs(dy) > UMBRAL_CLICK)) {
                 huboMovimientoSignificativo = true;
+            }
         }
         if (!Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
             if (dragging && !huboMovimientoSignificativo) {
@@ -139,8 +153,17 @@ public class VistaSanto implements Arrastrable {
             if (dragging) ALGUN_DRAG_ACTIVO = false;
             dragging = false;
         }
-        if (dragging) { targetX = mouseX - dragOffsetX; targetY = mouseY - dragOffsetY; }
+        if (dragging) {
+            targetX = mouseX - dragOffsetX;
+            targetY = mouseY - dragOffsetY;
+        }
     }
+    private float moverHacia(float v, float t, float max) {
+        float d = t - v;
+        if (Math.abs(d) <= max) return t;
+        return v + Math.signum(d) * max;
+    }
+
 
     public void render(SpriteBatch batch) {
         float drawY = y + visualOffsetY;

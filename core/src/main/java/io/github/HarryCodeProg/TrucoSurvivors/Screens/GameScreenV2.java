@@ -78,7 +78,7 @@ public class GameScreenV2 implements Screen {
     private GestorEstadoPartida gestorPartida;
     private HUDController hudController;
     private Boton botonVenderJoker;
-    float anchoCarta = 120;
+    private float anchoCarta = 120f;
     float separacion = 8f;
 
     public GameScreenV2(Main game) {
@@ -95,8 +95,7 @@ public class GameScreenV2 implements Screen {
         this.botonVenderJoker = new Boton(0, 0, 150, 45, Boton.TipoColor.ROJO, Accion.VENDER_JOKER);
         botonVenderJoker.setVisible(false);
         float margenLateral = 220f;
-        this.areaCartas = new AreaElementos<>(margenLateral, Y_MANO_JUGADOR, 1280f - margenLateral * 2, ALTO_CARTA, anchoCarta, ALTO_CARTA, separacion);
-        this.areaJokers = new AreaElementos<>(margenLateral, Y_JOKERS, 1280f - margenLateral * 2, ALTO_JOKER, ANCHO_JOKER, ALTO_JOKER, SEPARACION_JOKER);
+        this.areaCartas = new AreaElementos<>(margenLateral, Y_MANO_JUGADOR, 1280f - margenLateral * 2, ALTO_CARTA, anchoCarta, ALTO_CARTA, separacion); this.areaJokers = new AreaElementos<>(margenLateral, Y_JOKERS, 1280f - margenLateral * 2, ALTO_JOKER, ANCHO_JOKER, ALTO_JOKER, SEPARACION_JOKER);
         this.fondoPlasma = new Background();
         this.gestorAnimaciones = new GestorAnimacionesMano(
             new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(),
@@ -182,6 +181,7 @@ public class GameScreenV2 implements Screen {
             }
             return null;
         });
+        gestorSantos.setAlConsumirSanto(() -> gestorPartida.getJuego().notificarSantoConsumido());
         this.cartasRival = new ArrayList<>();
         ArrayList<Joker> jokersModelo = jugador.getJokers();
         if (this.jokers == null) this.jokers = new ArrayList<>();
@@ -779,6 +779,8 @@ public class GameScreenV2 implements Screen {
 
     public void finalizarCombate(boolean victoriaJugador) {
         if (victoriaJugador) {
+            gestorPartida.getJuego().reciclarMazoAlGanar();
+            panelPuntajes.setRivalNombre("");
             game.getPerfilJugador().avanzarNivel();
             pendingEstado = EstadoPantalla.VICTORIA;
         } else {
@@ -794,7 +796,10 @@ public class GameScreenV2 implements Screen {
     }
 
     public void prepararVictoria(int pesosVictoria, int pesosInteres) {
-        gestorVictoria.preparar(pesosVictoria, pesosInteres);
+        int recompensaManos = jugador.getManosActuales() * 1;
+        int recompensaDescartes = gestorPartida.getJuego().getDescartesActuales() * 1;
+        gestorVictoria.preparar(pesosVictoria, recompensaManos, recompensaDescartes, pesosInteres);
+        jugador.sumarPesos(pesosVictoria + recompensaManos + recompensaDescartes + pesosInteres);
     }
 
     public void sumarPesosExtrasVictoria(int cantidad) {

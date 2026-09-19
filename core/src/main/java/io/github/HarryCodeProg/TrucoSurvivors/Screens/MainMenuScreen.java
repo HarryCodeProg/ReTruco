@@ -1,6 +1,7 @@
 package io.github.HarryCodeProg.TrucoSurvivors.Screens;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -16,6 +17,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import io.github.HarryCodeProg.TrucoSurvivors.Main;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.Accion;
 import io.github.HarryCodeProg.TrucoSurvivors.Vista.Boton;
+import io.github.HarryCodeProg.TrucoSurvivors.Vista.FisicaTiltArrastre;
 
 public class MainMenuScreen implements Screen {
     private Main game;
@@ -36,6 +38,18 @@ public class MainMenuScreen implements Screen {
     private TextureRegion cartaDecorativa;
     private float tiempoDecoracion = 0f;
     private String subtituloActual;
+    private Texture logo1;
+    private Texture logo2;
+    private final float espadaXOriginal = 565f;
+    private final float espadaYOriginal = 580f;
+    private float espadaX = espadaXOriginal;
+    private float espadaY = espadaYOriginal;
+    private TextureRegion espadaUno;
+    private boolean arrastrandoEspada = false;
+    private float offsetEspadaX;
+    private float offsetEspadaY;
+    private final FisicaTiltArrastre fisicaTiltEspada = new FisicaTiltArrastre();
+    private float rotacionEspada = 0f;
     private final String[] frasesSubtitulo = {
         "EL TRUCO REINVENTADO",
         "¡QUIERO RETRUCO!",
@@ -98,6 +112,9 @@ public class MainMenuScreen implements Screen {
         botonOpciones = new Boton(centroX - anchoBoton / 2f, 245f, anchoBoton, altoBoton, "OPCIONES", Boton.TipoColor.CELESTE, Accion.OPCIONES);
         botonSalir = new Boton(centroX - anchoBoton / 2f, 165f, anchoBoton, altoBoton, "SALIR", Boton.TipoColor.BORDO, Accion.IR_AL_MAZO);
         cartaDecorativa = game.getAtlasCartas().findRegion("back");
+        logo1 = new Texture("ui/logo1.png");
+        logo2 = new Texture("ui/logo2.png");
+        espadaUno = game.getAtlasCartas().findRegion("1_espada");
         int indiceRandom = com.badlogic.gdx.math.MathUtils.random(0, frasesSubtitulo.length - 1);
         subtituloActual = frasesSubtitulo[indiceRandom];
         prepararFondo();
@@ -115,12 +132,11 @@ public class MainMenuScreen implements Screen {
         game.batch.setProjectionMatrix(camera.combined);
         mouseWorld.set(Gdx.input.getX(), Gdx.input.getY(), 0);
         camera.unproject(mouseWorld);
-
+        actualizarEspadaDecorativa();
         botonJugar.update(mouseWorld.x, mouseWorld.y);
         botonColeccion.update(mouseWorld.x, mouseWorld.y);
         botonOpciones.update(mouseWorld.x, mouseWorld.y);
         botonSalir.update(mouseWorld.x, mouseWorld.y);
-
         if (botonJugar.fueCliqueado(mouseWorld.x, mouseWorld.y)) {
             game.setScreen(new GameScreenV2(game));
             dispose();
@@ -140,40 +156,37 @@ public class MainMenuScreen implements Screen {
             Gdx.app.exit();
             return;
         }
-
         Gdx.gl.glClearColor(0f, 0f, 0f, 1f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         tiempoDecoracion += delta;
-
         game.batch.begin();
         fondoPlasma.render(game.batch, delta);
         dibujarDecoracion(game.batch);
         game.batch.end();
-
         game.batch.begin();
-        BitmapFont fontTitulo = game.getFuenteTitulo();
-        float escalaTituloOriginal = fontTitulo.getScaleX();
-        fontTitulo.getData().setScale(1.35f);
-        GlyphLayout titleLayout = new GlyphLayout(fontTitulo, "ReTruco");
-        float titleX = viewport.getWorldWidth() / 2f - titleLayout.width / 2f;
-        // Sombra del título
-        fontTitulo.setColor(0f, 0f, 0f, 0.45f);
-        fontTitulo.draw(game.batch, "ReTruco", titleX + 4f, 590f - 5f);
-        // Título
-        fontTitulo.setColor(1f, 1f, 1f, 1f);
-        fontTitulo.draw(game.batch, "ReTruco", titleX, 590f);
-        fontTitulo.getData().setScale(escalaTituloOriginal);
+
+        Texture logo = logo1;
+        float logoAncho = 420f;
+        float logoAlto = 140f;
+        float logoX = (viewport.getWorldWidth() - logoAncho) / 2f;
+        float logoY = 550f;
+        game.batch.setColor(Color.WHITE);
+        game.batch.draw(logo, logoX, logoY, logoAncho, logoAlto);
+        if (espadaUno != null) {
+            float espadaAncho = 62f;
+            float espadaAlto = 88f;
+            game.batch.setColor(Color.WHITE);
+            game.batch.draw(espadaUno, espadaX, espadaY, espadaAncho / 2f, espadaAlto / 2f, espadaAncho, espadaAlto, 1f, 1f, rotacionEspada);
+        }
 
         BitmapFont fontUI = game.getFuenteUI();
         fontUI.setColor(1f, 1f, 1f, 0.75f);
         GlyphLayout subtituloLayout = new GlyphLayout(fontUI, subtituloActual);
-        fontUI.draw(game.batch, subtituloActual, 640f - subtituloLayout.width / 2f, 545f);
+        fontUI.draw(game.batch, subtituloActual, 640f - subtituloLayout.width / 2f, 550f);
         fontUI.setColor(1f, 1f, 1f, 0.55f);
         fontUI.draw(game.batch, "v1.0.10", 1160f, 30f);
-
         // Dibujamos la caja contenedora justo antes de los botones
         dibujarCajaBotones(game.batch);
-
         botonJugar.render(game.batch);
         botonColeccion.render(game.batch);
         botonOpciones.render(game.batch);
@@ -181,20 +194,46 @@ public class MainMenuScreen implements Screen {
         game.batch.end();
     }
 
+    private void actualizarEspadaDecorativa() {
+        if (espadaUno == null) return;
+        float ancho = 62f;
+        float alto = 88f;
+        if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+            boolean encima = mouseWorld.x >= espadaX && mouseWorld.x <= espadaX + ancho && mouseWorld.y >= espadaY && mouseWorld.y <= espadaY + alto;
+            if (encima) {
+                arrastrandoEspada = true;
+                offsetEspadaX = mouseWorld.x - espadaX;
+                offsetEspadaY = mouseWorld.y - espadaY;
+                fisicaTiltEspada.iniciarArrastre(mouseWorld.x);
+            }
+        }
+        if (arrastrandoEspada) {
+            if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
+                espadaX = mouseWorld.x - offsetEspadaX;
+                espadaY = mouseWorld.y - offsetEspadaY;
+                fisicaTiltEspada.actualizarArrastre(mouseWorld.x, Gdx.graphics.getDeltaTime());
+                rotacionEspada = fisicaTiltEspada.getAngulo();
+            } else {
+                arrastrandoEspada = false;
+                espadaX = espadaXOriginal;
+                espadaY = espadaYOriginal;
+                fisicaTiltEspada.reset();
+                rotacionEspada = 0f;
+            }
+        }
+    }
+
     private void dibujarCajaBotones(SpriteBatch batch) {
         Texture pixel = game.getPixelBlanco();
         float anchoBoton = 220f;
         float altoBoton = 58f;
         float padding = 20f;
-
         // Calculamos la caja para que envuelva todos los botones
         float boxW = anchoBoton + (padding * 2f);
         // Desde el inicio del botón Salir (165) hasta el tope del botón Jugar (405 + 58)
         float boxH = (405f + altoBoton - 165f) + (padding * 2f);
-
         float boxX = (viewport.getWorldWidth() / 2f) - (boxW / 2f);
         float boxY = 165f - padding;
-
         // Borde oscuro grueso exterior
         dibujarRectRedondeado(batch, pixel, boxX - 4f, boxY - 4f, boxW + 8f, boxH + 8f, 12f, new Color(0.12f, 0.15f, 0.17f, 1f));
         // Fondo gris azulado interior (Color similar a la imagen)

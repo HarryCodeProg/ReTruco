@@ -3,8 +3,9 @@ package io.github.HarryCodeProg.TrucoSurvivors.Vista;
 public final class GameLayout {
     public static final float Y_BOTONES = 20f;
     public static final float ALTO_BOTON = 50f;
-    public static final float MARGEN_BOTONES_MANO = 45f;
+    public static final float ANCHO_CARTA = 120f;
     public static final float ALTO_CARTA = 180f;
+    public static final float MARGEN_BOTONES_MANO = 45f;
     public static final float Y_MANO_JUGADOR = Y_BOTONES + ALTO_BOTON + MARGEN_BOTONES_MANO;
     public static final float TECHO_MANO_JUGADOR = Y_MANO_JUGADOR + ALTO_CARTA;
     public static final float MARGEN_MANO_MESA = 8f;

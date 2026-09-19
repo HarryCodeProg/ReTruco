@@ -60,6 +60,7 @@ public class VistaJoker implements Arrastrable{
     private static final float RADIO_MARCO = 8f;
     private static final float GROSOR_MARCO = 2f;
     private boolean tooltipLateral = false;
+    private final FisicaTiltArrastre fisicaTiltArrastre = new FisicaTiltArrastre();
 
     public VistaJoker(Joker joker, TextureAtlas atlas) {
         this.joker = joker;
@@ -218,57 +219,6 @@ public class VistaJoker implements Arrastrable{
 
     public boolean isDragging() { return this.dragging; }
 
-    public void update(float mouseX, float mouseY, float delta) {
-        if (resaltado) {
-            pulso += delta * 6f; // velocidad del latido
-        }
-        hover = !ALGUN_DRAG_ACTIVO && contiene(mouseX, mouseY);
-        float offsetHover = hover ? OFFSET_HOVER : 0f;
-        float offsetSeleccion = seleccionada ? OFFSET_SELECCIONADA : 0f;
-        targetScale = hover ? ESCALA_HOVER : 1f;
-        targetOffsetY = offsetHover + offsetSeleccion;
-        if (hover) targetRotation = 0f;
-        if (!ALGUN_DRAG_ACTIVO) {
-            hover = contiene(mouseX, mouseY);
-        } else {
-            hover = false;
-        }
-        if (hover) targetRotation = 0f;
-        if (hover && !dragging) {
-            float cx = x + (width * scale) / 2f;
-            float cy = y + visualOffsetY + (height * scale) / 2f;
-            float mouseDeltaX = (mouseX - cx) / ((width * scale) / 2f);
-            float mouseDeltaY = (mouseY - cy) / ((height * scale) / 2f);
-            mouseDeltaX = Math.max(-1f, Math.min(1f, mouseDeltaX));
-            mouseDeltaY = Math.max(-1f, Math.min(1f, mouseDeltaY));
-            targetTiltY = mouseDeltaX * MAX_TILT;
-            targetTiltX = -mouseDeltaY * MAX_TILT;
-        } else {
-            targetTiltX = 0f;
-            targetTiltY = 0f;
-        }
-        tiltX = moverHacia(tiltX, targetTiltX, VELOCIDAD_TILT * delta);
-        tiltY = moverHacia(tiltY, targetTiltY, VELOCIDAD_TILT * delta);
-        if (!dragging) {
-            x = moverHacia(x, targetX, VELOCIDAD_POSICION * delta);
-            y = moverHacia(y, targetY, VELOCIDAD_POSICION * delta);
-            scale = moverHacia(scale, targetScale, VELOCIDAD_ESCALA * delta);
-            visualOffsetY = moverHacia(visualOffsetY, targetOffsetY, VELOCIDAD_OFFSET * delta);
-            rotation = moverHacia(rotation, targetRotation, VELOCIDAD_ROTACION * delta);
-        } else {
-            x = targetX;
-            y = targetY;
-            scale = moverHacia(scale, 1.2f, VELOCIDAD_ESCALA * delta);
-            visualOffsetY = moverHacia(visualOffsetY, 0f, VELOCIDAD_OFFSET * delta);
-        }
-    }
-
-    private float moverHacia(float value, float target, float maxDelta) {
-        float diferencia = target - value;
-        if (Math.abs(diferencia) <= maxDelta) return target;
-        return value + Math.signum(diferencia) * maxDelta;
-    }
-
     public void input(float mouseX, float mouseY) {
         draggingAnterior = dragging;
         if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT) && contiene(mouseX, mouseY)) {
@@ -279,6 +229,9 @@ public class VistaJoker implements Arrastrable{
             dragOffsetX = mouseX - x;
             dragOffsetY = mouseY - y;
             ALGUN_DRAG_ACTIVO = true;
+
+            // --- NUEVO: Iniciamos la física de arrastre ---
+            fisicaTiltArrastre.iniciarArrastre(mouseX);
         }
         if (dragging) {
             float dx = mouseX - pressX;
@@ -310,6 +263,66 @@ public class VistaJoker implements Arrastrable{
         }
     }
 
+    public void update(float mouseX, float mouseY, float delta) {
+        if (resaltado) {
+            pulso += delta * 6f; // velocidad del latido
+        }
+        if (!ALGUN_DRAG_ACTIVO) {
+            hover = contiene(mouseX, mouseY);
+        } else {
+            hover = false;
+        }
+        float offsetHover = hover ? OFFSET_HOVER : 0f;
+        float offsetSeleccion = seleccionada ? OFFSET_SELECCIONADA : 0f;
+        targetScale = hover ? ESCALA_HOVER : 1f;
+        targetOffsetY = offsetHover + offsetSeleccion;
+        if (hover) targetRotation = 0f;
+        // --- NUEVA LÓGICA DE INCLINACIÓN (Física de Arrastre + Hover) ---
+        if (dragging) {
+            fisicaTiltArrastre.actualizarArrastre(mouseX, delta);
+            targetTiltY = fisicaTiltArrastre.getAngulo();
+            targetTiltX = 0f;
+        } else {
+            fisicaTiltArrastre.actualizarSoltada(delta);
+            if (fisicaTiltArrastre.estaActiva()) {
+                targetTiltY = fisicaTiltArrastre.getAngulo();
+                targetTiltX = 0f;
+            } else if (hover) {
+                float cx = x + (width * scale) / 2f;
+                float cy = y + visualOffsetY + (height * scale) / 2f;
+                float mouseDeltaX = (mouseX - cx) / ((width * scale) / 2f);
+                float mouseDeltaY = (mouseY - cy) / ((height * scale) / 2f);
+                mouseDeltaX = Math.max(-1f, Math.min(1f, mouseDeltaX));
+                mouseDeltaY = Math.max(-1f, Math.min(1f, mouseDeltaY));
+                targetTiltY = mouseDeltaX * MAX_TILT;
+                targetTiltX = -mouseDeltaY * MAX_TILT;
+            } else {
+                targetTiltY = 0f;
+                targetTiltX = 0f;
+            }
+        }
+        tiltX = moverHacia(tiltX, targetTiltX, VELOCIDAD_TILT * delta);
+        tiltY = moverHacia(tiltY, targetTiltY, VELOCIDAD_TILT * delta);
+        if (!dragging) {
+            x = moverHacia(x, targetX, VELOCIDAD_POSICION * delta);
+            y = moverHacia(y, targetY, VELOCIDAD_POSICION * delta);
+            scale = moverHacia(scale, targetScale, VELOCIDAD_ESCALA * delta);
+            visualOffsetY = moverHacia(visualOffsetY, targetOffsetY, VELOCIDAD_OFFSET * delta);
+            rotation = moverHacia(rotation, targetRotation, VELOCIDAD_ROTACION * delta);
+        } else {
+            x = targetX;
+            y = targetY;
+            scale = moverHacia(scale, 1.2f, VELOCIDAD_ESCALA * delta);
+            visualOffsetY = moverHacia(visualOffsetY, 0f, VELOCIDAD_OFFSET * delta);
+        }
+    }
+
+    private float moverHacia(float value, float target, float maxDelta) {
+        float diferencia = target - value;
+        if (Math.abs(diferencia) <= maxDelta) return target;
+        return value + Math.signum(diferencia) * maxDelta;
+    }
+
     public void setHandPosition(float x, float y) {
         this.handX = x;
         this.handY = y;
@@ -320,7 +333,8 @@ public class VistaJoker implements Arrastrable{
     public boolean contiene(float mx, float my) {
         float w = width * scale;
         float h = height * scale;
-        return mx >= x && mx <= x + w && my >= y && my <= y + h;
+        float drawY = y + visualOffsetY;
+        return mx >= x && mx <= x + w && my >= drawY && my <= drawY + h;
     }
 
     private void dibujarCartelStats(SpriteBatch batch, Main game, Juego juego, float drawY) {

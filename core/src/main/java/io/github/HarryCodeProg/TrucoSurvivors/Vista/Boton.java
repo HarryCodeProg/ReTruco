@@ -58,6 +58,10 @@ public class Boton {
     private Accion accion;
     private boolean hover;
     private boolean pressed;
+    private boolean clickEnCurso = false;
+    private float animPresionado = 0f;
+    private static final float VELOCIDAD_PRESION = 18f;
+    private static final float ESCALA_PRESION = 0.96f;
     private boolean habilitado = true;
     private BitmapFont font;
     private boolean fontPropia;
@@ -73,6 +77,9 @@ public class Boton {
     private Color colorTextoActual = new Color();
     private final Color colorGlowActual = new Color();
     private boolean visible = true;
+    private float tiempoPresionado = 0f;
+    private static final float DURACION_PRESION = 0.02f;
+    private boolean clickConfirmado = false;
 
     public Boton(float x, float y, float width, float height, Accion accion) {
         Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
@@ -138,16 +145,14 @@ public class Boton {
             }
         }
         // PRESIONADO
-        boolean estaPresionado = pressed && habilitado;
-        if (estaPresionado) {
-            float escala = 0.96f;
-            drawWidth = width * escala;
-            drawHeight = height * escala;
-            drawX = x + (width - drawWidth) / 2f;
-            drawY = y + (height - drawHeight) / 2f - 3f;
-            colorFondoActual.mul(0.78f, 0.78f, 0.78f, 1f);
-            colorBordeActual.mul(0.75f, 0.75f, 0.75f, 1f);
-        }
+        boolean estaPresionado = pressed || tiempoPresionado > 0f;
+        float escalaPresion = 1f - (1f - ESCALA_PRESION) * animPresionado;
+        drawWidth = width * escalaPresion;
+        drawHeight = height * escalaPresion;
+        drawX = x + (width - drawWidth) / 2f;
+        drawY = y + (height - drawHeight) / 2f - (4f * animPresionado);
+        colorFondoActual.mul(1f - 0.22f * animPresionado, 1f - 0.22f * animPresionado, 1f - 0.22f * animPresionado, 1f);
+        colorBordeActual.mul(1f - 0.18f * animPresionado, 1f - 0.18f * animPresionado, 1f - 0.18f * animPresionado, 1f);
         // GLOW HOVER
         if (hover && habilitado && !estaPresionado) {
             colorGlowActual.set(colorBase.r, colorBase.g, colorBase.b, 0.12f);
@@ -169,12 +174,6 @@ public class Boton {
             batch.draw(pixel, drawX + 5f, drawY + drawHeight - 7f, drawWidth - 10f, 2f);
             batch.setColor(UITheme.BRILLO);
         }
-        // SOMBRA INTERIOR INFERIOR
-        if (!estaPresionado) {
-            batch.setColor(UITheme.SOMBRA_SUAVE);
-            batch.draw(pixel, drawX + 5f, drawY + 4f, drawWidth - 10f, 2f);
-            batch.setColor(UITheme.BRILLO);
-        }
         // TEXTO
         String textoRender = obtenerTexto();
         float escalaOriginal = font.getScaleX();
@@ -190,21 +189,83 @@ public class Boton {
     }
 
     public void update(float mouseX, float mouseY) {
-        if (!visible) return;
+        if (!visible) {
+            hover = false;
+            pressed = false;
+            clickEnCurso = false;
+            animPresionado = 0f;
+            tiempoPresionado = 0f;
+            return;
+        }
         if (!habilitado) {
             hover = false;
             pressed = false;
+            clickEnCurso = false;
+            animPresionado = 0f;
+            tiempoPresionado = 0f;
             return;
         }
         hover = mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + height;
-        pressed = hover && Gdx.input.isButtonPressed(Input.Buttons.LEFT);
+        // 1. Iniciamos el click solo si presionamos Estando sobre el botón
+        if (!clickEnCurso && hover && Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+            clickEnCurso = true;
+        }
+        // 2. Mientras mantengamos presionado, evaluamos si seguimos adentro o salimos
+        if (clickEnCurso) {
+            pressed = hover && Gdx.input.isButtonPressed(Input.Buttons.LEFT);
+            // 3. Soltamos el click
+            if (!Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
+                boolean confirmarClick = hover; // Confirmamos solo si soltamos Adentro
+                clickEnCurso = false;
+                pressed = false;
+                if (confirmarClick) {
+                    tiempoPresionado = DURACION_PRESION; // Mantenemos el botón hundido visualmente
+                    ejecutarClick();
+                }
+            }
+        } else {
+            pressed = false;
+        }
+        // --- LÓGICA VISUAL DE ANIMACIÓN ---
+        if (tiempoPresionado > 0f) {
+            tiempoPresionado -= Gdx.graphics.getDeltaTime();
+        }
+        float objetivoPresion = (pressed || tiempoPresionado > 0f) ? 1f : 0f;
+        animPresionado += (objetivoPresion - animPresionado) * Math.min(1f, VELOCIDAD_PRESION * Gdx.graphics.getDeltaTime());
+        if (Math.abs(animPresionado) < 0.01f && !pressed && tiempoPresionado <= 0f) {
+            animPresionado = 0f;
+        }
+    }
+
+    private void ejecutarClick() {
+        clickConfirmado = true; // Avisamos que hay un click listo para ser consumido
+        if (debeReproducirSonidoClick()) {
+            Main.getInstance().getGestorSonidos().reproducirSonidoClick();
+        }
     }
 
     public boolean fueCliqueado(float mouseWorldX, float mouseWorldY) {
-        if (!visible) return false;
-        if (!habilitado) return false;
-        boolean encima = mouseWorldX >= x && mouseWorldX <= x + width && mouseWorldY >= y && mouseWorldY <= y + height;
-        return encima && Gdx.input.isButtonJustPressed(Input.Buttons.LEFT);
+        if (!visible || !habilitado) return false;
+        return consumirClick();
+    }
+
+    public boolean consumirClick() {
+        if (!clickConfirmado) return false;
+        clickConfirmado = false;
+        return true;
+    }
+
+    private boolean debeReproducirSonidoClick() {
+        if (accion == null) return true;
+        switch (accion) {
+            case COMPRAR_ITEM_TIENDA:
+            case COMPRAR_Y_USAR_SANTO:
+            case REROLL_CARTAS:
+            case REROLL_JOKERS:
+                return false;
+            default:
+                return true;
+        }
     }
 
     public Accion getAccion() {
