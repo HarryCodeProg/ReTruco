@@ -13,7 +13,7 @@ public class Ñoquis extends Joker {
 
     public Ñoquis(){
         super(26, "Ñoquis", "Ñoquis", "Gana +2 Multiplicador truco cada vez que cantás \"Quiero\"",
-            Rareza.comun, 1, Joker.FaseActivacion.INDEPENDIENTE,
+            Rareza.comun, 4, Joker.FaseActivacion.INDEPENDIENTE,
             CategoriaJoker.NACIONAL, CategoriaJoker.COMIDA, CategoriaJoker.TRADICIONAL);
     }
 

@@ -20,6 +20,8 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import java.util.ArrayList;
 import java.util.Locale;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 
 public class Main extends Game {
     public SpriteBatch batch;
@@ -43,6 +45,8 @@ public class Main extends Game {
     private TextureAtlas atlasSantos;
     private BitmapFont fuenteUI;
     private ConfiguracionJuego configuracionJuego;
+    private BitmapFont fuenteTooltipTitulo;
+    private BitmapFont fuenteTooltipDescripcion;
 
     @Override
     public void create() {
@@ -137,7 +141,7 @@ public class Main extends Game {
         listaRivales.add(new DatosRival("Agusto", "Se hace odiar muy facil", 250000, false,13));
         listaRivales.add(new DatosRival("Benja", "No tiene VTV, es un peligro", 500000, false,14));
 
-        listaRivales.add(new DatosRival("Juanse", "Se autonombra el secas", 800000, false,15));
+        listaRivales.add(new DatosRival("Javito", "Siempre esta perdido", 800000, false,15));
         listaRivales.add(new DatosRival("El Z", "Le gusta Dragon Ball", 1000000, false,16));
         listaRivales.add(new DatosRival("Liguo", "La parca oscura", 1500000, false,17));
 
@@ -145,9 +149,11 @@ public class Main extends Game {
         listaRivales.add(new DatosRival("Thian", "Le gusta el futbol", 3000000, false,19));
         listaRivales.add(new DatosRival("Thiago", "Es muy erratico", 3500000, false,20));
 
-        listaRivales.add(new DatosRival("Susana", "Doña de doñas", 4000000, false,21));
-        listaRivales.add(new DatosRival("Nahuel", "¿Quien?", 5000000, false,22));
-        listaRivales.add(new DatosRival("Harry", "El creador del juego", 6666666, false,23));
+        listaRivales.add(new DatosRival("Marita", "Hermana mayor mas joven", 4000000, false,21));
+        listaRivales.add(new DatosRival("Yanina", "Hermana mayor mas grande", 5000000, false,22));
+        listaRivales.add(new DatosRival("Susana", "Doña de doñas", 5500000, false,23));
+
+        listaRivales.add(new DatosRival("Harry", "El creador del juego", 6666666, false,24));
     }
 
     public ArrayList<DatosRival> getListaRivales() {
@@ -173,19 +179,16 @@ public class Main extends Game {
         parameter.borderColor = Color.BLACK;
         fuentePrincipal = generator.generateFont(parameter);
         generator.dispose();
-
         // Títulos: ornamental, cálida y asociada a la estética tradicional del juego.
         generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/Almendra-Bold.ttf"));
         parameter.size = 48;
         fuenteTitulo = generator.generateFont(parameter);
         generator.dispose();
-
         // Acciones: fuerte y breve para botones, con personalidad sin perder contraste.
         generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/PirataOne-Regular.ttf"));
         parameter.size = 22;
         fuenteBotones = generator.generateFont(parameter);
         generator.dispose();
-
         // HUD: formas nítidas para contadores, multiplicadores y etiquetas compactas.
         generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/Cinzel-VariableFont_wght.ttf"));
         parameter.size = 20;
@@ -193,14 +196,45 @@ public class Main extends Game {
         fuenteUI.getData().setScale(0.9f);
         fuenteUI.setColor(Color.WHITE);
         generator.dispose();
-
         // Valores: dígitos de Cinzel con mayor tamaño para lectura inmediata en HUD y stats.
         generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/Cinzel-VariableFont_wght.ttf"));
         parameter.size = 22;
         fuenteNumeros = generator.generateFont(parameter);
         fuenteNumeros.setColor(Color.WHITE);
+        cargarFuentesTooltip();
         generator.dispose();
     }
+
+    private void cargarFuentesTooltip() {
+        // --- TÍTULO: gruesa, alto contraste ---
+        // Alternativas para probar el título (comentar la de arriba, descomentar una de estas):
+        // FreeTypeFontGenerator genTitulo = new FreeTypeFontGenerator(Gdx.files.internal("fonts/m6x11plus.ttf"));
+        // FreeTypeFontGenerator genTitulo = new FreeTypeFontGenerator(Gdx.files.internal("fonts/UnifrakturCook-Bold.ttf")); // gótica, no pixel — probablemente NO
+        // FreeTypeFontGenerator genTitulo = new FreeTypeFontGenerator(Gdx.files.internal("fonts/Rye-Regular.ttf")); // western, tampoco pixel
+        FreeTypeFontGenerator genTitulo = new FreeTypeFontGenerator(Gdx.files.internal("fonts/PixelOperator8-Bold.ttf"));
+        FreeTypeFontParameter paramTitulo = new FreeTypeFontParameter();
+        paramTitulo.size = 22;
+        paramTitulo.color = Color.WHITE;
+        paramTitulo.borderWidth = 0f;
+        fuenteTooltipTitulo = genTitulo.generateFont(paramTitulo);
+        genTitulo.dispose();
+        // --- DESCRIPCIÓN: legible, más espaciada que m6x11 ---
+        // Alternativas para probar la descripción:
+        FreeTypeFontGenerator genDesc = new FreeTypeFontGenerator(Gdx.files.internal("fonts/m6x11plus.ttf"));
+        // FreeTypeFontGenerator genDesc = new FreeTypeFontGenerator(Gdx.files.internal("fonts/scientifica.ttf")); // muy chica/densa, probablemente difícil de leer a este tamaño
+        // FreeTypeFontGenerator genDesc = new FreeTypeFontGenerator(Gdx.files.internal("fonts/CozetteVector.ttf")); // pixel muy fina, riesgo de apretarse igual que antes
+       // FreeTypeFontGenerator genDesc = new FreeTypeFontGenerator(Gdx.files.internal("fonts/PixelOperator.ttf"));
+        FreeTypeFontParameter paramDesc = new FreeTypeFontParameter();
+        paramDesc.size = 20;
+        //paramDesc.color = new Color(0.15f, 0.15f, 0.15f, 1f);
+        paramDesc.color = Color.WHITE;
+        paramDesc.borderWidth = 0f;
+        fuenteTooltipDescripcion = genDesc.generateFont(paramDesc);
+        genDesc.dispose();
+    }
+
+    public BitmapFont getFuenteTooltipTitulo() { return fuenteTooltipTitulo; }
+    public BitmapFont getFuenteTooltipDescripcion() { return fuenteTooltipDescripcion; }
 
     public BitmapFont getFuentePrincipal() { return fuentePrincipal; }
 
@@ -242,5 +276,7 @@ public class Main extends Game {
         if (atlasZodiaco != null) atlasZodiaco.dispose();
         if (texturaRuletaFondo != null) texturaRuletaFondo.dispose();
         if (fuenteUI != null) fuenteUI.dispose();
+        if (fuenteTooltipTitulo != null) fuenteTooltipTitulo.dispose();
+        if (fuenteTooltipDescripcion != null) fuenteTooltipDescripcion.dispose();
     }
 }

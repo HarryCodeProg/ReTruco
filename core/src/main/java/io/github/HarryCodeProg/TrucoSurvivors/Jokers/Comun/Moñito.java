@@ -12,7 +12,7 @@ import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 public class Moñito extends Joker {
     public Moñito(){
         super(22, "Moñito", "Moñito", "Las cartas de Basto que no maten reciben +20 puntos truco",
-            Rareza.comun, 1, Joker.FaseActivacion.AL_PUNTUAR_CARTA,
+            Rareza.comun, 3, Joker.FaseActivacion.AL_PUNTUAR_CARTA,
             CategoriaJoker.NACIONAL, CategoriaJoker.COMIDA, CategoriaJoker.DULCE);
     }
 

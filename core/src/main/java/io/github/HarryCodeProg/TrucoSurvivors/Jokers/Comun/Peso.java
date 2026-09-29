@@ -10,8 +10,8 @@ import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 public class Peso extends Joker {
 
     public Peso() {
-        super(33, "Peso", "Peso", "+1 peso por cada joker 'Nacional' al final de la ronda",
-            Rareza.comun, 1, Joker.FaseActivacion.INDEPENDIENTE,
+        super(33, "Peso", "Peso", "+$1 por cada joker 'Nacional' al final de la ronda",
+            Rareza.comun, 3, Joker.FaseActivacion.INDEPENDIENTE,
             CategoriaJoker.NACIONAL, CategoriaJoker.HISTORIA);
     }
 

@@ -68,20 +68,134 @@ public class Background {
                 "    for(int i=0;i<5;i++){ value += amp*noise(st); st*=2.0; amp*=0.5; }\n" +
                 "    return value;\n" +
                 "}\n" +
+                "float nubeOrganica(vec2 p, float escala, float velocidad, float semilla) {\n" +
+                "    vec2 q = p * escala;\n" +
+                "\n" +
+                "    float t = u_time * velocidad;\n" +
+                "\n" +
+                "    q.x += sin(q.y * 2.1 + t + semilla) * 0.22;\n" +
+                "    q.y += cos(q.x * 1.7 - t * 0.85 + semilla) * 0.18;\n" +
+                "\n" +
+                "    vec2 warp1 = vec2(\n" +
+                "        fbm(q * 1.15 + vec2(t * 0.22 + semilla, -t * 0.16)),\n" +
+                "        fbm(q * 1.15 + vec2(-t * 0.18, t * 0.24 + semilla))\n" +
+                "    );\n" +
+                "\n" +
+                "    q += (warp1 - 0.5) * 1.15;\n" +
+                "\n" +
+                "    float n1 = fbm(q);\n" +
+                "    float n2 = fbm(q * 2.1 + vec2(sin(t * 0.7 + semilla), cos(t * 0.55 + semilla)));\n" +
+                "\n" +
+                "    return mix(n1, n2, 0.28);\n" +
+                "}"+
                 "void main(){\n" +
                 "    vec2 uv = gl_FragCoord.xy/u_resolution.xy;\n" +
                 "    uv.x*=u_resolution.x/u_resolution.y;\n" +
-                "    float t=u_time*0.10;\n" +
+                "    float t=u_time;\n" + // <--- ACÁ ESTÁ EL CAMBIO
                 "    vec3 color = vec3(0.0);\n" +
-                "    if(u_efecto == 0) {\n" +
-                "        float n  = fbm(uv*3.5 + vec2(t*1.5, t*0.5));\n" +
-                "        float n2 = fbm(uv*6.0 - vec2(t*0.8, t*1.3));\n" +
-                "        float f = mix(n,n2,0.35);\n" +
-                "        vec3 c2b = u_c2 * u_brillo;\n" +
-                "        if(f < 0.85){ color = mix(u_c1, c2b, smoothstep(0.0, 0.85, f)); }\n" +
-                "        else { color = mix(c2b, u_c3, smoothstep(0.85, 1.0, f) * 0.25); }\n" +
-                "        color *= 0.90 + 0.05*sin(u_time*1.5);\n" +
-                "    } else if(u_efecto == 1) {\n" +
+                "   if(u_efecto == 0) {\n" +
+                "\n" +
+                "    // =========================================================\n" +
+                "    // CIELO\n" +
+                "    // =========================================================\n" +
+                "\n" +
+                "    vec3 cieloArriba = mix(\n" +
+                "        vec3(0.12, 0.32, 0.58),\n" +
+                "        u_c1,\n" +
+                "        0.35\n" +
+                "    ) * u_brillo;\n" +
+                "\n" +
+                "    vec3 cieloAbajo = mix(\n" +
+                "        vec3(0.58, 0.78, 0.93),\n" +
+                "        u_c2,\n" +
+                "        0.22\n" +
+                "    ) * u_brillo;\n" +
+                "\n" +
+                "    float gradiente = smoothstep(0.0, 1.0, uv.y);\n" +
+                "    color = mix(cieloAbajo, cieloArriba, gradiente);\n" +
+                "\n" +
+                "    // =========================================================\n" +
+                "    // NUBE LEJANA\n" +
+                "    // =========================================================\n" +
+                "\n" +
+                "    float nube1 = nubeOrganica(uv + vec2(0.0, 0.20), 2.1, 0.22, 1.7);\n" +
+                "    float mascara1 = smoothstep(0.58, 0.73, nube1);\n" +
+                "\n" +
+                "    color = mix(\n" +
+                "        color,\n" +
+                "        vec3(0.78, 0.86, 0.94),\n" +
+                "        mascara1 * 0.26\n" +
+                "    );\n" +
+                "\n" +
+                "    // =========================================================\n" +
+                "    // NUBE MEDIA\n" +
+                "    // =========================================================\n" +
+                "\n" +
+                "    float nube2 = nubeOrganica(\n" +
+                "        uv + vec2(3.7, -0.4),\n" +
+                "        3.4,\n" +
+                "        0.40,\n" +
+                "        7.2\n" +
+                "    );\n" +
+                "\n" +
+                "    float mascara2 = smoothstep(0.56, 0.72, nube2);\n" +
+                "\n" +
+                "    color = mix(\n" +
+                "        color,\n" +
+                "        vec3(0.88, 0.92, 0.96),\n" +
+                "        mascara2 * 0.34\n" +
+                "    );\n" +
+                "\n" +
+                "    // =========================================================\n" +
+                "    // NUBE CERCANA\n" +
+                "    // =========================================================\n" +
+                "\n" +
+                "    float nube3 = nubeOrganica(\n" +
+                "        uv + vec2(-2.5, 1.4),\n" +
+                "        5.0,\n" +
+                "        0.68,\n" +
+                "        13.5\n" +
+                "    );\n" +
+                "\n" +
+                "    float mascara3 = smoothstep(0.57, 0.75, nube3);\n" +
+                "\n" +
+                "    color = mix(\n" +
+                "        color,\n" +
+                "        vec3(0.94, 0.96, 0.98),\n" +
+                "        mascara3 * 0.34\n" +
+                "    );\n" +
+                "\n" +
+                "    // =========================================================\n" +
+                "    // SOMBRAS SUAVES\n" +
+                "    // =========================================================\n" +
+                "\n" +
+                "    float sombra = smoothstep(0.45, 0.62, nube2);\n" +
+                "\n" +
+                "    color -= vec3(0.025, 0.035, 0.05) * sombra;\n" +
+                "\n" +
+                "    // =========================================================\n" +
+                "    // LUZ SOLAR SUAVE\n" +
+                "    // =========================================================\n" +
+                "\n" +
+                "    vec2 posicionSol = vec2(0.72, 0.78);\n" +
+                "    vec2 uvNormalizada = vec2(\n" +
+                "        uv.x / (u_resolution.x / u_resolution.y),\n" +
+                "        uv.y\n" +
+                "    );\n" +
+                "\n" +
+                "    float distanciaSol = distance(uvNormalizada, posicionSol);\n" +
+                "\n" +
+                "    float halo = smoothstep(0.48, 0.0, distanciaSol);\n" +
+                "\n" +
+                "    color += vec3(1.0, 0.91, 0.72) * halo * 0.09;\n" +
+                "\n" +
+                "    // =========================================================\n" +
+                "    // VARIACIÓN AMBIENTAL\n" +
+                "    // =========================================================\n" +
+                "\n" +
+                "    color *= 0.985 + 0.015 * sin(u_time * 0.25);\n" +
+                "}\n" +
+                "else if(u_efecto == 1) {\n" +
                 "        uv.y += sin(uv.x * 5.0 + u_time) * 0.1;\n" +
                 "        float linea = abs(0.02 / sin(uv.y * 20.0 - u_time * 2.0));\n" +
                 "        color = mix(u_c1, u_c2 * u_brillo, linea);\n" +
@@ -96,7 +210,6 @@ public class Background {
                 "    vec4 tex = texture2D(u_texture,v_texCoords)*0.00001;\n" +
                 "    gl_FragColor = vec4(color,1.0)+tex;\n" +
                 "}";
-
         shaderPlasma = new ShaderProgram(vertexShader, fragmentShader);
         if (!shaderPlasma.isCompiled()) System.err.println("¡ERROR SHADER!: " + shaderPlasma.getLog());
         Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);

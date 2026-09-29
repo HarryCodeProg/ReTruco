@@ -14,26 +14,9 @@ import io.github.HarryCodeProg.TrucoSurvivors.Main;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 
 public class PanelPuntajes {
-    // Colores del estilo Balatro
-    private static final Color NEGRO_IZQ = new Color(0.04f, 0.05f, 0.06f, 1f);
-    private static final Color NEGRO_IZQ_S = new Color(0.02f, 0.02f, 0.03f, 1f);
-    private static final Color GRIS_AZULADO = new Color(0.24f, 0.31f, 0.40f, 1f);
-    private static final Color GRIS_AZULADO_S = new Color(0.12f, 0.15f, 0.20f, 1f);
-    private static final Color AZUL_PUNTOS = new Color(0.22f, 0.28f, 0.35f, 1f);
-    private static final Color AZUL_PUNTOS_S = new Color(0.11f, 0.14f, 0.18f, 1f);
-    private static final Color MARRON_AREA = new Color(0.45f, 0.25f, 0.05f, 1f);
-    private static final Color MARRON_AREA_S = new Color(0.22f, 0.12f, 0.02f, 1f);
-    private static final Color OLIVA_PUNTOS = new Color(0.35f, 0.3f, 0.2f, 1f);
-    private static final Color OLIVA_PUNTOS_S = new Color(0.17f, 0.15f, 0.1f, 1f);
-    private static final Color VERDE_OSCURO = new Color(0.18f, 0.32f, 0.22f, 1f);
-    private static final Color VERDE_OSCURO_S = new Color(0.09f, 0.16f, 0.11f, 1f);
-    private static final Color MARRON_OSCURO = new Color(0.38f, 0.25f, 0.1f, 1f);
-    private static final Color MARRON_OSCURO_S = new Color(0.19f, 0.12f, 0.05f, 1f);
-    private static final Color GRIS_OSCURO_DER = new Color(0.15f, 0.16f, 0.18f, 1f);
-    private static final Color GRIS_OSCURO_DER_S = new Color(0.07f, 0.08f, 0.09f, 1f);
-    private static final Color ORO = new Color(0.92f, 0.73f, 0.25f, 1f);
+    private static final Color BORDE_PANEL = new Color(0.18f, 0.22f, 0.28f, 1f);
+    private static final Color SEPARADOR_PANEL = new Color(0.35f, 0.40f, 0.48f, 0.55f);
     private static final Color FONDO_PANEL = new Color(0.08f, 0.11f, 0.14f, 1f);
-
     // Ajuste de espaciado para que no se caiga de la pantalla
     public static final float ESPACIO_LINEA = 50f;
     public static final float ALTO_CAJA = 34f;
@@ -41,7 +24,6 @@ public class PanelPuntajes {
     public static final float ANCHO_CAJA_MULT = 68f;
     public static final float ESPACIO_X = 18f;
     private static final float RADIO_ESQUINA = 6f;
-
     private final ShapeRenderer shapeRenderer;
     private final GlyphLayout layout = new GlyphLayout();
     private String rivalNombre = "";
@@ -65,18 +47,17 @@ public class PanelPuntajes {
         float altoFondo = Gdx.graphics.getHeight();
         float fondoX = x - margenX;
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        // =========================================================
-        // FONDO GENERAL LISO
-        // =========================================================
+        // PANEL PRINCIPAL
+        shapeRenderer.setColor(new Color(0.015f, 0.018f, 0.025f, 0.75f));
+        dibujarRectanguloRedondeado(fondoX - 3f, -3f, anchoFondo + 6f, altoFondo + 6f, RADIO_ESQUINA + 2f);
         shapeRenderer.setColor(FONDO_PANEL);
-        dibujarRectanguloRedondeado(fondoX, 0f, anchoFondo, altoFondo, RADIO_ESQUINA * 2f);
-        // Linea dorada en el borde derecho
-        shapeRenderer.setColor(new Color(0.85f, 0.65f, 0.2f, 1f));
-        shapeRenderer.rect(fondoX + anchoFondo - 2f, 0f, 2f, altoFondo);
-        
-        // =========================================================
-        // POSICIONES EXACTAS DE LAS FILAS
-        // =========================================================
+        dibujarRectanguloRedondeado(fondoX, 0f, anchoFondo, altoFondo, RADIO_ESQUINA);
+        // BORDE
+        shapeRenderer.setColor(BORDE_PANEL);
+        dibujarRectanguloRedondeado(fondoX + 2f, 2f, anchoFondo - 4f, altoFondo - 4f, RADIO_ESQUINA - 1f);
+        // LÍNEA DORADA LATERAL
+        shapeRenderer.setColor(UITheme.DORADO);
+        shapeRenderer.rect(fondoX + anchoFondo - 3f, 0f, 3f, altoFondo);
         float currentY = y + 70f;
         float rivalTrucoY = currentY;
         float rivalEnvidoY = rivalTrucoY - ESPACIO_LINEA;
@@ -88,23 +69,30 @@ public class PanelPuntajes {
         float manosY = jugadorEnvidoY - ESPACIO_LINEA;
         float descartesY = manosY - ESPACIO_LINEA;
         float pesosY = descartesY - ESPACIO_LINEA - 5f;
-
-        // CAJAS
-        // Rival
-        dibujarCajaBaseYMultiplicador(x, rivalTrucoY, NEGRO_IZQ, NEGRO_IZQ_S, GRIS_AZULADO, GRIS_AZULADO_S);
-        dibujarCajaBaseYMultiplicador(x, rivalEnvidoY, NEGRO_IZQ, NEGRO_IZQ_S, GRIS_AZULADO, GRIS_AZULADO_S);
-        dibujarCajaSimple(x, puntosRivalY, AZUL_PUNTOS, AZUL_PUNTOS_S);
-        // META Y LIGA
-        dibujarCajaSimple(x, metaY, MARRON_AREA, MARRON_AREA_S);
-        dibujarCajaSimple(x, puntosJugadorY, OLIVA_PUNTOS, OLIVA_PUNTOS_S);
-        // Jugador
-        dibujarCajaBaseYMultiplicador(x, jugadorTrucoY, VERDE_OSCURO, VERDE_OSCURO_S, MARRON_OSCURO, MARRON_OSCURO_S);
-        dibujarCajaBaseYMultiplicador(x, jugadorEnvidoY, MARRON_OSCURO, MARRON_OSCURO_S, GRIS_OSCURO_DER, GRIS_OSCURO_DER_S);
-        dibujarCajaSimple(x, manosY, VERDE_OSCURO, VERDE_OSCURO_S);
-        dibujarCajaSimple(x, descartesY, MARRON_OSCURO, MARRON_OSCURO_S);
-        // Borde dorado para el dinero
-        dibujarCajaConBorde(x, pesosY, new Color(0.9f, 0.7f, 0.2f, 1f), new Color(0.5f, 0.3f, 0.05f, 1f), new Color(0.1f, 0.1f, 0.1f, 1f));
+        // BLOQUE RIVAL
+        dibujarCajaBaseYMultiplicador(x, rivalTrucoY, UITheme.PANEL_SECUNDARIO, UITheme.BORDE, UITheme.AZUL, UITheme.BORDE);
+        dibujarCajaBaseYMultiplicador(x, rivalEnvidoY, UITheme.PANEL_SECUNDARIO, UITheme.BORDE, UITheme.AZUL, UITheme.BORDE);
+        dibujarCajaSimple(x, puntosRivalY, UITheme.AZUL, UITheme.BORDE);
+        dibujarSeparador(x, puntosRivalY - 11f, anchoFondo - margenX * 2f);
+        // BLOQUE OBJETIVO
+        dibujarCajaSimple(x, metaY, UITheme.DORADO, UITheme.BORDE);
+        dibujarCajaSimple(x, puntosJugadorY, UITheme.TRUCO, UITheme.BORDE);
+        dibujarSeparador(x, puntosJugadorY - 11f, anchoFondo - margenX * 2f);
+        // BLOQUE JUGADOR
+        dibujarCajaBaseYMultiplicador(x, jugadorTrucoY, UITheme.TURQUESA, UITheme.BORDE, UITheme.TRUCO, UITheme.BORDE);
+        dibujarCajaBaseYMultiplicador(x, jugadorEnvidoY, UITheme.ENVIDO, UITheme.BORDE, UITheme.PANEL_SECUNDARIO, UITheme.BORDE);
+        dibujarCajaSimple(x, manosY, UITheme.TRUCO, UITheme.BORDE);
+        dibujarCajaSimple(x, descartesY, UITheme.ROJO, UITheme.BORDE);
+        // DINERO
+        dibujarCajaConBorde(x, pesosY, UITheme.DORADO, UITheme.BORDE, UITheme.PANEL_PRINCIPAL);
         shapeRenderer.end();
+    }
+
+    private void dibujarSeparador(float x, float y, float ancho) {
+        shapeRenderer.setColor(new Color(0.02f, 0.025f, 0.035f, 0.9f));
+        shapeRenderer.rect(x, y - 2f, ancho, 4f);
+        shapeRenderer.setColor(SEPARADOR_PANEL);
+        shapeRenderer.rect(x + 4f, y, ancho - 8f, 1f);
     }
 
     public void setRivalNombre(String nombre) {
@@ -121,13 +109,14 @@ public class PanelPuntajes {
         BitmapFont fuenteUI = Main.getInstance().getFuenteUI();
         float escalaUI = fuenteUI.getScaleX();
         fuenteUI.getData().setScale(0.68f);
-        fuenteUI.setColor(ORO);
-        dibujarTextoCentrado(batch, fuenteUI, "MARCADOR", x, anchoCajaDoble, Gdx.graphics.getHeight() - 31f, ORO);
+        fuenteUI.setColor(UITheme.DORADO);
+        dibujarTextoCentrado(batch, fuenteUI, "MARCADOR", x, anchoCajaDoble, Gdx.graphics.getHeight() - 31f, UITheme.DORADO);
         fuenteUI.getData().setScale(escalaUI);
         if (nombreARender != null && !nombreARender.isEmpty()) {
             float escalaOriginal = fuente.getScaleX();
             fuente.getData().setScale(escalaOriginal * 1.25f);
-            fuente.setColor(Color.WHITE);
+            //fuente.setColor(Color.WHITE);
+            fuente.setColor(UITheme.DORADO);
             GlyphLayout nameLayout = new GlyphLayout();
             nameLayout.setText(fuente, nombreARender);
             float nameX = x + (anchoCajaDoble - nameLayout.width) / 2f;
@@ -229,32 +218,44 @@ public class PanelPuntajes {
 
     private void dibujarCajaSimple(float x, float y, Color colorFrente, Color colorSombra) {
         float anchoTotal = ANCHO_CAJA_BASE + ESPACIO_X + ANCHO_CAJA_MULT;
+        shapeRenderer.setColor(new Color(0f, 0f, 0f, 0.45f));
+        dibujarRectanguloRedondeado(x + 3f, y - 5f, anchoTotal, ALTO_CAJA, RADIO_ESQUINA + 1f);
         shapeRenderer.setColor(colorSombra);
-        dibujarRectanguloRedondeado(x, y - 3, anchoTotal, ALTO_CAJA, RADIO_ESQUINA);
+        dibujarRectanguloRedondeado(x, y - 3f, anchoTotal, ALTO_CAJA, RADIO_ESQUINA + 1f);
+        shapeRenderer.setColor(new Color(colorFrente.r * 0.82f, colorFrente.g * 0.82f, colorFrente.b * 0.82f, 1f));
+        dibujarRectanguloRedondeado(x, y, anchoTotal, ALTO_CAJA, RADIO_ESQUINA + 1f);
         shapeRenderer.setColor(colorFrente);
-        dibujarRectanguloRedondeado(x, y, anchoTotal, ALTO_CAJA, RADIO_ESQUINA);
+        dibujarRectanguloRedondeado(x + 1f, y + 1f, anchoTotal - 2f, ALTO_CAJA - 2f, RADIO_ESQUINA);
     }
 
     private void dibujarCajaBaseYMultiplicador(float x, float y, Color f1, Color s1, Color f2, Color s2) {
+        shapeRenderer.setColor(new Color(0f, 0f, 0f, 0.45f));
+        dibujarRectanguloRedondeado(x + 3f, y - 5f, ANCHO_CAJA_BASE, ALTO_CAJA, RADIO_ESQUINA + 1f);
         shapeRenderer.setColor(s1);
-        dibujarRectanguloRedondeado(x, y - 3, ANCHO_CAJA_BASE, ALTO_CAJA, RADIO_ESQUINA);
+        dibujarRectanguloRedondeado(x, y - 3f, ANCHO_CAJA_BASE, ALTO_CAJA, RADIO_ESQUINA + 1f);
         shapeRenderer.setColor(f1);
         dibujarRectanguloRedondeado(x, y, ANCHO_CAJA_BASE, ALTO_CAJA, RADIO_ESQUINA);
         float xCajaRoja = x + ANCHO_CAJA_BASE + ESPACIO_X;
+        shapeRenderer.setColor(new Color(0f, 0f, 0f, 0.45f));
+        dibujarRectanguloRedondeado(xCajaRoja + 3f, y - 5f, ANCHO_CAJA_MULT, ALTO_CAJA, RADIO_ESQUINA + 1f);
         shapeRenderer.setColor(s2);
-        dibujarRectanguloRedondeado(xCajaRoja, y - 3, ANCHO_CAJA_MULT, ALTO_CAJA, RADIO_ESQUINA);
+        dibujarRectanguloRedondeado(xCajaRoja, y - 3f, ANCHO_CAJA_MULT, ALTO_CAJA, RADIO_ESQUINA + 1f);
         shapeRenderer.setColor(f2);
         dibujarRectanguloRedondeado(xCajaRoja, y, ANCHO_CAJA_MULT, ALTO_CAJA, RADIO_ESQUINA);
     }
-    
+
     private void dibujarCajaConBorde(float x, float y, Color borde, Color bordeOscuro, Color fondo) {
         float anchoTotal = ANCHO_CAJA_BASE + ESPACIO_X + ANCHO_CAJA_MULT;
+        shapeRenderer.setColor(new Color(0f, 0f, 0f, 0.50f));
+        dibujarRectanguloRedondeado(x - 1f, y - 6f, anchoTotal + 4f, ALTO_CAJA + 5f, RADIO_ESQUINA + 2f);
         shapeRenderer.setColor(bordeOscuro);
-        dibujarRectanguloRedondeado(x - 2f, y - 5f, anchoTotal + 4f, ALTO_CAJA + 4f, RADIO_ESQUINA);
+        dibujarRectanguloRedondeado(x - 2f, y - 4f, anchoTotal + 4f, ALTO_CAJA + 4f, RADIO_ESQUINA + 2f);
         shapeRenderer.setColor(borde);
-        dibujarRectanguloRedondeado(x - 2f, y - 2f, anchoTotal + 4f, ALTO_CAJA + 4f, RADIO_ESQUINA);
+        dibujarRectanguloRedondeado(x - 2f, y - 2f, anchoTotal + 4f, ALTO_CAJA + 4f, RADIO_ESQUINA + 1f);
         shapeRenderer.setColor(fondo);
-        dibujarRectanguloRedondeado(x, y, anchoTotal, ALTO_CAJA, RADIO_ESQUINA - 1f);
+        dibujarRectanguloRedondeado(x, y, anchoTotal, ALTO_CAJA, RADIO_ESQUINA);
+        shapeRenderer.setColor(new Color(1f, 0.85f, 0.35f, 0.30f));
+        shapeRenderer.rect(x + 8f, y + ALTO_CAJA - 3f, anchoTotal - 16f, 2f);
     }
 
     private void dibujarRectanguloRedondeado(float x, float y, float width, float height, float radius) {

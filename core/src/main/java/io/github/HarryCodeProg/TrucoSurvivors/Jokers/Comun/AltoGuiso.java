@@ -12,7 +12,7 @@ public class AltoGuiso extends Joker {
 
     public AltoGuiso(){
         super(40, "Alto Guiso", "AltoGuiso", "La primer carta no figura que active otorga x1.5 multiplicador truco",
-            Rareza.comun, 1, Joker.FaseActivacion.AL_PUNTUAR_CARTA,
+            Rareza.comun, 4, Joker.FaseActivacion.AL_PUNTUAR_CARTA,
             CategoriaJoker.TV, CategoriaJoker.SECUENCIA);
     }
 

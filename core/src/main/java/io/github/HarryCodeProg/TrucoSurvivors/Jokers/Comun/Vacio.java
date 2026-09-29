@@ -12,7 +12,7 @@ import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 public class Vacio extends Joker {
     public Vacio(){
         super(36, "Vacío", "Vacio", "Las cartas de Oro que ganen envido reciben +15 puntos envido",
-            Rareza.comun, 1, Joker.FaseActivacion.INDEPENDIENTE,
+            Rareza.comun, 3, Joker.FaseActivacion.INDEPENDIENTE,
             CategoriaJoker.NACIONAL, CategoriaJoker.COMIDA);
     }
 

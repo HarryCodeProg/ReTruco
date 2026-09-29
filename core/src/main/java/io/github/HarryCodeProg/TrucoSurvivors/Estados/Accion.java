@@ -28,5 +28,6 @@ public enum Accion {
     USAR_SANTO,
     VENDER_SANTO,
 
-    OPCIONES
+    OPCIONES,
+    COLECCION
 }

@@ -55,14 +55,17 @@ public class Juego {
         this.gestorJokers = new GestorJokers(jugador);
         this.resolutorSecuencia = new ResolutorSecuencia(gestorJokers, this);
         this.descartesActuales = jugador.getDescartesMaximos();
-
         limpiarEstadoResidualDeCombateAnterior();
         jugador.multTrucoOriginal();
         jugador.multEnvidoOriginal();
         rival.multTrucoOriginal();
         rival.multEnvidoOriginal();
         jugador.reiniciarManos();
+        Carta.setNotificadorCambioPalo(carta -> {
+            ContextoJuego ctx = crearContexto();ctx.setCartaEnResolucion(carta);
+            gestorJokers.disparar(EventoJuego.AL_CAMBIAR_PALO, ctx, this);});
         repartir();
+        gestorJokers.disparar(EventoJuego.INICIO_COMBATE, crearContexto(), this);
     }
 
     private ContextoJuego crearContexto() {
@@ -145,6 +148,10 @@ public class Juego {
         avanzarMano();
         this.turnoActual = jugadorEsMano ? jugador : rival;
         repartir();
+    }
+
+    public void reciclarMazoAlGanar() {
+        jugador.getMazo().reciclarCartasTomadas();
     }
 
     public void recargarDescartes() {
@@ -647,6 +654,19 @@ public class Juego {
         if (puntosJugador >= puntajeMeta) {
             if (!recompensaFinDeRondaAplicada) {
                 recompensaFinDeRondaAplicada = true;
+                ContextoJuego ctx = crearContexto();
+                // Buscamos cuál fue la última resolución generada (Truco o Envido) para encadenarle las animaciones de victoria
+                ResolucionPuntaje resolucionActiva = this.ultimaResolucion;
+                if (resolucionActiva == null && this.ultimaResolucionEnvido != null) {
+                    resolucionActiva = this.ultimaResolucionEnvido;
+                }
+                // Si por algún motivo no hay ninguna, creamos una en blanco
+                if (resolucionActiva == null) {
+                    resolucionActiva = new ResolucionPuntaje(0, 1);
+                    this.ultimaResolucion = resolucionActiva;
+                }
+                ctx.setResolucionActual(resolucionActiva);
+                gestorJokers.disparar(EventoJuego.AL_GANAR_COMBATE, ctx, this);
                 gestorJokers.disparar(EventoJuego.TERMINO_MANO, crearContexto(), this);
             }
             return EstadoCombate.VICTORIA_JUGADOR;
@@ -678,5 +698,25 @@ public class Juego {
 
     public void consumirHand() {
         jugador.consumirMano();
+    }
+
+    public void notificarSantoConsumido() {
+        ContextoJuego ctx = crearContexto();
+        gestorJokers.disparar(EventoJuego.AL_CONSUMIR_SANTO, ctx, this);
+    }
+
+    public void notificarJokerComprado() {
+        ContextoJuego ctx = crearContexto();
+        gestorJokers.disparar(EventoJuego.AL_COMPRAR_JOKER, ctx, this);
+    }
+
+    public void notificarCartaComprada() {
+        ContextoJuego ctx = crearContexto();
+        gestorJokers.disparar(EventoJuego.AL_COMPRAR_CARTA, ctx, this);
+    }
+
+    public void notificarJokerVendido() {
+        ContextoJuego ctx = crearContexto();
+        gestorJokers.disparar(EventoJuego.AL_VENDER_JOKER, ctx, this);
     }
 }

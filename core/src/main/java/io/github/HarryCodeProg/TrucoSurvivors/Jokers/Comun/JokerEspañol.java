@@ -23,7 +23,7 @@ public class JokerEspañol extends Joker {
             "JokerEspañol",
             "Al final de cada ronda, agrega una carta aleatoria al mazo",
             Rareza.comun,
-            1,
+            3,
             INDEPENDIENTE,
             CategoriaJoker.INTERNACIONAL
         );

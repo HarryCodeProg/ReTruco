@@ -12,7 +12,7 @@ public class AK47 extends Joker {
 
     public AK47() {
         super(38, "AK-47", "AK-47", "+2 tamaño mano",
-                Rareza.comun, 1, Joker.FaseActivacion.INDEPENDIENTE,
+                Rareza.comun, 4, Joker.FaseActivacion.INDEPENDIENTE,
             CategoriaJoker.INTERNACIONAL);
     }
 

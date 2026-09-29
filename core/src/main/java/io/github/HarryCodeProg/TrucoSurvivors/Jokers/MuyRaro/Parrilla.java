@@ -7,12 +7,10 @@ import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Rareza;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 
-import java.util.ArrayList;
-
 public class Parrilla extends Joker {
 
     public Parrilla() {
-        super(104, "Parrilla", "Parrilla", "Reactiva todos los jokers con categoría 'COMIDA'",
+        super(104, "Parrilla", "Parrilla", "x0.30 multiplicador por cada carta debajo de 40 en tu mazo",
             Rareza.muyRaro, 8, Joker.FaseActivacion.INDEPENDIENTE,
             CategoriaJoker.COMIDA);
     }
@@ -24,15 +22,30 @@ public class Parrilla extends Joker {
         return copia;
     }
 
+    private double calcularMultiplicador(Juego juego) {
+        if (juego == null || juego.getJugador() == null || juego.getJugador().getMazo() == null) return 1.0;
+        int tamañoMazo = juego.getJugador().getMazo().getTamañoMazo();
+        int cartasFaltantes = Math.max(0, 40 - tamañoMazo);
+        return 1.0 + (cartasFaltantes * 0.30);
+    }
+
     @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego) {
-        if (!ctx.marcarUsado(this, evento)) return; // evita reencolarse en bucle si el evento se repite en la misma resolución
-        ArrayList<Joker> jokers = ctx.getJugador().getJokers();
-        for (Joker j : jokers) {
-            if (j == this) continue; // no se reactiva a sí mismo
-            if (j.tieneCategoria(CategoriaJoker.COMIDA)) {
-                ctx.reencolarActivacionJoker(j, evento);
+        if (evento == EventoJuego.ANTES_DE_SUMAR_TRUCO || evento == EventoJuego.ANTES_DE_SUMAR_ENVIDO) {
+            double mult = calcularMultiplicador(juego);
+            if (mult > 1.0) {
+                ctx.getResolucionActual().multiplicarMult(mult, getNombre(), this);
             }
         }
+    }
+
+    @Override
+    public String getDescripcionRenderizada(Juego juego) {
+        double mult = calcularMultiplicador(juego);
+        String formattedMult = String.format(java.util.Locale.US, "%.2f", mult);
+        if (formattedMult.endsWith(".00")) formattedMult = formattedMult.substring(0, formattedMult.length() - 3);
+        else if (formattedMult.endsWith("0")) formattedMult = formattedMult.substring(0, formattedMult.length() - 1);
+
+        return "x0.30 multiplicador por cada carta debajo de 40 en tu mazo (actual: x" + formattedMult + ")";
     }
 }

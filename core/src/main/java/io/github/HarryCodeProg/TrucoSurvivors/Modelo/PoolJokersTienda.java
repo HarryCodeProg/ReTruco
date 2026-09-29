@@ -13,6 +13,7 @@ import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Legendario.*;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.function.Supplier;
+import java.util.List;
 
 public class PoolJokersTienda {
     private final ArrayList<Supplier<Joker>> fabricas = new ArrayList<>();
@@ -74,6 +75,7 @@ public class PoolJokersTienda {
         fabricas.add(SosInumputable::new);
         fabricas.add(YoManejo::new);
         fabricas.add(CañaConRuda::new);
+        fabricas.add(Soda::new);
 
         //raro
         fabricas.add(Granadero::new);
@@ -83,6 +85,48 @@ public class PoolJokersTienda {
         fabricas.add(Misiones::new);
         fabricas.add(CuentaCorriente::new);
         fabricas.add(Hornero::new);
+        fabricas.add(RioNegro::new);
+        fabricas.add(Cordoba::new);
+        //fabricas.add(Asado::new);
+        fabricas.add(Caballo::new);
+        fabricas.add(Carpincho::new);
+        fabricas.add(Ñandu::new);
+        fabricas.add(Dogo::new);
+        fabricas.add(Formosa::new);
+        fabricas.add(Chaco::new);
+        fabricas.add(SantaCruz::new);
+        fabricas.add(Chubut::new);
+        fabricas.add(Jujuy::new);
+        fabricas.add(LaRioja::new);
+        fabricas.add(SantaFe::new);
+        fabricas.add(SanJuan::new);
+        fabricas.add(SanLuis::new);
+        fabricas.add(EntreRios::new);
+        fabricas.add(Guanaco::new);
+        fabricas.add(Mendoza::new);
+        fabricas.add(RataBlanca::new);
+        fabricas.add(Gaucho::new);
+        fabricas.add(Neuquen::new);
+        fabricas.add(BuenosAires::new);
+        fabricas.add(TierraDelFuego::new);
+        fabricas.add(Bariloche::new);
+        fabricas.add(LaPampa::new);
+        fabricas.add(SantiagoDelEstero::new);
+        fabricas.add(Gallina::new);
+        fabricas.add(Constelacion::new);
+
+        //muy raro
+        fabricas.add(VirgenItati::new);
+        fabricas.add(VirgenDeLujan::new);
+        fabricas.add(PlazaDeMayo::new);
+        fabricas.add(Obelisco::new);
+        fabricas.add(Gato::new);
+        /*fabricas.add(Bestiario::new);
+        fabricas.add(PlanSocial::new);*/
+        fabricas.add(Corrientes::new);
+        fabricas.add(Basilica::new);
+        fabricas.add(Escarapela::new);
+        fabricas.add(Iguazu::new);
 
         //epico
         fabricas.add(Aconcagua::new);
@@ -95,11 +139,9 @@ public class PoolJokersTienda {
         fabricas.add(Malvinas::new);
         fabricas.add(Cerati::new);
         fabricas.add(Cortazar::new);
-
-        //muy raro
-        fabricas.add(VirgenItati::new);
-        fabricas.add(VirgenDeLujan::new);
-        fabricas.add(PlazaDeMayo::new);
+        fabricas.add(SableCorvo::new);
+        fabricas.add(Perro::new);
+        fabricas.add(Borges::new);
 
         //legendario
         fabricas.add(Rivadavia::new);
@@ -109,19 +151,35 @@ public class PoolJokersTienda {
     }
 
     /** Devuelve un joker nuevo al azar, evitando (si es posible) los que el jugador ya tiene por clase. */
-    public Joker tomarAleatorio(Random random, Jugador jugador) {
+    public Joker tomarAleatorio(Random random, Jugador jugador, boolean permitirDuplicados, List<Integer> idsExcluidos) {
+        boolean bloquearComunes = debeBloquearComunes(jugador);
         ArrayList<Supplier<Joker>> disponibles = new ArrayList<>();
         for (Supplier<Joker> f : fabricas) {
             Joker candidato = f.get();
-            boolean yaLoTiene = jugador.getJokers().stream()
-                .anyMatch(j -> j.getClass().equals(candidato.getClass()));
-            if (!yaLoTiene) disponibles.add(f);
+            if (bloquearComunes && candidato.getRareza() == Rareza.comun) continue;
+            if (!permitirDuplicados) {
+                boolean yaLoTiene = jugador.getJokers().stream().anyMatch(j -> j.getClass().equals(candidato.getClass()));
+                if (yaLoTiene) continue;
+                if (idsExcluidos != null && idsExcluidos.contains(candidato.getId())) {
+                    continue;
+                }
+            }
+            disponibles.add(f);
         }
-        if (disponibles.isEmpty()) disponibles = fabricas; // si ya tiene todos, permite repetidos
+        if (disponibles.isEmpty()) {
+            return null;
+        }
         return disponibles.get(random.nextInt(disponibles.size())).get();
     }
 
+    public Joker tomarAleatorio(Random random, Jugador jugador) {
+        return tomarAleatorio(random, jugador, false, null);
+    }
+
     public Joker tomarAleatorioDeRareza(Rareza rareza, Jugador jugador) {
+        if (rareza == Rareza.comun && debeBloquearComunes(jugador)) {
+            return null;
+        }
         Random random = new Random();
         ArrayList<Supplier<Joker>> disponibles = new ArrayList<>();
         ArrayList<Supplier<Joker>> todosDeRareza = new ArrayList<>();
@@ -143,6 +201,18 @@ public class PoolJokersTienda {
             return null;
         }
         return disponibles.get(random.nextInt(disponibles.size())).get();
+    }
+
+    public ArrayList<Joker> crearTodos() {
+        ArrayList<Joker> resultado = new ArrayList<>();
+        for (Supplier<Joker> fabrica : fabricas) {
+            resultado.add(fabrica.get());
+        }
+        return resultado;
+    }
+
+    private boolean debeBloquearComunes(Jugador jugador) {
+        return jugador.getJokers().stream().anyMatch(Joker::bloqueaJokersComunes);
     }
 }
 

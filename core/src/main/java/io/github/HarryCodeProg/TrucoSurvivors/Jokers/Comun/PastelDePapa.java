@@ -13,7 +13,7 @@ public class PastelDePapa extends Joker {
 
     public PastelDePapa(){
         super(34, "Pastel De Papa", "PastelDePapa", "Las cartas de Copa que ganen envido reciben +15 puntos envido",
-            Rareza.comun, 1, Joker.FaseActivacion.INDEPENDIENTE,
+            Rareza.comun, 3, Joker.FaseActivacion.INDEPENDIENTE,
             CategoriaJoker.NACIONAL, CategoriaJoker.COMIDA);
     }
 

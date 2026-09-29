@@ -13,7 +13,7 @@ public class Churros extends Joker {
 
     public Churros(){
         super(15, "Churros", "Churros", "La primer carta que no mate recibe +1 valor truco",
-            Rareza.comun, 1, FaseActivacion.AL_PUNTUAR_CARTA,
+            Rareza.comun, 3, FaseActivacion.AL_PUNTUAR_CARTA,
             CategoriaJoker.NACIONAL, CategoriaJoker.COMIDA, CategoriaJoker.DULCE);
     }
 

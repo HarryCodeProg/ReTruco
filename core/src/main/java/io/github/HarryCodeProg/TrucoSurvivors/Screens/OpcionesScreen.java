@@ -95,14 +95,12 @@ public class OpcionesScreen implements Screen {
         game.batch.setProjectionMatrix(camera.combined);
         mouseWorld.set(Gdx.input.getX(), Gdx.input.getY(), 0);
         camera.unproject(mouseWorld);
-
         switch (panel) {
             case MENU: updateMenu(); break;
             case VIDEO: updateVideo(); break;
             case AUDIO: updateAudio(); break;
             case FONDO: updateFondo(); break;
         }
-
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         game.batch.begin();
@@ -199,7 +197,6 @@ public class OpcionesScreen implements Screen {
         botonFondoSiguiente.update(mouseWorld.x, mouseWorld.y);
         botonAplicarFondo.update(mouseWorld.x, mouseWorld.y);
         botonDescartarFondo.update(mouseWorld.x, mouseWorld.y);
-
         if (botonFondoSiguiente.fueCliqueado(mouseWorld.x, mouseWorld.y)) {
             fondoIndexPendiente = (fondoIndexPendiente + 1) % Background.TEMAS.length;
             fondoPlasma.setTema(fondoIndexPendiente); // ¡Previsualiza en vivo!
@@ -247,7 +244,6 @@ public class OpcionesScreen implements Screen {
         botonFondoSiguiente.render(game.batch);
         botonAplicarFondo.render(game.batch);
         botonDescartarFondo.render(game.batch);
-
         // Dibujamos el nombre del tema actual seleccionado en el centro
         BitmapFont f = game.getFuentePrincipal();
         String nombreTema = Background.TEMAS[fondoIndexPendiente].nombre;

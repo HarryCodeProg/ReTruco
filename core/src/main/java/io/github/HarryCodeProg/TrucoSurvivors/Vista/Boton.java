@@ -16,36 +16,38 @@ import static io.github.HarryCodeProg.TrucoSurvivors.Estados.Accion.COMPRAR_ITEM
 public class Boton {
     // --- NUEVO ENUM PARA SELECCIONAR EL COLOR CON PERSONALIDAD ---
     public enum TipoColor {
-        CELESTE(new Color(0.2f, 0.5f, 0.8f, 1f)),
-        BLANCO(new Color(0.85f, 0.85f, 0.85f, 1f)),
-        AMARILLO(new Color(0.85f, 0.65f, 0.1f, 1f)),
-        BORDO(new Color(0.5f, 0.1f, 0.15f, 1f)),
-        ROJO(new Color(0.80f, 0.20f, 0.20f, 1f)),
-        ROJO_OSCURO(new Color(0.55f, 0.12f, 0.12f, 1f)),
-        NARANJA(new Color(0.90f, 0.45f, 0.10f, 1f)),
-        NARANJA_OSCURO(new Color(0.75f, 0.35f, 0.08f, 1f)),
-        VERDE(new Color(0.20f, 0.65f, 0.30f, 1f)),
-        VERDE_OSCURO(new Color(0.12f, 0.45f, 0.20f, 1f)),
-        VERDE_MENTA(new Color(0.35f, 0.85f, 0.65f, 1f)),
-        AZUL(new Color(0.18f, 0.35f, 0.80f, 1f)),
-        AZUL_OSCURO(new Color(0.10f, 0.18f, 0.45f, 1f)),
-        AZUL_MARINO(new Color(0.08f, 0.12f, 0.28f, 1f)),
-        VIOLETA(new Color(0.50f, 0.28f, 0.75f, 1f)),
-        LILA(new Color(0.70f, 0.55f, 0.90f, 1f)),
-        ROSA(new Color(0.90f, 0.45f, 0.65f, 1f)),
-        FUCSIA(new Color(0.85f, 0.20f, 0.60f, 1f)),
-        CIAN(new Color(0.15f, 0.75f, 0.85f, 1f)),
-        TURQUESA(new Color(0.15f, 0.70f, 0.60f, 1f)),
-        DORADO(new Color(0.92f, 0.75f, 0.20f, 1f)),
-        BRONCE(new Color(0.70f, 0.45f, 0.22f, 1f)),
-        GRIS(new Color(0.50f, 0.50f, 0.50f, 1f)),
-        GRIS_OSCURO(new Color(0.25f, 0.25f, 0.25f, 1f)),
-        NEGRO_SUAVE(new Color(0.12f, 0.12f, 0.12f, 1f)),
-        CREMA(new Color(0.95f, 0.92f, 0.82f, 1f)),
-        MARRON(new Color(0.45f, 0.28f, 0.15f, 1f)),
-        CAFE(new Color(0.32f, 0.20f, 0.10f, 1f));
+        CELESTE(UITheme.AZUL),
+        BLANCO(UITheme.TEXTO_PRINCIPAL),
+        AMARILLO(UITheme.DORADO),
+        BORDO(UITheme.ROJO),
+        ROJO(UITheme.ROJO),
+        ROJO_OSCURO(UITheme.ROJO),
+        NARANJA(UITheme.NARANJA),
+        NARANJA_OSCURO(UITheme.NARANJA),
+        VERDE(UITheme.TRUCO),
+        VERDE_OSCURO(UITheme.TRUCO),
+        VERDE_MENTA(UITheme.TRUCO),
+        AZUL(UITheme.AZUL),
+        AZUL_OSCURO(UITheme.AZUL),
+        AZUL_MARINO(UITheme.AZUL),
+        VIOLETA(UITheme.VIOLETA),
+        LILA(UITheme.VIOLETA),
+        ROSA(UITheme.VIOLETA),
+        FUCSIA(UITheme.VIOLETA),
+        CIAN(UITheme.ENVIDO),
+        TURQUESA(UITheme.TURQUESA),
+        DORADO(UITheme.DORADO),
+        BRONCE(UITheme.DORADO),
+        GRIS(UITheme.TEXTO_SECUNDARIO),
+        GRIS_OSCURO(UITheme.PANEL_SECUNDARIO),
+        NEGRO_SUAVE(UITheme.PANEL_PRINCIPAL),
+        CREMA(UITheme.TEXTO_PRINCIPAL),
+        MARRON(UITheme.NARANJA),
+        CAFE(UITheme.NARANJA);
         public final Color base;
-        TipoColor(Color base) { this.base = base; }
+        TipoColor(Color base) {
+            this.base = base;
+        }
     }
     private Texture pixel;
     private String texto;
@@ -56,19 +58,28 @@ public class Boton {
     private Accion accion;
     private boolean hover;
     private boolean pressed;
+    private boolean clickEnCurso = false;
+    private float animPresionado = 0f;
+    private static final float VELOCIDAD_PRESION = 18f;
+    private static final float ESCALA_PRESION = 0.96f;
     private boolean habilitado = true;
     private BitmapFont font;
     private boolean fontPropia;
     private GlyphLayout layout;
     // Guardamos el tipo de color del botón (Celeste por defecto)
     private TipoColor tipoColor = TipoColor.CELESTE;
-    private final float GROSOR_BORDE = 3f; // Grosor del borde estilo panelPuntaje
-    private static final float SOMBRA_Y = 4f;
+    private static final float GROSOR_BORDE = 2f;
+    private static final float SOMBRA_Y = 5f;
+    private static final float RADIO_ESQUINA = 7f;
     // Colores auxiliares para el procesamiento visual
     private Color colorFondoActual = new Color();
     private Color colorBordeActual = new Color();
     private Color colorTextoActual = new Color();
+    private final Color colorGlowActual = new Color();
     private boolean visible = true;
+    private float tiempoPresionado = 0f;
+    private static final float DURACION_PRESION = 0.02f;
+    private boolean clickConfirmado = false;
 
     public Boton(float x, float y, float width, float height, Accion accion) {
         Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
@@ -114,89 +125,147 @@ public class Boton {
         float drawY = y;
         float drawWidth = width;
         float drawHeight = height;
-        // 1. Calcular lógica de colores dinámicos basados en el TipoColor elegido
+        Color colorBase = obtenerColorBase();
+        // ESTADO VISUAL
         if (!habilitado) {
-            colorFondoActual.set(0.3f, 0.3f, 0.3f, 1f);
-            colorBordeActual.set(0.15f, 0.15f, 0.15f, 1f);
-            colorTextoActual.set(0.5f, 0.5f, 0.5f, 1f);
+            colorFondoActual.set(UITheme.BOTON_DESHABILITADO);
+            colorBordeActual.set(UITheme.BOTON_DESHABILITADO_BORDE);
+            colorTextoActual.set(UITheme.BOTON_DESHABILITADO_TEXTO);
         } else {
-            // El borde siempre es una versión bastante más oscura del color base (Estilo cómic/panel)
-            colorBordeActual.set(tipoColor.base).mul(0.3f, 0.3f, 0.3f, 1f);
-            // Si el botón es blanco, el texto va en negro/oscuro para que se lea. Si no, va en blanco.
+            colorFondoActual.set(colorBase);
+            colorBordeActual.set(colorBase).mul(0.38f, 0.38f, 0.38f, 1f);
             if (tipoColor == TipoColor.BLANCO) {
-                colorTextoActual.set(0.1f, 0.1f, 0.1f, 1f);
+                colorTextoActual.set(UITheme.BORDE);
             } else {
-                colorTextoActual.set(Color.WHITE);
+                colorTextoActual.set(UITheme.TEXTO_PRINCIPAL);
             }
             if (hover) {
-                // Brillo de hover: aclaramos el fondo un 25%
-                colorFondoActual.set(tipoColor.base).add(0.15f, 0.15f, 0.15f, 0f);
-            } else {
-                colorFondoActual.set(tipoColor.base);
+                colorFondoActual.lerp(Color.WHITE, 0.10f);
+                colorBordeActual.lerp(Color.WHITE, 0.08f);
             }
         }
-        // Lógica de presionado mecánico (Se achica un poco y baja)
-        boolean estaPresionado = pressed && habilitado;
-        if (estaPresionado) {
-            float escala = 0.96f;
-            drawWidth = width * escala;
-            drawHeight = height * escala;
-            drawX = x + (width - drawWidth) / 2f;
-            drawY = y + (height - drawHeight) / 2f - 3f; // Se hunde hacia abajo
-            // Oscurecemos el fondo en el click
-            colorFondoActual.mul(0.7f, 0.7f, 0.7f, 1f);
-        }
-        // Sombra corta: separa el control del fondo sin modificar su zona clickeable.
-        batch.setColor(0.02f, 0.025f, 0.04f, habilitado ? 0.65f : 0.35f);
-        batch.draw(pixel, drawX + 2f, drawY - SOMBRA_Y, drawWidth, drawHeight);
-        // 2. DIBUJAR EL BORDE (Un rectángulo negro/oscuro de fondo más grande)
-        batch.setColor(colorBordeActual);
-        batch.draw(pixel, drawX, drawY, drawWidth, drawHeight);
-        // 3. DIBUJAR EL FONDO (Un rectángulo más chico adentro del borde)
-        batch.setColor(colorFondoActual);
-        batch.draw(pixel,
-            drawX + GROSOR_BORDE,
-            drawY + GROSOR_BORDE,
-            drawWidth - (GROSOR_BORDE * 2f),
-            drawHeight - (GROSOR_BORDE * 2f)
-        );
+        // PRESIONADO
+        boolean estaPresionado = pressed || tiempoPresionado > 0f;
+        float escalaPresion = 1f - (1f - ESCALA_PRESION) * animPresionado;
+        drawWidth = width * escalaPresion;
+        drawHeight = height * escalaPresion;
+        drawX = x + (width - drawWidth) / 2f;
+        drawY = y + (height - drawHeight) / 2f - (4f * animPresionado);
+        colorFondoActual.mul(1f - 0.22f * animPresionado, 1f - 0.22f * animPresionado, 1f - 0.22f * animPresionado, 1f);
+        colorBordeActual.mul(1f - 0.18f * animPresionado, 1f - 0.18f * animPresionado, 1f - 0.18f * animPresionado, 1f);
+        // GLOW HOVER
         if (hover && habilitado && !estaPresionado) {
-            batch.setColor(1f, 1f, 1f, 0.28f);
-            batch.draw(pixel, drawX + GROSOR_BORDE, drawY + drawHeight - GROSOR_BORDE - 2f,
-                drawWidth - (GROSOR_BORDE * 2f), 2f);
+            colorGlowActual.set(colorBase.r, colorBase.g, colorBase.b, 0.12f);
+            dibujarRectRedondeado(batch, drawX - 5f, drawY - 5f, drawWidth + 10f, drawHeight + 10f, RADIO_ESQUINA + 2f, colorGlowActual);
+            colorGlowActual.set(colorBase.r, colorBase.g, colorBase.b, 0.08f);
+            dibujarRectRedondeado(batch, drawX - 9f, drawY - 9f, drawWidth + 18f, drawHeight + 18f, RADIO_ESQUINA + 4f, colorGlowActual);
         }
-        // Restaurar color del batch para el texto
-        batch.setColor(Color.WHITE);
-        // 4. DIBUJAR EL TEXTO CENTRAL
+        // SOMBRA
+        colorGlowActual.set(UITheme.SOMBRA);
+        colorGlowActual.a = habilitado ? 0.70f : 0.35f;
+        dibujarRectRedondeado(batch, drawX + 2f, drawY - SOMBRA_Y, drawWidth, drawHeight, RADIO_ESQUINA, colorGlowActual);
+        // BORDE
+        dibujarRectRedondeado(batch, drawX, drawY, drawWidth, drawHeight, RADIO_ESQUINA, colorBordeActual);
+        // CUERPO
+        dibujarRectRedondeado(batch, drawX + GROSOR_BORDE, drawY + GROSOR_BORDE, drawWidth - GROSOR_BORDE * 2f, drawHeight - GROSOR_BORDE * 2f, RADIO_ESQUINA - 1f, colorFondoActual);
+        // HIGHLIGHT SUPERIOR
+        if (habilitado && !estaPresionado) {
+            batch.setColor(1f, 1f, 1f, hover ? 0.24f : 0.12f);
+            batch.draw(pixel, drawX + 5f, drawY + drawHeight - 7f, drawWidth - 10f, 2f);
+            batch.setColor(UITheme.BRILLO);
+        }
+        // TEXTO
         String textoRender = obtenerTexto();
         float escalaOriginal = font.getScaleX();
-        font.getData().setScale(escalaOriginal * (height >= 48f ? 1.06f : 0.96f));
+        font.getData().setScale(escalaOriginal * (height >= 48f ? 1.04f : 0.94f));
         layout.setText(font, textoRender);
         float textX = drawX + (drawWidth - layout.width) / 2f;
-        // Si está presionado bajamos el texto 1 píxel extra para acompañar el hundimiento mecánico
         float textY = drawY + (drawHeight + layout.height) / 2f - (estaPresionado ? 1f : 0f);
         font.setColor(colorTextoActual);
         font.draw(batch, textoRender, textX, textY);
         font.getData().setScale(escalaOriginal);
-        font.setColor(Color.WHITE);
+        font.setColor(UITheme.TEXTO_PRINCIPAL);
+        batch.setColor(1f, 1f, 1f, 1f);
     }
 
     public void update(float mouseX, float mouseY) {
-        if (!visible) return;
+        if (!visible) {
+            hover = false;
+            pressed = false;
+            clickEnCurso = false;
+            animPresionado = 0f;
+            tiempoPresionado = 0f;
+            return;
+        }
         if (!habilitado) {
             hover = false;
             pressed = false;
+            clickEnCurso = false;
+            animPresionado = 0f;
+            tiempoPresionado = 0f;
             return;
         }
         hover = mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + height;
-        pressed = hover && Gdx.input.isButtonPressed(Input.Buttons.LEFT);
+        // 1. Iniciamos el click solo si presionamos Estando sobre el botón
+        if (!clickEnCurso && hover && Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+            clickEnCurso = true;
+        }
+        // 2. Mientras mantengamos presionado, evaluamos si seguimos adentro o salimos
+        if (clickEnCurso) {
+            pressed = hover && Gdx.input.isButtonPressed(Input.Buttons.LEFT);
+            // 3. Soltamos el click
+            if (!Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
+                boolean confirmarClick = hover; // Confirmamos solo si soltamos Adentro
+                clickEnCurso = false;
+                pressed = false;
+                if (confirmarClick) {
+                    tiempoPresionado = DURACION_PRESION; // Mantenemos el botón hundido visualmente
+                    ejecutarClick();
+                }
+            }
+        } else {
+            pressed = false;
+        }
+        // --- LÓGICA VISUAL DE ANIMACIÓN ---
+        if (tiempoPresionado > 0f) {
+            tiempoPresionado -= Gdx.graphics.getDeltaTime();
+        }
+        float objetivoPresion = (pressed || tiempoPresionado > 0f) ? 1f : 0f;
+        animPresionado += (objetivoPresion - animPresionado) * Math.min(1f, VELOCIDAD_PRESION * Gdx.graphics.getDeltaTime());
+        if (Math.abs(animPresionado) < 0.01f && !pressed && tiempoPresionado <= 0f) {
+            animPresionado = 0f;
+        }
+    }
+
+    private void ejecutarClick() {
+        clickConfirmado = true; // Avisamos que hay un click listo para ser consumido
+        if (debeReproducirSonidoClick()) {
+            Main.getInstance().getGestorSonidos().reproducirSonidoClick();
+        }
     }
 
     public boolean fueCliqueado(float mouseWorldX, float mouseWorldY) {
-        if (!visible) return false;
-        if (!habilitado) return false;
-        boolean encima = mouseWorldX >= x && mouseWorldX <= x + width && mouseWorldY >= y && mouseWorldY <= y + height;
-        return encima && Gdx.input.isButtonJustPressed(Input.Buttons.LEFT);
+        if (!visible || !habilitado) return false;
+        return consumirClick();
+    }
+
+    public boolean consumirClick() {
+        if (!clickConfirmado) return false;
+        clickConfirmado = false;
+        return true;
+    }
+
+    private boolean debeReproducirSonidoClick() {
+        if (accion == null) return true;
+        switch (accion) {
+            case COMPRAR_ITEM_TIENDA:
+            case COMPRAR_Y_USAR_SANTO:
+            case REROLL_CARTAS:
+            case REROLL_JOKERS:
+                return false;
+            default:
+                return true;
+        }
     }
 
     public Accion getAccion() {
@@ -250,6 +319,34 @@ public class Boton {
     public float getX() {return x;}
 
     public float getY() {return y;}
+
+    private Color obtenerColorBase() {
+        return tipoColor.base;
+    }
+
+    private void dibujarRectRedondeado(SpriteBatch batch, float x, float y, float width, float height, float radio, Color color) {
+        if (width <= 0f || height <= 0f) return;
+        radio = Math.min(radio, Math.min(width, height) / 2f);
+        int r = Math.max(1, (int) Math.ceil(radio));
+        batch.setColor(color);
+        // Centro
+        batch.draw(pixel, x + radio, y, width - radio * 2f, height);
+        // Laterales
+        if (height > radio * 2f) {
+            batch.draw(pixel, x, y + radio, radio, height - radio * 2f);
+            batch.draw(pixel, x + width - radio, y + radio, radio, height - radio * 2f);
+        }
+        // Curvas superior e inferior
+        for (int i = 0; i < r; i++) {
+            float dy = i + 0.5f;
+            float distancia = radio - dy;
+            float raiz = (float) Math.sqrt(Math.max(0f, radio * radio - distancia * distancia));
+            float inset = radio - raiz;
+            batch.draw(pixel, x + inset, y + i, width - inset * 2f, 1f);
+            batch.draw(pixel, x + inset, y + height - i - 1f, width - inset * 2f, 1f);
+        }
+        batch.setColor(Color.WHITE);
+    }
 
     public void setVisible(boolean visible) { this.visible = visible; }
     public boolean isVisible() { return visible; }

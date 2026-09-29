@@ -18,7 +18,7 @@ public class Fernet extends Joker {
             "Fernet",
             "+20 puntos truco, +20 puntos envido. Si tienes una 'Cola', obtienes +20 puntos mas de cada uno.",
             Rareza.comun,
-            1,
+            3,
             INDEPENDIENTE,
             CategoriaJoker.NACIONAL,CategoriaJoker.BEBIDA,CategoriaJoker.ALCOHOL
         );

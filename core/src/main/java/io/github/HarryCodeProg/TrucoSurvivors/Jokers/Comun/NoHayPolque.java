@@ -13,7 +13,7 @@ public class NoHayPolque extends Joker {
 
     public NoHayPolque(){
         super(46, "No Hay Polque", "NoHayPolque", "Cada Basto que mata otorga +5 multiplicador truco",
-            Rareza.comun, 1, Joker.FaseActivacion.AL_PUNTUAR_CARTA,
+            Rareza.comun, 4, Joker.FaseActivacion.AL_PUNTUAR_CARTA,
             CategoriaJoker.TV, CategoriaJoker.SECUENCIA);
     }
 

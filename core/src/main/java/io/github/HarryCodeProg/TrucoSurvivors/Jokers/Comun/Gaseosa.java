@@ -18,7 +18,7 @@ public class Gaseosa extends Joker {
             "Gaseosa",
             "+20 puntos truco, +20 puntos envido. Si tienes un 'Fernet', obtienes +20 puntos mas de cada uno.",
             Rareza.comun,
-            1,
+            3,
             INDEPENDIENTE,
             CategoriaJoker.INTERNACIONAL,CategoriaJoker.BEBIDA,CategoriaJoker.DULCE
         );

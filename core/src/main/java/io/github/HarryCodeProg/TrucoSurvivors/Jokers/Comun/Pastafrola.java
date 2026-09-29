@@ -16,7 +16,7 @@ public class Pastafrola extends Joker {
             "Pastafrola",
             "Las cartas que te maten reciben +10 puntos truco",
             Rareza.comun,
-            1,
+            3,
             FaseActivacion.AL_PUNTUAR_CARTA,
             CategoriaJoker.COMIDA, CategoriaJoker.DULCE, CategoriaJoker.POSTRE);
     }

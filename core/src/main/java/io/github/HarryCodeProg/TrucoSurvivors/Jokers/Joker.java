@@ -20,7 +20,7 @@ public abstract class Joker {
     private final FaseActivacion fase;
     private double acumulado = 0;
     private int precioVenta;
-
+    private Jugador jugadorPropietario;
     public enum FaseActivacion {
         AL_JUGAR,           // Balatro: "On Played"
         AL_PUNTUAR_CARTA,   // Balatro: "On Scored"
@@ -66,7 +66,6 @@ public abstract class Joker {
     }
 
     public double getAcumulado() { return acumulado; }
-    public void sumarAcumulado(double cantidad) { this.acumulado += cantidad; }
 
     /** Descripcion final mostrada, con placeholders resueltos. Override si querés mostrar el acumulado. */
     public String getDescripcionRenderizada() {
@@ -87,16 +86,51 @@ public abstract class Joker {
 
     public abstract Joker copiar();
 
-    public void setAcumulado(double acumulado) {
-        this.acumulado = acumulado;
-    }
-
     protected void copiarEstado(Joker copia) {
         copia.acumulado = this.acumulado;
         copia.precioVenta = this.precioVenta;
     }
 
+    /** Si este joker ocupa un slot de jokers. Override si aplica (ej: Perro). */
+    public boolean ocupaEspacio() { return true; }
+
+    /** Se llama cada vez que el jugador gasta pesos (tienda, rerolls, etc). */
+    public void onPesosGastados(int cantidad, Jugador jugador) {}
+
     public String getDescripcionRenderizada(Juego juego) {
         return getDescripcionRenderizada();
+    }
+
+    /** Si tener este joker impide que aparezcan jokers de rareza "comun" en la tienda. */
+    public boolean bloqueaJokersComunes() { return false; }
+
+    /** Se llama cada vez que OTRO joker (no este) termina de aplicar su efecto. */
+    public void onOtroJokerActivado(Joker otro, EventoJuego evento, ContextoJuego ctx, Juego juego) {}
+
+    /** Seteado por Jugador al agregarse a la fila. No confundir con un parámetro puntual de un método. */
+    public void setJugadorPropietario(Jugador jugador) {
+        this.jugadorPropietario = jugador;
+    }
+
+    public Jugador getJugadorPropietario() {
+        return jugadorPropietario;
+    }
+
+    public void sumarAcumulado(double cantidad) {
+        if (estaCongeladoPorGallina()) return;
+        this.acumulado += cantidad;
+    }
+
+    public void setAcumulado(double acumulado) {
+        if (estaCongeladoPorGallina()) return;
+        this.acumulado = acumulado;
+    }
+
+    private boolean estaCongeladoPorGallina() {
+        if (jugadorPropietario == null) return false;
+        java.util.ArrayList<Joker> lista = jugadorPropietario.getJokers();
+        int idx = lista.indexOf(this);
+        if (idx <= 0) return false; // no tiene alguien a su izquierda
+        return lista.get(idx - 1) instanceof io.github.HarryCodeProg.TrucoSurvivors.Jokers.Raro.Gallina;
     }
 }

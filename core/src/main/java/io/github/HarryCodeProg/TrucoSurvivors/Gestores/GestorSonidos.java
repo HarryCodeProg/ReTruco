@@ -9,7 +9,7 @@ import java.util.HashMap;
 public class GestorSonidos implements Disposable {
     private final HashMap<String, Sound> sonidos;
     private float volumenGeneral = 1f;   // FIX: master, multiplica a todo
-    private float volumenEfectos = 0.5f;   // FIX: multiplica efectos (todo lo cargado acá hoy son efectos)
+    private float volumenEfectos = 0.2f;   // FIX: multiplica efectos (todo lo cargado acá hoy son efectos)
     private float volumenMusica = 1f;    // FIX: reservado para cuando haya música de fondo
     private boolean silenciado = false;
     private boolean alternarReparto = false;
@@ -34,6 +34,8 @@ public class GestorSonidos implements Disposable {
         cargar("gano-mas-1", "sonidos/gano-mas-1.ogg");
         cargar("gano-mas-20", "sonidos/gano-mas-20.ogg");
         cargar("gano-mas-50", "sonidos/gano-mas-50.ogg");
+        cargar("button-click", "sonidos/button-click.ogg");
+        cargar("spin", "sonidos/spin.ogg");
     }
 
     private void cargar(String clave, String ruta) {
@@ -43,6 +45,10 @@ public class GestorSonidos implements Disposable {
         } catch (Exception e) {
             Gdx.app.error("GestorSonidos", "Error al cargar el sonido: " + ruta, e);
         }
+    }
+
+    public void reproducirSonidoClick() {
+        reproducirConVariacion("button-click");
     }
 
     public void reproducir(String clave) {

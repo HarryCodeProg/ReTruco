@@ -2,19 +2,15 @@ package io.github.HarryCodeProg.TrucoSurvivors.Jokers.MuyRaro;
 
 import io.github.HarryCodeProg.TrucoSurvivors.Activacion.ContextoJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.EventoJuego;
-import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Rareza;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 
-import java.util.ArrayList;
-
 public class Bestiario extends Joker {
 
     public Bestiario() {
-        super(101, "Bestiario", "Bestiario", "Reactiva todos los jokers con categoría 'ANIMAL'",
-            Rareza.muyRaro, 8, Joker.FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.ANIMAL);
+        super(101, "Bestiario", "Bestiario", "+5 multiplicador truco por cada joker comprado",
+            Rareza.muyRaro, 8, Joker.FaseActivacion.INDEPENDIENTE);
     }
 
     @Override
@@ -26,13 +22,18 @@ public class Bestiario extends Joker {
 
     @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego) {
-        if (!ctx.marcarUsado(this, evento)) return; // evita reencolarse en bucle si el evento se repite en la misma resolución
-        ArrayList<Joker> jokers = ctx.getJugador().getJokers();
-        for (Joker j : jokers) {
-            if (j == this) continue; // no se reactiva a sí mismo
-            if (j.tieneCategoria(CategoriaJoker.ANIMAL)) {
-                ctx.reencolarActivacionJoker(j, evento);
+        if (evento == EventoJuego.AL_COMPRAR_JOKER) {
+            sumarAcumulado(5);
+        }
+        if (evento == EventoJuego.ANTES_DE_SUMAR_TRUCO) {
+            if (getAcumulado() > 0) {
+                ctx.getResolucionActual().sumarMult(getAcumulado(), getNombre(), this);
             }
         }
+    }
+
+    @Override
+    public String getDescripcionRenderizada(Juego juego) {
+        return "+5 multiplicador truco por cada joker comprado (actual: +" + (int)getAcumulado() + ")";
     }
 }

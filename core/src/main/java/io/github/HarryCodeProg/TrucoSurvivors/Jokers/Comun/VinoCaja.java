@@ -18,7 +18,7 @@ public class VinoCaja extends Joker {
             "VinoCaja",
             "+50 puntos de truco. Por cada otro joker con la categoria 'Alcohol' -5 puntos",
             Rareza.comun,
-            1,
+            3,
             INDEPENDIENTE,
             CategoriaJoker.NACIONAL, CategoriaJoker.BEBIDA, CategoriaJoker.ALCOHOL
         );
