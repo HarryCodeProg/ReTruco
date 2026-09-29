@@ -104,12 +104,29 @@ public class PoolJokersTienda {
         fabricas.add(EntreRios::new);
         fabricas.add(Guanaco::new);
         fabricas.add(Mendoza::new);
+        fabricas.add(RataBlanca::new);
+        fabricas.add(Gaucho::new);
+        fabricas.add(Neuquen::new);
+        fabricas.add(BuenosAires::new);
+        fabricas.add(TierraDelFuego::new);
+        fabricas.add(Bariloche::new);
+        fabricas.add(LaPampa::new);
+        fabricas.add(SantiagoDelEstero::new);
+        fabricas.add(Gallina::new);
+        fabricas.add(Constelacion::new);
 
         //muy raro
         fabricas.add(VirgenItati::new);
         fabricas.add(VirgenDeLujan::new);
         fabricas.add(PlazaDeMayo::new);
         fabricas.add(Obelisco::new);
+        fabricas.add(Gato::new);
+        /*fabricas.add(Bestiario::new);
+        fabricas.add(PlanSocial::new);*/
+        fabricas.add(Corrientes::new);
+        fabricas.add(Basilica::new);
+        fabricas.add(Escarapela::new);
+        fabricas.add(Iguazu::new);
 
         //epico
         fabricas.add(Aconcagua::new);
@@ -123,6 +140,8 @@ public class PoolJokersTienda {
         fabricas.add(Cerati::new);
         fabricas.add(Cortazar::new);
         fabricas.add(SableCorvo::new);
+        fabricas.add(Perro::new);
+        fabricas.add(Borges::new);
 
         //legendario
         fabricas.add(Rivadavia::new);
@@ -133,9 +152,11 @@ public class PoolJokersTienda {
 
     /** Devuelve un joker nuevo al azar, evitando (si es posible) los que el jugador ya tiene por clase. */
     public Joker tomarAleatorio(Random random, Jugador jugador, boolean permitirDuplicados, List<Integer> idsExcluidos) {
+        boolean bloquearComunes = debeBloquearComunes(jugador);
         ArrayList<Supplier<Joker>> disponibles = new ArrayList<>();
         for (Supplier<Joker> f : fabricas) {
             Joker candidato = f.get();
+            if (bloquearComunes && candidato.getRareza() == Rareza.comun) continue;
             if (!permitirDuplicados) {
                 boolean yaLoTiene = jugador.getJokers().stream().anyMatch(j -> j.getClass().equals(candidato.getClass()));
                 if (yaLoTiene) continue;
@@ -156,6 +177,9 @@ public class PoolJokersTienda {
     }
 
     public Joker tomarAleatorioDeRareza(Rareza rareza, Jugador jugador) {
+        if (rareza == Rareza.comun && debeBloquearComunes(jugador)) {
+            return null;
+        }
         Random random = new Random();
         ArrayList<Supplier<Joker>> disponibles = new ArrayList<>();
         ArrayList<Supplier<Joker>> todosDeRareza = new ArrayList<>();
@@ -185,6 +209,10 @@ public class PoolJokersTienda {
             resultado.add(fabrica.get());
         }
         return resultado;
+    }
+
+    private boolean debeBloquearComunes(Jugador jugador) {
+        return jugador.getJokers().stream().anyMatch(Joker::bloqueaJokersComunes);
     }
 }
 

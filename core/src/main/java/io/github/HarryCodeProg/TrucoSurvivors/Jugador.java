@@ -6,6 +6,7 @@ import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Raro.Salta;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Raro.Tucuman;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Mazo;
+import io.github.HarryCodeProg.TrucoSurvivors.Modelo.SignoZodiaco;
 import io.github.HarryCodeProg.TrucoSurvivors.Santos.Santo;
 
 import java.util.ArrayList;
@@ -20,7 +21,6 @@ public class Jugador {
     private Mazo mazo;
     private int tamañoMano;
     private int tamañoJokers;
-    private int envidoInicial = 20;
     private double envidoActual;
     private double multiplicadorTruco;
     private double multiplicadorEnvido;
@@ -32,7 +32,6 @@ public class Jugador {
     private static final int TOPE_INTERES = 5;
     private int descartesBase = 6;
     private int descartesExtra = 0;
-    private int tamañoManoExtra = 0;
     private int espacioSantosExtra = 0;
     private int proximoEfectoZodiacoMultiplicador = 1; // Libra
     private int rerollsTienda = 0;
@@ -51,7 +50,9 @@ public class Jugador {
     private Santo ultimoSantoUsado;
     private int manosMaximas = 6;
     private int manosActuales = manosMaximas;
-    private int deudaMaxima = 0; // 0 = sin deuda permitida; jokers como CuentaCorriente la aumentan
+    private int deudaMaxima = 0;
+    private int topeInteresExtra = 0;
+    private SignoZodiaco proximoZodiacoForzado;
 
     public Jugador(String nombre) {
         this.nombre = nombre;
@@ -65,6 +66,35 @@ public class Jugador {
         this.multiplicadorTrucoTemporal = 1;
         this.multiplicadorEnvidoTemporal = 1;
         this.mazo = new Mazo();
+    }
+
+    public int getEspacioJokersUsados() {
+        int usados = 0;
+        for (Joker j : jokers) if (j.ocupaEspacio()) usados++;
+        return usados;
+    }
+
+    public boolean agregarJoker(Joker joker) {
+        int necesita = joker.ocupaEspacio() ? 1 : 0;
+        if (getEspacioJokersUsados() + necesita <= tamañoJokers) {
+            this.jokers.add(joker);
+            joker.setJugadorPropietario(this);
+            joker.aplicarEfectoInstantaneo(this);
+            for (Consumer<Joker> l : jokerAddedListeners) {
+                try { l.accept(joker); } catch (Exception e) { e.printStackTrace(); }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public boolean gastarPesos(int cantidad) {
+        if (pesos - cantidad < -deudaMaxima) return false;
+        pesos -= cantidad;
+        if (cantidad > 0) {
+            for (Joker j : new ArrayList<>(jokers)) j.onPesosGastados(cantidad, this);
+        }
+        return true;
     }
 
     public void agregarCarta(Carta carta) { this.mano.add(carta); }
@@ -95,18 +125,6 @@ public class Jugador {
     public ArrayList<Carta> getMano() { return this.mano; }
     public ArrayList<Joker> getJokers() { return this.jokers; }
 
-    public boolean agregarJoker(Joker joker) {
-        if (jokers.size() < tamañoJokers) {
-            this.jokers.add(joker);
-            joker.aplicarEfectoInstantaneo(this);
-            for (Consumer<Joker> l : jokerAddedListeners) {
-                try { l.accept(joker); } catch (Exception e) { e.printStackTrace(); }
-            }
-            return true;
-        }
-        return false;
-    }
-
     public void eliminarJoker(Joker joker) {
         this.jokers.remove(joker);
         joker.desAplicarEfectoInstantaneo(this);
@@ -122,7 +140,7 @@ public class Jugador {
     public int getDinero() { return pesos; }
 
     public int calcularInteres() {
-        return Math.min(pesos / INTERVALO_INTERES, TOPE_INTERES);
+        return Math.min(pesos / INTERVALO_INTERES, TOPE_INTERES + topeInteresExtra);
     }
 
     public int getNumeroMasGrande() {
@@ -327,7 +345,6 @@ public class Jugador {
         return palo;
     }
 
-    /** Conveniencia: ¿esta carta cuenta como el palo objetivo, considerando fusiones activas? */
     public boolean cartaCuentaComoPalo(Carta carta, Palo paloObjetivo) {
         return paloEfectivo(carta.getPalo()) == paloEfectivo(paloObjetivo);
     }
@@ -342,10 +359,28 @@ public class Jugador {
     public void sumarDeudaMaxima(int cantidad) { deudaMaxima += cantidad; }
     public int getDeudaMaxima() { return deudaMaxima; }
 
-    // modificar gastarPesos existente:
-    public boolean gastarPesos(int cantidad) {
-        if (pesos - cantidad < -deudaMaxima) return false; // FIX: permite bajar hasta -deudaMaxima
-        pesos -= cantidad;
-        return true;
+    public void sumarTopeInteresExtra(int cantidad) {
+        this.topeInteresExtra += cantidad;
+    }
+
+    public void setProximoZodiacoForzado(SignoZodiaco signo) {
+        this.proximoZodiacoForzado = signo;
+    }
+
+    public SignoZodiaco getProximoZodiacoForzado() {
+        return proximoZodiacoForzado;
+    }
+
+    /** Saca todos los santos sin ejecutar su efecto (se "sacrifican"). Devuelve cuántos se consumieron. */
+    public int consumirTodosLosSantos() {
+        int cantidad = santos.size();
+        ArrayList<Santo> aQuitar = new ArrayList<>(santos);
+        for (Santo s : aQuitar) {
+            santos.remove(s);
+            for (Consumer<Santo> l : santoRemovedListeners) {
+                try { l.accept(s); } catch (Exception e) { e.printStackTrace(); }
+            }
+        }
+        return cantidad;
     }
 }

@@ -11,7 +11,7 @@ public class VirgenItati extends Joker {
 
     public VirgenItati() {
         super(125, "Virgen Itatí", "VirgenItati",
-            "En cada ronda, consume los descartes hasta dejarlos en 0, obtiene el multiplicador truco igual a lo consumido (actual: +0)",
+            "En cada ronda consume los descartes hasta dejarlos en 0, obtiene el multiplicador truco igual a lo consumido (actual: +0)",
             Rareza.muyRaro, 8, Joker.FaseActivacion.INDEPENDIENTE,
             CategoriaJoker.HISTORIA);
     }

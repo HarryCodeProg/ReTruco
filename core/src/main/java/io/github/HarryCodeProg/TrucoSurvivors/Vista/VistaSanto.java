@@ -68,10 +68,19 @@ public class VistaSanto implements Arrastrable {
     public float getCentroX() { return x + (width * scale) / 2f; }
 
     public boolean contiene(float mx, float my) {
+        float w = width * scale;
+        float h = height * scale;
+        float hitboxX = x + (width - w) / 2f;
+        float hitboxY = y + (height - h) / 2f;
+        return mx >= hitboxX && mx <= hitboxX + w && my >= hitboxY && my <= hitboxY + h;
+    }
+
+    /*
+    public boolean contiene(float mx, float my) {
         float w = width * scale, h = height * scale;
         float drawY = y + visualOffsetY;
         return mx >= x && mx <= x + w && my >= drawY && my <= drawY + h;
-    }
+    }*/
 
     @Override public boolean isDragging() { return dragging; }
 

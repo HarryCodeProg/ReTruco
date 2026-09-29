@@ -8,26 +8,6 @@ import java.util.ArrayList;
 
 public class GestorReordenamiento {
 
-    public void actualizarPreviews(GestorInputArrastrable<VistaCarta> gestorCartas,
-                                   ArrayList<VistaCarta> cartasJugador,
-                                   GestorInputArrastrable<VistaJoker> gestorJokers,
-                                   ArrayList<VistaJoker> jokers,
-                                   Runnable alOrganizarCartas,
-                                   Runnable alOrganizarJokers) {
-        boolean cambioCartas = previsualizarReordenamiento(gestorCartas, cartasJugador);
-        if (cambioCartas && alOrganizarCartas != null) {
-            alOrganizarCartas.run();
-        }
-        boolean cambioJokers = previsualizarReordenamiento(gestorJokers, jokers);
-        if (cambioJokers && alOrganizarJokers != null) {
-            alOrganizarJokers.run();
-        }
-    }
-
-    /**
-     * Reordena genéricamente cualquier lista de Arrastrables (Cartas o Jokers)
-     * en tiempo real mientras se arrastra un elemento.
-     */
     public <T extends Arrastrable> boolean previsualizarReordenamiento(GestorInputArrastrable<T> gestor,
                                                                        ArrayList<T> lista) {
         T arrastrando = gestor.getArrastrado();
@@ -64,70 +44,6 @@ public class GestorReordenamiento {
 
     public boolean previsualizarReordenamientoJokers(GestorInputArrastrable<VistaJoker> gestorJokers, ArrayList<VistaJoker> jokers) {
         return previsualizarReordenamiento(gestorJokers, jokers);
-    }
-
-    public <T extends Arrastrable> void actualizarSlots(
-        ArrayList<Float> slots,
-        int cantidad,
-        float ancho,
-        float separacion,
-        float anchoPantalla) {
-        slots.clear();
-        float margenLateral = 220f;
-        float anchoMaximo = anchoPantalla - margenLateral * 2;
-        float paso = calcularPaso(cantidad, ancho, separacion, anchoMaximo);
-        float anchoTotal = ancho + (cantidad - 1) * paso;
-        float inicioX = margenLateral + (anchoMaximo - anchoTotal) / 2f;
-        for (int i = 0; i < cantidad; i++) {
-            slots.add(inicioX + i * paso);
-        }
-    }
-
-    public <T extends Arrastrable> int calcularIndicePreview(
-        T arrastrado,
-        ArrayList<Float> slots,
-        float ancho) {
-        if (arrastrado == null)
-            return -1;
-        float centroX = arrastrado.getCentroX();
-        int mejorIndice = 0;
-        float mejorDistancia = Float.MAX_VALUE;
-        for (int i = 0; i < slots.size(); i++) {
-            float centroSlot = slots.get(i) + ancho / 2f;
-            float distancia = Math.abs(centroX - centroSlot);
-
-            if (distancia < mejorDistancia) {
-                mejorDistancia = distancia;
-                mejorIndice = i;
-            }
-        }
-        return mejorIndice;
-    }
-
-    public <T extends Arrastrable> void organizarPreview(
-        ArrayList<T> lista,
-        T arrastrado,
-        int indicePreview,
-        float ancho,
-        float separacion,
-        float y,
-        float anchoPantalla) {
-        if (arrastrado == null)
-            return;
-        ArrayList<T> visual = new ArrayList<>(lista);
-        visual.remove(arrastrado);
-        if (indicePreview < 0 || indicePreview > visual.size()) {
-            indicePreview = visual.size();
-        }
-        visual.add(indicePreview, arrastrado);
-        float anchoTotal = (visual.size() * ancho) + ((visual.size() - 1) * separacion);
-        float inicioX = (anchoPantalla - anchoTotal) / 2f;
-        for (int i = 0; i < visual.size(); i++) {
-            visual.get(i).setHandPosition(
-                inicioX + i * (ancho + separacion),
-                y
-            );
-        }
     }
 
     public static float calcularPaso(int cantidad, float anchoCarta, float separacionDeseada, float anchoMaximo) {

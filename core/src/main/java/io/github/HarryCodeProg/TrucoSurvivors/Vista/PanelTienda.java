@@ -91,6 +91,10 @@ public class PanelTienda {
         botonComprarYUsar = new Boton(0, 0, 120f, 35f, Boton.TipoColor.DORADO, Accion.COMPRAR_Y_USAR_SANTO);
         botonComprarYUsar.setVisible(false);
         ruedaZodiaco = new RuedaZodiaco(RUEDA_X, RUEDA_Y, RUEDA_RADIO, game.getTexturaRuletaFondo());
+        ruedaZodiaco.setAlIniciarGiro(() -> {
+            GestorSonidos sonidos = Main.getInstance().getGestorSonidos();
+            if (sonidos != null) sonidos.reproducir("spin");
+        });
         reconstruirVistas();
         this.offsetY = -(PANEL_Y + PANEL_ALTO);
         this.offsetYObjetivo = 0f;
@@ -206,13 +210,29 @@ public class PanelTienda {
         overlaySeleccion.update(mouseWorldX, mouseWorldY, delta);
         if (overlayConsumo.debeAplicarEfectoAhora()) {
             SignoZodiaco s = ruedaZodiaco.getUltimoSignoConsumido();
+            if (jugador.getProximoZodiacoForzado() != null) {
+                s = jugador.getProximoZodiacoForzado();
+            }
             s.aplicarEfecto(jugador, null, estadoTienda, null);
+            Joker neuquenAConsumir = null;
+            for (Joker joker : jugador.getJokers()) {
+                if (joker.getId() == 95) {
+                    neuquenAConsumir = joker;
+                    break;
+                }
+            }
+            if (neuquenAConsumir != null) {
+                jugador.eliminarJoker(neuquenAConsumir);
+            }
+            boolean quedaNeuquen = jugador.getJokers().stream().anyMatch(j -> j.getId() == 95);
+            jugador.setProximoZodiacoForzado(quedaNeuquen ? SignoZodiaco.PISCIS : null);
             overlayConsumo.confirmarCierre();
         }
         if (justTouched) {
             ruedaZodiaco.click(mouseWorldX, mouseWorldY,
                 signo -> {
-                    overlayConsumo.abrir(signo, game.getAtlasZodiaco().findRegion(signo.getNombreRegion()), () -> {});
+                    SignoZodiaco signoFinal = jugador.getProximoZodiacoForzado() != null ? jugador.getProximoZodiacoForzado() : signo;
+                    overlayConsumo.abrir(signoFinal, game.getAtlasZodiaco().findRegion(signoFinal.getNombreRegion()), () -> {});
                 }
             );
             overlaySeleccion.click(mouseWorldX, mouseWorldY, jugador, null);
@@ -244,9 +264,7 @@ public class PanelTienda {
             return;
         }
         // --- LÓGICA DE SELECCIÓN / DESELECCIÓN AL PRESIONAR (PRESS) ---
-        // Verificamos si estamos presionando un botón de la UI para no deseleccionar el ítem por error
         boolean mouseSobreBotonUI = botonComprar.isHovered() || botonReroll.isHovered() || botonContinuar.isHovered() || botonComprarYUsar.isHovered();
-        // Solo procesamos selección/deselección si tocamos y NO estamos encima de un botón
         if (justTouched && !mouseSobreBotonUI) {
             VistaItemTienda itemClickeado = ganadorHover;
             if (itemClickeado != null) {
@@ -275,7 +293,6 @@ public class PanelTienda {
                     float botX = seleccionado.getX() + (ANCHO_ITEM / 2f) - (botonComprar.getWidth() / 2f);
                     float botY = seleccionado.getY() - (botonComprar.getHeight() / 2f);
                     botonComprar.setPosition(botX, botY);
-
                     botonComprarYUsar.setVisible(esSanto);
                     botonComprarYUsar.setHabilitado(esSanto && dineroSuficiente && espacioDisponible);
                     if (esSanto) {
@@ -311,14 +328,17 @@ public class PanelTienda {
         if (item.getTipo() == ItemTienda.Tipo.CARTA) {
             juego.agregarCartaAlMazoJugador(item.getCarta());
             estadoTienda.removerItemComprado(item);
+            juego.notificarCartaComprada();
         } else if (item.getTipo() == ItemTienda.Tipo.JOKER) {
             if (alComprarJoker != null) {
                 estadoTienda.removerItemComprado(item);
                 reconstruirVistas();
                 alComprarJoker.accept(vista);
+                juego.notificarJokerComprado();
             } else {
                 jugador.agregarJoker(item.getJoker());
                 estadoTienda.removerItemComprado(item);
+                juego.notificarJokerComprado();
             }
         } else if (item.getTipo() == ItemTienda.Tipo.SANTO) {
             Santo santo = item.getSanto();

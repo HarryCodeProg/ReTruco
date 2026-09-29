@@ -75,7 +75,10 @@ public class PanelSeleccionRival {
         if (Math.abs(diferencia) <= VELOCIDAD_SLIDE * delta) {
             offsetY = offsetYObjetivo;
             if (cerrando && offsetY == offsetYObjetivo && alCerrarCompletamente != null) {
-                alCerrarCompletamente.run();
+                Runnable callback = alCerrarCompletamente;
+                alCerrarCompletamente = null;
+                cerrando = false;
+                callback.run();
             }
         } else {
             offsetY += Math.signum(diferencia) * VELOCIDAD_SLIDE * delta;

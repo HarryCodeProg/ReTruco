@@ -77,7 +77,7 @@ public class VistaJoker implements Arrastrable{
 
     public void render(SpriteBatch batch) {
         float drawY = y + visualOffsetY;
-        float scaleExtra = resaltado ? 1f + (float) (Math.sin(pulso) * 0.08f) : 1f;
+        float scaleExtra = resaltado ? 1f + (float)(Math.sin(pulso) * 0.06f) : 1f;
         Main game = Main.getInstance();
         // MATRIZ
         batch.flush();
@@ -229,7 +229,6 @@ public class VistaJoker implements Arrastrable{
             dragOffsetX = mouseX - x;
             dragOffsetY = mouseY - y;
             ALGUN_DRAG_ACTIVO = true;
-
             // --- NUEVO: Iniciamos la física de arrastre ---
             fisicaTiltArrastre.iniciarArrastre(mouseX);
         }
@@ -265,41 +264,27 @@ public class VistaJoker implements Arrastrable{
 
     public void update(float mouseX, float mouseY, float delta) {
         if (resaltado) {
-            pulso += delta * 6f; // velocidad del latido
-        }
-        if (!ALGUN_DRAG_ACTIVO) {
-            hover = contiene(mouseX, mouseY);
-        } else {
+            pulso += delta * 6f;
             hover = false;
+            return;
         }
+        hover = !ALGUN_DRAG_ACTIVO && contiene(mouseX, mouseY);
         float offsetHover = hover ? OFFSET_HOVER : 0f;
         float offsetSeleccion = seleccionada ? OFFSET_SELECCIONADA : 0f;
         targetScale = hover ? ESCALA_HOVER : 1f;
         targetOffsetY = offsetHover + offsetSeleccion;
-        if (hover) targetRotation = 0f;
-        // --- NUEVA LÓGICA DE INCLINACIÓN (Física de Arrastre + Hover) ---
-        if (dragging) {
-            fisicaTiltArrastre.actualizarArrastre(mouseX, delta);
-            targetTiltY = fisicaTiltArrastre.getAngulo();
-            targetTiltX = 0f;
+        if (hover && !dragging) {
+            float cx = x + (width * scale) / 2f;
+            float cy = y + visualOffsetY + (height * scale) / 2f;
+            float mouseDeltaX = (mouseX - cx) / ((width * scale) / 2f);
+            float mouseDeltaY = (mouseY - cy) / ((height * scale) / 2f);
+            mouseDeltaX = Math.max(-1f, Math.min(1f, mouseDeltaX));
+            mouseDeltaY = Math.max(-1f, Math.min(1f, mouseDeltaY));
+            targetTiltY = mouseDeltaX * MAX_TILT;
+            targetTiltX = -mouseDeltaY * MAX_TILT;
         } else {
-            fisicaTiltArrastre.actualizarSoltada(delta);
-            if (fisicaTiltArrastre.estaActiva()) {
-                targetTiltY = fisicaTiltArrastre.getAngulo();
-                targetTiltX = 0f;
-            } else if (hover) {
-                float cx = x + (width * scale) / 2f;
-                float cy = y + visualOffsetY + (height * scale) / 2f;
-                float mouseDeltaX = (mouseX - cx) / ((width * scale) / 2f);
-                float mouseDeltaY = (mouseY - cy) / ((height * scale) / 2f);
-                mouseDeltaX = Math.max(-1f, Math.min(1f, mouseDeltaX));
-                mouseDeltaY = Math.max(-1f, Math.min(1f, mouseDeltaY));
-                targetTiltY = mouseDeltaX * MAX_TILT;
-                targetTiltX = -mouseDeltaY * MAX_TILT;
-            } else {
-                targetTiltY = 0f;
-                targetTiltX = 0f;
-            }
+            targetTiltX = 0f;
+            targetTiltY = 0f;
         }
         tiltX = moverHacia(tiltX, targetTiltX, VELOCIDAD_TILT * delta);
         tiltY = moverHacia(tiltY, targetTiltY, VELOCIDAD_TILT * delta);
@@ -308,13 +293,18 @@ public class VistaJoker implements Arrastrable{
             y = moverHacia(y, targetY, VELOCIDAD_POSICION * delta);
             scale = moverHacia(scale, targetScale, VELOCIDAD_ESCALA * delta);
             visualOffsetY = moverHacia(visualOffsetY, targetOffsetY, VELOCIDAD_OFFSET * delta);
-            rotation = moverHacia(rotation, targetRotation, VELOCIDAD_ROTACION * delta);
+            rotation = moverHacia(rotation, 0f, VELOCIDAD_ROTACION * delta);
         } else {
             x = targetX;
             y = targetY;
             scale = moverHacia(scale, 1.2f, VELOCIDAD_ESCALA * delta);
             visualOffsetY = moverHacia(visualOffsetY, 0f, VELOCIDAD_OFFSET * delta);
         }
+    }
+
+    public void setResaltado(boolean resaltado) {
+        this.resaltado = resaltado;
+        if (resaltado) pulso = 0f;
     }
 
     private float moverHacia(float value, float target, float maxDelta) {
@@ -333,9 +323,18 @@ public class VistaJoker implements Arrastrable{
     public boolean contiene(float mx, float my) {
         float w = width * scale;
         float h = height * scale;
+        float hitboxX = x + (width - w) / 2f;
+        float hitboxY = y + (height - h) / 2f;
+        return mx >= hitboxX && mx <= hitboxX + w && my >= hitboxY && my <= hitboxY + h;
+    }
+
+    /*
+    public boolean contiene(float mx, float my) {
+        float w = width * scale;
+        float h = height * scale;
         float drawY = y + visualOffsetY;
         return mx >= x && mx <= x + w && my >= drawY && my <= drawY + h;
-    }
+    }*/
 
     private void dibujarCartelStats(SpriteBatch batch, Main game, Juego juego, float drawY) {
         BitmapFont fontTitulo = game.getFuenteTooltipTitulo();
@@ -346,15 +345,18 @@ public class VistaJoker implements Arrastrable{
         fontTitulo.getData().markupEnabled = true;
         fontDesc.getData().markupEnabled = true;
         String lineaNombre = joker.getNombre();
-        String descripcionPura = joker.getDescripcionRenderizada(juego);
+        // Usamos trim() para borrar cualquier \n sobrante que infle el alto de la caja
+        String descripcionPura = joker.getDescripcionRenderizada(juego).trim();
         String descripcion = ColorMecanica.colorearTexto(Palo.colorearTexto(descripcionPura));
         String rarezaStr = joker.getRareza().toString().toUpperCase();
         float padEtiquetaX = 10f;
         float padEtiquetaY = 4f;
-        float espacioVertical = 7f;
+        // --- NUEVO SISTEMA DE ESPACIADO SECUENCIAL ---
+        float gapTituloCaja = 6f;
         float descPadX = 10f;
+        // 1. Aumentamos levemente el padding vertical de la caja
         float descPadY = 8f;
-        float altoLinea = fontTitulo.getLineHeight();
+        float gapCajaBadges = 8f;
         float maxAnchoPalabra = 0f;
         String[] palabras = lineaNombre.split(" ");
         for (String palabra : palabras) {
@@ -382,8 +384,9 @@ public class VistaJoker implements Arrastrable{
         float altoDescripcion = layout.height;
         float paddingX = 14f;
         float paddingY = 12f;
+        float altoCaja = altoDescripcion + (descPadY * 2f);
         float anchoCartel = anchoUtil + (paddingX * 2f);
-        float altoCartel = paddingY + altoTitulo + espacioVertical + altoDescripcion + (descPadY * 2f) + espacioVertical + altoBadgeReal + altoCategorias + paddingY;
+        float altoCartel = paddingY + altoTitulo + gapTituloCaja + altoCaja + gapCajaBadges + altoBadgeReal + altoCategorias + paddingY;
         float actualWidth = width * scale;
         float actualHeight = height * scale;
         float cartelX, cartelY;
@@ -403,24 +406,28 @@ public class VistaJoker implements Arrastrable{
         Color colorDeRareza = joker.getRareza().getColor();
         Texture pixelBlanco = game.getPixelBlanco();
         TooltipUI.dibujarFondo(batch, pixelBlanco, cartelX, cartelY, anchoCartel, altoCartel, colorDeRareza);
+        // 1. DIBUJAMOS EL TÍTULO
         float currentY = cartelY + altoCartel - paddingY;
         TooltipUI.dibujarTitulo(batch, fontTitulo, lineaNombre, cartelX + paddingX, currentY, anchoUtil, colorDeRareza);
         currentY -= altoTitulo;
-        currentY -= espacioVertical;
+        currentY -= gapTituloCaja;
+        // 2. DIBUJAMOS LA CAJA BLANCA
         float boxX = cartelX + paddingX - descPadX;
         float boxW = anchoCartel - (paddingX * 2f) + (descPadX * 2f);
-        float boxTop = currentY + descPadY;
-        float boxH = altoDescripcion + (descPadY * 2f);
+        float boxTop = currentY;
+        float boxH = altoCaja;
         float boxY = boxTop - boxH;
         if (pixelBlanco != null) {
             TooltipUI.dibujarCajaBlancaInterna(batch, pixelBlanco, boxX, boxY, boxW, boxH);
         }
+        // 3. DIBUJAMOS EL TEXTO DE LA DESCRIPCIÓN
         Color colorDescAnterior = fontDesc.getColor();
         fontDesc.setColor(0.08f, 0.08f, 0.08f, 1f);
-        fontDesc.draw(batch, descripcion, cartelX + paddingX, currentY, anchoUtil, com.badlogic.gdx.utils.Align.center, true);
-        currentY -= altoDescripcion;
-        currentY -= descPadY;
-        currentY -= espacioVertical;
+        // Alineación vertical exacta, removiendo el offset arbitrario de -3f
+        float textY = boxTop - descPadY + 2f;
+        fontDesc.draw(batch, descripcion, cartelX + paddingX, textY, anchoUtil, com.badlogic.gdx.utils.Align.center, true); // 4. DIBUJAMOS LOS BADGES
+        currentY -= boxH;
+        currentY -= gapCajaBadges;
         float centroCartelX = cartelX + (anchoCartel / 2f);
         currentY = TooltipUI.dibujarBadge(batch, fontDesc, pixelBlanco, rarezaStr, colorDeRareza, centroCartelX, currentY, padEtiquetaX, padEtiquetaY);
         for (CategoriaJoker cat : joker.getCategorias()) {
@@ -432,14 +439,6 @@ public class VistaJoker implements Arrastrable{
         fontDesc.setColor(colorDescAnterior);
         batch.setColor(Color.WHITE);
     }
-
-
-    public void setResaltado(boolean resaltado) {
-        this.resaltado = resaltado;
-        if (resaltado) pulso = 0f;
-    }
-
-    public boolean isResaltado() { return resaltado; }
 
     public float getCentroX() { return x + (width * scale) / 2f; }
     public float getX() { return x; }

@@ -37,6 +37,7 @@ public class SanLaMuerte extends Santo {
         if (jugador.getJokers().size() >= jugador.getTamañoJokers()) return;
         for (Carta carta : seleccionadas) {
             jugador.eliminarCarta(carta);
+            jugador.getMazo().restarTamañoMazo(1);
         }
         PoolJokersTienda pool = new PoolJokersTienda();
         Joker joker = pool.tomarAleatorioDeRareza(Rareza.epico, jugador);

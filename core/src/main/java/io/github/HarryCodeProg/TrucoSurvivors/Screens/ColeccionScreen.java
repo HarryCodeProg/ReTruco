@@ -39,6 +39,10 @@ public class ColeccionScreen implements Screen {
     private final Boton botonAnterior;
     private final Boton botonSiguiente;
     private final Boton botonVolver;
+    private static final float X_INICIAL = 220f;
+    private static final float Y_INICIAL = 430f;
+    private static final float ESPACIO_X = 185f;
+    private static final float ESPACIO_Y = 165f;
     private enum Tipo {
         JOKERS,
         CARTAS,
@@ -54,16 +58,12 @@ public class ColeccionScreen implements Screen {
     private static final int COLUMNAS = 5;
     private static final int FILAS = 3;
     private static final int POR_PAGINA = 15;
-    private static final float X_INICIAL = 220f;
-    private static final float Y_INICIAL = 460f;
-    private static final float ESPACIO_X = 185f;
-    private static final float ESPACIO_Y = 165f;
     private static final float ANCHO_ITEM = 100f;
     private static final float ALTO_CARTA = 150f;
     private static final float ALTO_JOKER = 110f;
     private static final float ALTO_SANTO = 120f;
     private Background fondoPlasma;
-    private final VistaJoker[] vistasJokers = new VistaJoker[150]; // FIX: indexado por id real, no por orden de pool
+    private final VistaJoker[] vistasJokers = new VistaJoker[150];
     private static final float ALTO_ITEM = 150f;
 
     public ColeccionScreen(Main game) {
@@ -71,9 +71,9 @@ public class ColeccionScreen implements Screen {
         camera = new OrthographicCamera();
         viewport = new FitViewport(1280, 720, camera);
         mouseWorld = new Vector3();
-        botonJokers = new Boton(350f, 625f, 170f, 45f, "JOKERS", Boton.TipoColor.VIOLETA, Accion.COLECCION);
-        botonCartas = new Boton(555f, 625f, 170f, 45f, "CARTAS", Boton.TipoColor.CIAN, Accion.COLECCION);
-        botonSantos = new Boton(760f, 625f, 170f, 45f, "SANTOS", Boton.TipoColor.DORADO, Accion.COLECCION);
+        botonJokers = new Boton(350f, 595f, 170f, 45f, "JOKERS", Boton.TipoColor.DORADO, Accion.COLECCION);
+        botonCartas = new Boton(555f, 595f, 170f, 45f, "CARTAS", Boton.TipoColor.CIAN, Accion.COLECCION);
+        botonSantos = new Boton(760f, 595f, 170f, 45f, "SANTOS", Boton.TipoColor.VIOLETA, Accion.COLECCION);
         botonAnterior = new Boton(500f, 35f, 90f, 50f, "<-", Boton.TipoColor.CELESTE, Accion.COLECCION);
         botonSiguiente = new Boton(690f, 35f, 90f, 50f, "->", Boton.TipoColor.CELESTE, Accion.COLECCION);
         botonVolver = new Boton(40f, 35f, 130f, 50f, "VOLVER", Boton.TipoColor.BLANCO, Accion.OPCIONES);
@@ -92,13 +92,13 @@ public class ColeccionScreen implements Screen {
     }
 
     private void construirVistas() {
-        java.util.Arrays.fill(vistasJokers, null); // FIX
+        java.util.Arrays.fill(vistasJokers, null);
         vistasCartas.clear();
         vistasSantos.clear();
         for (Joker joker : jokers) {
             VistaJoker vista = new VistaJoker(joker, game.getAtlasJokers());
             vista.setTamaño(ANCHO_ITEM, ALTO_ITEM);
-            int idx = joker.getId() - 1; // FIX: id 1..150 -> índice 0..149
+            int idx = joker.getId() - 1;
             if (idx >= 0 && idx < vistasJokers.length) {
                 vistasJokers[idx] = vista;
             }
@@ -148,10 +148,12 @@ public class ColeccionScreen implements Screen {
         }
         int totalPaginas = obtenerTotalPaginas();
         if (botonAnterior.fueCliqueado(mouseWorld.x, mouseWorld.y)) {
-            if (paginaActual > 0) paginaActual--;
+            paginaActual--;
+            if (paginaActual < 0) paginaActual = totalPaginas - 1;
         }
         if (botonSiguiente.fueCliqueado(mouseWorld.x, mouseWorld.y)) {
-            if (paginaActual < totalPaginas - 1) paginaActual++;
+            paginaActual++;
+            if (paginaActual >= totalPaginas) paginaActual = 0;
         }
         if (botonVolver.fueCliqueado(mouseWorld.x, mouseWorld.y)) {
             game.setScreen(new MainMenuScreen(game));
@@ -173,6 +175,10 @@ public class ColeccionScreen implements Screen {
         botonSantos.render(game.batch);
         dibujarVistasActuales(game.batch);
         botonAnterior.render(game.batch);
+        BitmapFont fontPaginas = game.getFuenteBotones();
+        String textoPaginas = (paginaActual + 1) + "/" + totalPaginas;
+        GlyphLayout layoutPaginas = new GlyphLayout(fontPaginas, textoPaginas);
+        fontPaginas.draw(game.batch, textoPaginas, 640f - layoutPaginas.width / 2f, 67f);
         botonSiguiente.render(game.batch);
         botonVolver.render(game.batch);
         game.batch.end();
@@ -236,7 +242,7 @@ public class ColeccionScreen implements Screen {
                 if (indice < vistasJokers.length && vistasJokers[indice] != null) {
                     VistaJoker vista = vistasJokers[indice];
                     vista.setPosition(x, y);
-                    vista.setTooltipLateral(fila == 1); // <--- NUEVO
+                    vista.setTooltipLateral(fila == 1);
                     vista.render(batch);
                     if (vista.isHover()) jokerHover = vista;
                 } else if (indice < vistasJokers.length) {
@@ -247,7 +253,7 @@ public class ColeccionScreen implements Screen {
                 if (indice < vistasCartas.size()) {
                     VistaCarta vista = vistasCartas.get(indice);
                     vista.setPosition(x, y);
-                    vista.setTooltipLateral(fila == 1); // <--- NUEVO
+                    vista.setTooltipLateral(fila == 1);
                     vista.render(batch, game);
                     if (vista.isHover()) cartaHover = vista;
                 }
@@ -256,13 +262,13 @@ public class ColeccionScreen implements Screen {
                 if (indice < vistasSantos.size()) {
                     VistaSanto vista = vistasSantos.get(indice);
                     vista.setPosition(x, y);
-                    vista.setTooltipLateral(fila == 1); // <--- NUEVO
+                    vista.setTooltipLateral(fila == 1);
                     vista.render(batch);
                     if (vista.isHover()) santoHover = vista;
                 }
             }
         }
-        if (jokerHover != null) jokerHover.renderCartelStats(batch, game, null); // sin Juego activo en colección
+        if (jokerHover != null) jokerHover.renderCartelStats(batch, game, null);
         if (cartaHover != null) cartaHover.renderCartelStats(batch, game);
         if (santoHover != null) santoHover.renderCartelStats(batch, game);
     }

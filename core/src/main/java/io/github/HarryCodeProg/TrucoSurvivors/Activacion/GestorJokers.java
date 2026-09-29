@@ -30,6 +30,11 @@ public class GestorJokers {
             Activacion act = cola.poll();
             if (act.esJoker()) {
                 act.joker.aplicarEfecto(act.evento, ctx, juego);
+                for (Joker otro : jugador.getJokers()) {
+                    if (otro != act.joker) {
+                        otro.onOtroJokerActivado(act.joker, act.evento, ctx, juego);
+                    }
+                }
             }
         }
     }

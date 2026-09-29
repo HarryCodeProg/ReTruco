@@ -36,7 +36,6 @@ public class IARival {
     private void responderEnvidoSiCorresponde() {
         if (!juego.hayCantoEnvidoPendiente()) return;
         if (!juego.getCantorEnvidoPendiente().equals(juego.getJugador())) return;
-
         Decision decision = decidir(juego.puedeEscalarEnvido(juego.getRival()));
         aplicarDecisionEnvido(decision);
     }
@@ -44,7 +43,6 @@ public class IARival {
     private void responderTrucoSiCorresponde() {
         if (!juego.hayCantoTrucoPendiente()) return;
         if (!juego.getCantorTrucoPendiente().equals(juego.getJugador())) return;
-
         Decision decision = decidir(juego.puedeEscalarTruco(juego.getRival()));
         aplicarDecisionTruco(decision);
     }
@@ -52,8 +50,6 @@ public class IARival {
     private enum Decision { ESCALAR, QUIERO, NO_QUIERO }
 
     private Decision decidir(boolean puedeEscalar) {
-        double roll = random.nextDouble();
-        if (puedeEscalar && roll < 1.0 / 3.0) return Decision.ESCALAR;
         return Decision.QUIERO;
     }
     private void aplicarDecisionEnvido(Decision decision) {

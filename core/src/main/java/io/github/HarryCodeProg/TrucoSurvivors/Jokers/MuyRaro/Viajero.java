@@ -6,12 +6,11 @@ import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Rareza;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
-import java.util.ArrayList;
 
 public class Viajero extends Joker {
 
     public Viajero() {
-        super(108, "Viajero", "Viajero", "Reactiva todos los jokers con categoría 'INTERNACIONAL'",
+        super(108, "Viajero", "Viajero", "+8 multiplicador por cada mano restante al final de la ronda",
             Rareza.muyRaro, 8, Joker.FaseActivacion.INDEPENDIENTE,
             CategoriaJoker.INTERNACIONAL);
     }
@@ -20,18 +19,28 @@ public class Viajero extends Joker {
     public Joker copiar() {
         Viajero copia = new Viajero();
         copiarEstado(copia);
+        copia.setAcumulado(this.getAcumulado());
         return copia;
     }
 
     @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego) {
-        if (!ctx.marcarUsado(this, evento)) return;
-        ArrayList<Joker> jokers = ctx.getJugador().getJokers();
-        for (Joker j : jokers) {
-            if (j == this) continue;
-            if (j.tieneCategoria(CategoriaJoker.INTERNACIONAL)) {
-                ctx.reencolarActivacionJoker(j, evento);
+        if (evento == EventoJuego.AL_GANAR_COMBATE) {
+            int manosRestantes = ctx.getJugador().getManosActuales();
+            if (manosRestantes > 0) {
+                sumarAcumulado(8.0 * manosRestantes);
             }
         }
+
+        if (evento == EventoJuego.ANTES_DE_SUMAR_TRUCO || evento == EventoJuego.ANTES_DE_SUMAR_ENVIDO) {
+            if (getAcumulado() > 0) {
+                ctx.getResolucionActual().sumarMult(getAcumulado(), getNombre(), this);
+            }
+        }
+    }
+
+    @Override
+    public String getDescripcionRenderizada(Juego juego) {
+        return "+8 multiplicador por cada mano restante al final de la ronda\n(actual: +" + (int)getAcumulado() + ")";
     }
 }

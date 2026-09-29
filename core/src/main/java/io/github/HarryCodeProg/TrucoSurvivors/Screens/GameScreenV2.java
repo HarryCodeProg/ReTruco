@@ -80,6 +80,7 @@ public class GameScreenV2 implements Screen {
     private Boton botonVenderJoker;
     private float anchoCarta = 120f;
     float separacion = 8f;
+    private final GestorTransicionPantalla transicionEntradaJuego = new GestorTransicionPantalla();
 
     public GameScreenV2(Main game) {
         this.game = game;
@@ -120,7 +121,7 @@ public class GameScreenV2 implements Screen {
         float altoMazo = 88f;
         float posX = 1280f - anchoMazo - 25f;
         float posY = 130f;
-        this.vistaMazo = new VistaMazo(posX, posY, anchoMazo, altoMazo, game.getAtlasCartas(), game.getFuentePrincipal(), game.getPixelBlanco());
+        this.vistaMazo = new VistaMazo(posX, posY, anchoMazo, altoMazo, game.getAtlasCartas(), game.getFuentePrincipal(), game.getPixelBlanco(), camera);
         estado = EstadoPantalla.SELECCION_RIVAL;
         panelSeleccionRival = new PanelSeleccionRival(game, this::onPrimeraSeleccionRival);
         panelSeleccionVisible = true;
@@ -220,7 +221,7 @@ public class GameScreenV2 implements Screen {
         float altoMazo = 88f;
         float posX = 1280f - anchoMazo - 25f;
         float posY = 130f;
-        this.vistaMazo = new VistaMazo(posX, posY, anchoMazo, altoMazo, game.getAtlasCartas(), game.getFuentePrincipal(), game.getPixelBlanco());
+        this.vistaMazo = new VistaMazo(posX, posY, anchoMazo, altoMazo, game.getAtlasCartas(), game.getFuentePrincipal(), game.getPixelBlanco(), camera);
         this.hudController = new HUDController(this.vistaMazo);
         organizarCartas();
     }
@@ -254,26 +255,24 @@ public class GameScreenV2 implements Screen {
                 vistaMazo.tocar(mouseWorld.x, mouseWorld.y);
             }
         }
+        if (transicionEntradaJuego != null) {
+            transicionEntradaJuego.update(delta);
+        }
+        resolverPendingEstado();
         if (estado == EstadoPantalla.VICTORIA) {
             gestorVictoria.update(delta, mouseWorld, modalBloqueante);
             renderizar(delta);
             game.batch.begin();
             gestorVictoria.draw(game.batch);
             game.batch.end();
-            if (pendingEstado != null) {
-                enterState(pendingEstado);
-                pendingEstado = null;
-            }
             return;
         }
         if (estado == EstadoPantalla.TIENDA) {
             renderConTienda(delta, modalBloqueante);
-            if (pendingEstado != null) { enterState(pendingEstado); pendingEstado = null; }
             return;
         }
         if (estado == EstadoPantalla.SELECCION_RIVAL) {
             renderConSeleccionRival(delta, modalBloqueante);
-            if (pendingEstado != null) { enterState(pendingEstado); pendingEstado = null; }
             return;
         }
         if (gestorAnimaciones != null) gestorAnimaciones.update(delta);
@@ -302,7 +301,6 @@ public class GameScreenV2 implements Screen {
         gestorUsoSanto.update(mouseWorld.x, mouseWorld.y, gestorSantos.getSantos(), jugador, (vistaSanto, jug) -> {gestorSantos.usarSeleccionado(vistaSanto, jug);});
         if (vistaMazo != null) vistaMazo.update(mouseWorld.x, mouseWorld.y);
         renderizar(delta);
-        if (pendingEstado != null) { enterState(pendingEstado); pendingEstado = null; }
     }
 
     private void renderizar(float delta) {
@@ -320,6 +318,9 @@ public class GameScreenV2 implements Screen {
         gestorUsoSanto.render(game.batch);
         renderCartelCartaSiCorresponde();
         if (vistaMazo != null) vistaMazo.renderModalSiCorresponde(game.batch);
+        if (transicionEntradaJuego != null && transicionEntradaJuego.estaActiva()) {
+            transicionEntradaJuego.render(game.batch, game.getPixelBlanco());
+        }
         game.batch.end();
     }
 
@@ -328,13 +329,13 @@ public class GameScreenV2 implements Screen {
             panelSeleccionRival.updateAnimacion(delta);
             panelSeleccionRival.update(mouseWorld.x, mouseWorld.y);
         }
-        gestorSantos.update(mouseWorld.x, mouseWorld.y, delta, jugador); // FIX
+        gestorSantos.update(mouseWorld.x, mouseWorld.y, delta, jugador);
         gestorUsoSanto.update(mouseWorld.x, mouseWorld.y, gestorSantos.getSantos(), jugador, (vistaSanto, jug) -> {
             gestorSantos.usarSeleccionado(vistaSanto, jug);
         });
         renderComun(delta, true, true, gestorPartida.getJuego(), rival,
             () -> { if (panelSeleccionRival != null && panelSeleccionVisible) panelSeleccionRival.render(game.batch); },
-            () -> {}
+            () -> transicionEntradaJuego.render(game.batch, game.getPixelBlanco())
         );
     }
 
@@ -625,6 +626,27 @@ public class GameScreenV2 implements Screen {
                 if (alTerminar != null) alTerminar.run();
             }
         );
+    }
+
+    private void resolverPendingEstado() {
+        if (pendingEstado == null) return;
+        if (pendingEstado == EstadoPantalla.JUGANDO && estado == EstadoPantalla.SELECCION_RIVAL) {
+            EstadoPantalla destino = pendingEstado;
+            pendingEstado = null;
+            transicionEntradaJuego.iniciar(() -> {
+                System.out.println(">>> INICIANDO enterState(JUGANDO)"); // TEMPORAL
+                try {
+                    enterState(destino);
+                    System.out.println(">>> enterState(JUGANDO) TERMINO OK, estado=" + estado); // TEMPORAL
+                } catch (Exception e) {
+                    System.out.println(">>> EXCEPCION en enterState(JUGANDO):"); // TEMPORAL
+                    e.printStackTrace();
+                }
+            });
+        } else {
+            enterState(pendingEstado);
+            pendingEstado = null;
+        }
     }
 
     private void reproducirSonidoActivacion(String origen) {

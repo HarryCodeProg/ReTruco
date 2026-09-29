@@ -98,9 +98,16 @@ public class VistaItemTienda {
     public boolean contiene(float mx, float my) {
         float w = width * scale;
         float h = height * scale;
-        // Se considera el offset vertical para detectar clicks correctamente cuando sube
-        return mx >= x && mx <= x + w && my >= y + visualOffsetY && my <= y + visualOffsetY + h;
+        float hitboxX = x + (width - w) / 2f;
+        float hitboxY = y + (height - h) / 2f;
+        return mx >= hitboxX && mx <= hitboxX + w && my >= hitboxY && my <= hitboxY + h;
     }
+    /*
+    public boolean contiene(float mx, float my) {
+        float w = width * scale;
+        float h = height * scale;
+        return mx >= x && mx <= x + w && my >= y + visualOffsetY && my <= y + visualOffsetY + h;
+    }*/
 
     private float moverHacia(float value, float target, float maxDelta) {
         float diferencia = target - value;

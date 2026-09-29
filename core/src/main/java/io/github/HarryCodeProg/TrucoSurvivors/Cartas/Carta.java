@@ -26,6 +26,7 @@ public class Carta {
     private int bonusAporteEnvidoPermanente = 0;
     private double multiplicadorAporteEnvidoBase = 1.0;
     private double multiplicadorAporteEnvidoTemporal = 0.0;
+    private static java.util.function.Consumer<Carta> notificadorCambioPalo;
 
     public Carta(int numero, Palo palo){
         this.numero = numero;
@@ -262,23 +263,28 @@ public class Carta {
     }
 
     public void cambiarPalo(Palo nuevoPalo) {
+        Palo paloAnterior = this.palo; // capturamos ANTES de pisar el campo
         // Capturamos TODO el valor actual (base + bonus permanentes previos) antes de perderlo
         int trucoPoderActualPrevio = this.valorTrucoPoderActual;
         int trucoAporteActualPrevio = this.puntosTrucoAporteActual;
         int envidoPoderActualPrevio = this.valorEnvidoPoderActual;
         int envidoAporteActualPrevio = this.puntosEnvidoAporteActual;
-
         this.palo = nuevoPalo;
-        calcularValoresBase(); // recalcula *Base según el nuevo palo (con el número actual)
-
-        // FIX: el valor completo que tenía la carta pasa a ser el nuevo bonus permanente,
-        // así el resultado final es baseNueva + todoLoQueTeniaAntes
+        calcularValoresBase();
         this.bonusPoderTrucoPermanente = trucoPoderActualPrevio;
         this.bonusAporteTrucoPermanente = trucoAporteActualPrevio;
         this.bonusPoderEnvidoPermanente = envidoPoderActualPrevio;
         this.bonusAporteEnvidoPermanente = envidoAporteActualPrevio;
+        resetearValores();
+        if (paloAnterior != nuevoPalo && notificadorCambioPalo != null) {
+            notificadorCambioPalo.accept(this);
+        }
+    }
 
-        resetearValores(); // aplica: nuevaBase + bonusPermanente(=valorActualPrevio)
+
+    /** Registrado por Juego al crearse, para poder disparar el evento de jokers sin que Carta conozca nada del modelo de juego. */
+    public static void setNotificadorCambioPalo(java.util.function.Consumer<Carta> notificador) {
+        notificadorCambioPalo = notificador;
     }
 
     public void cambiarNumero(int nuevoNumero) {

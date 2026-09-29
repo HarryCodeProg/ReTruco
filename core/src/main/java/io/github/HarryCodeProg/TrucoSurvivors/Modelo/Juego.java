@@ -55,14 +55,17 @@ public class Juego {
         this.gestorJokers = new GestorJokers(jugador);
         this.resolutorSecuencia = new ResolutorSecuencia(gestorJokers, this);
         this.descartesActuales = jugador.getDescartesMaximos();
-
         limpiarEstadoResidualDeCombateAnterior();
         jugador.multTrucoOriginal();
         jugador.multEnvidoOriginal();
         rival.multTrucoOriginal();
         rival.multEnvidoOriginal();
         jugador.reiniciarManos();
+        Carta.setNotificadorCambioPalo(carta -> {
+            ContextoJuego ctx = crearContexto();ctx.setCartaEnResolucion(carta);
+            gestorJokers.disparar(EventoJuego.AL_CAMBIAR_PALO, ctx, this);});
         repartir();
+        gestorJokers.disparar(EventoJuego.INICIO_COMBATE, crearContexto(), this);
     }
 
     private ContextoJuego crearContexto() {
@@ -700,5 +703,20 @@ public class Juego {
     public void notificarSantoConsumido() {
         ContextoJuego ctx = crearContexto();
         gestorJokers.disparar(EventoJuego.AL_CONSUMIR_SANTO, ctx, this);
+    }
+
+    public void notificarJokerComprado() {
+        ContextoJuego ctx = crearContexto();
+        gestorJokers.disparar(EventoJuego.AL_COMPRAR_JOKER, ctx, this);
+    }
+
+    public void notificarCartaComprada() {
+        ContextoJuego ctx = crearContexto();
+        gestorJokers.disparar(EventoJuego.AL_COMPRAR_CARTA, ctx, this);
+    }
+
+    public void notificarJokerVendido() {
+        ContextoJuego ctx = crearContexto();
+        gestorJokers.disparar(EventoJuego.AL_VENDER_JOKER, ctx, this);
     }
 }

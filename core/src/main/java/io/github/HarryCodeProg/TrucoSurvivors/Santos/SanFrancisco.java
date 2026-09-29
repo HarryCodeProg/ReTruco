@@ -37,6 +37,7 @@ public class SanFrancisco extends Santo {
         if (seleccionadas.size() != 1) return;
         Carta carta = seleccionadas.get(0);
         jugador.eliminarCarta(carta);
+        jugador.getMazo().restarTamañoMazo(1);
         Palo[] palos = Palo.values();
         for (int i = 0; i < 3; i++) {
             int numero = random.nextInt(12) + 1;

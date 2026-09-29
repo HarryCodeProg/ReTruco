@@ -21,7 +21,6 @@ public class VistaCarta implements Arrastrable{
     private float height = 180;
     private boolean bocaAbajo;
     private boolean hover;
-    private float escala = 1f;
     private boolean dragging;
     private boolean draggingAnterior;
     private float handX;
@@ -63,6 +62,7 @@ public class VistaCarta implements Arrastrable{
     private float flipProgreso = 0f; // 0 a 1
     private static final float DURACION_MEDIO_FLIP = 0.25f;
     private Runnable onCargarNuevaVista; // callback: aplicar nuevo palo/número/región mientras está de dorso
+    private Runnable alTerminarFlip;
     private TextureRegion regionDorso; // el "back" del atlas, necesita seteo desde afuera o atlas guardado
     private static final float PAUSA_EN_DORSO = 0.15f;
     private float tiempoEnDorso = 0f;
@@ -502,6 +502,11 @@ public class VistaCarta implements Arrastrable{
                 if (flipProgreso >= 1f) {
                     flipProgreso = 1f;
                     estadoFlip = EstadoFlip.NINGUNO; // termina el flip, vuelve al render normal
+                    if (alTerminarFlip != null) {
+                        Runnable callback = alTerminarFlip;
+                        alTerminarFlip = null;
+                        callback.run();
+                    }
                 }
                 break;
             default:
@@ -527,12 +532,6 @@ public class VistaCarta implements Arrastrable{
         if (resaltado) pulso = 0f;
     }
 
-    public boolean isResaltado() { return resaltado; }
-
-    public boolean estaEnZona(Rectangle rect) {
-        return rect.contains(x + width / 2f, y + height / 2f);
-    }
-
     public void setHandPosition(float x, float y) {
         this.handX = x;
         this.handY = y;
@@ -540,16 +539,24 @@ public class VistaCarta implements Arrastrable{
         this.targetY = y;
     }
 
-    public void volverAMano() { targetX = handX; targetY = handY; }
     public void setTargetRotation(float rotation) { this.targetRotation = rotation; }
     public boolean isHover() { return hover; }
 
     public boolean contiene(float mx, float my) {
         float w = width * scale;
         float h = height * scale;
+        float hitboxX = x + (width - w) / 2f;
+        float hitboxY = y + (height - h) / 2f;
+        return mx >= hitboxX && mx <= hitboxX + w && my >= hitboxY && my <= hitboxY + h;
+    }
+
+    /*
+    public boolean contiene(float mx, float my) {
+        float w = width * scale;
+        float h = height * scale;
         float drawY = y + visualOffsetY;
         return mx >= x && mx <= x + w && my >= drawY && my <= drawY + h;
-    }
+    }*/
 
     // Agregar en VistaCarta.java
     public void renderCartelStats(SpriteBatch batch, io.github.HarryCodeProg.TrucoSurvivors.Main game) {
@@ -559,17 +566,6 @@ public class VistaCarta implements Arrastrable{
     }
 
     public void setEnModal(boolean enModal) { this.enModal = enModal; }
-
-    /** Restringe targetX/targetY (mientras se arrastra) a un rectángulo. No hace nada si no está dragging. */
-    public void clampArea(float minX, float minY, float maxX, float maxY) {
-        if (!dragging) return;
-        float maxTX = maxX - width;
-        float maxTY = maxY - height;
-        if (targetX < minX) targetX = minX;
-        if (targetX > maxTX) targetX = maxTX;
-        if (targetY < minY) targetY = minY;
-        if (targetY > maxTY) targetY = maxTY;
-    }
 
     public boolean llegoATarget() {
         return Math.abs(x - targetX) < 1f && Math.abs(y - targetY) < 1f;
@@ -594,8 +590,14 @@ public class VistaCarta implements Arrastrable{
     }
 
     public void iniciarFlip(TextureRegion regionDorso, Runnable onCargarNuevaVista) {
+        iniciarFlip(regionDorso, onCargarNuevaVista, null);
+    }
+
+    /** Inicia el giro y avisa cuando la carta vuelve a mostrarse de frente. */
+    public void iniciarFlip(TextureRegion regionDorso, Runnable onCargarNuevaVista, Runnable alTerminarFlip) {
         this.regionDorso = regionDorso;
         this.onCargarNuevaVista = onCargarNuevaVista;
+        this.alTerminarFlip = alTerminarFlip;
         this.estadoFlip = EstadoFlip.GIRANDO_A_DORSO;
         this.flipProgreso = 0f;
     }
