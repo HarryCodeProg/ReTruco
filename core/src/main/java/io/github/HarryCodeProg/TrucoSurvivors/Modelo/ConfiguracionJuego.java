@@ -15,6 +15,7 @@ public class ConfiguracionJuego {
     private float volumenMusica = 1f;
     private float volumenEfectos = 1f;
     private int fondoIndex = 0;
+    private int musicaIndex = 0;
 
     public void cargar() {
         Preferences p = Gdx.app.getPreferences(PREFS_NOMBRE);
@@ -24,6 +25,8 @@ public class ConfiguracionJuego {
         volumenGeneral = p.getFloat("volumenGeneral", 1f);
         volumenMusica = p.getFloat("volumenMusica", 1f);
         volumenEfectos = p.getFloat("volumenEfectos", 1f);
+        fondoIndex = p.getInteger("fondoIndex", 0); // ya debería estar, lo agrego por si faltaba
+        musicaIndex = p.getInteger("musicaIndex", 0);
     }
 
     public void guardar() {
@@ -34,8 +37,13 @@ public class ConfiguracionJuego {
         p.putFloat("volumenGeneral", volumenGeneral);
         p.putFloat("volumenMusica", volumenMusica);
         p.putFloat("volumenEfectos", volumenEfectos);
+        p.putInteger("fondoIndex", fondoIndex);
+        p.putInteger("musicaIndex", musicaIndex);
         p.flush();
     }
+
+    public int getMusicaIndex() { return musicaIndex; }
+    public void setMusicaIndex(int v) { musicaIndex = v; }
 
     /** Aplica modo de ventana / resolución / vsync ahora mismo. "Sin bordes" queda como ventana
      * normal (no se puede sacar el borde real sin GLFW, y core no puede depender del módulo lwjgl3). */

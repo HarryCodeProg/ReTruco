@@ -13,7 +13,7 @@ public class Granadero extends Joker {
 
     public Granadero() {
         super(72, "Granadero", "Granadero",
-            "x3 multiplicador truco y envido en la última mano",
+            "x3 multiplicador en la última mano",
             Rareza.raro, 6, Joker.FaseActivacion.INDEPENDIENTE,
             CategoriaJoker.NACIONAL, CategoriaJoker.HISTORIA);
     }
@@ -23,7 +23,6 @@ public class Granadero extends Joker {
         if (evento != EventoJuego.ANTES_DE_SUMAR_TRUCO && evento != EventoJuego.ANTES_DE_SUMAR_ENVIDO) {
             return;
         }
-        
         // Si al jugador le queda 1 mano actual, es su última mano antes de perder (0)
         if (juego.getJugador().getManosActuales() == 1) {
             ctx.getResolucionActual().multiplicarMult(MULT_EN_ULTIMA_MANO, getNombre(), this);

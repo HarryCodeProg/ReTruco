@@ -12,6 +12,7 @@ import com.badlogic.gdx.utils.I18NBundle;
 import io.github.HarryCodeProg.TrucoSurvivors.Gestores.GestorSonidos;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.ConfiguracionJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.DatosRival;
+import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Guardado.DatosGuardado;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.PerfilJugador;
 import io.github.HarryCodeProg.TrucoSurvivors.Screens.LoadingScreenCentered;
 import io.github.HarryCodeProg.TrucoSurvivors.Screens.MainMenuScreen;
@@ -65,9 +66,11 @@ public class Main extends Game {
         pixelBlanco = new Texture(pixmap);
         pixelBlancoRegion = new TextureRegion(pixelBlanco);
         inicializarFuentes();
-        musicaFondo = Gdx.audio.newMusic(Gdx.files.internal("music/Second_Dealing/second_dealing_full.ogg"));
+        int indiceGuardado = configuracionJuego.getMusicaIndex();
+        if (indiceGuardado < 0 || indiceGuardado >= PISTAS_MUSICA.length) indiceGuardado = 0;
+        musicaFondo = Gdx.audio.newMusic(Gdx.files.internal(PISTAS_MUSICA[indiceGuardado][1]));
         musicaFondo.setLooping(true);
-        musicaFondo.setVolume(0.05f * configuracionJuego.getVolumenMusica()); // FIX: base * config guardada
+        musicaFondo.setVolume(0.05f * configuracionJuego.getVolumenMusica());
         musicaFondo.play();
         gestorSonidos = new GestorSonidos();
         configuracionJuego.aplicarAudio(gestorSonidos); // FIX: aplica volumen general/efectos guardados
@@ -259,6 +262,116 @@ public class Main extends Game {
         idiomaBundle = I18NBundle.createBundle(Gdx.files.internal("idiomas/" + codigoIdioma), locale);
     }
 
+    // Agregalo en Main.java
+    public void sincronizarRivalesConProgreso(int indiceGuardado) {
+        for (int i = 0; i < listaRivales.size(); i++) {
+            // Solo dejamos desbloqueado al rival contra el que te toca pelear ahora
+            listaRivales.get(i).setDesbloqueado(i == indiceGuardado);
+        }
+    }
+
+    private final String[][] PISTAS_MUSICA = {
+        {"Second Dealing", "music/Second_Dealing/second_dealing_full.ogg"},
+        {"retrucoEnergetico1", "music/retrucoEnergetico1.ogg"},
+        {"retrucoEnergetico2", "music/retrucoEnergetico2.ogg"},
+        {"retrucoMetal1", "music/retrucoMetal1.ogg"},
+        {"retrucoMetal2", "music/retrucoMetal2.ogg"},
+        {"retrucoPhonk1", "music/retrucoPhonk1.ogg"},
+        {"retrucoPhonk2", "music/retrucoPhonk2.ogg"},
+        {"retrucoPummel1", "music/retrucoPummel1.ogg"},
+        {"retrucoPummel2", "music/retrucoPummel2.ogg"},
+        {"retrucoScattering1", "music/retrucoScattering1.ogg"},
+        {"retrucoScattering2", "music/retrucoScattering2.ogg"},
+        {"balatruco1", "music/balatruco1.ogg"},
+        {"balatruco2", "music/balatruco2.ogg"},
+        {"La Ultima Mano1", "music/La Ultima Mano1.ogg"},
+        {"La Ultima Mano2", "music/La Ultima Mano2.ogg"},
+        {"musicaFondo1", "music/musicaFondo1.ogg"},
+        {"musicaFondo2", "music/musicaFondo2.ogg"},
+        {"musicaFondo3", "music/musicaFondo3.ogg"},
+        {"musicaFondo4", "music/musicaFondo4.ogg"},
+        {"Not a freak1", "music/Not a freak1.ogg"},
+        {"Not a freak2", "music/Not a freak2.ogg"},
+        {"real envido", "music/real envido.ogg"},
+        {"real envido2", "music/real envido2.ogg"},
+        {"retruco dance1", "music/retruco dance1.ogg"},
+        {"retruco dance2", "music/retruco dance2.ogg"},
+        {"retruco db1", "music/retruco db1.ogg"},
+        {"retruco db2", "music/retruco db2.ogg"},
+        {"retruco one punch1", "music/retruco one punch1.ogg"},
+        {"retruco one punch2", "music/retruco one punch2.ogg"},
+        {"retruco persona1", "music/retruco persona1.ogg"},
+        {"retruco persona2", "music/retruco persona2.ogg"},
+        {"retruco silent1", "music/retruco silent1.ogg"},
+        {"retruco silent2", "music/retruco silent2.ogg"},
+        {"retruco8bit", "music/retruco8bit.ogg"},
+        {"retrucoAnime1", "music/retrucoAnime1.ogg"},
+        {"retrucoAnime2", "music/retrucoAnime2.ogg"},
+        {"retrucoBalatro", "music/retrucoBalatro.ogg"},
+        {"retrucoBoss1", "music/retrucoBoss1.ogg"},
+        {"retrucoBoss2", "music/retrucoBoss2.ogg"},
+        {"retrucoDerrota1", "music/retrucoDerrota1.ogg"},
+        {"retrucoDerrota2", "music/retrucoDerrota2.ogg"},
+        {"retrucoDramatico", "music/retrucoDramatico.ogg"},
+        {"retrucoElectronic", "music/retrucoElectronic.ogg"},
+        {"retrucoEmotional", "music/retrucoEmotional.ogg"},
+        {"retrucoEmotional2", "music/retrucoEmotional2.ogg"},
+        {"retrucoGameplay", "music/retrucoGameplay.ogg"},
+        {"retrucoGameplay2", "music/retrucoGameplay2.ogg"},
+        {"retrucoJazz", "music/retrucoJazz.ogg"},
+        {"retrucoJazz2", "music/retrucoJazz2.ogg"},
+        {"retrucoKuze1", "music/retrucoKuze1.ogg"},
+        {"retrucoKuze2", "music/retrucoKuze2.ogg"},
+        {"retrucoKuze3", "music/retrucoKuze3.ogg"},
+        {"retrucoMedieval", "music/retrucoMedieval.ogg"},
+        {"retrucoMedieval1", "music/retrucoMedieval1.ogg"},
+        {"retrucoMenu1", "music/retrucoMenu1.ogg"},
+        {"retrucoMenu2", "music/retrucoMenu2.ogg"},
+        {"retrucoMetal1", "music/retrucoMetal1.ogg"},
+        {"retrucoMetal2", "music/retrucoMetal2.ogg"},
+        {"retrucoOst", "music/retrucoOst.ogg"},
+        {"retrucoOst2", "music/retrucoOst2.ogg"},
+        {"retrucoPlants1", "music/retrucoPlants1.ogg"},
+        {"retrucoPlants2", "music/retrucoPlants2.ogg"},
+        {"retrucoPlants3", "music/retrucoPlants3.ogg"},
+        {"retrucoResident", "music/retrucoResident.ogg"},
+        {"retrucoResident2", "music/retrucoResident2.ogg"},
+        {"retrucoRondas1", "music/retrucoRondas1.ogg"},
+        {"retrucoRondas2", "music/retrucoRondas2.ogg"},
+        {"retrucoSave1", "music/retrucoSave1.ogg"},
+        {"retrucoSave2", "music/retrucoSave2.ogg"},
+        {"retrucoShop1", "music/retrucoShop1.ogg"},
+        {"retrucoShop2", "music/retrucoShop2.ogg"},
+        {"retrucoSoft", "music/retrucoSoft.ogg"},
+        {"retrucoSoft2", "music/retrucoSoft2.ogg"},
+        {"retrucoSynth", "music/retrucoSynth.ogg"},
+        {"retrucoSynth2", "music/retrucoSynth2.ogg"},
+        {"retrucoTension", "music/retrucoTension.ogg"},
+        {"retrucoTension2", "music/retrucoTension2.ogg"},
+        {"retrucoVictoria1", "music/retrucoVictoria1.ogg"},
+        {"retrucoVictoria2", "music/retrucoVictoria2.ogg"},
+        {"retrucoYakuza1", "music/retrucoYakuza1.ogg"}
+    };
+
+    public String[][] getPistasMusica() { return PISTAS_MUSICA; }
+
+    public int getIndicePistaActual() { return configuracionJuego.getMusicaIndex(); }
+
+    public void cambiarPistaMusica(int indice) {
+        if (indice < 0 || indice >= PISTAS_MUSICA.length) return;
+        boolean sonando = musicaFondo != null && musicaFondo.isPlaying();
+        if (musicaFondo != null) {
+            musicaFondo.stop();
+            musicaFondo.dispose();
+        }
+        musicaFondo = Gdx.audio.newMusic(Gdx.files.internal(PISTAS_MUSICA[indice][1]));
+        musicaFondo.setLooping(true);
+        musicaFondo.setVolume(0.05f * configuracionJuego.getVolumenMusica());
+        if (sonando) musicaFondo.play();
+        configuracionJuego.setMusicaIndex(indice);
+        configuracionJuego.guardar();
+    }
+
     @Override
     public void dispose() {
         batch.dispose();
@@ -279,4 +392,26 @@ public class Main extends Game {
         if (fuenteTooltipTitulo != null) fuenteTooltipTitulo.dispose();
         if (fuenteTooltipDescripcion != null) fuenteTooltipDescripcion.dispose();
     }
+
+    public void reiniciarDesbloqueoRivales() {
+        for (int i = 0; i < listaRivales.size(); i++) {
+            listaRivales.get(i).setDesbloqueado(i == 0);
+        }
+    }
+
+    public boolean hayGuardadoDisponible() {
+        return io.github.HarryCodeProg.TrucoSurvivors.Gestores.GestorGuardado.existeGuardado();
+    }
+
+    public io.github.HarryCodeProg.TrucoSurvivors.Modelo.Guardado.DatosGuardado getGuardadoDetectado() {
+        // Siempre relee del archivo real, nunca confía en una copia vieja en memoria
+        return io.github.HarryCodeProg.TrucoSurvivors.Gestores.GestorGuardado.cargar();
+    }
+
+    // limpiarGuardadoDetectado() ya no necesita hacer nada relevante, pero la dejamos
+// por si algo más la llama, para no romper compilación:
+    public void limpiarGuardadoDetectado() {
+        // no-op: ya no hay estado en memoria que limpiar
+    }
+
 }

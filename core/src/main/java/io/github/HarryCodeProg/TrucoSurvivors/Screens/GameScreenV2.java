@@ -19,8 +19,13 @@ import io.github.HarryCodeProg.TrucoSurvivors.Estados.Accion;
 import io.github.HarryCodeProg.TrucoSurvivors.Gestores.*;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.*;
+import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Guardado.DatosGuardado;
+import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Guardado.DatosJuego;
+import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Guardado.GestorConverterSerializacion;
 import io.github.HarryCodeProg.TrucoSurvivors.Santos.Santo;
 import io.github.HarryCodeProg.TrucoSurvivors.Vista.*;
+import io.github.HarryCodeProg.TrucoSurvivors.Vista.PanelPausa;
+
 import java.util.ArrayList;
 import java.util.function.Consumer;
 
@@ -53,7 +58,6 @@ public class GameScreenV2 implements Screen {
     private double multTrucoDisplay = 1;
     private double puntosEnvidoDisplay = 0;
     private double multEnvidoDisplay = 1;
-    private enum EstadoPantalla { JUGANDO, VICTORIA, TIENDA, SELECCION_RIVAL }
     private PanelSeleccionRival panelSeleccionRival;
     private EstadoPantalla estado = EstadoPantalla.JUGANDO;
     private PanelTienda panelTienda;
@@ -67,6 +71,9 @@ public class GameScreenV2 implements Screen {
     private boolean aplicarAnimacionInicial = true;
     private boolean panelTiendaVisible = false;
     private boolean panelSeleccionVisible = false;
+    private float jugableOffsetY = -800f;
+    private float jugableOffsetYObjetivo = 0f;
+    private static final float VELOCIDAD_SLIDE_GAME = 1800f;
     private final GestorCompraJokerAnimado gestorCompraJoker = new GestorCompraJokerAnimado();
     private GestorSantos gestorSantos;
     private final GestorUsoSanto gestorUsoSanto = new GestorUsoSanto();
@@ -81,6 +88,9 @@ public class GameScreenV2 implements Screen {
     private float anchoCarta = 120f;
     float separacion = 8f;
     private final GestorTransicionPantalla transicionEntradaJuego = new GestorTransicionPantalla();
+    private PanelPausa panelPausa;
+    private PanelDerrota panelDerrota;
+    private enum EstadoPantalla { JUGANDO, VICTORIA, DERROTA, TIENDA, SELECCION_RIVAL }
 
     public GameScreenV2(Main game) {
         this.game = game;
@@ -96,12 +106,10 @@ public class GameScreenV2 implements Screen {
         this.botonVenderJoker = new Boton(0, 0, 150, 45, Boton.TipoColor.ROJO, Accion.VENDER_JOKER);
         botonVenderJoker.setVisible(false);
         float margenLateral = 220f;
-        this.areaCartas = new AreaElementos<>(margenLateral, Y_MANO_JUGADOR, 1280f - margenLateral * 2, ALTO_CARTA, anchoCarta, ALTO_CARTA, separacion); this.areaJokers = new AreaElementos<>(margenLateral, Y_JOKERS, 1280f - margenLateral * 2, ALTO_JOKER, ANCHO_JOKER, ALTO_JOKER, SEPARACION_JOKER);
+        this.areaCartas = new AreaElementos<>(margenLateral, Y_MANO_JUGADOR, 1280f - margenLateral * 2, ALTO_CARTA, anchoCarta, ALTO_CARTA, separacion);
+        this.areaJokers = new AreaElementos<>(margenLateral, Y_JOKERS, 1280f - margenLateral * 2, ALTO_JOKER, ANCHO_JOKER, ALTO_JOKER, SEPARACION_JOKER);
         this.fondoPlasma = new Background();
-        this.gestorAnimaciones = new GestorAnimacionesMano(
-            new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(),
-            this::organizarCartas
-        );
+        this.gestorAnimaciones = new GestorAnimacionesMano(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), this::organizarCartas);
         iniciarShader();
         this.jugador = game.getPerfilJugador().getJugador();
         this.cartasJugador = new ArrayList<>();
@@ -122,10 +130,16 @@ public class GameScreenV2 implements Screen {
         float posX = 1280f - anchoMazo - 25f;
         float posY = 130f;
         this.vistaMazo = new VistaMazo(posX, posY, anchoMazo, altoMazo, game.getAtlasCartas(), game.getFuentePrincipal(), game.getPixelBlanco(), camera);
-        estado = EstadoPantalla.SELECCION_RIVAL;
-        panelSeleccionRival = new PanelSeleccionRival(game, this::onPrimeraSeleccionRival);
-        panelSeleccionVisible = true;
-        panelTiendaVisible = false;
+        if (game.hayGuardadoDisponible()) {
+            aplicarGuardado(game.getGuardadoDetectado());
+            game.limpiarGuardadoDetectado();
+        } else {
+            estado = EstadoPantalla.SELECCION_RIVAL;
+            panelSeleccionRival = new PanelSeleccionRival(game, this::onPrimeraSeleccionRival);
+            panelSeleccionVisible = true;
+            panelTiendaVisible = false;
+        }
+        panelPausa = new PanelPausa(game);
     }
 
     private void inicializarJuego() {
@@ -239,7 +253,26 @@ public class GameScreenV2 implements Screen {
     @Override
     public void render(float delta) {
         prepararFrame();
-        actualizarJokersYVenta(delta);
+        boolean puedeAbrirPausa = (estado == EstadoPantalla.JUGANDO || estado == EstadoPantalla.TIENDA || estado == EstadoPantalla.SELECCION_RIVAL);
+        boolean pausaVisible = panelPausa != null && panelPausa.isVisible();
+        if (puedeAbrirPausa && !pausaVisible && Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.ESCAPE)) {
+            panelPausa.abrir();
+            pausaVisible = true;
+        }
+        float mx = pausaVisible ? -9999f : mouseWorld.x;
+        float my = pausaVisible ? -9999f : mouseWorld.y;
+        com.badlogic.gdx.math.Vector3 mouseEfectivo = pausaVisible ? new com.badlogic.gdx.math.Vector3(-9999f, -9999f, 0) : mouseWorld;
+        // Update de pausa: ahora corre en cualquiera de los 3 estados que la permiten, ANTES de ramificar
+        if (puedeAbrirPausa && panelPausa != null) {
+            PanelPausa.Resultado resPausa = panelPausa.update(delta, mouseWorld.x, mouseWorld.y);
+            if (resPausa == PanelPausa.Resultado.VOLVER_MENU) {
+                guardarProgreso();
+                game.setScreen(new MainMenuScreen(game));
+                return;
+            }
+            pausaVisible = panelPausa.isVisible(); // puede haber cambiado (REANUDAR)
+        }
+        actualizarJokersYVenta(delta, mx, my);
         Joker jokerAgregado = gestorCompraJoker.update(delta, jokers, areaJokers);
         if (jokerAgregado != null) {
             suppressJugadorJokerListener = true;
@@ -247,18 +280,36 @@ public class GameScreenV2 implements Screen {
             finally { suppressJugadorJokerListener = false; }
             organizarJokers(true);
         }
-        boolean modalBloqueante = (vistaMazo != null && vistaMazo.isModalAbierto()) || gestorSantos.hayOverlayActivo();
+        boolean modalBloqueante = (vistaMazo != null && vistaMazo.isModalAbierto()) || gestorSantos.hayOverlayActivo() || pausaVisible;
         boolean puedeInteract = puedeInteractuar() && !modalBloqueante;
         if (vistaMazo != null) {
-            vistaMazo.update(mouseWorld.x, mouseWorld.y);
-            if (Gdx.input.justTouched()) {
-                vistaMazo.tocar(mouseWorld.x, mouseWorld.y);
+            vistaMazo.update(mx, my);
+            if (!pausaVisible && Gdx.input.justTouched()) {
+                vistaMazo.tocar(mx, my);
             }
         }
         if (transicionEntradaJuego != null) {
             transicionEntradaJuego.update(delta);
         }
+        if (jugableOffsetY != jugableOffsetYObjetivo) {
+            if (jugableOffsetY < jugableOffsetYObjetivo) {
+                jugableOffsetY += VELOCIDAD_SLIDE_GAME * delta;
+                if (jugableOffsetY >= jugableOffsetYObjetivo) jugableOffsetY = jugableOffsetYObjetivo;
+            } else {
+                jugableOffsetY -= VELOCIDAD_SLIDE_GAME * delta;
+                if (jugableOffsetY <= jugableOffsetYObjetivo) jugableOffsetY = jugableOffsetYObjetivo;
+            }
+        }
         resolverPendingEstado();
+        if (estado == EstadoPantalla.DERROTA) {
+            if (panelDerrota != null) panelDerrota.update(mouseWorld.x, mouseWorld.y);
+            renderizar(delta);
+            game.batch.begin();
+            if (panelDerrota != null) panelDerrota.render(game.batch);
+            game.batch.end();
+            resolverPendingEstado();
+            return;
+        }
         if (estado == EstadoPantalla.VICTORIA) {
             gestorVictoria.update(delta, mouseWorld, modalBloqueante);
             renderizar(delta);
@@ -268,110 +319,78 @@ public class GameScreenV2 implements Screen {
             return;
         }
         if (estado == EstadoPantalla.TIENDA) {
-            renderConTienda(delta, modalBloqueante);
+            renderConTienda(delta, modalBloqueante, mx, my);
             return;
         }
         if (estado == EstadoPantalla.SELECCION_RIVAL) {
-            renderConSeleccionRival(delta, modalBloqueante);
+            renderConSeleccionRival(delta, modalBloqueante, mx, my);
             return;
         }
         if (gestorAnimaciones != null) gestorAnimaciones.update(delta);
         gestorAnimacionResolucion.update(delta);
         gestorPartida.update(delta, puedeInteract, modalBloqueante);
-        hudController.update(mouseWorld, puedeInteract, gestorPartida.getGestorAccion());
+        hudController.update(mouseEfectivo, puedeInteract, gestorPartida.getGestorAccion());
         if (gestorPartida.getControladorIARival() != null && !modalBloqueante) {
             gestorPartida.getControladorIARival().update(puedeInteract);
         }
         VistaCarta cartaArrastradaAntes = gestorCartas.getArrastrado();
         if (!modalBloqueante) {
-            gestorCartas.update(mouseWorld.x, mouseWorld.y, delta, puedeInteract);
+            gestorCartas.update(mx, my, delta, puedeInteract);
         }
         if (!puedeInteract) {
-            for (VistaCarta c : new ArrayList<>(cartasJugador)) c.update(mouseWorld.x, mouseWorld.y, delta);
+            for (VistaCarta c : new ArrayList<>(cartasJugador)) c.update(mx, my, delta);
         }
         resolverHoverExclusivo(cartasJugador);
-        for (VistaCarta c : new ArrayList<>(cartasRival)) c.update(mouseWorld.x, mouseWorld.y, delta);
-        actualizarCartasMesa(delta);
+        for (VistaCarta c : new ArrayList<>(cartasRival)) c.update(mx, my, delta);
+        actualizarCartasMesa(delta, mx, my);
         if (!modalBloqueante) {
             actualizarPreviewsCartas(puedeInteract);
         }
         hudController.actualizarSeleccion(gestorPartida.getJuego(), puedeInteract, gestorCartas, gestorJokers, cartasJugador, jokers);
         if (cartaArrastradaAntes != null && gestorCartas.getArrastrado() == null) organizarCartas();
-        gestorSantos.update(mouseWorld.x, mouseWorld.y, delta, jugador);
-        gestorUsoSanto.update(mouseWorld.x, mouseWorld.y, gestorSantos.getSantos(), jugador, (vistaSanto, jug) -> {gestorSantos.usarSeleccionado(vistaSanto, jug);});
-        if (vistaMazo != null) vistaMazo.update(mouseWorld.x, mouseWorld.y);
+        gestorSantos.update(mx, my, delta, jugador);
+        gestorUsoSanto.update(mx, my, gestorSantos.getSantos(), jugador, (vistaSanto, jug) -> {gestorSantos.usarSeleccionado(vistaSanto, jug);});
+        if (vistaMazo != null) vistaMazo.update(mx, my);
         renderizar(delta);
     }
 
     private void renderizar(float delta) {
-        renderSystem.render(delta, camera, fondoPlasma, panelPuntajes, PANEL_PUNTAJES_X, PANEL_PUNTAJES_Y,
+        renderSystem.render(delta, jugableOffsetY, camera, fondoPlasma, panelPuntajes, PANEL_PUNTAJES_X, PANEL_PUNTAJES_Y,
             gestorPartida.getJuego(), jugador, rival, cartasMesaJugador, cartasMesaRival, cartasRival, cartasJugador, jokers,
             gestorCartas, gestorJokers, vistaMazo, gestorVentaJoker, gestorAnimacionResolucion, puntosTrucoDisplay,
             multTrucoDisplay, puntosEnvidoDisplay, multEnvidoDisplay, textoFlotanteActual,
             () -> hudController.renderBotones(game.batch, game.getPixelBlancoRegion()),
-            this::renderCartelJokerSiCorresponde
+            null // <-- 1. Mandamos 'null' para que GameRenderSystem ya no lo dibuje prematuramente
         );
         game.batch.begin();
         renderAreaSantos(game.batch, game.getPixelBlanco());
         renderContadorSantos(game.batch);
         gestorSantos.render(game.batch, game);
         gestorUsoSanto.render(game.batch);
+        // 2. Lo dibujamos acá al final, junto con los demás carteles, por encima de la mesa
+        renderCartelJokerSiCorresponde();
         renderCartelCartaSiCorresponde();
         if (vistaMazo != null) vistaMazo.renderModalSiCorresponde(game.batch);
-        if (transicionEntradaJuego != null && transicionEntradaJuego.estaActiva()) {
-            transicionEntradaJuego.render(game.batch, game.getPixelBlanco());
+        // Pausa (siempre al final, encima de todo)
+        if (panelPausa != null) {
+            panelPausa.render(game.batch, mouseWorld.x, mouseWorld.y);
         }
         game.batch.end();
-    }
-
-    private void renderConSeleccionRival(float delta, boolean modalBloqueante) {
-        if (panelSeleccionRival != null && panelSeleccionVisible) {
-            panelSeleccionRival.updateAnimacion(delta);
-            panelSeleccionRival.update(mouseWorld.x, mouseWorld.y);
-        }
-        gestorSantos.update(mouseWorld.x, mouseWorld.y, delta, jugador);
-        gestorUsoSanto.update(mouseWorld.x, mouseWorld.y, gestorSantos.getSantos(), jugador, (vistaSanto, jug) -> {
-            gestorSantos.usarSeleccionado(vistaSanto, jug);
-        });
-        renderComun(delta, true, true, gestorPartida.getJuego(), rival,
-            () -> { if (panelSeleccionRival != null && panelSeleccionVisible) panelSeleccionRival.render(game.batch); },
-            () -> transicionEntradaJuego.render(game.batch, game.getPixelBlanco())
-        );
-    }
-
-    private void renderConTienda(float delta, boolean modalBloqueante) {
-        if (panelTienda == null) {
-            if (jugador == null) jugador = game.getPerfilJugador() != null ? game.getPerfilJugador().getJugador() : null;
-            panelTienda = new PanelTienda(game, jugador, this::iniciarSalidaDeTienda, this::iniciarAnimacionCompraJoker,
-                (s) -> gestorSantos.comprarYUsar(s, jugador),
-                () -> {
-                    if (gestorCompraJoker != null) {gestorCompraJoker.cancel();}
-                    organizarJokers(true);}
-                ,gestorPartida.getJuego());
-        }
-        if (panelTienda != null && panelTiendaVisible) {
-            panelTienda.updateAnimacion(delta);
-            panelTienda.setBloqueadoPorModalExterno(modalBloqueante);
-            panelTienda.update(mouseWorld.x, mouseWorld.y, delta);
-        }
-        gestorSantos.update(mouseWorld.x, mouseWorld.y, delta, jugador); // FIX
-        gestorUsoSanto.update(mouseWorld.x, mouseWorld.y, gestorSantos.getSantos(), jugador, (vistaSanto, jug) -> {
-            gestorSantos.usarSeleccionado(vistaSanto, jug);
-        });
-        renderComun(delta, true, true, null, null,
-            () -> { if (panelTienda != null && panelTiendaVisible) panelTienda.render(game.batch); },
-            () -> gestorCompraJoker.render(game.batch)
-        );
     }
 
     private void renderComun(float delta, boolean mostrarMazo, boolean mostrarPanelPuntajes, Juego juegoParaPanel, Jugador rivalParaPanel,
                              Runnable renderPanelSuperpuesto, Runnable renderOverlaysFinal) {
         ScreenUtils.clear(0.1f, 0.12f, 0.16f, 1f);
+        float originalY = camera.position.y;
+        camera.position.y = 720f / 2f;
         camera.update();
         game.batch.setProjectionMatrix(camera.combined);
         game.batch.begin();
         fondoPlasma.render(game.batch, delta);
         game.batch.end();
+        camera.position.y = originalY;
+        camera.update();
+        game.batch.setProjectionMatrix(camera.combined);
         // TIENDA / PANEL SUPERPUESTO: se dibuja primero para quedar detrás
         game.batch.begin();
         renderPanelSuperpuesto.run();
@@ -391,14 +410,58 @@ public class GameScreenV2 implements Screen {
             vistaMazo.render(game.batch, jugador.getMazo().getCartasRestantesOrdenadas(), jugador.getMazo().getTamañoMazo());
         }
         gestorVentaJoker.render(game.batch);
-        renderCartelJokerSiCorresponde();
         gestorSantos.render(game.batch, game);
         gestorUsoSanto.render(game.batch);
         renderOverlaysFinal.run();
+        // 3. Movemos también el cartel del Joker al final en las pantallas de Tienda/Rival
+        renderCartelJokerSiCorresponde();
         if (vistaMazo != null) {
             vistaMazo.renderModalSiCorresponde(game.batch);
         }
         game.batch.end();
+    }
+
+    private void renderConTienda(float delta, boolean modalBloqueante, float mx, float my) {
+        if (panelTienda == null) {
+            if (jugador == null) jugador = game.getPerfilJugador() != null ? game.getPerfilJugador().getJugador() : null;
+            panelTienda = new PanelTienda(game, jugador, this::iniciarSalidaDeTienda, this::iniciarAnimacionCompraJoker,
+                (s) -> gestorSantos.comprarYUsar(s, jugador),
+                () -> {
+                    if (gestorCompraJoker != null) {gestorCompraJoker.cancel();}
+                    organizarJokers(true);}
+                ,gestorPartida.getJuego());
+        }
+        if (panelTienda != null && panelTiendaVisible) {
+            panelTienda.updateAnimacion(delta);
+            panelTienda.setBloqueadoPorModalExterno(modalBloqueante);
+            panelTienda.update(mx, my, delta);
+        }
+        gestorSantos.update(mx, my, delta, jugador);
+        gestorUsoSanto.update(mx, my, gestorSantos.getSantos(), jugador, (vistaSanto, jug) -> {
+            gestorSantos.usarSeleccionado(vistaSanto, jug);
+        });
+        renderComun(delta, true, true, null, null,
+            () -> { if (panelTienda != null && panelTiendaVisible) panelTienda.render(game.batch); },
+            () -> {
+                gestorCompraJoker.render(game.batch);
+                if (panelPausa != null) panelPausa.render(game.batch, mouseWorld.x, mouseWorld.y);
+            }
+        );
+    }
+
+    private void renderConSeleccionRival(float delta, boolean modalBloqueante, float mx, float my) {
+        if (panelSeleccionRival != null && panelSeleccionVisible && !modalBloqueante) {
+            panelSeleccionRival.updateAnimacion(delta);
+            panelSeleccionRival.update(mx, my);
+        }
+        gestorSantos.update(mx, my, delta, jugador);
+        gestorUsoSanto.update(mx, my, gestorSantos.getSantos(), jugador, (vistaSanto, jug) -> {
+            gestorSantos.usarSeleccionado(vistaSanto, jug);
+        });
+        renderComun(delta, true, true, gestorPartida.getJuego(), rival,
+            () -> { if (panelSeleccionRival != null && panelSeleccionVisible) panelSeleccionRival.render(game.batch); },
+            () -> { if (panelPausa != null) panelPausa.render(game.batch, mouseWorld.x, mouseWorld.y); }
+        );
     }
 
     private void renderHUDJugador() {
@@ -503,6 +566,7 @@ public class GameScreenV2 implements Screen {
     }
 
     private void renderCartelJokerSiCorresponde() {
+        if (panelPausa != null && panelPausa.isVisible()) return;
         VistaJoker jokerConHover = null;
         for (VistaJoker j : jokers) {
             if (j.isHover() || j.contiene(mouseWorld.x, mouseWorld.y)) {
@@ -515,11 +579,11 @@ public class GameScreenV2 implements Screen {
         }
     }
 
-    private void actualizarJokersYVenta(float delta) {
+    private void actualizarJokersYVenta(float delta, float mx, float my) {
         boolean modalBloqueante = (vistaMazo != null && vistaMazo.isModalAbierto()) || gestorSantos.hayOverlayActivo();
         if (modalBloqueante) return;
-        actualizarJokers(delta);
-        gestorVentaJoker.update(mouseWorld.x, mouseWorld.y, jokers, jugador, (v) -> organizarJokers());
+        actualizarJokers(delta, mx, my);
+        gestorVentaJoker.update(mx, my, jokers, jugador, (v) -> organizarJokers());
     }
 
     private void organizarJokers() { organizarJokers(false); }
@@ -630,23 +694,18 @@ public class GameScreenV2 implements Screen {
 
     private void resolverPendingEstado() {
         if (pendingEstado == null) return;
-        if (pendingEstado == EstadoPantalla.JUGANDO && estado == EstadoPantalla.SELECCION_RIVAL) {
-            EstadoPantalla destino = pendingEstado;
-            pendingEstado = null;
-            transicionEntradaJuego.iniciar(() -> {
-                System.out.println(">>> INICIANDO enterState(JUGANDO)"); // TEMPORAL
-                try {
-                    enterState(destino);
-                    System.out.println(">>> enterState(JUGANDO) TERMINO OK, estado=" + estado); // TEMPORAL
-                } catch (Exception e) {
-                    System.out.println(">>> EXCEPCION en enterState(JUGANDO):"); // TEMPORAL
-                    e.printStackTrace();
-                }
-            });
-        } else {
-            enterState(pendingEstado);
-            pendingEstado = null;
+        if (estado == EstadoPantalla.JUGANDO && pendingEstado != EstadoPantalla.JUGANDO) {
+            if (jugableOffsetYObjetivo != -800f) {
+                jugableOffsetYObjetivo = -800f;
+            }
+            if (jugableOffsetY <= -800f) {
+                enterState(pendingEstado);
+                pendingEstado = null;
+            }
+            return;
         }
+        enterState(pendingEstado);
+        pendingEstado = null;
     }
 
     private void reproducirSonidoActivacion(String origen) {
@@ -678,18 +737,18 @@ public class GameScreenV2 implements Screen {
         }
     }
 
-    private void actualizarCartasMesa(float delta) {
-        for (VistaCarta c : new ArrayList<>(cartasMesaJugador)) c.update(mouseWorld.x, mouseWorld.y, delta);
-        for (VistaCarta c : new ArrayList<>(cartasMesaRival)) c.update(mouseWorld.x, mouseWorld.y, delta);
+    private void actualizarCartasMesa(float delta, float mx, float my) {
+        for (VistaCarta c : new ArrayList<>(cartasMesaJugador)) c.update(mx, my, delta);
+        for (VistaCarta c : new ArrayList<>(cartasMesaRival)) c.update(mx, my, delta);
     }
 
-    private void actualizarJokers(float delta) {
+    private void actualizarJokers(float delta, float mx, float my) {
         VistaJoker antes = gestorJokers.getArrastrado();
         for (VistaJoker vj : jokers) {
-            vj.update(mouseWorld.x, mouseWorld.y, delta);
+            vj.update(mx, my, delta);
         }
         resolverHoverExclusivoJokers(); // FIX
-        gestorJokers.update(mouseWorld.x, mouseWorld.y, delta, true);
+        gestorJokers.update(mx, my, delta, true);
         boolean cambio = gestorReordenamiento.previsualizarReordenamientoJokers(gestorJokers, jokers);
         if (cambio) organizarJokers();
         if (antes != null && gestorJokers.getArrastrado() == null) {
@@ -764,6 +823,8 @@ public class GameScreenV2 implements Screen {
                 panelSeleccionVisible = false;
                 break;
             case JUGANDO:
+                jugableOffsetY = -800f;
+                jugableOffsetYObjetivo = 0f;
                 panelTiendaVisible = false;
                 panelSeleccionVisible = false;
                 aplicarAnimacionInicial = true;
@@ -781,6 +842,18 @@ public class GameScreenV2 implements Screen {
                 panelSeleccionVisible = false;
                 gestorVictoria.iniciarEntrada();
                 break;
+            case DERROTA:
+                panelTiendaVisible = false;
+                panelSeleccionVisible = false;
+                panelDerrota = new PanelDerrota(
+                    game,
+                    gestorPartida.getJuego(),
+                    jugador,
+                    datosRival,
+                    this::iniciarPartidaNuevaDesdeDerrota,
+                    this::volverAMenuPrincipalDesdeDerrota
+                );
+                break;
         }
         this.estado = newState;
     }
@@ -794,9 +867,27 @@ public class GameScreenV2 implements Screen {
             case SELECCION_RIVAL:
                 panelSeleccionVisible = false;
                 break;
+            case DERROTA:
+                panelDerrota = null;
+                break;
             default:
                 break;
         }
+    }
+
+    private void iniciarPartidaNuevaDesdeDerrota() {
+        game.getPerfilJugador().iniciarNuevaRun();
+        game.reiniciarDesbloqueoRivales(); 
+        panelDerrota = null;
+        pendingEstado = EstadoPantalla.SELECCION_RIVAL;
+    }
+
+    private void volverAMenuPrincipalDesdeDerrota() {
+        game.getPerfilJugador().iniciarNuevaRun();
+        game.reiniciarDesbloqueoRivales();
+        panelDerrota = null;
+        game.setScreen(new io.github.HarryCodeProg.TrucoSurvivors.Screens.MainMenuScreen(game));
+        dispose();
     }
 
     public void finalizarCombate(boolean victoriaJugador) {
@@ -806,7 +897,7 @@ public class GameScreenV2 implements Screen {
             game.getPerfilJugador().avanzarNivel();
             pendingEstado = EstadoPantalla.VICTORIA;
         } else {
-            pendingEstado = EstadoPantalla.SELECCION_RIVAL;
+            pendingEstado = EstadoPantalla.DERROTA;
         }
     }
 
@@ -827,6 +918,138 @@ public class GameScreenV2 implements Screen {
     public void sumarPesosExtrasVictoria(int cantidad) {
         gestorVictoria.sumarPesosExtras(cantidad);
         if (jugador != null) jugador.sumarPesos(cantidad);
+    }
+
+    private void aplicarGuardado(DatosGuardado d) {
+        GestorConverterSerializacion.aplicarDatos(jugador, d.jugador);
+        // Reconstruir la vista de jokers SIEMPRE, sin importar a qué pantalla se vuelve
+        if (this.jokers != null) for (VistaJoker v : this.jokers) v.dispose();
+        this.jokers = new ArrayList<>();
+        for (Joker joker : jugador.getJokers()) {
+            VistaJoker view = new VistaJoker(joker, game.getAtlasJokers());
+            view.setTamaño(ANCHO_JOKER, ALTO_JOKER);
+            this.jokers.add(view);
+        }
+        this.gestorJokers = new GestorInputArrastrable<>(jokers);
+        organizarJokers(true);
+        this.datosRival = game.getListaRivales().get(d.rivalIndice);
+        game.sincronizarRivalesConProgreso(d.rivalIndice);
+        switch (d.estadoPantalla) {
+            case "SELECCION_RIVAL":
+                estado = EstadoPantalla.SELECCION_RIVAL;
+                panelSeleccionRival = new PanelSeleccionRival(game, this::onRivalElegido);
+                panelSeleccionVisible = true;
+                break;
+            case "TIENDA":
+                estado = EstadoPantalla.TIENDA;
+                panelTienda = new PanelTienda(game, jugador, this::iniciarSalidaDeTienda, this::iniciarAnimacionCompraJoker,
+                    (s) -> gestorSantos.comprarYUsar(s, jugador),
+                    () -> { if (gestorCompraJoker != null) gestorCompraJoker.cancel(); organizarJokers(true); },
+                    null
+                );
+                if (d.estadoTienda != null) {
+                    panelTienda.restaurarOferta(d.estadoTienda);
+                }
+                panelTiendaVisible = true;
+                break;
+            case "JUGANDO":
+                estado = EstadoPantalla.JUGANDO;
+                aplicarAnimacionInicial = false; // sin animación de reparto, ya está todo puesto
+                inicializarJuegoDesdeGuardado(d.juego);
+                break;
+        }
+    }
+
+    private void inicializarJuegoDesdeGuardado(DatosJuego dj) {
+        if (this.jugador != null) {
+            if (jugadorJokerAddedListener != null) this.jugador.removeJokerAddedListener(jugadorJokerAddedListener);
+            if (jugadorSantoAddedListener != null) this.jugador.removeSantoAddedListener(jugadorSantoAddedListener);
+            if (jugadorSantoRemovedListener != null) this.jugador.removeSantoRemovedListener(jugadorSantoRemovedListener);
+        }
+        iniciarShader();
+        jugadorJokerAddedListener = (jokerModel) -> {
+            if (suppressJugadorJokerListener) return;
+            VistaJoker vista = new VistaJoker(jokerModel, game.getAtlasJokers());
+            vista.setTamaño(ANCHO_JOKER, ALTO_JOKER);
+            jokers.add(vista);
+            organizarJokers(true);
+        };
+        jugador.addJokerAddedListener(jugadorJokerAddedListener);
+        jugador.addJokerRemovedListener((jokerModel) -> {
+            VistaJoker aRemover = null;
+            for (VistaJoker v : jokers) if (v.getJoker() == jokerModel) { aRemover = v; break; }
+            if (aRemover != null) { aRemover.dispose(); jokers.remove(aRemover); organizarJokers(true); }
+        });
+        jugadorSantoAddedListener = (santo) -> gestorSantos.agregarVistaDesdeModelo(santo, jugador);
+        jugadorSantoRemovedListener = (santo) -> gestorSantos.eliminarVistaDesdeModelo(santo);
+        jugador.addSantoAddedListener(jugadorSantoAddedListener);
+        jugador.addSantoRemovedListener(jugadorSantoRemovedListener);
+        this.rival = new Jugador(datosRival.getNombre());
+        if (panelPuntajes != null) panelPuntajes.setRivalNombre(rival.getNombre());
+        this.fondoPlasma.setRivalesVencidos(datosRival.getIndice());
+        // Reconstruir VistaCarta de la mano del jugador (ya puesta en jugador.getMano() por aplicarDatos)
+        this.cartasJugador = new ArrayList<>();
+        for (Carta c : jugador.getMano()) {
+            VistaCarta vc = new VistaCarta(c, false, game.getAtlasCartas());
+            cartasJugador.add(vc);
+        }
+        gestorSantos.setBuscadorVistaCarta(carta -> {
+            for (VistaCarta v : cartasJugador) if (v.getCarta() == carta) return v;
+            for (VistaCarta v : cartasMesaJugador) if (v.getCarta() == carta) return v;
+            return null;
+        });
+        gestorSantos.setAlConsumirSanto(() -> gestorPartida.getJuego().notificarSantoConsumido());
+        // Reconstruir VistaCarta de mano rival, boca abajo
+        this.cartasRival = new ArrayList<>();
+        for (Carta c : GestorConverterSerializacion.listaDesdeDatos(dj.manoRival)) { // ver nota abajo
+            VistaCarta vc = new VistaCarta(c, true, game.getAtlasCartas());
+            vc.setTamaño(70f, 80f);
+            cartasRival.add(vc);
+        }
+        ArrayList<Joker> jokersModelo = jugador.getJokers();
+        if (this.jokers != null) for (VistaJoker v : this.jokers) v.dispose();
+        this.jokers = new ArrayList<>();
+        for (Joker joker : jokersModelo) {
+            VistaJoker view = new VistaJoker(joker, game.getAtlasJokers());
+            view.setTamaño(ANCHO_JOKER, ALTO_JOKER);
+            this.jokers.add(view);
+        }
+        // Reconstruir cartas en mesa
+        this.cartasMesaJugador = new ArrayList<>();
+        for (Carta c : GestorConverterSerializacion.listaDesdeDatos(dj.mesaJugador)) {
+            VistaCarta vc = new VistaCarta(c, false, game.getAtlasCartas());
+            vc.setTamaño(ANCHO_CARTA_MESA, ALTO_CARTA_MESA);
+            cartasMesaJugador.add(vc);
+        }
+        this.cartasMesaRival = new ArrayList<>();
+        for (Carta c : GestorConverterSerializacion.listaDesdeDatos(dj.mesaRival)) {
+            VistaCarta vc = new VistaCarta(c, false, game.getAtlasCartas());
+            vc.setTamaño(ANCHO_CARTA_MESA, ALTO_CARTA_MESA);
+            cartasMesaRival.add(vc);
+        }
+        this.gestorCartas = new GestorInputArrastrable<>(cartasJugador);
+        this.gestorJokers = new GestorInputArrastrable<>(jokers);
+        this.gestorAnimaciones = new GestorAnimacionesMano(cartasJugador, cartasRival, cartasMesaJugador, cartasMesaRival, this::organizarCartas);
+        gestorPartida.inicializarDesdeGuardado(jugador, rival, datosRival, gestorCartas, gestorAnimaciones, dj);
+        organizarJokers(true);
+        organizarCartas();
+        organizarMesa();
+        float anchoMazo = 60f, altoMazo = 88f;
+        float posX = 1280f - anchoMazo - 25f, posY = 130f;
+        this.vistaMazo = new VistaMazo(posX, posY, anchoMazo, altoMazo, game.getAtlasCartas(), game.getFuentePrincipal(), game.getPixelBlanco(), camera);
+        this.hudController = new HUDController(this.vistaMazo);
+    }
+
+    public void guardarProgreso() {
+        if (jugador == null) return;
+        String estadoActual = this.estado.name(); // "JUGANDO","TIENDA","SELECCION_RIVAL","VICTORIA","DERROTA"
+        if (estadoActual.equals("VICTORIA") || estadoActual.equals("DERROTA")) return; // no autoguardar en transiciones
+        int rivalIndice = datosRival != null ? datosRival.getIndice() : 0;
+        Juego juegoActual = (estado == EstadoPantalla.JUGANDO) ? gestorPartida.getJuego() : null;
+        EstadoTienda estadoTiendaActual = (estado == EstadoPantalla.TIENDA && panelTienda != null) ? panelTienda.getEstadoTienda() : null;
+        DatosGuardado d = GestorGuardado.crearSnapshot(estadoActual, rivalIndice, game.getPerfilJugador().getNivelActual(),
+            jugador, juegoActual, estadoTiendaActual);
+        GestorGuardado.guardar(d);
     }
 
     public ArrayList<VistaCarta> getCartasRival() { return cartasRival; }

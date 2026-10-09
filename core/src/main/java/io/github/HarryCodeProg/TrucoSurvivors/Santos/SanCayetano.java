@@ -35,6 +35,9 @@ public class SanCayetano extends Santo {
         for (Joker joker : jugador.getJokers()) {
             total += joker.getPrecioVenta();
         }
+        if (jugador.tieneDobleEfectoSantos()) {
+            total *= 2;
+        }
         jugador.sumarPesos(total);
     }
 }

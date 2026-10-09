@@ -36,6 +36,8 @@ public class GestorSonidos implements Disposable {
         cargar("gano-mas-50", "sonidos/gano-mas-50.ogg");
         cargar("button-click", "sonidos/button-click.ogg");
         cargar("spin", "sonidos/spin.ogg");
+        cargar("slide", "sonidos/slide.ogg");
+        cargar("slide-inver", "sonidos/slide-inver.ogg");
     }
 
     private void cargar(String clave, String ruta) {

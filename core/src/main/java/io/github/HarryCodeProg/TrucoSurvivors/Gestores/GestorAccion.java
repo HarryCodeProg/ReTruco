@@ -57,38 +57,16 @@ public class GestorAccion {
                             gScreen.setEsperandoTransicion(false);
                             juego.aplicarResultadoEnvido();
                             cCombate.comprobarFinDelCombate();
+                            gScreen.guardarProgreso(); // NUEVO
                         });
                     } else {
                         juego.aplicarResultadoEnvido();
                         cCombate.comprobarFinDelCombate();
+                        gScreen.guardarProgreso(); // NUEVO
                     }
                 } else if (juego.hayCantoTrucoPendiente()) {
                     juego.responderTruco(true);
-                }
-                break;
-            case NO_QUIERO:
-                if (juego.hayCantoEnvidoPendiente()) {
-                    juego.responderEnvido(false); // arma resolución simple, no aplica todavía
-                    ResolucionPuntaje resolucionEnvido = juego.getUltimaResolucionEnvido();
-                    if (resolucionEnvido != null && !resolucionEnvido.getLog().isEmpty()) {
-                        gScreen.setEsperandoTransicion(true);
-                        gScreen.iniciarAnimacionResolucion(resolucionEnvido, false, () -> {
-                            gScreen.setEsperandoTransicion(false);
-                            juego.aplicarResultadoEnvido();
-                            cCombate.comprobarFinDelCombate();
-                        });
-                    } else {
-                        juego.aplicarResultadoEnvido();
-                        cCombate.comprobarFinDelCombate();
-                    }
-                } else if (juego.hayCantoTrucoPendiente()) {
-                    juego.responderTruco(false);
-                    cCombate.comprobarFinDelCombate();
-                    if (juego.verificarEstadoCombate() == EstadoCombate.EN_PROGRESO) {
-                        gScreen.setEsperandoTransicion(true);
-                        gScreen.setIniciarNuevaRondaPendiente(true);
-                        gScreen.setTiempoNuevaRonda();
-                    }
+                    gScreen.guardarProgreso(); // NUEVO
                 }
                 break;
             case IR_AL_MAZO:
@@ -108,6 +86,7 @@ public class GestorAccion {
                     juego.setTurnoActual(juego.getRival());
                 }
                 cCombate.comprobarGanadorRonda();
+                gScreen.guardarProgreso(); // NUEVO
                 break;
             case DESCARTAR:
                 if (gestorCartas.getSeleccionados().isEmpty()) break;
@@ -121,6 +100,7 @@ public class GestorAccion {
                 gestorCartas.getSeleccionados().clear();
                 gScreen.getCartasJugador().removeAll(vistasADescartar);
                 gestorAnimaciones.iniciarDescarte(vistasADescartar, cartasNuevas);
+                gScreen.guardarProgreso(); // NUEVO
                 break;
         }
     }

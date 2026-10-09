@@ -53,6 +53,8 @@ public class Jugador {
     private int deudaMaxima = 0;
     private int topeInteresExtra = 0;
     private SignoZodiaco proximoZodiacoForzado;
+    private double totalPesosGanados = 0;
+    private double totalPesosGastados = 0;
 
     public Jugador(String nombre) {
         this.nombre = nombre;
@@ -86,15 +88,6 @@ public class Jugador {
             return true;
         }
         return false;
-    }
-
-    public boolean gastarPesos(int cantidad) {
-        if (pesos - cantidad < -deudaMaxima) return false;
-        pesos -= cantidad;
-        if (cantidad > 0) {
-            for (Joker j : new ArrayList<>(jokers)) j.onPesosGastados(cantidad, this);
-        }
-        return true;
     }
 
     public void agregarCarta(Carta carta) { this.mano.add(carta); }
@@ -134,7 +127,6 @@ public class Jugador {
     }
 
     public int getPesos() { return pesos; }
-    public void sumarPesos(int cantidad) { this.pesos += cantidad; }
 
     /** Devuelve la cantidad de dinero que tiene el jugador (pesos). */
     public int getDinero() { return pesos; }
@@ -382,5 +374,59 @@ public class Jugador {
             }
         }
         return cantidad;
+    }
+
+    public boolean tieneDobleEfectoSantos() {
+        return jokers.stream().anyMatch(j -> j.getId() == 121);
+    }
+
+    public void sumarPesos(int cantidad) {
+        this.pesos += cantidad;
+        if (cantidad > 0) totalPesosGanados += cantidad;
+    }
+
+    public boolean gastarPesos(int cantidad) {
+        if (pesos - cantidad < -deudaMaxima) return false;
+        pesos -= cantidad;
+        totalPesosGastados += cantidad;
+        for (Joker j : new ArrayList<>(jokers)) j.onPesosGastados(cantidad, this);
+        return true;
+    }
+
+    public double getTotalPesosGanados() { return totalPesosGanados; }
+    public double getTotalPesosGastados() { return totalPesosGastados; }
+    public void setTotalPesosGanados(double v) { this.totalPesosGanados = v; }
+    public void setTotalPesosGastados(double v) { this.totalPesosGastados = v; }
+    public void resetEconomiaRun() { totalPesosGanados = 0; totalPesosGastados = 0; }
+
+    public void resetearABase() {
+        mano.clear();
+        jokers.clear();
+        santos.clear();
+        tamañoMano = 3;
+        tamañoJokers = 5;
+        multiplicadorTruco = 1;
+        multiplicadorEnvido = 1;
+        multiplicadorTrucoTemporal = 1;
+        multiplicadorEnvidoTemporal = 1;
+        descartesBase = 6;
+        descartesExtra = 0;
+        //tamañoManoExtra = 0;
+        espacioSantosExtra = 0;
+        proximoEfectoZodiacoMultiplicador = 1;
+        rerollsTienda = 0;
+        bonusEnvidoFinal = 0;
+        tamañoSantos = 3;
+        espacioJokersTiendaExtra = 0;
+        espacioCartasTiendaExtra = 0;
+        espacioSantosTiendaExtra = 0;
+        multiplicadorPrecioTienda = 1.0;
+        rerollsGratisTienda = 0;
+        manosMaximas = 6;
+        manosActuales = manosMaximas;
+        deudaMaxima = 0;
+        topeInteresExtra = 0;
+        totalPesosGanados = 0;
+        totalPesosGastados = 0;
     }
 }

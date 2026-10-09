@@ -76,6 +76,10 @@ public class PoolJokersTienda {
         fabricas.add(YoManejo::new);
         fabricas.add(CañaConRuda::new);
         fabricas.add(Soda::new);
+        fabricas.add(QueMiras::new);
+        fabricas.add(Consola::new);
+        fabricas.add(Cafe::new);
+        fabricas.add(Mermelada::new);
 
         //raro
         fabricas.add(Granadero::new);
@@ -87,7 +91,7 @@ public class PoolJokersTienda {
         fabricas.add(Hornero::new);
         fabricas.add(RioNegro::new);
         fabricas.add(Cordoba::new);
-        //fabricas.add(Asado::new);
+        fabricas.add(Asado::new);
         fabricas.add(Caballo::new);
         fabricas.add(Carpincho::new);
         fabricas.add(Ñandu::new);
@@ -114,6 +118,10 @@ public class PoolJokersTienda {
         fabricas.add(SantiagoDelEstero::new);
         fabricas.add(Gallina::new);
         fabricas.add(Constelacion::new);
+        fabricas.add(Ardilla::new);
+        fabricas.add(Tero::new);
+        fabricas.add(Tucuman::new);
+        fabricas.add(Salta::new);
 
         //muy raro
         fabricas.add(VirgenItati::new);
@@ -121,12 +129,31 @@ public class PoolJokersTienda {
         fabricas.add(PlazaDeMayo::new);
         fabricas.add(Obelisco::new);
         fabricas.add(Gato::new);
-        /*fabricas.add(Bestiario::new);
-        fabricas.add(PlanSocial::new);*/
+        fabricas.add(Bestiario::new);
+        fabricas.add(PlanSocial::new);
         fabricas.add(Corrientes::new);
         fabricas.add(Basilica::new);
         fabricas.add(Escarapela::new);
         fabricas.add(Iguazu::new);
+        fabricas.add(RevolucionDeMayo::new);
+        fabricas.add(Parrilla::new);
+        fabricas.add(CasaRosada::new);
+        fabricas.add(Pelota::new);
+        fabricas.add(Cancha::new);
+        fabricas.add(Kiosco::new);
+        fabricas.add(Pulperia::new);
+        fabricas.add(Polenta::new);
+        fabricas.add(Cotorra::new);
+        fabricas.add(Museo::new);
+        fabricas.add(Vaca::new);
+        fabricas.add(Argentinosaurio::new);
+        fabricas.add(Argentavis::new);
+        fabricas.add(Ceibo::new);
+        fabricas.add(Ombu::new);
+        fabricas.add(Nahuelito::new);
+        fabricas.add(Antartida::new);
+        fabricas.add(Tango::new);
+        fabricas.add(Colectivo::new);
 
         //epico
         fabricas.add(Aconcagua::new);
@@ -142,12 +169,15 @@ public class PoolJokersTienda {
         fabricas.add(SableCorvo::new);
         fabricas.add(Perro::new);
         fabricas.add(Borges::new);
+        fabricas.add(Saavedra::new);
+        fabricas.add(MercedesSosa::new);
 
         //legendario
         fabricas.add(Rivadavia::new);
         fabricas.add(Roca::new);
         fabricas.add(SanMartin::new);
         fabricas.add(Belgrano::new);
+        fabricas.add(Sarmiento::new);
     }
 
     /** Devuelve un joker nuevo al azar, evitando (si es posible) los que el jugador ya tiene por clase. */
@@ -170,6 +200,14 @@ public class PoolJokersTienda {
             return null;
         }
         return disponibles.get(random.nextInt(disponibles.size())).get();
+    }
+
+    public Joker crearPorId(int id) {
+        for (Supplier<Joker> f : fabricas) {
+            Joker j = f.get();
+            if (j.getId() == id) return j;
+        }
+        return null;
     }
 
     public Joker tomarAleatorio(Random random, Jugador jugador) {

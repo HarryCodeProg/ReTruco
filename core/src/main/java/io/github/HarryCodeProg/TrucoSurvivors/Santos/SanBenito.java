@@ -32,8 +32,15 @@ public class SanBenito extends Santo {
     public void aplicarEfecto(Jugador jugador, ArrayList<Carta> seleccionadas, ContextoJuego ctx) {
         int limite = Math.min(2, seleccionadas.size());
         for (int i = 0; i < limite; i++) {
-            Carta copia = new Carta(seleccionadas.get(i));
-            jugador.getMazo().agregarCarta(copia);
+            if (jugador.tieneDobleEfectoSantos()) {
+                Carta copia1 = new Carta(seleccionadas.get(i));
+                Carta copia2 = new Carta(seleccionadas.get(i));
+                jugador.getMazo().agregarCarta(copia1);
+                jugador.getMazo().agregarCarta(copia2);
+            } else {
+                Carta copia = new Carta(seleccionadas.get(i));
+                jugador.getMazo().agregarCarta(copia);
+            }
         }
     }
 }

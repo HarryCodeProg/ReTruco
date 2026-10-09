@@ -106,6 +106,13 @@ public class EstadoTienda {
         return true;
     }
 
+    public void restaurarDesde(ArrayList<ItemTienda> cartas, ArrayList<ItemTienda> jokers, ArrayList<ItemTienda> santos, int rerollsTiendaGuardado) {
+        filaCartas.clear(); filaCartas.addAll(cartas);
+        filaJokers.clear(); filaJokers.addAll(jokers);
+        filaSantos.clear(); filaSantos.addAll(santos);
+        this.rerollsTienda = rerollsTiendaGuardado;
+    }
+
     public void sumarEspacioJokersTienda(int c) { espacioJokersExtra += c; cantidadJokers += c; }
 
     public void sumarEspacioCartasTienda(int c) {
@@ -170,4 +177,6 @@ public class EstadoTienda {
     private boolean tieneMendoza(Jugador jugador) {
         return jugador.getJokers().stream().anyMatch(j -> j.getId() == ID_MENDOZA);
     }
+
+    public int getRerollsTiendaActual() { return rerollsTienda; }
 }

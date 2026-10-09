@@ -24,6 +24,9 @@ public class SanNicolas extends Santo {
 
     @Override
     public void aplicarEfecto(Jugador jugador, ArrayList<Carta> seleccionadas, ContextoJuego ctxOpcional) {
-        jugador.restaurarUnaMano(); // ya chequea internamente que no supere el máximo
+        if (jugador.tieneDobleEfectoSantos()) {
+            jugador.restaurarUnaMano();
+        }
+        jugador.restaurarUnaMano();
     }
 }

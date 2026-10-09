@@ -30,6 +30,7 @@ public class SanMartinDePorres extends Santo{
 
     @Override
     public void aplicarEfecto(Jugador jugador, ArrayList<Carta> seleccionadas, ContextoJuego ctx) {
-        jugador.sumarRerollsGratisTienda(1);
+       int num = jugador.tieneDobleEfectoSantos() ? 2 : 1;
+       jugador.sumarRerollsGratisTienda(num);
     }
 }

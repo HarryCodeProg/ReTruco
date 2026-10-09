@@ -11,6 +11,7 @@ import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Carta;
 import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Palo;
 import io.github.HarryCodeProg.TrucoSurvivors.Gestores.GestorSonidos;
 import io.github.HarryCodeProg.TrucoSurvivors.Main;
+import com.badlogic.gdx.utils.TimeUtils;
 
 public class VistaCarta implements Arrastrable{
     private Carta carta;
@@ -78,6 +79,9 @@ public class VistaCarta implements Arrastrable{
     private boolean cartelHaciaAbajo = false;
     private boolean tooltipLateral = false;
     private final FisicaTiltArrastre fisicaTiltArrastre = new FisicaTiltArrastre();
+    private static long ultimoMsSonidoInicioFlip = 0;
+    private static long ultimoMsSonidoFinFlip = 0;
+    private static final long DEBOUNCE_SONIDO_FLIP_MS = 60;
 
     /** Ahora recibe el TextureAtlas compartido en vez de crear su propia Texture. */
     public VistaCarta(Carta carta, boolean bocaAbajo, TextureAtlas atlas) {
@@ -297,12 +301,36 @@ public class VistaCarta implements Arrastrable{
     private void renderFlip(SpriteBatch batch) {
         batch.setColor(1f, 1f, 1f, 1f);
         float drawY = y + visualOffsetY;
-        TextureRegion regionAMostrar = (estadoFlip == EstadoFlip.GIRANDO_A_DORSO) ? this.region : regionDorso;
-        if (estadoFlip == EstadoFlip.GIRANDO_A_FRENTE) regionAMostrar = this.region;
-        float progresoClamp = Math.min(flipProgreso, 1f);
-        float scaleXFlip = (estadoFlip == EstadoFlip.GIRANDO_A_DORSO) ? (1f - progresoClamp) : progresoClamp;
+        TextureRegion regionAMostrar;
+        float scaleXFlip;
+        float t = Math.min(flipProgreso, 1f);
+        if (estadoFlip == EstadoFlip.GIRANDO_A_DORSO) {
+            regionAMostrar = this.region;
+            // pow2In: arranca suave, se acelera hacia el medio (como una carta que se da vuelta)
+            float eased = t * t;
+            scaleXFlip = 1f - eased;
+
+        } else if (estadoFlip == EstadoFlip.GIRANDO_A_FRENTE) {
+            regionAMostrar = this.region;
+            // pow2Out: llega y frena (el frente "aparece" suave)
+            float eased = 1f - (1f - t) * (1f - t);
+            scaleXFlip = eased;
+
+        } else {
+            regionAMostrar = regionDorso;
+            scaleXFlip = 1f;
+        }
         scaleXFlip = Math.max(scaleXFlip, 0.02f);
-        batch.draw(regionAMostrar, x, drawY, width / 2f, height / 2f, width * scaleXFlip, height, 1f, 1f, 0f);
+        // Efecto "pop" 3D: la carta se estira un poquito en Y durante el giro,
+        // con pico máximo a mitad del flip. Rompe la sensación plana.
+        float popScale = 1f + (float)(Math.sin(t * Math.PI) * 0.10f);
+        float heightFinal = height * popScale;
+        float yOffset = (height - heightFinal) / 2f;
+        batch.draw(regionAMostrar,
+            x, drawY + yOffset,
+            width / 2f, heightFinal / 2f,
+            width * scaleXFlip, heightFinal,
+            1f, 1f, 0f);
         batch.setColor(1f, 1f, 1f, 1f);
     }
 
@@ -401,12 +429,14 @@ public class VistaCarta implements Arrastrable{
             dragging = false;
             targetScale = 0.8f;
             targetRotation = 45f;
-            x = moverHacia(x, animTargetX, velocidadAnim * delta);
-            y = moverHacia(y, animTargetY, velocidadAnim * delta);
-            scale = moverHacia(scale, targetScale, 5f * delta);
-            rotation = moverHacia(rotation, targetRotation, 500f * delta);
-            visualOffsetY = moverHacia(visualOffsetY, 0f, 10f * delta);
+            x = aproximar(x, animTargetX, delta, 6f);
+            y = aproximar(y, animTargetY, delta, 6f);
+            scale = aproximar(scale, targetScale, delta, 5f);
+            rotation = aproximar(rotation, targetRotation, delta, 6f);
+            visualOffsetY = aproximar(visualOffsetY, 0f, delta, 10f);
             if (Math.abs(x - animTargetX) < 2f && Math.abs(y - animTargetY) < 2f) {
+                x = animTargetX;
+                y = animTargetY;
                 animando = false;
                 if (accionAlTerminar != null) {
                     accionAlTerminar.run();
@@ -456,26 +486,24 @@ public class VistaCarta implements Arrastrable{
             }
         }
         // Aplicamos suavizado al 3D
-        tiltX = moverHacia(tiltX, targetTiltX, VELOCIDAD_TILT * delta);
-        tiltY = moverHacia(tiltY, targetTiltY, VELOCIDAD_TILT * delta);
+        tiltX = aproximar(tiltX, targetTiltX, delta, 14f);
+        tiltY = aproximar(tiltY, targetTiltY, delta, 14f);
         // Aplicamos movimiento
         if (!dragging) {
-            x = moverHacia(x, targetX, VELOCIDAD_POSICION * delta);
-            y = moverHacia(y, targetY, VELOCIDAD_POSICION * delta);
-            scale = moverHacia(scale, targetScale, VELOCIDAD_ESCALA * delta);
-            visualOffsetY = moverHacia(visualOffsetY, targetOffsetY, VELOCIDAD_OFFSET * delta);
-            // Si la física está soltándose, ya viene suavizada. Si no, suavizamos manual.
+            x = aproximar(x, targetX, delta, 12f);
+            y = aproximar(y, targetY, delta, 12f);
+            scale = aproximar(scale, targetScale, delta, 10f);
+            visualOffsetY = aproximar(visualOffsetY, targetOffsetY, delta, 14f);
             if (fisicaTiltArrastre.estaActiva()) {
                 rotation = targetRotation;
             } else {
-                rotation = moverHacia(rotation, targetRotation, VELOCIDAD_ROTACION * delta);
+                rotation = aproximar(rotation, targetRotation, delta, 12f);
             }
         } else {
             x = targetX;
             y = targetY;
-            scale = moverHacia(scale, 1.2f, VELOCIDAD_ESCALA * delta);
-            visualOffsetY = moverHacia(visualOffsetY, 0f, VELOCIDAD_OFFSET * delta);
-            // FIX: Durante el arrastre, la rotación copia directamente a la física (que ya tiene inercia)
+            scale = aproximar(scale, 1.2f, delta, 10f);
+            visualOffsetY = aproximar(visualOffsetY, 0f, delta, 14f);
             rotation = targetRotation;
         }
     }
@@ -501,7 +529,8 @@ public class VistaCarta implements Arrastrable{
             case GIRANDO_A_FRENTE:
                 if (flipProgreso >= 1f) {
                     flipProgreso = 1f;
-                    estadoFlip = EstadoFlip.NINGUNO; // termina el flip, vuelve al render normal
+                    estadoFlip = EstadoFlip.NINGUNO;
+                    reproducirSonidoFlip("slide-inver", false);
                     if (alTerminarFlip != null) {
                         Runnable callback = alTerminarFlip;
                         alTerminarFlip = null;
@@ -545,20 +574,18 @@ public class VistaCarta implements Arrastrable{
     public boolean contiene(float mx, float my) {
         float w = width * scale;
         float h = height * scale;
+        float drawY = y + visualOffsetY;
         float hitboxX = x + (width - w) / 2f;
-        float hitboxY = y + (height - h) / 2f;
+        float hitboxY = drawY + (height - h) / 2f;
         return mx >= hitboxX && mx <= hitboxX + w && my >= hitboxY && my <= hitboxY + h;
     }
 
-    /*
-    public boolean contiene(float mx, float my) {
-        float w = width * scale;
-        float h = height * scale;
-        float drawY = y + visualOffsetY;
-        return mx >= x && mx <= x + w && my >= drawY && my <= drawY + h;
-    }*/
+    private float aproximar(float actual, float target, float delta, float rigidez) {
+        if (Math.abs(target - actual) < 0.02f) return target;
+        float factor = 1f - (float) Math.exp(-rigidez * delta);
+        return actual + (target - actual) * factor;
+    }
 
-    // Agregar en VistaCarta.java
     public void renderCartelStats(SpriteBatch batch, io.github.HarryCodeProg.TrucoSurvivors.Main game) {
         if (!hover || bocaAbajo || carta == null) return;
         float drawY = y + visualOffsetY;
@@ -569,6 +596,20 @@ public class VistaCarta implements Arrastrable{
 
     public boolean llegoATarget() {
         return Math.abs(x - targetX) < 1f && Math.abs(y - targetY) < 1f;
+    }
+
+    private void reproducirSonidoFlip(String clave, boolean esInicio) {
+        GestorSonidos s = Main.getInstance().getGestorSonidos();
+        if (s == null) return;
+        long ahora = TimeUtils.millis();
+        if (esInicio) {
+            if (ahora - ultimoMsSonidoInicioFlip < DEBOUNCE_SONIDO_FLIP_MS) return;
+            ultimoMsSonidoInicioFlip = ahora;
+        } else {
+            if (ahora - ultimoMsSonidoFinFlip < DEBOUNCE_SONIDO_FLIP_MS) return;
+            ultimoMsSonidoFinFlip = ahora;
+        }
+        s.reproducirConVariacion(clave);
     }
 
     public float getCentroX() { return x + (width * scale) / 2f; }
@@ -589,10 +630,6 @@ public class VistaCarta implements Arrastrable{
         return this.width;
     }
 
-    public void iniciarFlip(TextureRegion regionDorso, Runnable onCargarNuevaVista) {
-        iniciarFlip(regionDorso, onCargarNuevaVista, null);
-    }
-
     /** Inicia el giro y avisa cuando la carta vuelve a mostrarse de frente. */
     public void iniciarFlip(TextureRegion regionDorso, Runnable onCargarNuevaVista, Runnable alTerminarFlip) {
         this.regionDorso = regionDorso;
@@ -600,6 +637,7 @@ public class VistaCarta implements Arrastrable{
         this.alTerminarFlip = alTerminarFlip;
         this.estadoFlip = EstadoFlip.GIRANDO_A_DORSO;
         this.flipProgreso = 0f;
+        reproducirSonidoFlip("slide", true);   // ← NUEVO
     }
 
     public boolean isFlipeando() { return estadoFlip != EstadoFlip.NINGUNO; }

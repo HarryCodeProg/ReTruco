@@ -64,17 +64,16 @@ public class GestorSantos {
             if (vista != null && dorso != null) {
                 cambiosPorVista.computeIfAbsent(vista, ignorada -> new ArrayList<>()).add(accion);
             } else {
-                accion.run(); // sin vista: aplicar directo
+                accion.run();
             }
         }
         santo.limpiarDiferidos();
-
         if (cambiosPorVista.isEmpty()) {
             terminarSeleccionCuandoCorresponda(alTerminarTodo);
             return;
         }
-
-        final int[] flipsPendientes = { cambiosPorVista.size() };
+        // Todos arrancan a la vez, esperamos a que terminen todos
+        final int[] pendientes = { cambiosPorVista.size() };
         for (Map.Entry<VistaCarta, ArrayList<Runnable>> entrada : cambiosPorVista.entrySet()) {
             VistaCarta vista = entrada.getKey();
             ArrayList<Runnable> cambios = entrada.getValue();
@@ -82,13 +81,16 @@ public class GestorSantos {
                 for (Runnable cambio : cambios) cambio.run();
                 vista.actualizarRegionDesdeCarta(game.getAtlasCartas());
             }, () -> {
-                flipsPendientes[0]--;
-                if (flipsPendientes[0] == 0 && !overlaySeleccion.estaVisible() && alTerminarTodo != null) {
-                    alTerminarTodo.run();
+                pendientes[0]--;
+                if (pendientes[0] == 0) {
+                    if (overlaySeleccion.estaVisible()) {
+                        overlaySeleccion.esperarFlipsYLuegoVolver(alTerminarTodo);
+                    } else if (alTerminarTodo != null) {
+                        alTerminarTodo.run();
+                    }
                 }
             });
         }
-
         if (overlaySeleccion.estaVisible()) {
             overlaySeleccion.esperarFlipsYLuegoVolver(alTerminarTodo);
         }

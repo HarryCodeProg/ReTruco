@@ -9,7 +9,7 @@ import java.util.ArrayList;
 public class GestorAnimacionesMano {
     private static final float MAZO_VISUAL_X = 1150f;
     private static final float MAZO_VISUAL_Y = 50f;
-    private static final float DELAY_REPARTO = 0.08f;
+    private static final float DELAY_REPARTO = 0.06f;
     private final ArrayList<VistaCarta> cartasJugador;
     private final ArrayList<VistaCarta> cartasRival;
     private final ArrayList<VistaCarta> cartasMesaJugador;

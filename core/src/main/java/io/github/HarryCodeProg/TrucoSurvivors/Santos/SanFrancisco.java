@@ -39,7 +39,8 @@ public class SanFrancisco extends Santo {
         jugador.eliminarCarta(carta);
         jugador.getMazo().restarTamañoMazo(1);
         Palo[] palos = Palo.values();
-        for (int i = 0; i < 3; i++) {
+        int total = jugador.tieneDobleEfectoSantos() ? 6 : 3;
+        for (int i = 0; i < total; i++) {
             int numero = random.nextInt(12) + 1;
             Palo palo = palos[random.nextInt(palos.length)];
             jugador.getMazo().agregarCarta(

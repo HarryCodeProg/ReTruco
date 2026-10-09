@@ -35,6 +35,7 @@ public class ContextoJuego {
     private int cartasRepartidasEsteEvento = 0;
     private int profundidadCopia = 0;
     private static final int MAX_PROFUNDIDAD_COPIA = 8;
+    private int cartasDescartadasEsteEvento = 0;
 
     public ContextoJuego(Jugador jugador, Jugador rival, Mazo mazo, Mesa mesa, Juego juego) {
         this.jugador = jugador;
@@ -190,5 +191,8 @@ public class ContextoJuego {
     }
 
     public void salirDeCopia() {profundidadCopia--;}
+
+    public int getCartasDescartadasEsteEvento() { return cartasDescartadasEsteEvento; }
+    public void setCartasDescartadasEsteEvento(int cantidad) { this.cartasDescartadasEsteEvento = cantidad; }
 
 }

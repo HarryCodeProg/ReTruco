@@ -42,8 +42,14 @@ public class Juego {
     private int manosGanadasConsecutivas = 0;
     private boolean recompensaFinDeRondaAplicada = false;
     private boolean ultimoGanadorEnvidoFueJugador = false;
+    private int envidosGanadosConsecutivos = 0;
+    private int cartasJugadasTotal = 0;
+    private int cartasDescartadasTotal = 0;
+    private int cartasCompradasTotal = 0;
+    private int renovacionesTotal = 0;
+    private double mejorEnvidoLogrado = 0;
 
-    public Juego(Jugador jugador, Jugador rival, Mazo mazoRival) {
+    public Juego(Jugador jugador, Jugador rival, Mazo mazoRival, boolean saltarRepartoInicial) {
         this.jugador = jugador;
         this.rival = rival;
         this.jugadorEsMano = true;
@@ -55,17 +61,21 @@ public class Juego {
         this.gestorJokers = new GestorJokers(jugador);
         this.resolutorSecuencia = new ResolutorSecuencia(gestorJokers, this);
         this.descartesActuales = jugador.getDescartesMaximos();
-        limpiarEstadoResidualDeCombateAnterior();
-        jugador.multTrucoOriginal();
-        jugador.multEnvidoOriginal();
-        rival.multTrucoOriginal();
-        rival.multEnvidoOriginal();
-        jugador.reiniciarManos();
         Carta.setNotificadorCambioPalo(carta -> {
-            ContextoJuego ctx = crearContexto();ctx.setCartaEnResolucion(carta);
-            gestorJokers.disparar(EventoJuego.AL_CAMBIAR_PALO, ctx, this);});
-        repartir();
-        gestorJokers.disparar(EventoJuego.INICIO_COMBATE, crearContexto(), this);
+            ContextoJuego ctx = crearContexto();
+            ctx.setCartaEnResolucion(carta);
+            gestorJokers.disparar(EventoJuego.AL_CAMBIAR_PALO, ctx, this);
+        });
+        if (!saltarRepartoInicial) {
+            limpiarEstadoResidualDeCombateAnterior();
+            jugador.multTrucoOriginal();
+            jugador.multEnvidoOriginal();
+            rival.multTrucoOriginal();
+            rival.multEnvidoOriginal();
+            jugador.reiniciarManos();
+            repartir();
+            gestorJokers.disparar(EventoJuego.INICIO_COMBATE, crearContexto(), this);
+        }
     }
 
     private ContextoJuego crearContexto() {
@@ -96,6 +106,8 @@ public class Juego {
         jugador.limpiarMano();
     }
 
+    public int getEnvidosGanadosConsecutivos() { return envidosGanadosConsecutivos; }
+
     public static Mazo crearMazoRival(int nivelDificultad) {
         Mazo mazo = Mazo.crearMazoBase();
         for (int i = 0; i < nivelDificultad && i < mazo.getMazo().size(); i++) {
@@ -103,8 +115,6 @@ public class Juego {
         }
         return mazo;
     }
-
-    private double puntosPendientesEnvidoRival = 0;
 
     public void ganadorEnvido() {
         double puntosEJ = jugador.getPuntosEnvido();
@@ -154,24 +164,8 @@ public class Juego {
         jugador.getMazo().reciclarCartasTomadas();
     }
 
-    public void recargarDescartes() {
-        this.descartesActuales = jugador.getDescartesMaximos();
-    }
-
     public void setManoFinalizada(boolean b) {
         this.manoFinalizada = b;
-    }
-
-    private void resetearEstadoTemporalDeMano() {
-        vaciarTruco();
-        vaciarCantos();
-    }
-
-    public void responderEnvidoSinAnimacion(boolean quiero) {
-        responderEnvido(quiero);
-        if (quiero) {
-            aplicarResultadoEnvido(); // aplica inmediato, sin esperar animación
-        }
     }
 
     public ArrayList<Carta> descartarCartas(ArrayList<Carta> cartas) {
@@ -181,15 +175,22 @@ public class Juego {
         if (cartas.size() > jugador.getMazo().getCantidadDisponibles()) return cartasNuevas;
         for (Carta carta : cartas) {
             jugador.eliminarCarta(carta);
-            jugador.getMazo().descartarCarta(carta); // va a "descartadas", vuelve al mazo real en limpiarDescartadas()
+            jugador.getMazo().descartarCarta(carta);
             jugador.robar(jugador.getMazo(), 1);
             ArrayList<Carta> mano = jugador.getMano();
             cartasNuevas.add(mano.get(mano.size() - 1));
         }
         restarUnDescarte();
-        gestorJokers.disparar(EventoJuego.AL_DESCARTAR, crearContexto(), this);
+        cartasDescartadasTotal += cartas.size();
+        ContextoJuego ctx = crearContexto();
+        ctx.setCartasDescartadasEsteEvento(cartas.size());
+        gestorJokers.disparar(EventoJuego.AL_DESCARTAR, ctx, this);
         return cartasNuevas;
     }
+
+    public boolean isJugadorEsMano() { return jugadorEsMano; }
+    public int getFaseActual() { return faseActual; }
+    public int getRondaActual() { return rondaActual; }
 
     public void setTurnoActual(Jugador turnoActual) {
         this.turnoActual = turnoActual;
@@ -203,10 +204,6 @@ public class Juego {
         this.descartesActuales -= 1;
     }
 
-    public int getMazoDisponible() {
-        return jugador.getMazo().getCantidadDisponibles();
-    }
-
     public Mazo getMazoJugador() {
         return this.jugador.getMazo();
     }
@@ -217,6 +214,26 @@ public class Juego {
 
     public ResolucionPuntaje getUltimaResolucionEnvido() {
         return ultimaResolucionEnvido;
+    }
+
+    public void restaurarEstado(double puntosJugador, double puntosRival, boolean jugadorEsMano,
+                                int faseActual, int rondaActual, int descartesActuales,
+                                ArrayList<Carta> manoRival, ArrayList<Carta> mesaJugador, ArrayList<Carta> mesaRival,
+                                int cartasJugadasTotal, int cartasDescartadasTotal, int cartasCompradasTotal, int renovacionesTotal) {
+        this.puntosJugador = puntosJugador;
+        this.puntosRival = puntosRival;
+        this.jugadorEsMano = jugadorEsMano;
+        this.faseActual = faseActual;
+        this.rondaActual = rondaActual;
+        this.descartesActuales = descartesActuales;
+        this.rival.getMano().clear();
+        this.rival.getMano().addAll(manoRival);
+        for (Carta c : mesaJugador) this.mesa.agregarCartaJugador(c);
+        for (Carta c : mesaRival) this.mesa.agregarCartaRival(c);
+        this.cartasJugadasTotal = cartasJugadasTotal;
+        this.cartasDescartadasTotal = cartasDescartadasTotal;
+        this.cartasCompradasTotal = cartasCompradasTotal;
+        this.renovacionesTotal = renovacionesTotal;
     }
 
     public void devolverCartas() {
@@ -331,6 +348,10 @@ public class Juego {
         }
         gestorJokers.disparar(EventoJuego.TERMINO_MANO, crearContexto(), this);
         verificarEstadoCombate();
+    }
+
+    public int getManosGanadasConsecutivas() {
+        return manosGanadasConsecutivas;
     }
 
     public boolean terminoLaMano() {
@@ -536,9 +557,11 @@ public class Juego {
             double puntosFinales = ultimaResolucionEnvido.calcularPuntajeFinal();
             if (ultimoGanadorEnvidoFueJugador) {
                 puntosJugador += puntosFinales;
+                envidosGanadosConsecutivos++; // NUEVO
                 gestorJokers.disparar(EventoJuego.AL_GANAR_ENVIDO, crearContexto(), this);
             } else {
                 puntosRival += puntosFinales;
+                envidosGanadosConsecutivos = 0; // NUEVO
             }
         }
         canterNoQuieroPendiente = null;
@@ -550,20 +573,6 @@ public class Juego {
         jugador.getMazo().agregarCarta(carta);
         ContextoJuego ctx = crearContexto();
         gestorJokers.disparar(EventoJuego.AL_AGREGAR_CARTA_AL_MAZO, ctx, this);
-    }
-
-    private void resolverNoQuieroEnvido(Jugador canter) {
-        double sumMult = calcularPuntosEnvido();
-        double puntosCantor = canter.getPuntosEnvido();
-        double total = puntosCantor * sumMult;
-        double otorgado = total * 0.5;
-        if (canter.equals(jugador)) puntosJugador += otorgado;
-        else puntosRival += otorgado;
-    }
-
-    public void agregarCartaJugador(Carta carta) {
-        jugador.eliminarCarta(carta);
-        mesa.agregarCartaJugador(carta);
     }
 
     public void agregarCartaRival(Carta carta) {
@@ -688,16 +697,24 @@ public class Juego {
         return this.puntajeMeta;
     }
 
-    public int getManosGanadasConsecutivas() {
-        return manosGanadasConsecutivas;
-    }
-
     public int getDescartesActuales() {
         return this.descartesActuales;
     }
 
     public void consumirHand() {
         jugador.consumirMano();
+    }
+
+    public int getCartasJugadasTotal() { return cartasJugadasTotal; }
+    public int getCartasDescartadasTotal() { return cartasDescartadasTotal; }
+    public int getCartasCompradasTotal() { return cartasCompradasTotal; }
+    public int getRenovacionesTotal() { return renovacionesTotal; }
+    public double getMejorEnvidoLogrado() { return mejorEnvidoLogrado; }
+
+    public void agregarCartaJugador(Carta carta) {
+        cartasJugadasTotal++; // NUEVO
+        jugador.eliminarCarta(carta);
+        mesa.agregarCartaJugador(carta);
     }
 
     public void notificarSantoConsumido() {

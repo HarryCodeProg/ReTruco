@@ -294,52 +294,46 @@ public class VistaSanto implements Arrastrable {
         // --- 2. TEXTOS Y FILTROS ---
         String titulo = santo.getNombre();
         String descripcion = ColorMecanica.colorearTexto(Palo.colorearTexto(santo.getDescripcion()));
-        // --- 3. ANCHO INTELIGENTE (Evita que las palabras se corten) ---
+        // --- 3. NUEVO SISTEMA DE ESPACIADO SECUENCIAL (Igual a VistaJoker) ---
         float paddingX = 14f;
         float paddingY = 12f;
-        float espacioVertical = 7f;
+        float gapTituloCaja = 6f;
         float descPadX = 10f;
         float descPadY = 8f;
-        float altoLinea = fontTitulo.getLineHeight();
-        // A) Buscamos la palabra más larga del título para asegurar que nunca se rompa por la mitad
+        // A) Buscamos la palabra más larga
         float maxAnchoPalabra = 0f;
         String[] palabras = titulo.split(" ");
         for (String palabra : palabras) {
             layout.setText(fontTitulo, palabra);
             maxAnchoPalabra = Math.max(maxAnchoPalabra, layout.width);
         }
-        // B) Definimos un ancho útil base (180f), pero si hay una palabra más larga, lo expandimos para que entre
-        float anchoUtil = Math.max(180f, maxAnchoPalabra + 5f); // +5f de margen de seguridad
-        // C) Si el título completo entra estirando la caja un poquito (hasta 240f), lo estiramos para que quede en 1 línea
+        // B) Definimos un ancho útil base
+        float anchoUtil = Math.max(180f, maxAnchoPalabra + 5f);
         layout.setText(fontTitulo, titulo);
         if (layout.width > anchoUtil && layout.width <= 240f) {
             anchoUtil = layout.width + 5f;
         }
-        // D) Medimos el título final (hará wrap automático si supera los 240f)
+        // C) Medimos las alturas
         layout.setText(fontTitulo, titulo, fontTitulo.getColor(), anchoUtil, com.badlogic.gdx.utils.Align.center, true);
         float altoTitulo = layout.height;
-        // E) Medimos la descripción usando ese mismo ancho
         layout.setText(fontDesc, descripcion, fontDesc.getColor(), anchoUtil, com.badlogic.gdx.utils.Align.center, true);
         float altoDescripcion = layout.height;
-        // Calculamos ancho y alto final del cartel
+        // D) Calculamos los totales secuencialmente
+        float altoCaja = altoDescripcion + (descPadY * 2f);
         float anchoCartel = anchoUtil + (paddingX * 2f);
-        float altoCartel = paddingY + altoTitulo + espacioVertical + altoDescripcion + (descPadY * 2f) + paddingY;
+        float altoCartel = paddingY + altoTitulo + gapTituloCaja + altoCaja + paddingY;
         // --- 4. POSICIONAMIENTO INTELIGENTE ---
         float drawY = y + visualOffsetY;
         float actualWidth = width * scale;
         float actualHeight = height * scale;
         float cartelX, cartelY;
         if (tooltipLateral) {
-            // Centrado verticalmente
             cartelY = drawY + (actualHeight / 2f) - (altoCartel / 2f);
-            // Por defecto a la derecha
             cartelX = x + actualWidth + 12f;
-            // Si choca con el borde derecho (columna 5), lo pasamos a la izquierda
             if (cartelX + anchoCartel > 1280f - 10f) {
                 cartelX = x - anchoCartel - 12f;
             }
         } else {
-            // Comportamiento normal (Arriba/Abajo)
             cartelX = x + (actualWidth / 2f) - (anchoCartel / 2f);
             cartelY = drawY + actualHeight + 12f;
             if (cartelY + altoCartel > 720f - 10f) {
@@ -349,24 +343,26 @@ public class VistaSanto implements Arrastrable {
         // --- 5. RENDER DEL FONDO CON TOOLTIP UI ---
         com.badlogic.gdx.graphics.Texture pixelBlanco = game.getPixelBlanco();
         TooltipUI.dibujarFondo(batch, pixelBlanco, cartelX, cartelY, anchoCartel, altoCartel, UITheme.RAREZA_EPICO);
-        // --- 6. RENDER DE TEXTOS ---
+        // --- 6. RENDER DE TEXTOS SECUENCIAL ---
+        // 6.1 DIBUJAMOS EL TÍTULO
         float currentY = cartelY + altoCartel - paddingY;
-        // Dibujamos el título (usando el ancho útil calculado)
         TooltipUI.dibujarTitulo(batch, fontTitulo, titulo, cartelX + paddingX, currentY, anchoUtil, UITheme.RAREZA_EPICO);
-        currentY -= (altoTitulo + espacioVertical);
-        // Caja blanca interna para la descripción
+        currentY -= altoTitulo;
+        currentY -= gapTituloCaja;
+        // 6.2 DIBUJAMOS LA CAJA BLANCA
         float boxX = cartelX + paddingX - descPadX;
         float boxW = anchoCartel - (paddingX * 2f) + (descPadX * 2f);
-        float boxTop = currentY + descPadY;
-        float boxH = altoDescripcion + (descPadY * 2f);
+        float boxTop = currentY;
+        float boxH = altoCaja;
         float boxY = boxTop - boxH;
         if (pixelBlanco != null) {
             TooltipUI.dibujarCajaBlancaInterna(batch, pixelBlanco, boxX, boxY, boxW, boxH);
         }
-        // Dibujamos la descripción (letras oscuras)
+        // 6.3 DIBUJAMOS LA DESCRIPCIÓN
         Color colorDescAnterior = fontDesc.getColor();
         fontDesc.setColor(0.08f, 0.08f, 0.08f, 1f);
-        fontDesc.draw(batch, descripcion, cartelX + paddingX, currentY, anchoUtil, com.badlogic.gdx.utils.Align.center, true);
+        float textY = boxTop - descPadY + 2f;
+        fontDesc.draw(batch, descripcion, cartelX + paddingX, textY, anchoUtil, com.badlogic.gdx.utils.Align.center, true);
         // --- 7. RESTAURAR ESTADOS ---
         fontTitulo.getData().markupEnabled = markupOriginalTitulo;
         fontDesc.getData().markupEnabled = markupOriginalDesc;

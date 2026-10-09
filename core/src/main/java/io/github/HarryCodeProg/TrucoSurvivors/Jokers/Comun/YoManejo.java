@@ -26,10 +26,10 @@ public class YoManejo extends Joker {
 
     @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego) {
-        if (evento != EventoJuego.AL_PUNTUAR_CARTA) return; // FIX: reacciona DENTRO de la resolución de puntaje real
+        if (evento != EventoJuego.AL_PUNTUAR_CARTA) return;
         Carta carta = ctx.getCartaEnResolucion();
         if (carta == null) return;
-        if (!ctx.cartaMato(carta)) return; // FIX: solo cartas que efectivamente mataron su baza
+        if (!ctx.cartaMato(carta)) return;
         if (ctx.isPrimerCartaQueMataAplicada(this)) return;
         ctx.marcarPrimerCartaQueMataAplicada(this);
         for (int i = 0; i < 3; i++) {

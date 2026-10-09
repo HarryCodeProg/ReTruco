@@ -23,7 +23,6 @@ public class OverlaySeleccionCartaSanto {
     private final ArrayList<VistaCarta> vistasCartas = new ArrayList<>();
     private TextureAtlas atlasCartas;
     private Consumer<ArrayList<Carta>> alConfirmar;
-    private final Random random = new Random();
     private static final int MAX_CARTAS_MOSTRADAS = 10;
     private static final float CARTA_ANCHO = 95f;
     private static final float CARTA_ALTO = 135f;
@@ -43,8 +42,6 @@ public class OverlaySeleccionCartaSanto {
     private static final float DECK_Y = 130f;
     private boolean cerrando = false;
     private int animacionesPendientes = 0;
-    private ArrayList<Carta> resultadoPendiente;
-    private int flipsPendientes = 0;
     private boolean esperandoFlips = false;
     private Runnable alTerminarFlipsYCerrar;
 
@@ -118,7 +115,8 @@ public class OverlaySeleccionCartaSanto {
             boolean yaEstaba = seleccionadas.contains(vista.getCarta());
             if (quiereSeleccionar != yaEstaba) sincronizarSeleccion(vista, quiereSeleccionar);
         }
-        if (Gdx.input.justTouched() && botonConfirmar.fueCliqueado(mouseWorldX, mouseWorldY)) {
+        // CORRECCIÓN: Quitamos Gdx.input.justTouched()
+        if (botonConfirmar.fueCliqueado(mouseWorldX, mouseWorldY)) {
             confirmar();
         }
     }
@@ -188,20 +186,6 @@ public class OverlaySeleccionCartaSanto {
 
     public boolean estaVisible() { return visible; }
 
-    public void cerrar() {
-        visible = false;
-        cerrando = false;
-        seleccionadas.clear();
-        vistasCartas.clear();
-    }
-
-    /** Llamado externamente (por GestorSantos) una vez que el Santo ya aplicó su efecto y los flips
-     * (si los hubo) ya terminaron. Recién ahí empiezan a volar las cartas de vuelta al mazo. */
-    public void cerrarConVuelta() {
-        if (cerrando) return;
-        iniciarCierre();
-    }
-
     public VistaCarta buscarVistaPorCarta(Carta carta) {
         for (VistaCarta v : vistasCartas) {
             if (v.getCarta() == carta) return v;
@@ -221,16 +205,6 @@ public class OverlaySeleccionCartaSanto {
     public void esperarFlipsYLuegoVolver(Runnable alCerrarFinal) {
         this.alTerminarFlipsYCerrar = alCerrarFinal;
         this.esperandoFlips = true;
-    }
-
-    /** Llamar una vez por cada flip individual que termina (desde el callback de iniciarFlip). */
-    public void notificarFlipTerminado() {
-        if (!esperandoFlips) return;
-        flipsPendientes--;
-        if (flipsPendientes <= 0) {
-            esperandoFlips = false;
-            iniciarCierre();
-        }
     }
 
     private boolean hayAlgunaCartaFlipeando() {

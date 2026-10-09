@@ -24,28 +24,61 @@ public class GameRenderSystem {
 
     public GameRenderSystem(Main game) {this.game = game;}
 
-    public void render(float delta,
-        OrthographicCamera camera, Background fondoPlasma, PanelPuntajes panelPuntajes, float panelX, float panelY, Juego juego, Jugador jugador, Jugador rival,
-        ArrayList<VistaCarta> cartasMesaJugador, ArrayList<VistaCarta> cartasMesaRival, ArrayList<VistaCarta> cartasRival, ArrayList<VistaCarta> cartasJugador,
-        ArrayList<VistaJoker> jokers, GestorInputArrastrable<VistaCarta> gestorCartas, GestorInputArrastrable<VistaJoker> gestorJokers, VistaMazo vistaMazo,
-        GestorVentaJoker gestorVentaJoker, GestorAnimacionResolucion gestorAnimacion, double puntosTrucoDisplay, double multTrucoDisplay,
-        double puntosEnvidoDisplay, double multEnvidoDisplay, String textoFlotanteActual, Runnable renderBotones, Runnable renderCartelJoker)
+    public void render(float delta, float offsetY,
+                       OrthographicCamera camera, Background fondoPlasma, PanelPuntajes panelPuntajes, float panelX, float panelY, Juego juego, Jugador jugador, Jugador rival,
+                       ArrayList<VistaCarta> cartasMesaJugador, ArrayList<VistaCarta> cartasMesaRival, ArrayList<VistaCarta> cartasRival, ArrayList<VistaCarta> cartasJugador,
+                       ArrayList<VistaJoker> jokers, GestorInputArrastrable<VistaCarta> gestorCartas, GestorInputArrastrable<VistaJoker> gestorJokers, VistaMazo vistaMazo,
+                       GestorVentaJoker gestorVentaJoker, GestorAnimacionResolucion gestorAnimacion, double puntosTrucoDisplay, double multTrucoDisplay,
+                       double puntosEnvidoDisplay, double multEnvidoDisplay, String textoFlotanteActual, Runnable renderBotones, Runnable renderCartelJoker)
     {
+        camera.near = -1000f;
+        camera.far = 1000f;
+        camera.update();
         ScreenUtils.clear(0.1f, 0.12f, 0.16f, 1f);
+        float originalY = camera.position.y;
+        camera.position.y = 720f / 2f;
         camera.update();
         game.batch.setProjectionMatrix(camera.combined);
         game.batch.begin();
         fondoPlasma.render(game.batch, delta);
         game.batch.end();
+        // HUD and static elements (CÁMARA ESTÁTICA)
+        camera.position.y = 720f / 2f;
+        camera.update();
+        game.batch.setProjectionMatrix(camera.combined);
+        // 1. Dibujamos los fondos del panel ANTES del batch.begin()
         panelPuntajes.renderFondosYCajas(camera, panelX, panelY);
         game.batch.begin();
-        renderAreasJugador(game.batch, jugador, game.getPixelBlanco());
-        renderContadoresAreas(game.batch, jugador, cartasJugador);
+        // 2. Dibujamos los textos del panel ADENTRO del batch
         panelPuntajes.renderTextos(game.batch, game.getFuentePrincipal(), juego, jugador, rival, panelX,
             panelY, gestorAnimacion, puntosTrucoDisplay, multTrucoDisplay, puntosEnvidoDisplay, multEnvidoDisplay);
+        renderAreasJugador(game.batch, jugador, game.getPixelBlanco());
+        renderContadoresAreas(game.batch, jugador, cartasJugador);
+        VistaJoker jokerArrastrado = gestorJokers != null ? gestorJokers.getArrastrado() : null;
+        renderJokers(jokers, jokerArrastrado);
+        gestorVentaJoker.render(game.batch);
+        if (renderBotones != null) {
+            renderBotones.run();
+        }
+        if (vistaMazo != null && juego != null) {
+            vistaMazo.render(
+                game.batch,
+                juego.getMazoJugador().getCartasRestantesOrdenadas(),
+                juego.getMazoJugador().getTamañoMazo()
+            );
+        }
+        if (renderCartelJoker != null) {
+            renderCartelJoker.run();
+        }
+        game.batch.end();
+        camera.position.y = 720f / 2f + offsetY;
+        camera.update();
+        game.batch.setProjectionMatrix(camera.combined);
+        game.batch.begin();
         if (textoFlotanteActual != null) {
             BitmapFont fuente = game.getFuentePrincipal();
             layout.setText(fuente, textoFlotanteActual);
+            // (Arreglé los signos '-' que se habían perdido acá)
             float tx = ((Gdx.graphics.getWidth() - layout.width) / 2f) + 270f;
             float ty = GameLayout.TECHO_MESA - 30f;
             Color colorTexto = Color.WHITE;
@@ -65,24 +98,12 @@ public class GameRenderSystem {
         renderMesa(cartasMesaJugador, cartasMesaRival);
         renderRival(cartasRival);
         VistaCarta cartaArrastrada = gestorCartas != null ? gestorCartas.getArrastrado() : null;
-        VistaJoker jokerArrastrado = gestorJokers != null ? gestorJokers.getArrastrado() : null;
-        renderJugador(cartasJugador, cartaArrastrada);
-        renderJokers(jokers, jokerArrastrado);
-        gestorVentaJoker.render(game.batch);
-        if (renderBotones != null) {
-            renderBotones.run();
-        }
-        if (vistaMazo != null && juego != null) {
-            vistaMazo.render(
-                game.batch,
-                juego.getMazoJugador().getCartasRestantesOrdenadas(),
-                juego.getMazoJugador().getTamañoMazo()
-            );
-        }
-        if (renderCartelJoker != null) {
-            renderCartelJoker.run();
-        }
+        renderJugador(cartasJugador, cartaArrastrada, camera);
         game.batch.end();
+        // Restore camera
+        camera.position.y = 720f / 2f;
+        camera.update();
+        game.batch.setProjectionMatrix(camera.combined);
     }
 
     private void renderMesa(ArrayList<VistaCarta> cartasMesaJugador, ArrayList<VistaCarta> cartasMesaRival) {
@@ -100,7 +121,7 @@ public class GameRenderSystem {
         }
     }
 
-    private void renderJugador(ArrayList<VistaCarta> cartasJugador, VistaCarta cartaArrastrada) {
+    /*private void renderJugador(ArrayList<VistaCarta> cartasJugador, VistaCarta cartaArrastrada) {
         // Pasada 1: Dibuja las cartas quietas
         for (VistaCarta c : cartasJugador) {
             if (c != cartaArrastrada) {
@@ -108,6 +129,38 @@ public class GameRenderSystem {
             }
         }
         // Pasada 2: Dibuja la carta arrastrada AL FINAL para que flote por encima
+        if (cartaArrastrada != null) {
+            cartaArrastrada.render(game.batch, game);
+        }
+    }*/
+
+    // 1. Agregamos OrthographicCamera como parámetro
+    private void renderJugador(ArrayList<VistaCarta> cartasJugador, VistaCarta cartaArrastrada, OrthographicCamera camera) {
+        float areaX = MARGEN_AREA_LATERAL;
+        float areaY = Y_MANO_JUGADOR - 10f;
+        float areaAncho = ANCHO_AREA_JUGADOR;
+        float areaAlto = ALTO_AREA_CARTAS;
+        float bleed = 30f;
+        com.badlogic.gdx.math.Rectangle clipBounds = new com.badlogic.gdx.math.Rectangle(areaX - bleed, areaY - bleed, areaAncho + (bleed * 2), areaAlto + (bleed * 2));
+        com.badlogic.gdx.math.Rectangle scissors = new com.badlogic.gdx.math.Rectangle();
+        game.batch.flush();
+        // 2. Ahora pasamos "camera" directamente como primer argumento
+        com.badlogic.gdx.scenes.scene2d.utils.ScissorStack.calculateScissors(
+            camera,
+            game.batch.getTransformMatrix(),
+            clipBounds,
+            scissors
+        );
+        boolean pushed = com.badlogic.gdx.scenes.scene2d.utils.ScissorStack.pushScissors(scissors);
+        if (pushed) {
+            for (VistaCarta c : cartasJugador) {
+                if (c != cartaArrastrada) {
+                    c.render(game.batch, game);
+                }
+            }
+            game.batch.flush();
+            com.badlogic.gdx.scenes.scene2d.utils.ScissorStack.popScissors();
+        }
         if (cartaArrastrada != null) {
             cartaArrastrada.render(game.batch, game);
         }

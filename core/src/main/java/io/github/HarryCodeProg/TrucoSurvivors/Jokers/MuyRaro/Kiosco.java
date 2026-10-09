@@ -7,32 +7,40 @@ import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Rareza;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 
-import java.util.ArrayList;
-
 public class Kiosco extends Joker {
 
     public Kiosco() {
-        super(105, "Kiosco", "Kiosco", "Reactiva todos los jokers con categoría 'DULCE'",
+        super(108, "Kiosco", "Kiosco", "+8 multiplicador por cada mano restante al final de la ronda",
             Rareza.muyRaro, 8, Joker.FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.DULCE);
+            CategoriaJoker.INTERNACIONAL);
     }
 
     @Override
     public Joker copiar() {
         Kiosco copia = new Kiosco();
         copiarEstado(copia);
+        copia.setAcumulado(this.getAcumulado());
         return copia;
     }
 
     @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego) {
-        if (!ctx.marcarUsado(this, evento)) return; // evita reencolarse en bucle si el evento se repite en la misma resolución
-        ArrayList<Joker> jokers = ctx.getJugador().getJokers();
-        for (Joker j : jokers) {
-            if (j == this) continue; // no se reactiva a sí mismo
-            if (j.tieneCategoria(CategoriaJoker.DULCE)) {
-                ctx.reencolarActivacionJoker(j, evento);
+        if (evento == EventoJuego.AL_GANAR_COMBATE) {
+            int manosRestantes = ctx.getJugador().getManosActuales();
+            if (manosRestantes > 0) {
+                sumarAcumulado(8.0 * manosRestantes);
             }
         }
+
+        if (evento == EventoJuego.ANTES_DE_SUMAR_TRUCO || evento == EventoJuego.ANTES_DE_SUMAR_ENVIDO) {
+            if (getAcumulado() > 0) {
+                ctx.getResolucionActual().sumarMult(getAcumulado(), getNombre(), this);
+            }
+        }
+    }
+
+    @Override
+    public String getDescripcionRenderizada(Juego juego) {
+        return "+8 multiplicador por cada mano restante al final de la ronda\n(actual: +" + (int)getAcumulado() + ")";
     }
 }

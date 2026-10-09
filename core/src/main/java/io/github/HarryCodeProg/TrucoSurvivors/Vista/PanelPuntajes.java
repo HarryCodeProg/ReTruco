@@ -79,9 +79,8 @@ public class PanelPuntajes {
         dibujarCajaSimple(x, puntosJugadorY, UITheme.TRUCO, UITheme.BORDE);
         dibujarSeparador(x, puntosJugadorY - 11f, anchoFondo - margenX * 2f);
         // BLOQUE JUGADOR
-        dibujarCajaBaseYMultiplicador(x, jugadorTrucoY, UITheme.TURQUESA, UITheme.BORDE, UITheme.TRUCO, UITheme.BORDE);
-        dibujarCajaBaseYMultiplicador(x, jugadorEnvidoY, UITheme.ENVIDO, UITheme.BORDE, UITheme.PANEL_SECUNDARIO, UITheme.BORDE);
-        dibujarCajaSimple(x, manosY, UITheme.TRUCO, UITheme.BORDE);
+        dibujarCajaBaseYMultiplicador(x, jugadorTrucoY, UITheme.TURQUESA, UITheme.BORDE, UITheme.ROJO, UITheme.BORDE);
+        dibujarCajaBaseYMultiplicador(x, jugadorEnvidoY, UITheme.ENVIDO, UITheme.BORDE, UITheme.ROJO, UITheme.BORDE); dibujarCajaSimple(x, manosY, UITheme.TRUCO, UITheme.BORDE);
         dibujarCajaSimple(x, descartesY, UITheme.ROJO, UITheme.BORDE);
         // DINERO
         dibujarCajaConBorde(x, pesosY, UITheme.DORADO, UITheme.BORDE, UITheme.PANEL_PRINCIPAL);

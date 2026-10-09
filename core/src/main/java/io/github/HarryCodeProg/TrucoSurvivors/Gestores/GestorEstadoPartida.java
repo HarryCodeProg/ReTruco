@@ -1,11 +1,17 @@
 package io.github.HarryCodeProg.TrucoSurvivors.Gestores;
 
+import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Carta;
 import io.github.HarryCodeProg.TrucoSurvivors.Jugador;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.DatosRival;
+import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Guardado.DatosCarta;
+import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Guardado.DatosJuego;
+import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Guardado.GestorConverterSerializacion;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Mazo;
 import io.github.HarryCodeProg.TrucoSurvivors.Screens.GameScreenV2;
 import io.github.HarryCodeProg.TrucoSurvivors.Vista.VistaCarta;
+
+import java.util.ArrayList;
 
 public class GestorEstadoPartida {
     private final GameScreenV2 screen;
@@ -34,7 +40,7 @@ public class GestorEstadoPartida {
 
         // Creamos el corazón de la lógica
         Mazo mazoRival = Juego.crearMazoRival(datosRival.getNivelDificultad());
-        this.juego = new Juego(jugador, rival, mazoRival);
+        this.juego = new Juego(jugador, rival, mazoRival, false);
         this.juego.setPuntajeMeta(datosRival.getPuntosMeta());
 
         this.controladorCombate = new ControladorCombate(screen, juego);
@@ -78,5 +84,34 @@ public class GestorEstadoPartida {
     public GestorAccion getGestorAccion() { return gestorAccion; }
     public void resetTocoJugar() {
         this.tocoJugar = 0;
+    }
+
+    public void inicializarDesdeGuardado(Jugador jugador, Jugador rival, DatosRival datosRival,
+                                         GestorInputArrastrable<VistaCarta> gestorCartas,
+                                         GestorAnimacionesMano gestorAnimaciones,
+                                         DatosJuego datosJuego) {
+        this.tocoJugar = 0;
+        this.esperandoTransicion = false;
+        this.iniciarNuevaRondaPendiente = false;
+        this.tiempoNuevaRonda = 0f;
+        Mazo mazoRival = Juego.crearMazoRival(datosRival.getNivelDificultad());
+        this.juego = new Juego(jugador, rival, mazoRival, true); // true = saltar reparto inicial
+        this.juego.setPuntajeMeta(datosRival.getPuntosMeta());
+        ArrayList<Carta> manoRival = new ArrayList<>();
+        for (DatosCarta dc : datosJuego.manoRival) manoRival.add(GestorConverterSerializacion.desdeDatos(dc));
+        ArrayList<Carta> mesaJug = new ArrayList<>();
+        for (DatosCarta dc : datosJuego.mesaJugador) mesaJug.add(GestorConverterSerializacion.desdeDatos(dc));
+        ArrayList<Carta> mesaRiv = new ArrayList<>();
+        for (DatosCarta dc : datosJuego.mesaRival) mesaRiv.add(GestorConverterSerializacion.desdeDatos(dc));
+        this.juego.restaurarEstado(
+            datosJuego.puntosJugador, datosJuego.puntosRival, datosJuego.jugadorEsMano,
+            datosJuego.faseActual, datosJuego.rondaActual, datosJuego.descartesActuales,
+            manoRival, mesaJug, mesaRiv,
+            datosJuego.cartasJugadasTotal, datosJuego.cartasDescartadasTotal,
+            datosJuego.cartasCompradasTotal, datosJuego.renovacionesTotal
+        );
+        this.controladorCombate = new ControladorCombate(screen, juego);
+        this.controladorIARival = new ControladorIARival(juego, controladorCombate, screen);
+        this.gestorAccion = new GestorAccion(juego, screen, controladorCombate, gestorCartas, gestorAnimaciones);
     }
 }

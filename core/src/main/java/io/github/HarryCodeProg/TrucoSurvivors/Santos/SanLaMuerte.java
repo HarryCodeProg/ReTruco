@@ -41,6 +41,12 @@ public class SanLaMuerte extends Santo {
         }
         PoolJokersTienda pool = new PoolJokersTienda();
         Joker joker = pool.tomarAleatorioDeRareza(Rareza.epico, jugador);
+        if (jugador.tieneDobleEfectoSantos()) {
+            Joker joker2 = pool.tomarAleatorioDeRareza(Rareza.epico, jugador);
+            if (joker2 != null) {
+                jugador.agregarJoker(joker2);
+            }
+        }
         if (joker != null) {
             jugador.agregarJoker(joker);
         }

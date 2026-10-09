@@ -1,14 +1,19 @@
 package io.github.HarryCodeProg.TrucoSurvivors.Vista;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Carta;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.Accion;
 import io.github.HarryCodeProg.TrucoSurvivors.Gestores.GestorSonidos;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jugador;
 import io.github.HarryCodeProg.TrucoSurvivors.Main;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.*;
+import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Guardado.DatosEstadoTienda;
+import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Guardado.DatosItemTienda;
+import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Guardado.GestorConverterSerializacion;
 import io.github.HarryCodeProg.TrucoSurvivors.Santos.Santo;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Rareza;
 
@@ -115,7 +120,6 @@ public class PanelTienda {
             VistaItemTienda v = new VistaItemTienda(item, game.getAtlasCartas(), game.getAtlasJokers(), juego);
             v.setTamaño(anchoJokers, altoJokers);
             v.setPosition(xJokers, Y_FILA_SUPERIOR);
-            // <--- NUEVO: Activamos el tooltip lateral SOLO para los Jokers
             v.setTooltipLateral(true);
             vistasJokers.add(v);
             xJokers += anchoJokers + espacioJokers;
@@ -263,6 +267,7 @@ public class PanelTienda {
             }
             return;
         }
+
         // --- LÓGICA DE SELECCIÓN / DESELECCIÓN AL PRESIONAR (PRESS) ---
         boolean mouseSobreBotonUI = botonComprar.isHovered() || botonReroll.isHovered() || botonContinuar.isHovered() || botonComprarYUsar.isHovered();
         if (justTouched && !mouseSobreBotonUI) {
@@ -278,7 +283,7 @@ public class PanelTienda {
                     seleccionado.setSeleccionado(true);
                     GestorSonidos sonidos = Main.getInstance().getGestorSonidos();
                     if (sonidos != null) sonidos.reproducirConVariacion("seleccionar");
-                    boolean dineroSuficiente = jugador.getPesos() >= seleccionado.getItem().getPrecio();
+                    boolean dineroSuficiente = jugador.getPesos() >= precioEfectivo(seleccionado.getItem());
                     boolean esSanto = seleccionado.getItem().getTipo() == ItemTienda.Tipo.SANTO;
                     boolean espacioDisponible;
                     if (seleccionado.getItem().getTipo() == ItemTienda.Tipo.JOKER) {
@@ -288,16 +293,41 @@ public class PanelTienda {
                     } else {
                         espacioDisponible = true;
                     }
+
                     botonComprar.setVisible(true);
                     botonComprar.setHabilitado(dineroSuficiente && espacioDisponible);
-                    float botX = seleccionado.getX() + (ANCHO_ITEM / 2f) - (botonComprar.getWidth() / 2f);
-                    float botY = seleccionado.getY() - (botonComprar.getHeight() / 2f);
-                    botonComprar.setPosition(botX, botY);
-                    botonComprarYUsar.setVisible(esSanto);
-                    botonComprarYUsar.setHabilitado(esSanto && dineroSuficiente && espacioDisponible);
+
+                    // --- REPOSICIONAMIENTO LATERAL DE BOTONES ---
+                    // Determinamos si el item está en la mitad izquierda o derecha de la pantalla
+                    boolean estaEnMitadIzquierda = seleccionado.getX() + (ANCHO_ITEM / 2f) < Gdx.graphics.getWidth() / 2f;
+                    float gapLateral = 15f;
+
+                    float botX;
+                    if (estaEnMitadIzquierda) {
+                        // Si está a la izquierda, los botones salen a la derecha del ítem
+                        botX = seleccionado.getX() + ANCHO_ITEM + gapLateral;
+                    } else {
+                        // Si está a la derecha, los botones salen a la izquierda del ítem
+                        botX = seleccionado.getX() - botonComprar.getWidth() - gapLateral;
+                    }
+
+                    // Centramos los botones verticalmente respecto al ítem
+                    float centerY = seleccionado.getY() + (ALTO_ITEM / 2f);
+
                     if (esSanto) {
-                        float botYUsarX = seleccionado.getX() + (ANCHO_ITEM / 2f) - (botonComprarYUsar.getWidth() / 2f);
-                        botonComprarYUsar.setPosition(botYUsarX, botY - botonComprarYUsar.getHeight() - 5f);
+                        // Si es un Santo, hay dos botones apilados (Comprar, y Comprar/Usar)
+                        botonComprarYUsar.setVisible(true);
+                        botonComprarYUsar.setHabilitado(esSanto && dineroSuficiente && espacioDisponible);
+
+                        // Posicionamos el boton Comprar arriba, y el ComprarYUsar abajo
+                        botonComprar.setPosition(botX, centerY + 5f);
+
+                        // Si aparece a la izquierda, el segundo botón podría tener distinto ancho, lo alineamos a la derecha
+                        float botYUsarX = estaEnMitadIzquierda ? botX : seleccionado.getX() - botonComprarYUsar.getWidth() - gapLateral;
+                        botonComprarYUsar.setPosition(botYUsarX, centerY - botonComprarYUsar.getHeight() - 5f);
+                    } else {
+                        // Si es Carta o Joker, solo hay un botón (Comprar), lo centramos verticalmente
+                        botonComprar.setPosition(botX, centerY - (botonComprar.getHeight() / 2f));
                     }
                 }
             } else {
@@ -310,6 +340,26 @@ public class PanelTienda {
         }
     }
 
+    private boolean tieneMuseo() {
+        return jugador.getJokers().stream().anyMatch(j -> j.getId() == 105);
+    }
+
+    private int precioEfectivo(ItemTienda item) {
+        if (item.getTipo() == ItemTienda.Tipo.SANTO && tieneRevolucionDeMayo()) {
+            return 0;
+        }
+        if (item.getTipo() == ItemTienda.Tipo.JOKER && tieneMuseo()) {
+            Joker joker = item.getJoker();
+            if (joker != null) {
+                Rareza r = joker.getRareza();
+                if (r == Rareza.comun || r == Rareza.raro || r == Rareza.muyRaro) {
+                    return 0;
+                }
+            }
+        }
+        return item.getPrecio();
+    }
+
     public void setBloqueadoPorModalExterno(boolean b) { this.bloqueadoPorModalExterno = b; }
 
     private void comprar(VistaItemTienda vista) {
@@ -320,9 +370,10 @@ public class PanelTienda {
         if (item.getTipo() == ItemTienda.Tipo.SANTO && jugador.getSantos().size() >= jugador.getTamañoSantos()) {
             return;
         }
-        if (!jugador.gastarPesos(item.getPrecio())) {
+        if (!jugador.gastarPesos(precioEfectivo(item))) {
             return;
         }
+        aplicarBuffSarmientoSiCorresponde();
         GestorSonidos sonidos = Main.getInstance().getGestorSonidos();
         if (sonidos != null) sonidos.reproducirSonidoGastarPeso();
         if (item.getTipo() == ItemTienda.Tipo.CARTA) {
@@ -356,7 +407,8 @@ public class PanelTienda {
         Santo santo = item.getSanto();
         if (santo == null) return;
         if (jugador.getSantos().size() >= jugador.getTamañoSantos()) return;
-        if (!jugador.gastarPesos(item.getPrecio())) return;
+        if (!jugador.gastarPesos(precioEfectivo(item))) return;
+        aplicarBuffSarmientoSiCorresponde();
         GestorSonidos sonidos = Main.getInstance().getGestorSonidos();
         if (sonidos != null) sonidos.reproducirSonidoGastarPeso();
         estadoTienda.removerItemComprado(item);
@@ -368,53 +420,63 @@ public class PanelTienda {
         com.badlogic.gdx.math.Matrix4 matrizOriginal = batch.getProjectionMatrix().cpy();
         com.badlogic.gdx.math.Matrix4 matrizConOffset = matrizOriginal.cpy().translate(0, offsetY, 0);
         batch.setProjectionMatrix(matrizConOffset);
+
         Texture pixel = game.getPixelBlanco();
-        // FONDO DEL PANEL
+
         float panelX = PANEL_X;
-        float panelY = PANEL_Y; // No sumamos offsetY porque la matrizConOffset ya mueve TODO junto.
+        float panelY = PANEL_Y;
         PanelUI.dibujarFondoPanel(batch, pixel, panelX, panelY, PANEL_ANCHO, PANEL_ALTO);
         dibujarCabecera(batch);
+
         // FONDOS DE FILAS
         PanelUI.dibujarFondoFila(batch, pixel, GALERIA_X - 12f, Y_FILA_SUPERIOR - 15f, GALERIA_ANCHO_COMPLETO + 24f, ALTO_ITEM + 30f, UITheme.ROJO_SECCION);
         dibujarSeccionTitulo(batch, "JOKERS", GALERIA_X, Y_FILA_SUPERIOR + ALTO_ITEM + 15f);
+
         // SANTOS (Abajo, mitad izquierda)
         PanelUI.dibujarFondoFila(batch, pixel, GALERIA_X - 12f, Y_FILA_INFERIOR - 15f, GALERIA_ANCHO_MITAD + 24f, ALTO_ITEM + 30f, UITheme.RAREZA_EPICO);
         dibujarSeccionTitulo(batch, "SANTOS", GALERIA_X, Y_FILA_INFERIOR + ALTO_ITEM + 15f);
+
         // CARTAS (Abajo, mitad derecha)
         PanelUI.dibujarFondoFila(batch, pixel, GALERIA_X_MITAD_DER - 12f, Y_FILA_INFERIOR - 15f, GALERIA_ANCHO_MITAD + 24f, ALTO_ITEM + 30f, UITheme.RAREZA_RARO);
         dibujarSeccionTitulo(batch, "CARTAS", GALERIA_X_MITAD_DER, Y_FILA_INFERIOR + ALTO_ITEM + 15f);
+
         batch.setColor(1, 1, 1, 1);
+
         // RENDERIZAR ITEMS NO SELECCIONADOS
         for (VistaItemTienda v : vistasCartas) {
             if (v != seleccionado) v.render(batch, game);
             dibujarEtiquetaPrecio(batch, v);
         }
         for (VistaItemTienda v : vistasJokers) {
-            if (v != seleccionado) {
-                v.render(batch, game);
-            }
+            if (v != seleccionado) v.render(batch, game);
             dibujarEtiquetaPrecio(batch, v);
         }
         for (VistaItemTienda v : vistasSantos) {
             if (v != seleccionado) v.render(batch, game);
             dibujarEtiquetaPrecio(batch, v);
         }
+
         // ITEM SELECCIONADO AL FRENTE
         if (seleccionado != null) {
             seleccionado.render(batch, game);
             dibujarEtiquetaPrecio(batch, seleccionado);
         }
+
         // BOTONES
         botonComprar.render(batch);
         botonReroll.render(batch);
         botonContinuar.render(batch);
         botonComprarYUsar.render(batch);
-        // CARTELES DE STATS
+
+        // --- 1. Rueda Zodiaco (dibuja antes que los carteles de stats) ---
+        ruedaZodiaco.render(batch);
+
+        // --- 2. Carteles de Stats (ahora dibujados POR ENCIMA de la rueda) ---
         for (VistaItemTienda v : vistasCartas) v.renderCartelStats(batch, game);
         for (VistaItemTienda v : vistasJokers) v.renderCartelStats(batch, game);
         for (VistaItemTienda v : vistasSantos) v.renderCartelStats(batch, game);
-        // OVERLAYS
-        ruedaZodiaco.render(batch);
+
+        // OVERLAYS (al final)
         overlayConsumo.render(batch, game);
         overlaySeleccion.render(batch, game);
         batch.setProjectionMatrix(matrizOriginal);
@@ -426,22 +488,19 @@ public class PanelTienda {
         float alto = 24f;
         float etiquetaX = x;
         float etiquetaY = y + 2f;
-        // Pequeña placa oscura detrás del título
         PanelUI.dibujarFondoFila(batch, game.getPixelBlanco(), etiquetaX, etiquetaY, anchoTexto, alto, UITheme.BORDE);
-        // Título
         font.setColor(UITheme.TEXTO_PRINCIPAL);
         font.getData().setScale(0.72f);
         font.draw(batch, texto, etiquetaX + 12f, etiquetaY + 17f);
         font.getData().setScale(1f);
         font.setColor(com.badlogic.gdx.graphics.Color.WHITE);
-        // Línea decorativa
         batch.setColor(UITheme.DORADO.r, UITheme.DORADO.g, UITheme.DORADO.b, 0.75f);
         batch.draw(game.getPixelBlanco(), etiquetaX + 8f, etiquetaY, anchoTexto - 16f, 2f);
         batch.setColor(1f, 1f, 1f, 1f);
     }
 
     private void dibujarEtiquetaPrecio(SpriteBatch batch, VistaItemTienda v) {
-        String textoPrecio = "$" + v.getItem().getPrecio();
+        String textoPrecio = "$" + precioEfectivo(v.getItem());
         float paddingY = 4f;
         float badgeH = game.getFuenteNumeros().getCapHeight() + (paddingY * 2f) + 6f;
         float yTop = v.getTopeY() + badgeH + 6f;
@@ -465,13 +524,10 @@ public class PanelTienda {
     private void dibujarCabecera(SpriteBatch batch) {
         float centroX = PANEL_X + PANEL_ANCHO / 2f;
         float y = PANEL_Y + PANEL_ALTO - 47f;
-        // Línea decorativa debajo de la cabecera
         batch.setColor(UITheme.BORDE.r, UITheme.BORDE.g, UITheme.BORDE.b, 0.65f);
         batch.draw(game.getPixelBlanco(), PANEL_X + 22f, PANEL_Y + PANEL_ALTO - 82f, PANEL_ANCHO - 44f, 1f);
-        // Pequeño brillo dorado central
         batch.setColor(UITheme.DORADO.r, UITheme.DORADO.g, UITheme.DORADO.b, 0.65f);
         batch.draw(game.getPixelBlanco(), centroX - 125f, PANEL_Y + PANEL_ALTO - 83f, 250f, 2f);
-        // TÍTULO
         com.badlogic.gdx.graphics.g2d.BitmapFont font = game.getFuentePrincipal();
         String titulo = "LA TIENDA DEL CAMINO";
         font.getData().setScale(1.05f);
@@ -484,9 +540,7 @@ public class PanelTienda {
         batch.setColor(1f, 1f, 1f, 1f);
     }
 
-    public boolean isAnimando() {
-        return offsetY != offsetYObjetivo;
-    }
+    public boolean isAnimando() { return offsetY != offsetYObjetivo; }
 
     public void cerrar(Runnable alCerrarCompletamente) {
         this.cerrando = true;
@@ -495,12 +549,17 @@ public class PanelTienda {
     }
 
     public void dispose() {
-        if (iconoPeso != null) {
-            iconoPeso.dispose();
-        }
-        if (ruedaZodiaco != null) {
-            ruedaZodiaco.dispose();
-        }
+        if (iconoPeso != null) iconoPeso.dispose();
+        if (ruedaZodiaco != null) ruedaZodiaco.dispose();
+    }
+
+    private boolean tieneSarmiento() {
+        return jugador.getJokers().stream().anyMatch(j -> j.getId() == 148);
+    }
+
+    private void aplicarBuffSarmientoSiCorresponde() {
+        if (!tieneSarmiento()) return;
+        io.github.HarryCodeProg.TrucoSurvivors.Jokers.Legendario.Sarmiento.aplicarBuffATodasLasCartas(jugador);
     }
 
     public float getOffsetY() {return offsetY;}
@@ -510,5 +569,22 @@ public class PanelTienda {
         float anchoTotalOcupado = (cantidad * anchoItem) + ((cantidad - 1) * espacioItem);
         float espacioSobrante = anchoArea - anchoTotalOcupado;
         return inicioAreaX + (espacioSobrante / 2f);
+    }
+
+    private boolean tieneRevolucionDeMayo() {
+        return jugador.getJokers().stream().anyMatch(j -> j.getId() == 120);
+    }
+
+    public EstadoTienda getEstadoTienda() { return estadoTienda; }
+
+    public void restaurarOferta(DatosEstadoTienda d) {
+        ArrayList<ItemTienda> cartas = new ArrayList<>();
+        for (DatosItemTienda di : d.filaCartas) cartas.add(GestorConverterSerializacion.desdeDatos(di));
+        ArrayList<ItemTienda> jokers = new ArrayList<>();
+        for (DatosItemTienda di : d.filaJokers) jokers.add(GestorConverterSerializacion.desdeDatos(di));
+        ArrayList<ItemTienda> santos = new ArrayList<>();
+        for (DatosItemTienda di : d.filaSantos) santos.add(GestorConverterSerializacion.desdeDatos(di));
+        estadoTienda.restaurarDesde(cartas, jokers, santos, d.rerollsTienda);
+        reconstruirVistas();
     }
 }
