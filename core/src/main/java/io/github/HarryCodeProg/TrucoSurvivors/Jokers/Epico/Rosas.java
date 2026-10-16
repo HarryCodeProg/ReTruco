@@ -14,7 +14,7 @@ public class Rosas extends Joker {
         super(141, "Rosas", "Rosas",
             "Cuando vendas un joker, agrega el valor de venta a multiplicador truco (actual: +0)",
             Rareza.epico, 8, Joker.FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.NACIONAL);
+            CategoriaJoker.TRUCO, CategoriaJoker.ECONOMIA, CategoriaJoker.PERSONA);
     }
 
     @Override

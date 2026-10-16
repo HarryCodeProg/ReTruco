@@ -11,7 +11,10 @@ public class Pizza extends Joker {
     public Pizza(){
         super(30, "Pizza", "Pizza", "+4 multiplicador envido si tu tanto no tiene una figura",
             Rareza.comun, 4, Joker.FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.COMIDA, CategoriaJoker.SALADO, CategoriaJoker.INTERNACIONAL);
+            CategoriaJoker.ENVIDO,
+            CategoriaJoker.FIGURA,
+            CategoriaJoker.GASTRONOMIA
+        );
     }
 
     @Override

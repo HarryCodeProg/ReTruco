@@ -2,6 +2,7 @@ package io.github.HarryCodeProg.TrucoSurvivors.Jokers.MuyRaro;
 
 import io.github.HarryCodeProg.TrucoSurvivors.Activacion.ContextoJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.EventoJuego;
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Rareza;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
@@ -12,7 +13,9 @@ public class Iguazu extends Joker {
         super(119, "Iguazu", "Iguazu", "+50 puntos por cada vez que\nuna carta cambia de palo",
             Rareza.muyRaro,
             8,
-            FaseActivacion.INDEPENDIENTE
+            FaseActivacion.INDEPENDIENTE,
+            CategoriaJoker.ACTIVACION,
+            CategoriaJoker.TERRITORIO
         );
     }
 

@@ -20,7 +20,8 @@ public class Tero extends Joker {
             Rareza.raro,
             6, // placeholder: ajustá coste real
             Joker.FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.NACIONAL // ajustá si corresponde
+            CategoriaJoker.MAZO,
+            CategoriaJoker.FAUNA
         );
     }
 

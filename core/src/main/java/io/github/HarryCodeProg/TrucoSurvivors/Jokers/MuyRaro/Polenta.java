@@ -2,6 +2,7 @@ package io.github.HarryCodeProg.TrucoSurvivors.Jokers.MuyRaro;
 
 import io.github.HarryCodeProg.TrucoSurvivors.Activacion.ContextoJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.EventoJuego;
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Rareza;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
@@ -13,7 +14,8 @@ public class Polenta extends Joker {
     public Polenta() {
         super(118, "Polenta", "Polenta",
             "X3 multiplicador en la primer mano",
-            Rareza.muyRaro, 8, FaseActivacion.INDEPENDIENTE);
+            Rareza.muyRaro, 8, FaseActivacion.INDEPENDIENTE,
+            CategoriaJoker.TRUCO, CategoriaJoker.RACHAS, CategoriaJoker.GASTRONOMIA);
     }
 
     @Override

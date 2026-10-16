@@ -13,7 +13,9 @@ public class Yerba extends Joker {
     public Yerba(){
         super(35, "Yerba", "Yerba", "Las cartas de Basto que ganen envido reciben +15 puntos envido",
             Rareza.comun, 3, Joker.FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.NACIONAL);
+            CategoriaJoker.ENVIDO,
+            CategoriaJoker.GASTRONOMIA
+        );
     }
 
     @Override

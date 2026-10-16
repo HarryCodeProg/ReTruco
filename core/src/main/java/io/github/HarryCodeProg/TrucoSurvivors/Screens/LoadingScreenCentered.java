@@ -57,7 +57,6 @@ public class LoadingScreenCentered implements Screen {
         this.viewport = new FitViewport(1280, 720, camera);
         this.font = new BitmapFont();
         this.frameDuration = 1f / 12f; // 12 FPS por defecto (ajustable)
-
         loadStrip(stripPath);
     }
 
@@ -69,13 +68,11 @@ public class LoadingScreenCentered implements Screen {
         int frameH = h;
         spriteWidth = frameW;
         spriteHeight = frameH;
-
         TextureRegion[][] tmp = TextureRegion.split(spriteStrip, frameW, frameH);
         TextureRegion[] frames = new TextureRegion[frameCount];
         for (int i = 0; i < frameCount; i++) frames[i] = tmp[0][i];
         anim = new Animation<>(frameDuration, frames);
         anim.setPlayMode(Animation.PlayMode.LOOP);
-
         // calcula escala para que no sea gigantesco en pantalla (ajusta maxDisplayWidth)
         float maxDisplayWidth = viewport.getWorldWidth() * 0.25f; // que ocupe hasta 25% del ancho
         if (spriteWidth > maxDisplayWidth) {

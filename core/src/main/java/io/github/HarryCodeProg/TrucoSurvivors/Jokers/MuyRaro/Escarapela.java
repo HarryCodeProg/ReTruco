@@ -21,7 +21,7 @@ public class Escarapela extends Joker {
     public Escarapela() {
         super(107, "Escarapela", "Escarapela", "",
             Rareza.muyRaro, 8, Joker.FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.NACIONAL);
+            CategoriaJoker.ENVIDO, CategoriaJoker.ACTIVACION, CategoriaJoker.NACIONAL);
         cambiarNumeroAleatorio();
     }
 

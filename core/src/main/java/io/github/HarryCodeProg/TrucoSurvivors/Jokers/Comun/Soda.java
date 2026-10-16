@@ -20,6 +20,8 @@ public class Soda extends Joker {
             Rareza.comun,
             4,
             INDEPENDIENTE,
+            CategoriaJoker.TRUCO,
+            CategoriaJoker.RACHAS,
             CategoriaJoker.BEBIDA
         );
         // Iniciamos el acumulador con su valor máximo

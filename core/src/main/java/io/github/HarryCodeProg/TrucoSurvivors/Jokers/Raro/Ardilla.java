@@ -2,6 +2,7 @@ package io.github.HarryCodeProg.TrucoSurvivors.Jokers.Raro;
 
 import io.github.HarryCodeProg.TrucoSurvivors.Activacion.ContextoJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.EventoJuego;
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Rareza;
 import io.github.HarryCodeProg.TrucoSurvivors.Jugador;
@@ -19,7 +20,8 @@ public class Ardilla extends Joker {
             "Al seleccionar rival obtienes\naleatoriamente uno de estos efectos:\n+1 mano, +2 tamaño mano o +3 descartes",
             Rareza.raro,
             6,
-            FaseActivacion.INDEPENDIENTE);
+            FaseActivacion.INDEPENDIENTE,
+            CategoriaJoker.MAZO, CategoriaJoker.AZAR, CategoriaJoker.FAUNA);
     }
 
     @Override

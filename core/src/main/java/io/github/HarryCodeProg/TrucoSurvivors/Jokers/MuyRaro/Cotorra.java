@@ -2,6 +2,7 @@ package io.github.HarryCodeProg.TrucoSurvivors.Jokers.MuyRaro;
 
 import io.github.HarryCodeProg.TrucoSurvivors.Activacion.ContextoJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.EventoJuego;
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Rareza;
 import io.github.HarryCodeProg.TrucoSurvivors.Jugador;
@@ -16,7 +17,8 @@ public class Cotorra extends Joker {
     public Cotorra() {
         super(116, "Cotorra", "Cotorra",
             "+1000 puntos.\n-150 puntos por cada\n1 tamaño de mano por encima de 3",
-            Rareza.muyRaro, 8, FaseActivacion.INDEPENDIENTE);
+            Rareza.muyRaro, 8, FaseActivacion.INDEPENDIENTE,
+            CategoriaJoker.MAZO, CategoriaJoker.FAUNA);
     }
 
     private double calcularPuntosActuales(Jugador jugador) {

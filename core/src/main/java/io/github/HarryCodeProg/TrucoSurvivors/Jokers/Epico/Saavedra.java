@@ -20,7 +20,7 @@ public class Saavedra extends Joker {
             Rareza.epico,
             8, // placeholder: ajustá el coste real
             Joker.FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.NACIONAL // ajustá si corresponde
+            CategoriaJoker.ENVIDO, CategoriaJoker.CONSUMIBLES, CategoriaJoker.PERSONA
         );
     }
 

@@ -2,6 +2,7 @@ package io.github.HarryCodeProg.TrucoSurvivors.Jokers.MuyRaro;
 
 import io.github.HarryCodeProg.TrucoSurvivors.Activacion.ContextoJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.EventoJuego;
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Rareza;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
@@ -9,8 +10,11 @@ import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 public class PlanSocial extends Joker {
 
     public PlanSocial() {
-        super(102, "PlanSocial", "PlanSocial", "+5 multiplicador envido por cada carta comprada",
-            Rareza.muyRaro, 8, Joker.FaseActivacion.INDEPENDIENTE);
+        super(102, "Plan Social",
+            "PlanSocial",
+            "+5 multiplicador envido por cada carta comprada",
+            Rareza.muyRaro, 8, Joker.FaseActivacion.INDEPENDIENTE,
+            CategoriaJoker.ENVIDO, CategoriaJoker.ECONOMIA, CategoriaJoker.NACIONAL);
     }
 
     @Override

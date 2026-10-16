@@ -15,7 +15,8 @@ public class Pelota extends Joker {
     public Pelota() {
         super(112, "Pelota", "Pelota",
             "+1 mano. +50 puntos envido por cada envido ganado de forma consecutiva (Actual: +0)",
-            Rareza.muyRaro, 8, Joker.FaseActivacion.INDEPENDIENTE, CategoriaJoker.NACIONAL);
+            Rareza.muyRaro, 8, Joker.FaseActivacion.INDEPENDIENTE,
+            CategoriaJoker.ENVIDO, CategoriaJoker.RACHAS, CategoriaJoker.DEPORTE);
     }
 
     @Override

@@ -12,7 +12,8 @@ public class Carpincho extends Joker {
 
     public Carpincho() {
         super(65, "Carpincho", "Carpincho", "+6 multiplicador envido por cada figura en tu mano",
-            Rareza.raro, 6, Joker.FaseActivacion.INDEPENDIENTE, CategoriaJoker.NACIONAL);
+            Rareza.raro, 6, Joker.FaseActivacion.INDEPENDIENTE,
+            CategoriaJoker.ENVIDO, CategoriaJoker.FIGURA, CategoriaJoker.FAUNA);
     }
 
     @Override

@@ -15,13 +15,15 @@ public class RataBlanca extends Joker {
     public RataBlanca() {
         super(
             69,
-            "RataBlanca",
+            "Rata Blanca",
             "RataBlanca",
             "+1 mano.\n+10 puntos truco cada vez que una de tus cartas mate.",
             Rareza.raro,
             5,
             INDEPENDIENTE,
-            CategoriaJoker.ANIMAL
+            CategoriaJoker.TRUCO,
+            CategoriaJoker.MAZO,
+            CategoriaJoker.FAUNA
         );
         setAcumulado(0);
     }
@@ -61,6 +63,6 @@ public class RataBlanca extends Joker {
     @Override
     public String getDescripcionRenderizada(Juego juego) {
         int actual = (int) getAcumulado();
-        return getDescripcion() + "\n\n(Actual: +" + actual + " puntos)";
+        return getDescripcion() + "\n(Actual: +" + actual + " puntos)";
     }
 }

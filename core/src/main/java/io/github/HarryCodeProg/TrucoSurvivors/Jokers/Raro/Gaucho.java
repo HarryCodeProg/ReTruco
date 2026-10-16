@@ -21,6 +21,7 @@ public class Gaucho extends Joker {
             Rareza.raro,
             5,
             INDEPENDIENTE,
+            CategoriaJoker.ECONOMIA,
             CategoriaJoker.NACIONAL
         );
     }

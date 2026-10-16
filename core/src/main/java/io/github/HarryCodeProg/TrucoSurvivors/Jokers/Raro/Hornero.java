@@ -13,7 +13,7 @@ public class Hornero extends Joker {
         super(79, "Hornero", "Hornero",
             "+1 rolleo de tienda gratuito cada vez que derrotes un rival (actual: 0)",
             Rareza.raro, 6, Joker.FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.ANIMAL, CategoriaJoker.NACIONAL);
+            CategoriaJoker.ECONOMIA, CategoriaJoker.FAUNA);
     }
 
     @Override

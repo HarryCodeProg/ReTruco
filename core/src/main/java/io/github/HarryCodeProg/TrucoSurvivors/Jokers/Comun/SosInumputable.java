@@ -22,7 +22,7 @@ public class SosInumputable extends Joker {
             Rareza.comun,
             3,
             Joker.FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.TV, CategoriaJoker.SECUENCIA
+            CategoriaJoker.TRUCO, CategoriaJoker.AZAR, CategoriaJoker.NACIONAL
         );
     }
 

@@ -16,7 +16,7 @@ public class DameLaMochila extends Joker {
     public DameLaMochila(){
         super(49, "Dame La Mochila", "DameLaMochila", "+2 multiplicador envido por cada roll en la tienda",
             Rareza.comun, 4, Joker.FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.TV, CategoriaJoker.SECUENCIA);
+            CategoriaJoker.ECONOMIA, CategoriaJoker.ENVIDO, CategoriaJoker.NACIONAL);
     }
 
     @Override

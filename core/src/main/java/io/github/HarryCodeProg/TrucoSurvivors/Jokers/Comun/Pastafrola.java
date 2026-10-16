@@ -18,7 +18,8 @@ public class Pastafrola extends Joker {
             Rareza.comun,
             3,
             FaseActivacion.AL_PUNTUAR_CARTA,
-            CategoriaJoker.COMIDA, CategoriaJoker.DULCE, CategoriaJoker.POSTRE);
+            CategoriaJoker.TRUCO,
+            CategoriaJoker.GASTRONOMIA);
     }
 
     @Override

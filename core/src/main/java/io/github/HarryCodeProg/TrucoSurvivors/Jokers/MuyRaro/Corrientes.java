@@ -2,6 +2,7 @@ package io.github.HarryCodeProg.TrucoSurvivors.Jokers.MuyRaro;
 
 import io.github.HarryCodeProg.TrucoSurvivors.Activacion.ContextoJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.EventoJuego;
+import io.github.HarryCodeProg.TrucoSurvivors.Gestores.FormateadorPuntaje;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Rareza;
@@ -10,18 +11,19 @@ import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 public class Corrientes extends Joker {
 
     public Corrientes() {
-        super(117, "Corrientes", "Corrientes", "Acumula los puntos que sobran\nal superar la meta",
+        super(117, "Corrientes", "Corrientes", "Acumula los puntos que sobran al superar la meta",
             Rareza.muyRaro,
             8,
             FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.NACIONAL
+            CategoriaJoker.TRUCO,
+            CategoriaJoker.TERRITORIO
         );
     }
 
     @Override
     public String getDescripcionRenderizada(Juego juego) {
-        // Sobrescribimos para mostrar el valor dinámico guardado en la variable nativa `acumulado`
-        return getDescripcion() + "\n(actual: +" + (int) getAcumulado() + ")";
+        // Reemplazamos el casteo (int) por el formateador
+        return getDescripcion() + "\n(actual: +" + FormateadorPuntaje.formatear(getAcumulado()) + ")";
     }
 
     @Override

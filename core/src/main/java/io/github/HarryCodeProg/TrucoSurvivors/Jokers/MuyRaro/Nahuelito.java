@@ -10,7 +10,8 @@ import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 public class Nahuelito extends Joker {
     public Nahuelito() {
         super(121, "Nahuelito", "Nahuelito", "Los Santos otorgan el doble de efecto",
-            Rareza.muyRaro, 7, Joker.FaseActivacion.INDEPENDIENTE, CategoriaJoker.NACIONAL);
+            Rareza.muyRaro, 7, Joker.FaseActivacion.INDEPENDIENTE,
+            CategoriaJoker.CONSUMIBLES, CategoriaJoker.FAUNA);
     }
 
     @Override

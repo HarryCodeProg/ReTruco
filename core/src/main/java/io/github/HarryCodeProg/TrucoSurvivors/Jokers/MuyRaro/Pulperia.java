@@ -20,7 +20,7 @@ public class Pulperia extends Joker {
     public Pulperia() {
         super(109, "Pulperia", "Pulperia", "Consume todas las cartas de tu primer descarte. Otorga $2 por carta consumida",
             Rareza.muyRaro, 8, Joker.FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.ALCOHOL);
+            CategoriaJoker.ECONOMIA, CategoriaJoker.MAZO, CategoriaJoker.GASTRONOMIA);
     }
 
     @Override

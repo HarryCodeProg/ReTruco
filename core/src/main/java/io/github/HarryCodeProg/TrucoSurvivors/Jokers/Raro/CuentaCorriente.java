@@ -16,7 +16,8 @@ public class CuentaCorriente extends Joker {
     public CuentaCorriente() {
         super(81, "Cuenta Corriente", "CuentaCorriente",
             "Obtiene hasta -$20 de deuda. +4 multiplicador envido por cada mano jugada en deuda",
-            Rareza.raro, 5, Joker.FaseActivacion.INDEPENDIENTE, CategoriaJoker.TV);
+            Rareza.raro, 5, Joker.FaseActivacion.INDEPENDIENTE,
+            CategoriaJoker.ECONOMIA, CategoriaJoker.ENVIDO);
     }
 
     @Override

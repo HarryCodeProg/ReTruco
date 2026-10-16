@@ -13,7 +13,7 @@ public class Malvinas extends Joker {
         super(133, "Malvinas", "Malvinas",
             "Obtiene multiplicador truco igual al Valor Truco de la primer carta que mate (actual: x1)",
             Rareza.epico, 8, Joker.FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.NACIONAL);
+            CategoriaJoker.TRUCO, CategoriaJoker.ACTIVACION, CategoriaJoker.NACIONAL);
         setAcumulado(1.0);
     }
 

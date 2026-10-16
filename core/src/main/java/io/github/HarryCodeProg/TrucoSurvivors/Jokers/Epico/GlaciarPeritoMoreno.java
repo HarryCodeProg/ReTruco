@@ -16,7 +16,10 @@ public class GlaciarPeritoMoreno extends Joker {
         super(142, "Glaciar Perito Moreno", "GlaciarPeritoMoreno",
             "Gana x0.15 de multiplicador truco cada vez que vendas un joker (Actual: x1)",
             Rareza.epico, 8, Joker.FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.NACIONAL, CategoriaJoker.NATURALEZA);
+            CategoriaJoker.TRUCO,
+            CategoriaJoker.ECONOMIA,
+            CategoriaJoker.TERRITORIO
+        );
         // Acumulado representa el multiplicador total: arranca en 1
         setAcumulado(1.0);
     }

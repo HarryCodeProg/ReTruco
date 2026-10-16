@@ -21,7 +21,9 @@ public class Colectivo extends Joker {
             Rareza.muyRaro,
             8, // placeholder: ajustá el coste real
             Joker.FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.NACIONAL // ajustá si corresponde
+            CategoriaJoker.TRUCO,
+            CategoriaJoker.RACHAS,
+            CategoriaJoker.TRANSPORTE
         );
     }
 

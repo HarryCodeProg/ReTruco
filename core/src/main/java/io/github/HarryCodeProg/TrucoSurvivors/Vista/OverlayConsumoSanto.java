@@ -1,8 +1,6 @@
 package io.github.HarryCodeProg.TrucoSurvivors.Vista;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Interpolation;
@@ -14,147 +12,122 @@ import io.github.HarryCodeProg.TrucoSurvivors.Main;
 import io.github.HarryCodeProg.TrucoSurvivors.Santos.Santo;
 
 public class OverlayConsumoSanto {
-    public enum Estado {
-        OCULTO,
-        ENTRANDO,
-        QUEMANDO,
-        APLICANDO_EFECTO,
-        CERRADO
-    }
+
+    public enum Estado { OCULTO, ENTRANDO, QUEMANDO, CERRADO }
+
     private Estado estado = Estado.OCULTO;
     private Santo santo;
     private TextureRegion region;
-    private float x = 640;
-    private float y = 360;
-    private float scale = 0.3f;
-    private float alpha = 1f;
+    private float x, y, w, h;
     private float tiempo = 0f;
     private Runnable alAplicar;
-    // Tiempos ajustados para dar lugar al rebote y al flash
-    private static final float DURACION_ENTRADA = 0.45f;
-    private static final float DURACION_QUEMA = 0.9f;
-    private static final float DURACION_FLASH = 0.25f;
-    private GestorShaderDisolucion gestorDisolucion = new GestorShaderDisolucion();
-    private float progresoDisolucion = 0f;
-    // Variables para físicas y jugosidad
-    private float rotacion = 0f;
-    private float offsetY = 0f;
-    private float flashAlpha = 0f;
 
-    public void abrir(Santo santo, TextureRegion region, Runnable alAplicar) {
+    private static final float DURACION_ENTRADA = 0.22f;
+    private static final float DURACION_QUEMA   = 0.85f;
+
+    private final GestorShaderDisolucion gestorDisolucion = new GestorShaderDisolucion();
+    private float progresoDisolucion = 0f;
+    private float rotacion = 0f;
+    private float scale = 1f;
+
+    public void abrir(Santo santo, TextureRegion region,
+                      float x, float y, float w, float h,
+                      Runnable alAplicar) {
         this.santo = santo;
         this.region = region;
+        this.x = x;
+        this.y = y;
+        this.w = w;
+        this.h = h;
         this.alAplicar = alAplicar;
         estado = Estado.ENTRANDO;
-        scale = 0.3f;
-        alpha = 1f;
         tiempo = 0f;
-        offsetY = 0f;
-        rotacion = -25f; // Inicia inclinado para enderezarse con el rebote
-        flashAlpha = 0f;
+        progresoDisolucion = 0f;
+        rotacion = -10f;
+        scale = 1f;
         GestorSonidos s = Main.getInstance().getGestorSonidos();
-        if (s != null) {
-            s.reproducirConVariacion("consumir_zodiaco");
-        }
+        if (s != null) s.reproducirConVariacion("consumir_zodiaco");
     }
 
     public void update(float delta) {
-        if (estado == Estado.OCULTO || estado == Estado.CERRADO) {
-            return;
-        }
+        if (estado == Estado.OCULTO || estado == Estado.CERRADO) return;
+
         tiempo += delta;
         gestorDisolucion.update(delta);
+
         if (estado == Estado.ENTRANDO) {
             float t = Math.min(tiempo / DURACION_ENTRADA, 1f);
-            // Animación de entrada con overshoot (rebote al pasarse del 100%)
             float ease = Interpolation.swingOut.apply(t);
-            scale = 0.3f + 0.9f * ease;
-            rotacion = (1f - ease) * -25f; // Gira suavemente hasta 0
+            scale = 1f + 0.15f * ease;
+            rotacion = -10f * (1f - ease);
             if (t >= 1f) {
                 estado = Estado.QUEMANDO;
                 tiempo = 0f;
-                progresoDisolucion = 0f;
                 rotacion = 0f;
+                scale = 1f;
             }
         } else if (estado == Estado.QUEMANDO) {
             float t = Math.min(tiempo / DURACION_QUEMA, 1f);
-            progresoDisolucion = t; // El shader necesita avance lineal
-            // Acelera la reducción al final simulando absorción
-            float easeShrink = Interpolation.pow2In.apply(t);
-            scale = 1.2f - (0.4f * easeShrink);
-            // Deriva sutil hacia arriba (efecto humo)
-            offsetY = easeShrink * 60f;
-            // Vibración caótica aumentando con el tiempo
-            rotacion = MathUtils.sin(tiempo * 50f) * (1f + easeShrink * 3f);
+            progresoDisolucion = t;
+            // Vibración que crece con la disolución
+            rotacion = MathUtils.sin(tiempo * 38f) * (1.8f * t);
+            // Micro-expansión durante la quema
+            scale = 1f + 0.05f * t;
             if (t >= 1f) {
-                estado = Estado.APLICANDO_EFECTO;
-                tiempo = 0f;
-                if (alAplicar != null) {
-                    alAplicar.run(); // Se aplica inmediatamente al terminar de quemar
-                    alAplicar = null;
-                }
-            }
-        } else if (estado == Estado.APLICANDO_EFECTO) {
-            // Flash bang blanco que se desvanece
-            float t = Math.min(tiempo / DURACION_FLASH, 1f);
-            flashAlpha = 1f - t;
-
-            if (t >= 1f) {
+                if (alAplicar != null) { alAplicar.run(); alAplicar = null; }
                 estado = Estado.CERRADO;
             }
         }
     }
 
     public void render(SpriteBatch batch, Main game) {
-        if (estado == Estado.OCULTO || estado == Estado.CERRADO) {
-            return;
-        }
-        Texture pixel = game.getPixelBlanco();
-        // 1. Fondo oscurecido
-        batch.setColor(0, 0, 0, 0.7f);
-        batch.draw(pixel, 0, 0, 1280, 720);
-        batch.setColor(1f, 1f, 1f, 1f);
-        float drawY = y + offsetY;
-        float size = 220 * scale;
-        // Modificamos la matriz del batch para poder aplicar la rotación de la vibración
-        // globalmente, incluso al gestorDisolucion que no soporta rotación nativa
+        if (estado == Estado.OCULTO || estado == Estado.CERRADO) return;
+        if (region == null) return;
+
+        float sizeW = w * scale;
+        float sizeH = h * scale;
+        float drawX = x + (w - sizeW) / 2f;
+        float drawY = y + (h - sizeH) / 2f;
+
+        // Rotación sobre el centro de la carta
         batch.flush();
         Matrix4 oldMatrix = batch.getTransformMatrix().cpy();
         Matrix4 newMatrix = oldMatrix.cpy();
-        newMatrix.translate(x, drawY, 0);
+        float cx = x + w / 2f;
+        float cy = y + h / 2f;
+        newMatrix.translate(cx, cy, 0);
         newMatrix.rotate(0, 0, 1, rotacion);
-        newMatrix.translate(-x, -drawY, 0);
+        newMatrix.translate(-cx, -cy, 0);
         batch.setTransformMatrix(newMatrix);
+
         if (estado == Estado.QUEMANDO) {
-            // A. Halo pulsante dorado detrás del objeto
-            float pulseAlpha = 0.4f + MathUtils.sin(tiempo * 20f) * 0.2f;
-            batch.setColor(1f, 0.85f, 0.2f, pulseAlpha);
-            float haloSize = size * 1.15f;
-            batch.draw(region, x - haloSize / 2f, drawY - haloSize / 2f, haloSize, haloSize);
+            // Halo dorado pulsante detrás de la carta que se quema
+            float pulse = 0.30f + MathUtils.sin(tiempo * 18f) * 0.12f;
+            float haloAlpha = pulse * (1f - progresoDisolucion);
+            float haloW = sizeW * 1.25f;
+            float haloH = sizeH * 1.25f;
+            batch.setColor(1f, 0.8f, 0.2f, haloAlpha);
+            batch.draw(region,
+                drawX - (haloW - sizeW) / 2f,
+                drawY - (haloH - sizeH) / 2f,
+                haloW, haloH);
             batch.setColor(1f, 1f, 1f, 1f);
-            // B. Santo quemándose
-            batch.flush();
+
             gestorDisolucion.dibujarConDisolucion(batch, region,
-                x - size / 2f, drawY - size / 2f, size, size,
+                drawX, drawY, sizeW, sizeH,
                 progresoDisolucion, false,
                 new Color(1f, 0.55f, 0.1f, 1f),
                 new Color(0.8f, 0.15f, 0.05f, 1f));
-
-        } else if (estado == Estado.ENTRANDO) {
-            batch.draw(region, x - size / 2f, drawY - size / 2f, size, size);
+        } else {
+            // ENTRANDO
+            batch.setColor(1f, 1f, 1f, 1f);
+            batch.draw(region, drawX, drawY, sizeW, sizeH);
         }
-        // Restaurar matriz obligatoriamente
+
         batch.flush();
         batch.setTransformMatrix(oldMatrix);
-        // Flash blanco final por encima de todo
-        if (estado == Estado.APLICANDO_EFECTO && flashAlpha > 0) {
-            batch.setColor(1f, 1f, 1f, flashAlpha);
-            batch.draw(pixel, 0, 0, 1280, 720);
-            batch.setColor(1f, 1f, 1f, 1f);
-        }
     }
 
-    public boolean estaActivo() {return estado != Estado.OCULTO && estado != Estado.CERRADO;}
-    public boolean estaCerrado() {return estado == Estado.CERRADO;}
-    public void confirmarCierre() {estado = Estado.OCULTO;}
+    public boolean estaActivo() { return estado != Estado.OCULTO && estado != Estado.CERRADO; }
+    public void confirmarCierre() { estado = Estado.OCULTO; }
 }

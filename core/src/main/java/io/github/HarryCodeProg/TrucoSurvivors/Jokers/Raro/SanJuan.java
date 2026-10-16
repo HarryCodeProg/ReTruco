@@ -20,7 +20,9 @@ public class SanJuan extends Joker {
             Rareza.raro,
             5,
             INDEPENDIENTE,
-            CategoriaJoker.NACIONAL
+            CategoriaJoker.TRUCO,
+            CategoriaJoker.RACHAS,
+            CategoriaJoker.TERRITORIO
         );
         setAcumulado(50);
     }

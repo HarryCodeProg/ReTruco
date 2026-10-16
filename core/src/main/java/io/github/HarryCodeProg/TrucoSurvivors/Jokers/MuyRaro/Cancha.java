@@ -15,7 +15,8 @@ public class Cancha extends Joker {
     public Cancha() {
         super(113, "Cancha", "Cancha",
             "+1 mano. +50 puntos truco por cada mano ganada de forma consecutiva (Actual: +0)",
-            Rareza.muyRaro, 8, Joker.FaseActivacion.INDEPENDIENTE, CategoriaJoker.NACIONAL);
+            Rareza.muyRaro, 8, Joker.FaseActivacion.INDEPENDIENTE,
+            CategoriaJoker.TRUCO, CategoriaJoker.RACHAS, CategoriaJoker.DEPORTE);
     }
 
     @Override

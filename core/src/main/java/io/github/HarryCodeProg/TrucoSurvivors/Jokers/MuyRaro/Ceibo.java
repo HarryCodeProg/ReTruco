@@ -13,7 +13,8 @@ public class Ceibo extends Joker {
     public Ceibo() {
         super(110, "Ceibo", "Ceibo",
             "Al seleccionar rival, consume el Joker a la derecha y agrega permanentemente el doble de su valor de venta como Multiplicador truco (actual: +0)",
-            Rareza.muyRaro, 8, Joker.FaseActivacion.INDEPENDIENTE, CategoriaJoker.NACIONAL);
+            Rareza.muyRaro, 8, Joker.FaseActivacion.INDEPENDIENTE,
+            CategoriaJoker.TRUCO, CategoriaJoker.ECONOMIA, CategoriaJoker.TERRITORIO);
     }
 
     @Override

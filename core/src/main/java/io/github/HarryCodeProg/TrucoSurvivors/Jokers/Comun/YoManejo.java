@@ -11,9 +11,11 @@ import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 public class YoManejo extends Joker {
 
     public YoManejo() {
-        super(52, "YoManejo", "YoManejo", "Reactiva 3 veces la primera carta que mata",
+        super(52, "Yo Manejo",
+            "YoManejo",
+            "Reactiva 3 veces la primera carta que mata",
             Rareza.comun, 4, Joker.FaseActivacion.AL_PUNTUAR_CARTA,
-            CategoriaJoker.SECUENCIA, CategoriaJoker.TV);
+            CategoriaJoker.ACTIVACION, CategoriaJoker.TRUCO, CategoriaJoker.NACIONAL);
     }
 
     @Override

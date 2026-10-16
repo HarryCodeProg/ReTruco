@@ -17,7 +17,8 @@ public class Antartida extends Joker {
     public Antartida() {
         super(123, "Antartida", "Antartida",
             "X4 multiplicador cada 20 activaciones de cartas (restante: 20)",
-            Rareza.muyRaro, 8, Joker.FaseActivacion.INDEPENDIENTE, CategoriaJoker.NACIONAL);
+            Rareza.muyRaro, 8, Joker.FaseActivacion.INDEPENDIENTE,
+            CategoriaJoker.TRUCO, CategoriaJoker.ACTIVACION, CategoriaJoker.TERRITORIO);
     }
 
     @Override

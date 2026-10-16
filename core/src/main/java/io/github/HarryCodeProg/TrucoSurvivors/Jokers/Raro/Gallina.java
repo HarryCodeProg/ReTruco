@@ -18,7 +18,8 @@ public class Gallina extends Joker {
             Rareza.raro,
             6, // placeholder: ajustá el coste real
             Joker.FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.NACIONAL // ajustá si corresponde
+            CategoriaJoker.ACTIVACION,
+            CategoriaJoker.FAUNA
         );
     }
 

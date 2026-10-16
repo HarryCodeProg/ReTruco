@@ -28,7 +28,9 @@ public class Sarmiento extends Joker {
             Rareza.legendario,
             12,
             Joker.FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.NACIONAL
+            CategoriaJoker.ECONOMIA,
+            CategoriaJoker.MAZO,
+            CategoriaJoker.PERSONA
         );
     }
 

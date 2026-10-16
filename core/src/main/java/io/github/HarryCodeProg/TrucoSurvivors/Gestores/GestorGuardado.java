@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Json;
 import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Carta;
+import io.github.HarryCodeProg.TrucoSurvivors.Estados.ResultadoMano;
 import io.github.HarryCodeProg.TrucoSurvivors.Jugador;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.*;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Guardado.*;
@@ -40,15 +41,15 @@ public class GestorGuardado {
         }
     }
 
-    /** Arma el snapshot completo a partir del estado actual de GameScreenV2. */
+    /** Arma el snapshot completo a partir del estado actual de GameScreen. */
     public static DatosGuardado crearSnapshot(String estadoPantalla, int rivalIndice, int nivelActual,
-                                              Jugador jugador, Juego juegoOpcional, EstadoTienda estadoTiendaOpcional) {
+                                              Jugador jugador, Juego juegoOpcional, EstadoTienda estadoTiendaOpcional,
+                                              int tocoJugarActual) {
         DatosGuardado d = new DatosGuardado();
         d.estadoPantalla = estadoPantalla;
         d.rivalIndice = rivalIndice;
         d.nivelActual = nivelActual;
         d.jugador = GestorConverterSerializacion.aDatos(jugador);
-
         if (juegoOpcional != null) {
             DatosJuego dj = new DatosJuego();
             dj.puntosJugador = juegoOpcional.getPuntosJugador();
@@ -61,17 +62,18 @@ public class GestorGuardado {
             for (Carta c : juegoOpcional.getRival().getMano()) dj.manoRival.add(GestorConverterSerializacion.aDatos(c));
             for (Carta c : juegoOpcional.getMesa().getMesaJugador()) dj.mesaJugador.add(GestorConverterSerializacion.aDatos(c));
             for (Carta c : juegoOpcional.getMesa().getMesaRival()) dj.mesaRival.add(GestorConverterSerializacion.aDatos(c));
+            for (ResultadoMano r : juegoOpcional.getResultados()) dj.resultados.add(r.name());
+            dj.manoFinalizada = juegoOpcional.isManoFinalizada();
             dj.cartasJugadasTotal = juegoOpcional.getCartasJugadasTotal();
             dj.cartasDescartadasTotal = juegoOpcional.getCartasDescartadasTotal();
             dj.cartasCompradasTotal = juegoOpcional.getCartasCompradasTotal();
             dj.renovacionesTotal = juegoOpcional.getRenovacionesTotal();
+            dj.tocoJugar = tocoJugarActual; // NUEVO
             d.juego = dj;
         }
-
         if (estadoTiendaOpcional != null) {
             d.estadoTienda = GestorConverterSerializacion.aDatos(estadoTiendaOpcional);
         }
-
         return d;
     }
 }

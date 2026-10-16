@@ -20,7 +20,10 @@ public class Gaseosa extends Joker {
             Rareza.comun,
             3,
             INDEPENDIENTE,
-            CategoriaJoker.INTERNACIONAL,CategoriaJoker.BEBIDA,CategoriaJoker.DULCE
+            CategoriaJoker.TRUCO,
+            CategoriaJoker.ENVIDO,
+            CategoriaJoker.BEBIDA
+
         );
     }
 

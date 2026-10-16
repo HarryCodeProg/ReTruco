@@ -13,7 +13,8 @@ public class Ombu extends Joker {
     public Ombu() {
         super(111, "Ombu", "Ombu",
             "Al seleccionar rival, consume el Joker a la derecha y agrega permanentemente el doble de su valor de venta como Multiplicador envido (actual: +0)",
-            Rareza.muyRaro, 8, Joker.FaseActivacion.INDEPENDIENTE, CategoriaJoker.NACIONAL);
+            Rareza.muyRaro, 8, Joker.FaseActivacion.INDEPENDIENTE,
+            CategoriaJoker.ENVIDO, CategoriaJoker.ECONOMIA, CategoriaJoker.TERRITORIO);
     }
 
     @Override

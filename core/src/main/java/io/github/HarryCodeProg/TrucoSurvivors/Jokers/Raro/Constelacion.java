@@ -3,6 +3,7 @@ package io.github.HarryCodeProg.TrucoSurvivors.Jokers.Raro;
 import io.github.HarryCodeProg.TrucoSurvivors.Activacion.ContextoJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Carta;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.EventoJuego;
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Rareza;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
@@ -13,7 +14,9 @@ public class Constelacion extends Joker {
         super(80, "Constelacion", "Constelacion", "Jugar tres 7 en una mano\notorga $15",
             Rareza.raro,
             6,
-            FaseActivacion.INDEPENDIENTE);
+            FaseActivacion.INDEPENDIENTE,
+            CategoriaJoker.ECONOMIA,
+            CategoriaJoker.FIGURA);
     }
 
     @Override

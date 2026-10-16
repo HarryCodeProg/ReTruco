@@ -22,7 +22,8 @@ public class Vaca extends Joker {
             Rareza.muyRaro,
             8, // placeholder
             Joker.FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.NACIONAL
+            CategoriaJoker.MAZO,
+            CategoriaJoker.FAUNA
         );
         setAcumulado(TAMAÑO_INICIAL);
     }

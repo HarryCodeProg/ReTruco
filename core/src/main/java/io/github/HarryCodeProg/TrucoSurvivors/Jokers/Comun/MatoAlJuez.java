@@ -21,7 +21,7 @@ public class MatoAlJuez extends Joker {
             Rareza.comun,
             5,
             Joker.FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.TV, CategoriaJoker.NACIONAL
+            CategoriaJoker.ACTIVACION, CategoriaJoker.CONSUMIBLES, CategoriaJoker.NACIONAL
         );
     }
 

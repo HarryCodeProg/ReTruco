@@ -17,4 +17,7 @@ public class DatosJuego {
     public int cartasDescartadasTotal;
     public int cartasCompradasTotal;
     public int renovacionesTotal;
+    public ArrayList<String> resultados = new ArrayList<>();
+    public boolean manoFinalizada;
+    public int tocoJugar;
 }

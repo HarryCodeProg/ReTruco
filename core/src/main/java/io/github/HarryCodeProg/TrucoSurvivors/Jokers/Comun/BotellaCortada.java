@@ -23,7 +23,10 @@ public class BotellaCortada extends Joker {
             Rareza.comun,
             4,
             AL_JUGAR,
-            CategoriaJoker.INTERNACIONAL, CategoriaJoker.BEBIDA, CategoriaJoker.ALCOHOL
+            CategoriaJoker.TRUCO,
+            CategoriaJoker.ACTIVACION,
+            CategoriaJoker.BEBIDA
+
         );
     }
 

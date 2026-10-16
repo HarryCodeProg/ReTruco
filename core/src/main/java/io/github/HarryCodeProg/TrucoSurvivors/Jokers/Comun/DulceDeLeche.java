@@ -20,7 +20,8 @@ public class DulceDeLeche extends Joker {
             Rareza.comun,
             4,
             INDEPENDIENTE,
-            CategoriaJoker.NACIONAL, CategoriaJoker.COMIDA, CategoriaJoker.DULCE, CategoriaJoker.POSTRE
+            CategoriaJoker.MAZO,
+            CategoriaJoker.GASTRONOMIA
         );
     }
 

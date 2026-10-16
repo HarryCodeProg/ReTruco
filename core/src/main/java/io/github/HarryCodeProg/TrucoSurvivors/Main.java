@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Locale;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import io.github.HarryCodeProg.TrucoSurvivors.Vista.AssetsRasgos;
 
 public class Main extends Game {
     public SpriteBatch batch;
@@ -48,6 +49,10 @@ public class Main extends Game {
     private ConfiguracionJuego configuracionJuego;
     private BitmapFont fuenteTooltipTitulo;
     private BitmapFont fuenteTooltipDescripcion;
+    private AssetsRasgos assetsRasgos;
+    private int nivelInfinito = 0; // 0 = run normal, >=1 = modo infinito
+    private static final double META_BASE_INFINITO = 6666666d;
+    private static final double FACTOR_INFINITO = 1.8d; // ajustalo a gusto
 
     @Override
     public void create() {
@@ -90,6 +95,7 @@ public class Main extends Game {
         for (Texture texture : atlasSantos.getTextures()) {
             texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         }
+        assetsRasgos = new AssetsRasgos();
         atlasZodiaco = new TextureAtlas(Gdx.files.internal("atlas/zodiaco.atlas"));
         texturaRuletaFondo = new Texture("ui/zodiaco_ruleta.png");
         cambiarIdioma("es");
@@ -123,6 +129,8 @@ public class Main extends Game {
 
     public ConfiguracionJuego getConfiguracionJuego() { return configuracionJuego; }
 
+    public AssetsRasgos getAssetsRasgos() { return assetsRasgos; }
+
     public void crearRivales(){
         listaRivales.add(new DatosRival("Maty", "Vive en chaco, pobre tipo", 30, true,0));
         listaRivales.add(new DatosRival("Enzo", "El incel definitivo", 60, false,1));
@@ -137,7 +145,7 @@ public class Main extends Game {
         listaRivales.add(new DatosRival("Guille", "Probablemente este en una banda", 30000, false,8));
 
         listaRivales.add(new DatosRival("Geno", "Le gustan los gatos mas que las personas", 50000, false,9));
-        listaRivales.add(new DatosRival("Sol", "Es diseñadora, no se de que", 80000, false,10));
+        listaRivales.add(new DatosRival("Mailen", "No tiene edad para apostar", 80000, false,10));
         listaRivales.add(new DatosRival("Valen", "Es profesora de literatura (¿sabe jugar al truco?)", 100000, false,11));
 
         listaRivales.add(new DatosRival("Negro", "Trabaja en el gym, te presta mas atencion si sos mujer", 150000, false,12));
@@ -391,6 +399,7 @@ public class Main extends Game {
         if (fuenteUI != null) fuenteUI.dispose();
         if (fuenteTooltipTitulo != null) fuenteTooltipTitulo.dispose();
         if (fuenteTooltipDescripcion != null) fuenteTooltipDescripcion.dispose();
+        if (assetsRasgos != null) assetsRasgos.dispose();
     }
 
     public void reiniciarDesbloqueoRivales() {
@@ -412,6 +421,21 @@ public class Main extends Game {
 // por si algo más la llama, para no romper compilación:
     public void limpiarGuardadoDetectado() {
         // no-op: ya no hay estado en memoria que limpiar
+    }
+
+    public boolean esUltimoRival(int indice) { return indice >= listaRivales.size() - 1; }
+
+    public boolean isModoInfinito() { return nivelInfinito > 0; }
+    public int getNivelInfinito() { return nivelInfinito; }
+    public void setNivelInfinito(int n) { nivelInfinito = Math.max(0, n); }
+    public void iniciarModoInfinito() { nivelInfinito = 1; }
+    public void subirNivelInfinito() { if (nivelInfinito > 0) nivelInfinito++; }
+
+    public DatosRival crearRivalInfinito() {
+        DatosRival base = listaRivales.get((nivelInfinito - 1) % listaRivales.size());
+        double meta = META_BASE_INFINITO * Math.pow(FACTOR_INFINITO, nivelInfinito);
+        return new DatosRival(base.getNombre(), "Ronda infinita " + nivelInfinito, meta, false,
+            listaRivales.size() - 1); // índice máximo: dificultad y fondo del último rival
     }
 
 }

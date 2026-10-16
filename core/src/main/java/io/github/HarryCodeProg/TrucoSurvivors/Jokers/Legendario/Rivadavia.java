@@ -18,13 +18,16 @@ public class Rivadavia extends Joker {
     public Rivadavia() {
         super(146, "Rivadavia", "Rivadavia", "Cada 30 cartas repartidas ganas x1.5 multiplicador truco",
             Rareza.legendario, 15, Joker.FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.NACIONAL, CategoriaJoker.HISTORIA);
+            CategoriaJoker.TRUCO,
+            CategoriaJoker.ACTIVACION,
+            CategoriaJoker.PERSONA
+        );
     }
 
     @Override
     public String getDescripcionRenderizada() {
-        return "Cada "+cartasRestantes+" cartas repartidas ganas x1.5 multiplicador truco (actual: x"
-            + String.format("%.1f", multiplicadorAcumulado);
+        return "Cada "+cartasRestantes+" cartas repartidas ganas x1.5 multiplicador truco \n(actual: x"
+            + String.format("%.1f", multiplicadorAcumulado)+")";
     }
 
     @Override

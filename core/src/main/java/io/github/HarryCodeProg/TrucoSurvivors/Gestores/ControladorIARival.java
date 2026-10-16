@@ -3,15 +3,15 @@ package io.github.HarryCodeProg.TrucoSurvivors.Gestores;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.EstadoCombate;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 import io.github.HarryCodeProg.TrucoSurvivors.Rival.IARival;
-import io.github.HarryCodeProg.TrucoSurvivors.Screens.GameScreenV2;
+import io.github.HarryCodeProg.TrucoSurvivors.Screens.GameScreen;
 
 public class ControladorIARival {
     private final Juego juego;
     private final IARival iaRival;
     private final ControladorCombate controladorCombate;
-    private final GameScreenV2 screen;
+    private final GameScreen screen;
 
-    public ControladorIARival(Juego juego, ControladorCombate controladorCombate, GameScreenV2 screen) {
+    public ControladorIARival(Juego juego, ControladorCombate controladorCombate, GameScreen screen) {
         this.juego = juego;
         this.iaRival = new IARival(juego);
         this.controladorCombate = controladorCombate;

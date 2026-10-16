@@ -4,7 +4,12 @@ import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Carta;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.*;
 import io.github.HarryCodeProg.TrucoSurvivors.Activacion.ContextoJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Activacion.GestorJokers;
+import io.github.HarryCodeProg.TrucoSurvivors.Gestores.GestorRasgos;
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jugador;
+import io.github.HarryCodeProg.TrucoSurvivors.Rasgos.EfectoRasgo;
+import io.github.HarryCodeProg.TrucoSurvivors.Rasgos.EfectoTrucoBonus;
+import io.github.HarryCodeProg.TrucoSurvivors.Rasgos.EfectoTrucoMultiplicador;
 
 import java.util.ArrayList;
 
@@ -48,6 +53,7 @@ public class Juego {
     private int cartasCompradasTotal = 0;
     private int renovacionesTotal = 0;
     private double mejorEnvidoLogrado = 0;
+    private final GestorRasgos gestorRasgos = new GestorRasgos();
 
     public Juego(Jugador jugador, Jugador rival, Mazo mazoRival, boolean saltarRepartoInicial) {
         this.jugador = jugador;
@@ -59,12 +65,29 @@ public class Juego {
         this.resultados = new ArrayList<>();
         this.rival.setMazo(mazoRival);
         this.gestorJokers = new GestorJokers(jugador);
+        jugador.addJokerAddedListener(j -> gestorRasgos.recalcular(jugador.getJokers()));
+        jugador.addJokerRemovedListener(j -> gestorRasgos.recalcular(jugador.getJokers()));
+        gestorRasgos.recalcular(jugador.getJokers());
+        gestorRasgos.setJuego(this);
+        gestorRasgos.addListener(new GestorRasgos.Listener() {
+            @Override public void onRasgoActivado(CategoriaJoker cat, int tierNuevo) {
+                // aplicar efecto del rasgo al tierNuevo
+            }
+            @Override public void onRasgoDesactivado(CategoriaJoker cat, int tierAnterior) {
+                // quitar efecto del tier que estaba activo
+            }
+            @Override public void onTierCambiado(CategoriaJoker cat, int a, int b) {
+                // si sube: quitar el efecto del tier a, aplicar el del tier b
+                // si baja: al revés
+            }
+        });
         this.resolutorSecuencia = new ResolutorSecuencia(gestorJokers, this);
         this.descartesActuales = jugador.getDescartesMaximos();
         Carta.setNotificadorCambioPalo(carta -> {
             ContextoJuego ctx = crearContexto();
             ctx.setCartaEnResolucion(carta);
             gestorJokers.disparar(EventoJuego.AL_CAMBIAR_PALO, ctx, this);
+            gestorRasgos.dispararEvento(EventoJuego.AL_CAMBIAR_PALO, ctx, this);
         });
         if (!saltarRepartoInicial) {
             limpiarEstadoResidualDeCombateAnterior();
@@ -74,12 +97,23 @@ public class Juego {
             rival.multEnvidoOriginal();
             jugador.reiniciarManos();
             repartir();
-            gestorJokers.disparar(EventoJuego.INICIO_COMBATE, crearContexto(), this);
+            dispararTodo(EventoJuego.INICIO_COMBATE);
         }
     }
 
     private ContextoJuego crearContexto() {
         return new ContextoJuego(jugador, rival, jugador.getMazo(), mesa, this);
+    }
+
+    private void dispararTodo(EventoJuego evento) {
+        ContextoJuego ctx = crearContexto();
+        gestorJokers.disparar(evento, ctx, this);
+        gestorRasgos.dispararEvento(evento, ctx, this);
+    }
+
+    private void dispararTodo(EventoJuego evento, ContextoJuego ctx) {
+        gestorJokers.disparar(evento, ctx, this);
+        gestorRasgos.dispararEvento(evento, ctx, this);
     }
 
     public void repartir() {
@@ -98,7 +132,7 @@ public class Juego {
         }
         ContextoJuego ctx = crearContexto();
         ctx.setCartasRepartidasEsteEvento(cartasRepartidasJugador);
-        gestorJokers.disparar(EventoJuego.POST_REPARTO, ctx, this);
+        dispararTodo(EventoJuego.POST_REPARTO, ctx);
     }
 
     private void limpiarEstadoResidualDeCombateAnterior() {
@@ -131,7 +165,7 @@ public class Juego {
             ContextoJuego ctx = crearContexto();
             ctx.setResolucionActual(resolucion);
             ctx.setCartasContribuyentesEnvido(cartasEnvido);
-            gestorJokers.disparar(EventoJuego.AL_GANAR_ENVIDO_CANTO, ctx, this);
+            dispararTodo(EventoJuego.AL_GANAR_ENVIDO_CANTO, ctx);
             resolutorSecuencia.resolverEnvido(cartasEnvido, ctx, EventoJuego.AL_PUNTUAR_CARTA_ENVIDO, EventoJuego.ANTES_DE_SUMAR_ENVIDO);
             this.ultimaResolucionEnvido = resolucion;
         } else {
@@ -139,7 +173,7 @@ public class Juego {
             ResolucionPuntaje resolucion = new ResolucionPuntaje(0, rival.getMultiplicadorEnvido());
             resolucion.sumarChips(puntosER, "Cartas Rival", null); // Esto hace que aparezca "+33 (Cartas Rival)" en pantalla
             this.ultimaResolucionEnvido = resolucion;
-            gestorJokers.disparar(EventoJuego.AL_PERDER_ENVIDO, crearContexto(), this);
+            dispararTodo(EventoJuego.AL_PERDER_ENVIDO);
         }
     }
 
@@ -150,6 +184,8 @@ public class Juego {
         }
         return total;
     }
+
+    public GestorRasgos getGestorRasgos() { return gestorRasgos; }
 
     public void irAlMazo() {
         vaciarTruco();
@@ -184,7 +220,7 @@ public class Juego {
         cartasDescartadasTotal += cartas.size();
         ContextoJuego ctx = crearContexto();
         ctx.setCartasDescartadasEsteEvento(cartas.size());
-        gestorJokers.disparar(EventoJuego.AL_DESCARTAR, ctx, this);
+        dispararTodo(EventoJuego.AL_DESCARTAR, ctx);
         return cartasNuevas;
     }
 
@@ -216,10 +252,13 @@ public class Juego {
         return ultimaResolucionEnvido;
     }
 
+    public ArrayList<ResultadoMano> getResultados() { return resultados; }
+
     public void restaurarEstado(double puntosJugador, double puntosRival, boolean jugadorEsMano,
                                 int faseActual, int rondaActual, int descartesActuales,
                                 ArrayList<Carta> manoRival, ArrayList<Carta> mesaJugador, ArrayList<Carta> mesaRival,
-                                int cartasJugadasTotal, int cartasDescartadasTotal, int cartasCompradasTotal, int renovacionesTotal) {
+                                int cartasJugadasTotal, int cartasDescartadasTotal, int cartasCompradasTotal, int renovacionesTotal,
+                                ArrayList<ResultadoMano> resultadosGuardados, boolean manoFinalizadaGuardada) {
         this.puntosJugador = puntosJugador;
         this.puntosRival = puntosRival;
         this.jugadorEsMano = jugadorEsMano;
@@ -234,7 +273,12 @@ public class Juego {
         this.cartasDescartadasTotal = cartasDescartadasTotal;
         this.cartasCompradasTotal = cartasCompradasTotal;
         this.renovacionesTotal = renovacionesTotal;
+        this.resultados.clear();
+        this.resultados.addAll(resultadosGuardados);
+        this.manoFinalizada = manoFinalizadaGuardada;
     }
+
+    public boolean isManoFinalizada() { return manoFinalizada; }
 
     public void devolverCartas() {
         for (Carta c : mesa.getMesaJugador()) {
@@ -253,8 +297,8 @@ public class Juego {
     }
 
     public void jugarMano(int i) {
-        if (i == 0) gestorJokers.disparar(EventoJuego.AL_JUGAR_PRIMERA_CARTA, crearContexto(), this);
-        else if (i == 1) gestorJokers.disparar(EventoJuego.AL_JUGAR_SEGUNDA_CARTA, crearContexto(), this);
+        if (i == 0) dispararTodo(EventoJuego.AL_JUGAR_PRIMERA_CARTA);
+        else if (i == 1) dispararTodo(EventoJuego.AL_JUGAR_SEGUNDA_CARTA);
         ResultadoMano resultado = matoCarta(i);
         resultados.add(resultado);
         Carta cartaJugador = mesa.getMesaJugador().get(i);
@@ -263,14 +307,14 @@ public class Juego {
             this.turnoActual = jugador;
             ContextoJuego ctxMato = crearContexto();
             ctxMato.setCartaEnResolucion(cartaJugador);
-            gestorJokers.disparar(EventoJuego.AL_MATAR_CARTA, ctxMato, this);
-            gestorJokers.disparar(EventoJuego.AL_GANAR_BAZA, crearContexto(), this);
+            dispararTodo(EventoJuego.AL_MATAR_CARTA, ctxMato);
+            dispararTodo(EventoJuego.AL_GANAR_BAZA);
         } else if (resultado == ResultadoMano.RIVAL) {
             this.turnoActual = rival;
             ContextoJuego ctxPerdio = crearContexto();
             ctxPerdio.setCartaEnResolucion(cartaJugador);          // la que perdio (del jugador)
             ctxPerdio.setCartaOponenteEnResolucion(cartaRival);    // la que gano (del rival)
-            gestorJokers.disparar(EventoJuego.AL_SER_MATADO, ctxPerdio, this);
+            dispararTodo(EventoJuego.AL_SER_MATADO, ctxPerdio);
         } else {
             this.turnoActual = jugadorEsMano ? jugador : rival;
         }
@@ -331,7 +375,7 @@ public class Juego {
             resolutorSecuencia.resolver(cartasGanadoras, ctx, EventoJuego.AL_PUNTUAR_CARTA, EventoJuego.ANTES_DE_SUMAR_TRUCO);
             this.ultimaResolucion = resolucion;
             puntosJugador += resolucion.calcularPuntajeFinal();
-            gestorJokers.disparar(EventoJuego.AL_GANAR_TRUCO, crearContexto(), this);
+            dispararTodo(EventoJuego.AL_GANAR_TRUCO);
             manosGanadasConsecutivas++;
         } else {
             this.ultimaResolucion = null;
@@ -344,9 +388,9 @@ public class Juego {
             }
             puntosRival += acumulador * rival.getMultiplicadorTruco();
             manosGanadasConsecutivas = 0;
-            gestorJokers.disparar(EventoJuego.AL_PERDER_TRUCO, crearContexto(), this);
+            dispararTodo(EventoJuego.AL_PERDER_TRUCO);
         }
-        gestorJokers.disparar(EventoJuego.TERMINO_MANO, crearContexto(), this);
+        dispararTodo(EventoJuego.TERMINO_MANO);
         verificarEstadoCombate();
     }
 
@@ -426,10 +470,10 @@ public class Juego {
             double puntosCanto = valorNivelTruco(nivelTrucoPendiente);
             jugador.aumentarMultiplicadorTrucoTemporal(puntosCanto);
             rival.aumentarMultiplicadorTrucoTemporal(puntosCanto);
-            gestorJokers.disparar(EventoJuego.AL_DECIR_QUIERO_TRUCO, crearContexto(), this);
+            dispararTodo(EventoJuego.AL_DECIR_QUIERO_TRUCO);
         } else {
             resolverNoQuieroTruco(canter);
-            gestorJokers.disparar(EventoJuego.AL_DECIR_NO_QUIERO_TRUCO, crearContexto(), this); // NUEVO
+            dispararTodo(EventoJuego.AL_DECIR_NO_QUIERO_TRUCO); // NUEVO
         }
         cantorTrucoPendiente = null;
         nivelTrucoPendiente = null;
@@ -499,7 +543,7 @@ public class Juego {
         nivelEnvidoPendiente = nivel;
         nivelEnvidoActual = nivel;
         ultimoCantorEnvido = quien;
-        gestorJokers.disparar(EventoJuego.AL_CANTAR_ENVIDO, crearContexto(), this); // NUEVO
+        dispararTodo(EventoJuego.AL_CANTAR_ENVIDO); // NUEVO
         return true;
     }
 
@@ -558,7 +602,7 @@ public class Juego {
             if (ultimoGanadorEnvidoFueJugador) {
                 puntosJugador += puntosFinales;
                 envidosGanadosConsecutivos++; // NUEVO
-                gestorJokers.disparar(EventoJuego.AL_GANAR_ENVIDO, crearContexto(), this);
+                dispararTodo(EventoJuego.AL_GANAR_ENVIDO);
             } else {
                 puntosRival += puntosFinales;
                 envidosGanadosConsecutivos = 0; // NUEVO
@@ -572,7 +616,7 @@ public class Juego {
     public void agregarCartaAlMazoJugador(Carta carta) {
         jugador.getMazo().agregarCarta(carta);
         ContextoJuego ctx = crearContexto();
-        gestorJokers.disparar(EventoJuego.AL_AGREGAR_CARTA_AL_MAZO, ctx, this);
+        dispararTodo(EventoJuego.AL_AGREGAR_CARTA_AL_MAZO, ctx);
     }
 
     public void agregarCartaRival(Carta carta) {
@@ -675,8 +719,8 @@ public class Juego {
                     this.ultimaResolucion = resolucionActiva;
                 }
                 ctx.setResolucionActual(resolucionActiva);
-                gestorJokers.disparar(EventoJuego.AL_GANAR_COMBATE, ctx, this);
-                gestorJokers.disparar(EventoJuego.TERMINO_MANO, crearContexto(), this);
+                dispararTodo(EventoJuego.AL_GANAR_COMBATE, ctx);
+                dispararTodo(EventoJuego.TERMINO_MANO);
             }
             return EstadoCombate.VICTORIA_JUGADOR;
         }
@@ -717,23 +761,45 @@ public class Juego {
         mesa.agregarCartaJugador(carta);
     }
 
+    public double getBonusCantoTruco() {
+        EfectoRasgo e = gestorRasgos.getEfectoActivo(CategoriaJoker.TRUCO);
+        if (e instanceof EfectoTrucoBonus) return ((EfectoTrucoBonus) e).getBonus();
+        return 0.0;
+    }
+
+    public double getMultiplicadorCantoTruco() {
+        EfectoRasgo e = gestorRasgos.getEfectoActivo(CategoriaJoker.TRUCO);
+        if (e instanceof EfectoTrucoMultiplicador) return ((EfectoTrucoMultiplicador) e).getMultiplicador();
+        return 1.0;
+    }
+
+    public double getBonusCantoEnvido() {
+        EfectoRasgo e = gestorRasgos.getEfectoActivo(CategoriaJoker.ENVIDO);
+        if (e instanceof EfectoTrucoBonus) return ((EfectoTrucoBonus) e).getBonus();
+        return 0.0;
+    }
+
+    public double getMultiplicadorCantoEnvido() {
+        EfectoRasgo e = gestorRasgos.getEfectoActivo(CategoriaJoker.ENVIDO);
+        if (e instanceof EfectoTrucoMultiplicador) return ((EfectoTrucoMultiplicador) e).getMultiplicador();
+        return 1.0;
+    }
+
     public void notificarSantoConsumido() {
-        ContextoJuego ctx = crearContexto();
-        gestorJokers.disparar(EventoJuego.AL_CONSUMIR_SANTO, ctx, this);
+        dispararTodo(EventoJuego.AL_CONSUMIR_SANTO);
     }
 
     public void notificarJokerComprado() {
-        ContextoJuego ctx = crearContexto();
-        gestorJokers.disparar(EventoJuego.AL_COMPRAR_JOKER, ctx, this);
+        dispararTodo(EventoJuego.AL_COMPRAR_JOKER);
+        gestorRasgos.recalcular(jugador.getJokers());
     }
 
     public void notificarCartaComprada() {
-        ContextoJuego ctx = crearContexto();
-        gestorJokers.disparar(EventoJuego.AL_COMPRAR_CARTA, ctx, this);
+        dispararTodo(EventoJuego.AL_COMPRAR_CARTA);
     }
 
     public void notificarJokerVendido() {
-        ContextoJuego ctx = crearContexto();
-        gestorJokers.disparar(EventoJuego.AL_VENDER_JOKER, ctx, this);
+        dispararTodo(EventoJuego.AL_VENDER_JOKER);
+        gestorRasgos.recalcular(jugador.getJokers());
     }
 }

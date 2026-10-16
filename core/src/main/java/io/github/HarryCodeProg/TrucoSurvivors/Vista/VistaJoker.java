@@ -61,6 +61,8 @@ public class VistaJoker implements Arrastrable{
     private static final float GROSOR_MARCO = 2f;
     private boolean tooltipLateral = false;
     private final FisicaTiltArrastre fisicaTiltArrastre = new FisicaTiltArrastre();
+    private static final float ICONO_BADGE = 18f;
+    private static final float GAP_ICONO_BADGE = 6f;
 
     public VistaJoker(Joker joker, TextureAtlas atlas) {
         this.joker = joker;
@@ -264,7 +266,7 @@ public class VistaJoker implements Arrastrable{
 
     public void update(float mouseX, float mouseY, float delta) {
         if (resaltado) {
-            pulso += delta * 6f;
+            pulso = Math.min(pulso + delta * 6f, (float) Math.PI);
             hover = false;
             return;
         }
@@ -303,8 +305,10 @@ public class VistaJoker implements Arrastrable{
     }
 
     public void setResaltado(boolean resaltado) {
+        if (resaltado && !this.resaltado) {
+            pulso = 0f;
+        }
         this.resaltado = resaltado;
-        if (resaltado) pulso = 0f;
     }
 
     private float moverHacia(float value, float target, float maxDelta) {
@@ -328,14 +332,6 @@ public class VistaJoker implements Arrastrable{
         return mx >= hitboxX && mx <= hitboxX + w && my >= hitboxY && my <= hitboxY + h;
     }
 
-    /*
-    public boolean contiene(float mx, float my) {
-        float w = width * scale;
-        float h = height * scale;
-        float drawY = y + visualOffsetY;
-        return mx >= x && mx <= x + w && my >= drawY && my <= drawY + h;
-    }*/
-
     private void dibujarCartelStats(SpriteBatch batch, Main game, Juego juego, float drawY) {
         BitmapFont fontTitulo = game.getFuenteTooltipTitulo();
         BitmapFont fontDesc = game.getFuenteTooltipDescripcion();
@@ -345,16 +341,13 @@ public class VistaJoker implements Arrastrable{
         fontTitulo.getData().markupEnabled = true;
         fontDesc.getData().markupEnabled = true;
         String lineaNombre = joker.getNombre();
-        // Usamos trim() para borrar cualquier \n sobrante que infle el alto de la caja
         String descripcionPura = joker.getDescripcionRenderizada(juego).trim();
         String descripcion = ColorMecanica.colorearTexto(Palo.colorearTexto(descripcionPura));
         String rarezaStr = joker.getRareza().toString().toUpperCase();
         float padEtiquetaX = 10f;
         float padEtiquetaY = 4f;
-        // --- NUEVO SISTEMA DE ESPACIADO SECUENCIAL ---
         float gapTituloCaja = 6f;
         float descPadX = 10f;
-        // 1. Aumentamos levemente el padding vertical de la caja
         float descPadY = 8f;
         float gapCajaBadges = 8f;
         float maxAnchoPalabra = 0f;
@@ -373,7 +366,7 @@ public class VistaJoker implements Arrastrable{
         float altoCategorias = 0;
         layout.setText(fontDesc, rarezaStr);
         anchoUtil = Math.max(anchoUtil, layout.width + (padEtiquetaX * 2f));
-        for (CategoriaJoker cat : joker.getCategorias()) {
+        for (io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker cat : joker.getCategorias()) {
             layout.setText(fontDesc, cat.getTexto().toUpperCase());
             anchoUtil = Math.max(anchoUtil, layout.width + (padEtiquetaX * 2f));
             altoCategorias += espacioEntreBadges + altoBadgeReal;
@@ -406,12 +399,12 @@ public class VistaJoker implements Arrastrable{
         Color colorDeRareza = joker.getRareza().getColor();
         Texture pixelBlanco = game.getPixelBlanco();
         TooltipUI.dibujarFondo(batch, pixelBlanco, cartelX, cartelY, anchoCartel, altoCartel, colorDeRareza);
-        // 1. DIBUJAMOS EL TÍTULO
+        // Título
         float currentY = cartelY + altoCartel - paddingY;
         TooltipUI.dibujarTitulo(batch, fontTitulo, lineaNombre, cartelX + paddingX, currentY, anchoUtil, colorDeRareza);
         currentY -= altoTitulo;
         currentY -= gapTituloCaja;
-        // 2. DIBUJAMOS LA CAJA BLANCA
+        // Caja blanca
         float boxX = cartelX + paddingX - descPadX;
         float boxW = anchoCartel - (paddingX * 2f) + (descPadX * 2f);
         float boxTop = currentY;
@@ -420,19 +413,21 @@ public class VistaJoker implements Arrastrable{
         if (pixelBlanco != null) {
             TooltipUI.dibujarCajaBlancaInterna(batch, pixelBlanco, boxX, boxY, boxW, boxH);
         }
-        // 3. DIBUJAMOS EL TEXTO DE LA DESCRIPCIÓN
+        // Descripción
         Color colorDescAnterior = fontDesc.getColor();
         fontDesc.setColor(0.08f, 0.08f, 0.08f, 1f);
-        // Alineación vertical exacta, removiendo el offset arbitrario de -3f
         float textY = boxTop - descPadY + 2f;
-        fontDesc.draw(batch, descripcion, cartelX + paddingX, textY, anchoUtil, com.badlogic.gdx.utils.Align.center, true); // 4. DIBUJAMOS LOS BADGES
+        fontDesc.draw(batch, descripcion, cartelX + paddingX, textY, anchoUtil, com.badlogic.gdx.utils.Align.center, true);
+        // Badges (sin icono)
         currentY -= boxH;
         currentY -= gapCajaBadges;
         float centroCartelX = cartelX + (anchoCartel / 2f);
-        currentY = TooltipUI.dibujarBadge(batch, fontDesc, pixelBlanco, rarezaStr, colorDeRareza, centroCartelX, currentY, padEtiquetaX, padEtiquetaY);
-        for (CategoriaJoker cat : joker.getCategorias()) {
+        currentY = TooltipUI.dibujarBadge(batch, fontDesc, pixelBlanco, rarezaStr, colorDeRareza,
+            centroCartelX, currentY, padEtiquetaX, padEtiquetaY);
+        for (io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker cat : joker.getCategorias()) {
             currentY -= espacioEntreBadges;
-            currentY = TooltipUI.dibujarBadge(batch, fontDesc, pixelBlanco, cat.getTexto().toUpperCase(), cat.getColor(), centroCartelX, currentY, padEtiquetaX, padEtiquetaY);
+            currentY = TooltipUI.dibujarBadge(batch, fontDesc, pixelBlanco, cat.getTexto().toUpperCase(), cat.getColor(),
+                centroCartelX, currentY, padEtiquetaX, padEtiquetaY);
         }
         fontTitulo.getData().markupEnabled = markupOriginalTitulo;
         fontDesc.getData().markupEnabled = markupOriginalDesc;

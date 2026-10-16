@@ -11,7 +11,8 @@ public class Tucuman extends Joker {
 
     public Tucuman() {
         super(77, "Tucumán", "Tucuman", "Espada y Oro cuentan como el mismo palo para el envido",
-            Rareza.raro, 6, Joker.FaseActivacion.INDEPENDIENTE, CategoriaJoker.TV);
+            Rareza.raro, 6, Joker.FaseActivacion.INDEPENDIENTE,
+            CategoriaJoker.ACTIVACION, CategoriaJoker.TERRITORIO);
     }
 
     @Override

@@ -21,7 +21,9 @@ public class Formosa extends Joker {
             Rareza.raro,
             5,
             INDEPENDIENTE,
-            CategoriaJoker.NACIONAL
+            CategoriaJoker.ECONOMIA,
+            CategoriaJoker.AZAR,
+            CategoriaJoker.TERRITORIO
         );
         setAcumulado(1); // Arranca dando $1
     }

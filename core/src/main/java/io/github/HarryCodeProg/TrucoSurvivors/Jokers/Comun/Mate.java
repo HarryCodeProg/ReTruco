@@ -23,7 +23,8 @@ public class Mate extends Joker {
             Rareza.comun,
             3,
             AL_JUGAR,
-            CategoriaJoker.NACIONAL,CategoriaJoker.BEBIDA,CategoriaJoker.AMARGO
+            CategoriaJoker.ACTIVACION,
+            CategoriaJoker.BEBIDA
         );
     }
 

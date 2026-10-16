@@ -422,7 +422,7 @@ public class VistaCarta implements Arrastrable{
             return;
         }
         if (resaltado) {
-            pulso += delta * 6f;
+            pulso = Math.min(pulso + delta * 6f, (float) Math.PI);
         }
         if (animando) {
             hover = false;
@@ -550,15 +550,11 @@ public class VistaCarta implements Arrastrable{
         }
     }
 
-    private float moverHacia(float value, float target, float maxDelta) {
-        float diferencia = target - value;
-        if (Math.abs(diferencia) <= maxDelta) return target;
-        return value + Math.signum(diferencia) * maxDelta;
-    }
-
     public void setResaltado(boolean resaltado) {
+        if (resaltado && !this.resaltado) {
+            pulso = 0f;
+        }
         this.resaltado = resaltado;
-        if (resaltado) pulso = 0f;
     }
 
     public void setHandPosition(float x, float y) {

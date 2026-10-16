@@ -24,7 +24,9 @@ public class Guanaco extends Joker {
             Rareza.raro,
             5,
             INDEPENDIENTE,
-            CategoriaJoker.ANIMAL
+            CategoriaJoker.MAZO,
+            CategoriaJoker.TRUCO,
+            CategoriaJoker.FAUNA
         );
         // El acumulado va a guardar el total histórico de descartes ahorrados
         setAcumulado(0);

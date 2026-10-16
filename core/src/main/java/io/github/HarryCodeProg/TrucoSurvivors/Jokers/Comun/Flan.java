@@ -10,9 +10,12 @@ import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 public class Flan extends Joker {
 
     public Flan() {
-        super(25, "Flan", "Flan", "+50 puntos truco y +50 puntos envido por cada otro joker con categoria POSTRE",
+        super(25, "Flan", "Flan", "+50 puntos truco y +50 puntos envido por cada otro joker con categoria 'GASTRONOMIA'",
             Rareza.comun, 4, Joker.FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.POSTRE, CategoriaJoker.COMIDA, CategoriaJoker.DULCE);
+            CategoriaJoker.TRUCO,
+            CategoriaJoker.ENVIDO,
+            CategoriaJoker.GASTRONOMIA
+        );
     }
 
     @Override
@@ -26,9 +29,9 @@ public class Flan extends Joker {
     @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego) {
         if (evento != EventoJuego.TERMINO_MANO) return;
-        int cantidadPostres = ctx.contarJokersConCategoria(CategoriaJoker.POSTRE, this);
-        if (cantidadPostres > 0) {
-            double bonus = cantidadPostres * 50.0;
+        int cantidadGastronomia = ctx.contarJokersConCategoria(CategoriaJoker.GASTRONOMIA, this);
+        if (cantidadGastronomia > 0) {
+            double bonus = cantidadGastronomia * 50.0;
             ctx.sumarPuntosBaseCalculo(bonus); // Ajustar según los setters de tu ResolucionPuntaje
         }
     }

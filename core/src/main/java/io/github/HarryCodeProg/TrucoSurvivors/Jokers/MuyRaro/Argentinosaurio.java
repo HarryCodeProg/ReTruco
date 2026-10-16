@@ -20,6 +20,8 @@ public class Argentinosaurio extends Joker {
             Rareza.muyRaro,
             6,
             Joker.FaseActivacion.INDEPENDIENTE,
+            CategoriaJoker.TRUCO,
+            CategoriaJoker.FAUNA,
             CategoriaJoker.NACIONAL
         );
         setAcumulado(PUNTOS_INICIALES);

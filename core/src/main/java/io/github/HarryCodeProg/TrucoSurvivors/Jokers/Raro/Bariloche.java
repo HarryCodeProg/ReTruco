@@ -16,7 +16,7 @@ public class Bariloche extends Joker {
             Rareza.raro,
             5,
             Joker.FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.NACIONAL);
+            CategoriaJoker.ECONOMIA, CategoriaJoker.TERRITORIO);
     }
 
     @Override

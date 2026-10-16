@@ -14,7 +14,7 @@ public class MartinFierro extends Joker {
         super(75, "Martin Fierro", "MartinFierro",
             "Al ganar al rival, genera +1 reactivacion de las cartas por cada otro joker 'Nacional' (actual: 0)",
             Rareza.raro, 6, Joker.FaseActivacion.AL_PUNTUAR_CARTA,
-            CategoriaJoker.NACIONAL, CategoriaJoker.HISTORIA);
+            CategoriaJoker.ACTIVACION, CategoriaJoker.NACIONAL, CategoriaJoker.CULTURA);
     }
 
     @Override

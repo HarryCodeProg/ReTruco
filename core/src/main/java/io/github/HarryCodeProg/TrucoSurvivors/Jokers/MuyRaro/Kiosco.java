@@ -12,7 +12,7 @@ public class Kiosco extends Joker {
     public Kiosco() {
         super(108, "Kiosco", "Kiosco", "+8 multiplicador por cada mano restante al final de la ronda",
             Rareza.muyRaro, 8, Joker.FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.INTERNACIONAL);
+            CategoriaJoker.TRUCO, CategoriaJoker.ECONOMIA, CategoriaJoker.GASTRONOMIA);
     }
 
     @Override

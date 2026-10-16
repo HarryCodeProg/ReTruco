@@ -19,7 +19,9 @@ public class Tango extends Joker {
             Rareza.muyRaro,
             8, // placeholder: ajustá el coste real
             Joker.FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.NACIONAL // ajustá si corresponde
+            CategoriaJoker.TRUCO,
+            CategoriaJoker.MAZO,
+            CategoriaJoker.CULTURA
         );
     }
 
@@ -61,7 +63,7 @@ public class Tango extends Joker {
         double ahorrados = getAcumulado();
         int sumaActual = (int) (ahorrados * 8);
         double xActual = Math.round((1.0 + (ahorrados * 0.3)) * 100.0) / 100.0;
-        return getDescripcion() + "\n\n(Actual: +" + sumaActual + " mult y X" + xActual + " mult)";
+        return getDescripcion() + "\n(Actual: +" + sumaActual + " mult y X" + xActual + " mult)";
     }
 
     @Override

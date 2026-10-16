@@ -18,8 +18,9 @@ public class Yaguarete extends Joker {
             Rareza.raro,
             8,
             Joker.FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.NACIONAL,
-            CategoriaJoker.ANIMAL
+            CategoriaJoker.ACTIVACION,
+            CategoriaJoker.FIGURA,
+            CategoriaJoker.FAUNA
         );
     }
 

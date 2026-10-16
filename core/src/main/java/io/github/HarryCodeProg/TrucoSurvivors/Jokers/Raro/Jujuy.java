@@ -20,7 +20,9 @@ public class Jujuy extends Joker {
             Rareza.raro,
             5,
             INDEPENDIENTE,
-            CategoriaJoker.NACIONAL
+            CategoriaJoker.ENVIDO,
+            CategoriaJoker.ACTIVACION,
+            CategoriaJoker.TERRITORIO
         );
     }
 

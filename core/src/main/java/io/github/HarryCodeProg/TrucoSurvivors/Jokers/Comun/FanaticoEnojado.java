@@ -15,7 +15,7 @@ public class FanaticoEnojado extends Joker {
     public FanaticoEnojado(){
         super(45, "Fanatico Enojado", "FanaticoEnojado", "Cada Copa que mata otorga +50 puntos truco",
             Rareza.comun, 1, Joker.FaseActivacion.AL_PUNTUAR_CARTA,
-            CategoriaJoker.TV, CategoriaJoker.SECUENCIA);
+            CategoriaJoker.TRUCO, CategoriaJoker.NACIONAL);
     }
 
     @Override

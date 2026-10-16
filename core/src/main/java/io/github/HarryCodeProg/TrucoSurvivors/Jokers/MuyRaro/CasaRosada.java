@@ -19,13 +19,15 @@ public class CasaRosada extends Joker {
     public CasaRosada() {
         super(
             129,
-            "CasaRosada",
+            "Casa Rosada",
             "CasaRosada",
             "X3 multiplicador truco si las cartas jugadas son de distinto palo",
             Rareza.muyRaro,
             8, // placeholder: ajustá el coste real
             Joker.FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.NACIONAL // ajustá si corresponde
+            CategoriaJoker.TRUCO,
+            CategoriaJoker.ACTIVACION,
+            CategoriaJoker.TERRITORIO
         );
     }
 

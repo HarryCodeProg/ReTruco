@@ -18,7 +18,8 @@ public class Museo extends Joker {
             Rareza.muyRaro,
             8, // placeholder: ajustá coste real
             Joker.FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.NACIONAL // ajustá si corresponde
+            CategoriaJoker.ECONOMIA,
+            CategoriaJoker.CULTURA
         );
     }
 

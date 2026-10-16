@@ -13,7 +13,8 @@ public class Galletitas extends Joker {
     public Galletitas(){
         super(12, "Galletitas", "Galletitas", "Las cartas que ganen el envido reciben +3 valor envido",
             Rareza.comun, 3, FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.COMIDA, CategoriaJoker.DULCE);
+            CategoriaJoker.ENVIDO,
+            CategoriaJoker.GASTRONOMIA);
     }
 
     @Override

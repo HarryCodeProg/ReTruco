@@ -16,7 +16,7 @@ public class Argentavis extends Joker {
         super(122, "Argentavis", "Argentavis",
             "Reactiva la primer carta que mata una vez por cada $5 que tengas",
             Rareza.muyRaro, 6, Joker.FaseActivacion.AL_PUNTUAR_CARTA,
-            CategoriaJoker.NACIONAL);
+            CategoriaJoker.TRUCO, CategoriaJoker.ACTIVACION, CategoriaJoker.FAUNA);
     }
 
     @Override

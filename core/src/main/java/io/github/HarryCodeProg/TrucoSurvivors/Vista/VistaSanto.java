@@ -42,6 +42,7 @@ public class VistaSanto implements Arrastrable {
     private static final float GROSOR_MARCO = 2f;
     private boolean tooltipLateral = false;
     private final FisicaTiltArrastre fisicaTiltArrastre = new FisicaTiltArrastre();
+    private boolean oculto = false;
 
     public VistaSanto(Santo santo, TextureAtlas atlasSantos) {
         this.santo = santo;
@@ -175,6 +176,7 @@ public class VistaSanto implements Arrastrable {
 
 
     public void render(SpriteBatch batch) {
+        if (oculto) return;
         float drawY = y + visualOffsetY;
         batch.flush();
         com.badlogic.gdx.math.Matrix4 matrixAnterior = batch.getTransformMatrix().cpy();
@@ -369,6 +371,9 @@ public class VistaSanto implements Arrastrable {
         fontDesc.setColor(colorDescAnterior);
         batch.setColor(Color.WHITE);
     }
+
+    public void setOculto(boolean oculto) { this.oculto = oculto; }
+    public boolean isOculto() { return oculto; }
 
     public void setTooltipLateral(boolean lateral) { this.tooltipLateral = lateral; }
 

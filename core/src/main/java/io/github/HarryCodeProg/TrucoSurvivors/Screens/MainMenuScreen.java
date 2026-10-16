@@ -25,7 +25,6 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack;
-import io.github.HarryCodeProg.TrucoSurvivors.Gestores.GestorGuardado;
 
 import java.util.ArrayList;
 
@@ -37,7 +36,6 @@ public class MainMenuScreen implements Screen {
     private BitmapFont font;
     private Boton botonJugar;
     private Boton botonSalir;
-    private float tiempoTranscurrido = 0;
     private Texture texturaVacia;
     private BitmapFont miFuentePersonalizada;
     private Background fondoPlasma;
@@ -58,7 +56,13 @@ public class MainMenuScreen implements Screen {
     private float offsetEspadaY;
     private final FisicaTiltArrastre fisicaTiltEspada = new FisicaTiltArrastre();
     private float rotacionEspada = 0f;
-    private enum PanelMenu { PRINCIPAL, PERSONALIZAR, CONTINUAR_O_NUEVA }
+    private enum PanelMenu {
+        PRINCIPAL,
+        CONTINUAR_O_NUEVA,
+        PERSONALIZAR_MENU,
+        PERSONALIZAR_MUSICA,
+        PERSONALIZAR_FONDO
+    }
     private PanelMenu panelActual = PanelMenu.PRINCIPAL;
     private Boton botonPersonalizar;
     private Boton botonVolverPersonalizar;
@@ -82,6 +86,16 @@ public class MainMenuScreen implements Screen {
     private static final float FOOTER_ALTO = 95f;
     private final ArrayList<Rectangle> filasCanciones = new ArrayList<>();
     private float panelMusicaX, panelMusicaY, panelMusicaAlto;
+    // Submenú personalizar
+    private Boton botonPersonalizarMusica;
+    private Boton botonPersonalizarFondo;
+    private Boton botonVolverSubmenu;
+    // Panel fondo (movido desde OpcionesScreen)
+    private Boton botonFondoAnterior;
+    private Boton botonFondoSiguiente;
+    private Boton botonAplicarFondo;
+    private Boton botonDescartarFondo;
+    private int fondoIndexPendiente;
     private final String[] frasesSubtitulo = {
         "EL TRUCO REINVENTADO",
     };
@@ -104,6 +118,15 @@ public class MainMenuScreen implements Screen {
         botonPartidaNueva = new Boton(centroX - anchoBoton / 2f, 245f, anchoBoton, altoBoton, "PARTIDA NUEVA", Boton.TipoColor.BORDO, Accion.JUGAR_CARTA);
         botonVolverContinuar = new Boton(centroX - anchoBoton / 2f, 165f, anchoBoton, altoBoton, "VOLVER", Boton.TipoColor.CELESTE, Accion.OPCIONES);
         calcularLayoutMusica();
+        botonPersonalizarMusica = new Boton(centroX - anchoBoton / 2f, 380f, anchoBoton, altoBoton, "MÚSICA", Boton.TipoColor.DORADO, Accion.OPCIONES);
+        botonPersonalizarFondo = new Boton(centroX - anchoBoton / 2f, 300f, anchoBoton, altoBoton, "FONDO",  Boton.TipoColor.CELESTE, Accion.OPCIONES);
+        botonVolverSubmenu     = new Boton(centroX - anchoBoton / 2f, 180f, anchoBoton, altoBoton, "VOLVER", Boton.TipoColor.BORDO,   Accion.OPCIONES);
+// Botones del panel fondo, movidos desde OpcionesScreen
+        botonFondoAnterior   = new Boton(centroX - 250f, 320f, 60f, 50f, "<", Accion.OPCIONES);
+        botonFondoSiguiente  = new Boton(centroX + 190f, 320f, 60f, 50f, ">", Accion.OPCIONES);
+        botonAplicarFondo    = new Boton(centroX - 180f, 150f, 170f, 50f, "APLICAR",   Accion.OPCIONES);
+        botonDescartarFondo  = new Boton(centroX + 10f,  150f, 170f, 50f, "DESCARTAR", Accion.OPCIONES);
+        fondoIndexPendiente  = game.getConfiguracionJuego().getFondoIndex();
         cartaDecorativa = game.getAtlasCartas().findRegion("back");
         logo1 = new Texture("ui/logo1.png");
         logo2 = new Texture("ui/logo2.png");
@@ -166,7 +189,7 @@ public class MainMenuScreen implements Screen {
                 if (game.hayGuardadoDisponible()) {
                     panelActual = PanelMenu.CONTINUAR_O_NUEVA;
                 } else {
-                    game.setScreen(new GameScreenV2(game));
+                    game.setScreen(new GameScreen(game));
                     dispose();
                 }
                 return;
@@ -182,7 +205,7 @@ public class MainMenuScreen implements Screen {
                 return;
             }
             if (botonPersonalizar.fueCliqueado(mouseWorld.x, mouseWorld.y)) {
-                panelActual = PanelMenu.PERSONALIZAR;
+                panelActual = PanelMenu.PERSONALIZAR_MENU;
             }
             if (botonSalir.fueCliqueado(mouseWorld.x, mouseWorld.y)) {
                 Gdx.app.exit();
@@ -193,7 +216,7 @@ public class MainMenuScreen implements Screen {
             botonPartidaNueva.update(mouseWorld.x, mouseWorld.y);
             botonVolverContinuar.update(mouseWorld.x, mouseWorld.y);
             if (botonContinuar.fueCliqueado(mouseWorld.x, mouseWorld.y)) {
-                game.setScreen(new GameScreenV2(game));
+                game.setScreen(new GameScreen(game));
                 dispose();
                 return;
             }
@@ -201,18 +224,35 @@ public class MainMenuScreen implements Screen {
                 game.getPerfilJugador().iniciarNuevaRun();
                 game.reiniciarDesbloqueoRivales();
                 io.github.HarryCodeProg.TrucoSurvivors.Gestores.GestorGuardado.borrarGuardado();
-                game.setScreen(new GameScreenV2(game));
+                game.setScreen(new GameScreen(game));
                 dispose();
                 return;
             }
             if (botonVolverContinuar.fueCliqueado(mouseWorld.x, mouseWorld.y)) {
                 panelActual = PanelMenu.PRINCIPAL;
             }
-        } else if (panelActual == PanelMenu.PERSONALIZAR) {
-            botonVolverPersonalizar.update(mouseWorld.x, mouseWorld.y);
-            if (botonVolverPersonalizar.fueCliqueado(mouseWorld.x, mouseWorld.y)) {
+        } else if (panelActual == PanelMenu.PERSONALIZAR_MENU) {
+            botonPersonalizarMusica.update(mouseWorld.x, mouseWorld.y);
+            botonPersonalizarFondo.update(mouseWorld.x, mouseWorld.y);
+            botonVolverSubmenu.update(mouseWorld.x, mouseWorld.y);
+            if (botonPersonalizarMusica.fueCliqueado(mouseWorld.x, mouseWorld.y)) {
+                panelActual = PanelMenu.PERSONALIZAR_MUSICA;
+            }
+            if (botonPersonalizarFondo.fueCliqueado(mouseWorld.x, mouseWorld.y)) {
+                fondoIndexPendiente = game.getConfiguracionJuego().getFondoIndex();
+                fondoPlasma.setTema(fondoIndexPendiente);
+                panelActual = PanelMenu.PERSONALIZAR_FONDO;
+            }
+            if (botonVolverSubmenu.fueCliqueado(mouseWorld.x, mouseWorld.y)) {
                 panelActual = PanelMenu.PRINCIPAL;
             }
+
+        } else if (panelActual == PanelMenu.PERSONALIZAR_MUSICA) {
+            botonVolverPersonalizar.update(mouseWorld.x, mouseWorld.y);
+            if (botonVolverPersonalizar.fueCliqueado(mouseWorld.x, mouseWorld.y)) {
+                panelActual = PanelMenu.PERSONALIZAR_MENU;
+            }
+            // (Acá va el resto de la lógica de arrastre/selección que ya tenías)
             boolean clickAceptado = false;
             if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
                 if (areaLista.contains(mouseWorld.x, mouseWorld.y)) {
@@ -226,23 +266,40 @@ public class MainMenuScreen implements Screen {
                 scrollY = scrollYStart + deltaY;
                 scrollY = MathUtils.clamp(scrollY, 0, maxScrollY);
             } else if (arrastrandoLista) {
-                // El usuario soltó el clic
                 arrastrandoLista = false;
-                // Si el mouse casi no se movió, lo consideramos un clic para elegir canción
-                if (Math.abs(mouseWorld.y - dragListaStartY) < 10f) {
-                    clickAceptado = true;
-                }
+                if (Math.abs(mouseWorld.y - dragListaStartY) < 10f) clickAceptado = true;
             }
             if (clickAceptado) {
                 for (int i = 0; i < filasCanciones.size(); i++) {
                     Rectangle r = filasCanciones.get(i);
-                    // Comprobamos la colisión sumando el offset actual del scroll
                     if (mouseWorld.x >= r.x && mouseWorld.x <= r.x + r.width &&
                         mouseWorld.y >= r.y + scrollY && mouseWorld.y <= r.y + scrollY + r.height) {
                         game.cambiarPistaMusica(i);
                         break;
                     }
                 }
+            }
+        } else if (panelActual == PanelMenu.PERSONALIZAR_FONDO) {
+            botonFondoAnterior.update(mouseWorld.x, mouseWorld.y);
+            botonFondoSiguiente.update(mouseWorld.x, mouseWorld.y);
+            botonAplicarFondo.update(mouseWorld.x, mouseWorld.y);
+            botonDescartarFondo.update(mouseWorld.x, mouseWorld.y);
+            if (botonFondoSiguiente.fueCliqueado(mouseWorld.x, mouseWorld.y)) {
+                fondoIndexPendiente = (fondoIndexPendiente + 1) % Background.TEMAS.length;
+                fondoPlasma.setTema(fondoIndexPendiente);
+            }
+            if (botonFondoAnterior.fueCliqueado(mouseWorld.x, mouseWorld.y)) {
+                fondoIndexPendiente = (fondoIndexPendiente - 1 + Background.TEMAS.length) % Background.TEMAS.length;
+                fondoPlasma.setTema(fondoIndexPendiente);
+            }
+            if (botonAplicarFondo.fueCliqueado(mouseWorld.x, mouseWorld.y)) {
+                game.getConfiguracionJuego().setFondoIndex(fondoIndexPendiente);
+                game.getConfiguracionJuego().guardar();
+                panelActual = PanelMenu.PERSONALIZAR_MENU;
+            }
+            if (botonDescartarFondo.fueCliqueado(mouseWorld.x, mouseWorld.y)) {
+                fondoPlasma.setTema(game.getConfiguracionJuego().getFondoIndex());
+                panelActual = PanelMenu.PERSONALIZAR_MENU;
             }
         }
         // --- FIN LÓGICA DE ACTUALIZACIÓN ---
@@ -286,10 +343,61 @@ public class MainMenuScreen implements Screen {
             botonContinuar.render(game.batch);
             botonPartidaNueva.render(game.batch);
             botonVolverContinuar.render(game.batch);
-        } else if (panelActual == PanelMenu.PERSONALIZAR) {
+        } else if (panelActual == PanelMenu.PERSONALIZAR_MENU) {
+            dibujarCajaPersonalizar(game.batch);
+            botonPersonalizarMusica.render(game.batch);
+            botonPersonalizarFondo.render(game.batch);
+            botonVolverSubmenu.render(game.batch);
+        } else if (panelActual == PanelMenu.PERSONALIZAR_MUSICA) {
             dibujarPanelMusica(game.batch, delta);
+        } else if (panelActual == PanelMenu.PERSONALIZAR_FONDO) {
+            dibujarPanelFondo(game.batch);
+            botonFondoAnterior.render(game.batch);
+            botonFondoSiguiente.render(game.batch);
+            botonAplicarFondo.render(game.batch);
+            botonDescartarFondo.render(game.batch);
         }
         game.batch.end();
+    }
+
+    private void dibujarCajaPersonalizar(SpriteBatch batch) {
+        Texture pixel = game.getPixelBlanco();
+        float anchoBoton = 220f;
+        float altoBoton = 58f;
+        float padding = 20f;
+        float boxW = anchoBoton + (padding * 2f);
+        float boxH = (380f + altoBoton - 180f) + (padding * 2f);
+        float boxX = (viewport.getWorldWidth() / 2f) - (boxW / 2f);
+        float boxY = 180f - padding;
+        dibujarRectRedondeado(batch, pixel, boxX - 4f, boxY - 4f, boxW + 8f, boxH + 8f, 12f, new Color(0.12f, 0.15f, 0.17f, 1f));
+        dibujarRectRedondeado(batch, pixel, boxX, boxY, boxW, boxH, 10f, new Color(0.20f, 0.25f, 0.28f, 1f));
+    }
+
+    private void dibujarPanelFondo(SpriteBatch batch) {
+        Texture pixel = game.getPixelBlanco();
+        float centroX = viewport.getWorldWidth() / 2f;
+        // Reutiliza el estilo del panel de música
+        float w = PANEL_MUSICA_ANCHO;
+        float h = HEADER_ALTO + FOOTER_ALTO + 100f;
+        float x = centroX - w / 2f;
+        float y = 85f;
+        dibujarRectRedondeado(batch, pixel, x + 6f, y - 8f, w, h, 12f, UITheme.SOMBRA);
+        dibujarRectRedondeado(batch, pixel, x - 4f, y - 4f, w + 8f, h + 8f, 13f, UITheme.BORDE);
+        dibujarRectRedondeado(batch, pixel, x, y, w, h, 10f, UITheme.PANEL_PRINCIPAL);
+        batch.setColor(UITheme.DORADO);
+        batch.draw(pixel, x + 18f, y + h - 6f, w - 36f, 3f);
+        batch.setColor(Color.WHITE);
+        BitmapFont fTitulo = game.getFuentePrincipal();
+        BitmapFont fUI = game.getFuenteUI();
+        fTitulo.getData().setScale(1.05f);
+        fTitulo.setColor(UITheme.DORADO_BRILLANTE);
+        fTitulo.draw(batch, "FONDO", x, y + h - 30f, w, Align.center, false);
+        fTitulo.getData().setScale(1f);
+        fTitulo.setColor(Color.WHITE);
+        String nombreTema = Background.TEMAS[fondoIndexPendiente].nombre;
+        fUI.setColor(UITheme.TEXTO_PRINCIPAL);
+        fUI.draw(batch, nombreTema, x, y + h - 90f, w, Align.center, false);
+        fUI.setColor(Color.WHITE);
     }
 
     private void dibujarCajaContinuar(SpriteBatch batch) {
@@ -521,7 +629,7 @@ public class MainMenuScreen implements Screen {
         Gdx.input.setInputProcessor(new InputAdapter() {
             @Override
             public boolean scrolled(float amountX, float amountY) {
-                if (panelActual == PanelMenu.PERSONALIZAR) {
+                if (panelActual == PanelMenu.PERSONALIZAR_MUSICA) {
                     scrollY += amountY * 30f; // Velocidad de la rueda
                     scrollY = MathUtils.clamp(scrollY, 0, maxScrollY);
                     return true;

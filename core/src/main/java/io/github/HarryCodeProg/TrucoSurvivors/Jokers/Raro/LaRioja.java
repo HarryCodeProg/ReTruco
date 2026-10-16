@@ -21,7 +21,8 @@ public class LaRioja extends Joker {
             Rareza.raro,
             5,
             INDEPENDIENTE,
-            CategoriaJoker.NACIONAL
+            CategoriaJoker.MAZO,
+            CategoriaJoker.TERRITORIO
         );
     }
 

@@ -12,7 +12,8 @@ public class RioNegro extends Joker {
 
     public RioNegro() {
         super(96, "Río Negro", "RioNegro", "Cada vez que se active una figura en envido, x2 multiplicador envido",
-            Rareza.raro, 6, Joker.FaseActivacion.AL_PUNTUAR_CARTA, CategoriaJoker.NACIONAL);
+            Rareza.raro, 6, Joker.FaseActivacion.AL_PUNTUAR_CARTA,
+            CategoriaJoker.ENVIDO, CategoriaJoker.ACTIVACION, CategoriaJoker.TERRITORIO);
     }
 
     @Override

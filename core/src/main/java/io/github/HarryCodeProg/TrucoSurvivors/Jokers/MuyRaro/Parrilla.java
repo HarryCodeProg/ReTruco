@@ -12,7 +12,7 @@ public class Parrilla extends Joker {
     public Parrilla() {
         super(104, "Parrilla", "Parrilla", "x0.30 multiplicador por cada carta debajo de 40 en tu mazo",
             Rareza.muyRaro, 8, Joker.FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.COMIDA);
+            CategoriaJoker.MAZO, CategoriaJoker.TRUCO, CategoriaJoker.GASTRONOMIA);
     }
 
     @Override

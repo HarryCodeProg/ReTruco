@@ -15,7 +15,9 @@ public class Damajuana extends Joker {
     public Damajuana(){
         super(41, "Damajuana", "Damajuana", "Si tenés 3 jokers 'Bebida', x3 multiplicador truco",
             Rareza.comun, 4, Joker.FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.NACIONAL, CategoriaJoker.BEBIDA, CategoriaJoker.ALCOHOL);
+            CategoriaJoker.TRUCO,
+            CategoriaJoker.BEBIDA
+        );
     }
 
     @Override

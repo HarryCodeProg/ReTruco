@@ -14,7 +14,9 @@ public class TortaNegra extends Joker {
     public TortaNegra(){
         super(23, "Torta Negra", "TortaNegra", "Las cartas de Oro que no maten reciben +20 puntos truco",
             Rareza.comun, 3, Joker.FaseActivacion.AL_PUNTUAR_CARTA,
-            CategoriaJoker.NACIONAL, CategoriaJoker.COMIDA, CategoriaJoker.DULCE);
+            CategoriaJoker.TRUCO,
+            CategoriaJoker.GASTRONOMIA
+        );
     }
 
     @Override

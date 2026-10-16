@@ -2,6 +2,7 @@ package io.github.HarryCodeProg.TrucoSurvivors.Jokers.Epico;
 
 import io.github.HarryCodeProg.TrucoSurvivors.Activacion.ContextoJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.EventoJuego;
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Rareza;
 import io.github.HarryCodeProg.TrucoSurvivors.Jugador;
@@ -13,7 +14,8 @@ public class Borges extends Joker {
         super(140, "Borges", "Borges", "+1 tamaño mano, jokers y santos.\n+1 espacio en tienda (todas las zonas).",
             Rareza.epico,
             10,
-            FaseActivacion.INDEPENDIENTE
+            FaseActivacion.INDEPENDIENTE,
+            CategoriaJoker.MAZO, CategoriaJoker.ECONOMIA, CategoriaJoker.PERSONA
         );
     }
 

@@ -2,22 +2,21 @@ package io.github.HarryCodeProg.TrucoSurvivors.Gestores;
 
 import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Carta;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.Accion;
-import io.github.HarryCodeProg.TrucoSurvivors.Estados.EstadoCombate;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.ResolucionPuntaje;
-import io.github.HarryCodeProg.TrucoSurvivors.Screens.GameScreenV2;
+import io.github.HarryCodeProg.TrucoSurvivors.Screens.GameScreen;
 import io.github.HarryCodeProg.TrucoSurvivors.Vista.VistaCarta;
 
 import java.util.ArrayList;
 
 public class GestorAccion {
     private final Juego juego;
-    private final GameScreenV2 gScreen;
+    private final GameScreen gScreen;
     private final ControladorCombate cCombate;
     private final GestorInputArrastrable<VistaCarta> gestorCartas;
     private final GestorAnimacionesMano gestorAnimaciones;
 
-    public GestorAccion(Juego juego, GameScreenV2 gScreen, ControladorCombate cCombate,
+    public GestorAccion(Juego juego, GameScreen gScreen, ControladorCombate cCombate,
                         GestorInputArrastrable<VistaCarta> gestorCartas,
                         GestorAnimacionesMano gestorAnimaciones) {
         this.juego = juego;

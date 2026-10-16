@@ -13,7 +13,9 @@ public class Oblea extends Joker{
     public Oblea(){
         super(32, "Oblea", "Oblea", "+1 tamaño mano, -1 descarte",
             Rareza.comun, 3, Joker.FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.NACIONAL, CategoriaJoker.COMIDA, CategoriaJoker.DULCE, CategoriaJoker.POSTRE);
+            CategoriaJoker.MAZO,
+            CategoriaJoker.GASTRONOMIA
+        );
     }
 
     @Override

@@ -2,6 +2,7 @@ package io.github.HarryCodeProg.TrucoSurvivors.Jokers.Epico;
 
 import io.github.HarryCodeProg.TrucoSurvivors.Activacion.ContextoJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.EventoJuego;
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Rareza;
 import io.github.HarryCodeProg.TrucoSurvivors.Jugador;
@@ -15,7 +16,8 @@ public class MercedesSosa extends Joker {
             "+2 tamaño jokers.\n+2 Multiplicador de Envido\npor cada joker que tengas.",
             Rareza.epico,
             10,
-            FaseActivacion.INDEPENDIENTE
+            FaseActivacion.INDEPENDIENTE,
+            CategoriaJoker.ENVIDO, CategoriaJoker.MAZO, CategoriaJoker.PERSONA
         );
     }
 

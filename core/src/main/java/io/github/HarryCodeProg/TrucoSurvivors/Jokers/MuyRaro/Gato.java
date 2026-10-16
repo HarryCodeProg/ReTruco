@@ -21,7 +21,8 @@ public class Gato extends Joker {
             Rareza.muyRaro,
             6,
             Joker.FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.NACIONAL // ajustá si corresponde
+            CategoriaJoker.CONSUMIBLES,
+            CategoriaJoker.FAUNA
         );
     }
 

@@ -2,6 +2,7 @@ package io.github.HarryCodeProg.TrucoSurvivors.Jokers.MuyRaro;
 
 import io.github.HarryCodeProg.TrucoSurvivors.Activacion.ContextoJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.EventoJuego;
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Rareza;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
@@ -10,7 +11,8 @@ public class Bestiario extends Joker {
 
     public Bestiario() {
         super(101, "Bestiario", "Bestiario", "+5 multiplicador truco por cada joker comprado",
-            Rareza.muyRaro, 8, Joker.FaseActivacion.INDEPENDIENTE);
+            Rareza.muyRaro, 8, Joker.FaseActivacion.INDEPENDIENTE,
+            CategoriaJoker.TRUCO, CategoriaJoker.ECONOMIA);
     }
 
     @Override

@@ -15,7 +15,9 @@ public class SanMartin extends Joker {
         super(150, "San Martín", "SanMartin",
             "Reactiva todas las cartas Espada. x3 multiplicador truco cada vez que se active una Espada.",
             Rareza.legendario, 20, Joker.FaseActivacion.AL_PUNTUAR_CARTA,
-            CategoriaJoker.NACIONAL, CategoriaJoker.HISTORIA);
+            CategoriaJoker.TRUCO,
+            CategoriaJoker.ACTIVACION,
+            CategoriaJoker.PERSONA);
     }
 
     @Override

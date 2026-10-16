@@ -11,7 +11,10 @@ public class Locro extends Joker {
     public Locro(){
         super(29, "Locro", "Locro", "+6 multiplicador envido si tu tanto tiene una figura",
             Rareza.comun, 4, Joker.FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.NACIONAL, CategoriaJoker.COMIDA);
+            CategoriaJoker.ENVIDO,
+            CategoriaJoker.FIGURA,
+            CategoriaJoker.GASTRONOMIA
+        );
     }
 
     @Override

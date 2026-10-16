@@ -20,7 +20,9 @@ public class BuenosAires extends Joker {
             Rareza.raro,
             6, // placeholder: ajustá el coste que corresponda
             Joker.FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.NACIONAL // ajustá categorías si corresponde
+            CategoriaJoker.ENVIDO,
+            CategoriaJoker.ECONOMIA,
+            CategoriaJoker.TERRITORIO
         );
     }
 

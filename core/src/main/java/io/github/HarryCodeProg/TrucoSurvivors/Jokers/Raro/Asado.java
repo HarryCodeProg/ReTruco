@@ -11,7 +11,8 @@ public class Asado extends Joker {
 
     public Asado() {
         super(64, "Asado", "Asado", "+1 multiplicador envido por cada santo consumido",
-            Rareza.raro, 6, Joker.FaseActivacion.INDEPENDIENTE, CategoriaJoker.NACIONAL, CategoriaJoker.COMIDA);
+            Rareza.raro, 6, Joker.FaseActivacion.INDEPENDIENTE,
+            CategoriaJoker.ENVIDO, CategoriaJoker.CONSUMIBLES, CategoriaJoker.GASTRONOMIA);
     }
 
     @Override

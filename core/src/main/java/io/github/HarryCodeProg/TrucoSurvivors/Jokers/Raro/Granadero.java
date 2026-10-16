@@ -15,7 +15,7 @@ public class Granadero extends Joker {
         super(72, "Granadero", "Granadero",
             "x3 multiplicador en la última mano",
             Rareza.raro, 6, Joker.FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.NACIONAL, CategoriaJoker.HISTORIA);
+            CategoriaJoker.TRUCO, CategoriaJoker.ENVIDO, CategoriaJoker.NACIONAL);
     }
 
     @Override
