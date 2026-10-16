@@ -6,14 +6,14 @@ import io.github.HarryCodeProg.TrucoSurvivors.Jugador;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.ConfiguracionEconomia;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.ResolucionPuntaje;
-import io.github.HarryCodeProg.TrucoSurvivors.Screens.GameScreenV2;
+import io.github.HarryCodeProg.TrucoSurvivors.Screens.GameScreen;
 import io.github.HarryCodeProg.TrucoSurvivors.Vista.VistaCarta;
 
 public class ControladorCombate {
-    private final GameScreenV2 screen;
+    private final GameScreen screen;
     private final Juego juego;
 
-    public ControladorCombate(GameScreenV2 screen, Juego juego) {
+    public ControladorCombate(GameScreen screen, Juego juego) {
         this.screen = screen;
         this.juego = juego;
     }

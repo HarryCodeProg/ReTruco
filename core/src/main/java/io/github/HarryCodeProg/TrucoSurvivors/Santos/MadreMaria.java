@@ -30,9 +30,10 @@ public class MadreMaria extends Santo {
 
     @Override
     public void aplicarEfecto(Jugador jugador, ArrayList<Carta> seleccionadas, ContextoJuego ctx) {
+        int puntos = jugador.tieneDobleEfectoSantos() ? 30 : 15;
         int limite = Math.min(2, seleccionadas.size());
         for (int i = 0; i < limite; i++) {
-            seleccionadas.get(i).modificarPuntosTrucoAportePermanente(15);
+            seleccionadas.get(i).modificarPuntosTrucoAportePermanente(puntos);
         }
     }
 }

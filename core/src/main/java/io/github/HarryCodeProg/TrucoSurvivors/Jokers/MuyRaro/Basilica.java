@@ -12,7 +12,7 @@ public class Basilica extends Joker {
     public Basilica() {
         super(130, "Basílica", "Basilica", "x0.25 de multiplicador por cada carta consumida",
             Rareza.muyRaro, 8, Joker.FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.NACIONAL);
+            CategoriaJoker.CONSUMIBLES, CategoriaJoker.MAZO, CategoriaJoker.CULTURA);
     }
 
     @Override

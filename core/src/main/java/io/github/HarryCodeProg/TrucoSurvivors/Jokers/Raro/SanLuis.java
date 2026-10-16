@@ -20,7 +20,9 @@ public class SanLuis extends Joker {
             Rareza.raro,
             5,
             INDEPENDIENTE,
-            CategoriaJoker.NACIONAL
+            CategoriaJoker.ENVIDO,
+            CategoriaJoker.MAZO,
+            CategoriaJoker.TERRITORIO
         );
         setAcumulado(0);
     }

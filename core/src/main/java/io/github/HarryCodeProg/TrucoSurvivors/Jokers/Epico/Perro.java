@@ -2,6 +2,7 @@ package io.github.HarryCodeProg.TrucoSurvivors.Jokers.Epico;
 
 import io.github.HarryCodeProg.TrucoSurvivors.Activacion.ContextoJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.EventoJuego;
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Rareza;
 import io.github.HarryCodeProg.TrucoSurvivors.Jugador;
@@ -20,7 +21,10 @@ public class Perro extends Joker {
             "X2 multiplicador, después de gastar ($50) este joker no consume espacio",
             Rareza.epico,
             8,
-            Joker.FaseActivacion.INDEPENDIENTE
+            Joker.FaseActivacion.INDEPENDIENTE,
+            CategoriaJoker.TRUCO,
+            CategoriaJoker.ECONOMIA,
+            CategoriaJoker.FAUNA
         );
     }
 

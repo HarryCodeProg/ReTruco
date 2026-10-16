@@ -14,13 +14,15 @@ public class EntreRios extends Joker {
     public EntreRios() {
         super(
             91,
-            "EntreRios",
+            "Entre Rios",
             "EntreRios",
             "+3 multiplicador truco por cada mano jugada, -1 por cada descarte.",
             Rareza.raro,
             5,
             INDEPENDIENTE,
-            CategoriaJoker.NACIONAL
+            CategoriaJoker.TRUCO,
+            CategoriaJoker.MAZO,
+            CategoriaJoker.TERRITORIO
         );
         setAcumulado(0);
     }

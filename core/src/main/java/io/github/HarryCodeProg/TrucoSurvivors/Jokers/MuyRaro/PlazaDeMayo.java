@@ -18,7 +18,9 @@ public class PlazaDeMayo extends Joker {
             Rareza.muyRaro,
             12,
             Joker.FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.NACIONAL
+            CategoriaJoker.ENVIDO,
+            CategoriaJoker.ACTIVACION,
+            CategoriaJoker.TERRITORIO
         );
     }
 

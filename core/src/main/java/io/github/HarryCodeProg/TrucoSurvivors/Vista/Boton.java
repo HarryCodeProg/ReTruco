@@ -307,6 +307,7 @@ public class Boton {
             case REROLL_CARTAS:
             case REROLL_JOKERS: return "REROLL";
             case CONTINUAR_TIENDA: return "CONTINUAR";
+            case CONFIRMAR_SELECCION_SANTO: return "CONFIRMAR";
             default: return accion != null ? accion.name() : "";
         }
     }

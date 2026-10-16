@@ -18,13 +18,15 @@ public class SableCorvo extends Joker {
     public SableCorvo() {
         super(
             143,
-            "SableCorvo",
+            "Sable Corvo",
             "SableCorvo",
             "Obtiene aleatoriamente uno de estos efectos:\n+125 puntos, +35 mult, X4 mult o +$10.\n(Cambia en cada mano)",
             Rareza.epico,
             8,
             INDEPENDIENTE,
-            CategoriaJoker.NACIONAL
+            CategoriaJoker.TRUCO,
+            CategoriaJoker.ECONOMIA,
+            CategoriaJoker.AZAR
         );
         cambiarEfecto();
     }

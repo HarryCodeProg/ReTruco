@@ -14,7 +14,7 @@ public class Salta extends Joker {
     public Salta() {
         super(76, "Salta", "Salta", "Basto y Copa cuentan como el mismo palo para el envido",
             Rareza.raro, 6, Joker.FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.NACIONAL);
+            CategoriaJoker.ACTIVACION, CategoriaJoker.TERRITORIO);
     }
 
     @Override

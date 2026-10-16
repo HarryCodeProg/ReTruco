@@ -19,7 +19,7 @@ public class PanelSeleccionRival {
     private static final float PANEL_X = 260f;
     private static final float PANEL_ANCHO = 760f;
     private static final float PANEL_Y = 40f;
-    private static final float PANEL_ALTO = 480f; // Un poco más alto para que respiren las cartas
+    private static final float PANEL_ALTO = 480f;
 
     private final Main game;
     private final Consumer<DatosRival> alElegirRival;
@@ -34,7 +34,6 @@ public class PanelSeleccionRival {
     private boolean cerrando = false;
     private Runnable alCerrarCompletamente;
 
-    // Colores temáticos estilo Balatro (Ciega Pequeña, Grande, Jefe)
     private final Color colorAzul = new Color(0.18f, 0.45f, 0.85f, 1f);
     private final Color colorDorado = new Color(0.85f, 0.65f, 0.15f, 1f);
     private final Color colorRojo = new Color(0.75f, 0.22f, 0.22f, 1f);
@@ -64,8 +63,7 @@ public class PanelSeleccionRival {
         botonesJugar.clear();
         for (int slot = 0; slot < 3; slot++) {
             float cuadroX = xInicial + slot * (anchoCuadro + espacio);
-            // Botón DORADO (Naranja) estilo Balatro para destacar la acción
-            Boton btn = new Boton(cuadroX + (anchoCuadro - 170) / 2f, yCuadro - 15, 170, 50, "SELECCIONAR", Boton.TipoColor.DORADO, Accion.JUGAR_CARTA);
+            Boton btn = new Boton(cuadroX + (anchoCuadro - 170) / 2f, yCuadro + 15, 170, 50, "SELECCIONAR", Boton.TipoColor.DORADO, Accion.JUGAR_CARTA);
             botonesJugar.add(btn);
         }
     }
@@ -102,7 +100,7 @@ public class PanelSeleccionRival {
                 Boton btn = botonesJugar.get(slot);
                 btn.setHabilitado(rival.isDesbloqueado());
                 btn.update(mouseWorldX, mouseWorldY - offsetY);
-                if (btn.fueCliqueado(mouseWorldX, mouseWorldY)) {
+                if (btn.fueCliqueado(mouseWorldX, mouseWorldY - offsetY)) { // Fix: el click también debe compensar el offsetY
                     alElegirRival.accept(rival);
                     return;
                 }
@@ -117,9 +115,9 @@ public class PanelSeleccionRival {
         batch.begin();
 
         Texture pixel = game.getPixelBlanco();
-        BitmapFont font = game.getFuentePrincipal(); // Usamos SIEMPRE la fuente pixelada
+        BitmapFont font = game.getFuentePrincipal();
 
-        // 1. Fondo contenedor sutil (para no opacar las cartas)
+        // 1. Fondo contenedor
         dibujarRectRedondeado(batch, pixel, PANEL_X, PANEL_Y, PANEL_ANCHO, PANEL_ALTO, 16f, new Color(0.04f, 0.05f, 0.07f, 0.85f));
 
         // 2. Título Superior
@@ -144,7 +142,7 @@ public class PanelSeleccionRival {
 
                 Color colorRival = obtenerColorRival(indice);
                 Color colorBorde = rival.isDesbloqueado() ? colorRival : colorBloqueado;
-                Color colorFondo = new Color(0.20f, 0.23f, 0.26f, 1f); // Gris pizarra azulado
+                Color colorFondo = new Color(0.20f, 0.23f, 0.26f, 1f);
 
                 // A) Sombra Exterior
                 dibujarRectRedondeado(batch, pixel, cuadroX + 8, yCuadro - 8, anchoCuadro, altoCuadro, 12f, new Color(0f, 0f, 0f, 0.4f));
@@ -155,18 +153,15 @@ public class PanelSeleccionRival {
                 // C) Fondo Principal
                 dibujarRectRedondeado(batch, pixel, cuadroX, yCuadro, anchoCuadro, altoCuadro, 10f, colorFondo);
 
-                // D) Píldora de Nombre (Top Badge)
+                // D) Píldora de Nombre
                 float badgeW = anchoCuadro - 30;
                 float badgeH = 35;
                 float badgeX = cuadroX + 15;
                 float badgeY = yCuadro + altoCuadro - 15 - badgeH;
 
-                // Borde negro del badge
                 dibujarRectRedondeado(batch, pixel, badgeX - 3, badgeY - 3, badgeW + 6, badgeH + 6, badgeH / 2f, new Color(0.1f, 0.1f, 0.1f, 1f));
-                // Relleno del badge (mismo color que el borde exterior)
                 dibujarRectRedondeado(batch, pixel, badgeX, badgeY, badgeW, badgeH, badgeH / 2f, colorBorde);
 
-                // Texto Nombre con sombra dura
                 String nombreRival = rival.getNombre();
                 layout.setText(font, nombreRival);
                 float textX = cuadroX + (anchoCuadro - layout.width) / 2f;
@@ -176,16 +171,14 @@ public class PanelSeleccionRival {
                 font.setColor(Color.WHITE);
                 font.draw(batch, nombreRival, textX, textY);
 
-                // E) Avatar / Símbolo Circular (Simulando la ficha de Ciega)
+                // E) Avatar
                 float iconSize = 85;
                 float iconX = cuadroX + (anchoCuadro - iconSize) / 2f;
                 float iconY = badgeY - 15 - iconSize;
 
-                // Borde y fondo del icono
                 dibujarRectRedondeado(batch, pixel, iconX, iconY, iconSize, iconSize, iconSize / 2f, colorBorde);
                 dibujarRectRedondeado(batch, pixel, iconX + 5, iconY + 5, iconSize - 10, iconSize - 10, (iconSize - 10) / 2f, new Color(0.15f, 0.17f, 0.20f, 1f));
 
-                // Inicial del rival como logo
                 font.getData().setScale(2f);
                 String inicial = nombreRival.substring(0, 1).toUpperCase();
                 layout.setText(font, inicial);
@@ -200,13 +193,11 @@ public class PanelSeleccionRival {
                 layout.setText(font, "Anota al menos");
                 font.draw(batch, "Anota al menos", cuadroX + (anchoCuadro - layout.width) / 2f, metaBoxY + 65);
 
-                // Cajita hundida
                 float metaBoxW = anchoCuadro - 50;
                 float metaBoxH = 45;
                 float metaBoxX = cuadroX + 25;
                 dibujarRectRedondeado(batch, pixel, metaBoxX, metaBoxY, metaBoxW, metaBoxH, 8f, new Color(0.12f, 0.14f, 0.16f, 1f));
 
-                // Número Meta
                 String puntosTxt = String.valueOf((int) rival.getPuntosMeta());
                 font.getData().setScale(1.4f);
                 layout.setText(font, puntosTxt);
@@ -221,7 +212,7 @@ public class PanelSeleccionRival {
                 font.getData().setScale(1f);
                 font.setColor(Color.WHITE);
 
-                // H) Renderizar Botón JUGAR (Solapando el borde inferior)
+                // H) Botón
                 botonesJugar.get(slot).render(batch);
             }
         }
@@ -241,7 +232,6 @@ public class PanelSeleccionRival {
         }
     }
 
-    // Herramienta interna para dibujar rectángulos redondeados perfectos
     private void dibujarRectRedondeado(SpriteBatch batch, Texture pixel, float x, float y, float width, float height, float radio, Color color) {
         if (width <= 0f || height <= 0f) return;
         radio = Math.min(radio, Math.min(width, height) / 2f);

@@ -11,7 +11,8 @@ public class Cortazar extends Joker {
 
     public Cortazar() {
         super(139, "Cortázar", "Cortazar", "Cada vez que agregues una carta al mazo, +1 multiplicador",
-            Rareza.epico, 8, Joker.FaseActivacion.INDEPENDIENTE, CategoriaJoker.TV);
+            Rareza.epico, 8, Joker.FaseActivacion.INDEPENDIENTE,
+            CategoriaJoker.MAZO, CategoriaJoker.ACTIVACION, CategoriaJoker.PERSONA);
     }
 
     @Override

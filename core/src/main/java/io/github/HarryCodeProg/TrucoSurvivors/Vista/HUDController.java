@@ -51,13 +51,4 @@ public class HUDController {
     public void renderBotones(SpriteBatch batch, com.badlogic.gdx.graphics.g2d.TextureRegion pixelBlanco) {
         botones.render(batch, pixelBlanco.getTexture());
     }
-
-    public void renderMazo(SpriteBatch batch, Iterable<Carta> cartasRestantes, int tamanoMazo) {
-        if (vistaMazo != null) {
-            vistaMazo.render(batch, (List<Carta>) cartasRestantes, tamanoMazo);
-        }
-    }
-
-    public GameBotones getBotones() { return botones; }
-    public VistaMazo getVistaMazo() { return vistaMazo; }
 }

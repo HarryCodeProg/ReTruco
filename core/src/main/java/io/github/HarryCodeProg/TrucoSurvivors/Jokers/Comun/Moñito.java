@@ -13,7 +13,8 @@ public class Moñito extends Joker {
     public Moñito(){
         super(22, "Moñito", "Moñito", "Las cartas de Basto que no maten reciben +20 puntos truco",
             Rareza.comun, 3, Joker.FaseActivacion.AL_PUNTUAR_CARTA,
-            CategoriaJoker.NACIONAL, CategoriaJoker.COMIDA, CategoriaJoker.DULCE);
+            CategoriaJoker.TRUCO,
+            CategoriaJoker.GASTRONOMIA);
     }
 
     @Override

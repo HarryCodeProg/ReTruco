@@ -13,7 +13,7 @@ public class PoolSantosTienda {
 
     public PoolSantosTienda() {
         fabricas.add(AlmaMula::new);
-        fabricas.add(Caferino::new);
+        fabricas.add(Ceferino::new);
         fabricas.add(CuraBrochero::new);
         fabricas.add(DifuntaCorrea::new);
         fabricas.add(ElFamiliar::new);
@@ -31,6 +31,12 @@ public class PoolSantosTienda {
         fabricas.add(SanFrancisco::new);
         fabricas.add(SanJorge::new);
         fabricas.add(SanRoque::new);
+        fabricas.add(SanMartinDePorres::new);
+        fabricas.add(SanNicolas::new);
+        fabricas.add(SanPantaleon::new);
+        fabricas.add(SantaRita::new);
+        fabricas.add(YasyYatere::new);
+        fabricas.add(SanLaMuerte::new);
     }
 
     public Santo tomarAleatorio(Random random) {
@@ -50,5 +56,13 @@ public class PoolSantosTienda {
             resultado.add(fabrica.get());
         }
         return resultado;
+    }
+
+    public Santo crearPorId(int id) {
+        for (Supplier<Santo> f : fabricas) {
+            Santo s = f.get();
+            if (s.getId() == id) return s;
+        }
+        return null;
     }
 }

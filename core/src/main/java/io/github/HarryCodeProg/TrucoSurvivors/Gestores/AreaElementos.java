@@ -39,19 +39,6 @@ public class AreaElementos<T extends Arrastrable> {
         }
     }
 
-    /** Fuerza la posición real (x/y) además del objetivo — útil para spawns iniciales sin animación de entrada. */
-    public void distribuirInstantaneo(ArrayList<T> elementos, T arrastrado) {
-        distribuir(elementos, arrastrado);
-        // No hay setPosition en Arrastrable por diseño (solo setHandPosition), así que
-        // esto queda como hook si en el futuro se necesita snap inmediato sin interpolar.
-    }
-
-    public ArrayList<Float> getSlots() { return slots; }
-
-    public void setBounds(float x, float y, float ancho, float alto) {
-        this.x = x; this.y = y; this.ancho = ancho; this.alto = alto;
-    }
-
     public float getX() { return x; }
     public float getY() { return y; }
     public float getAncho() { return ancho; }

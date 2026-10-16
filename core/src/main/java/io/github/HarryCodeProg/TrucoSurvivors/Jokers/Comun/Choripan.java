@@ -14,7 +14,10 @@ public class Choripan extends Joker {
     public Choripan(){
         super(28, "Choripan", "Choripan", "Gana +4 Multiplicador truco cada vez que cantás \"No Quiero\"",
             Rareza.comun, 3, Joker.FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.NACIONAL, CategoriaJoker.COMIDA, CategoriaJoker.TRADICIONAL);
+            CategoriaJoker.TRUCO,
+            CategoriaJoker.RACHAS,
+            CategoriaJoker.GASTRONOMIA
+        );
     }
 
     @Override

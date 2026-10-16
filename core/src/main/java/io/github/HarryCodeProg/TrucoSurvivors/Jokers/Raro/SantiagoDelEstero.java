@@ -20,7 +20,8 @@ public class SantiagoDelEstero extends Joker {
             Rareza.raro,
             5,
             INDEPENDIENTE,
-            CategoriaJoker.NACIONAL
+            CategoriaJoker.CONSUMIBLES,
+            CategoriaJoker.TERRITORIO
         );
     }
 
@@ -64,6 +65,6 @@ public class SantiagoDelEstero extends Joker {
         if (multTexto.endsWith(".0")) {
             multTexto = multTexto.substring(0, multTexto.length() - 2);
         }
-        return getDescripcion() + "\n\n(Actual: X" + multTexto + ")";
+        return getDescripcion() + "\n(Actual: X" + multTexto + ")";
     }
 }

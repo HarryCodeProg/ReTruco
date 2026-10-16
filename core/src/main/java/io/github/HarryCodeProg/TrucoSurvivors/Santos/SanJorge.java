@@ -39,6 +39,12 @@ public class SanJorge extends Santo {
         if (jugador.getJokers().size() >= jugador.getTamañoJokers()) return;
         Joker original = jugador.getJokers().get(random.nextInt(jugador.getJokers().size()));
         Joker copia = original.copiar();
+        if (jugador.tieneDobleEfectoSantos()) {
+            Joker copia2 = original.copiar();
+            if (copia2 != null) {
+                jugador.agregarJoker(copia2);
+            }
+        }
         if (copia != null) {
             jugador.agregarJoker(copia);
         }

@@ -21,7 +21,7 @@ public class Ñandu extends Joker {
             Rareza.raro,
             5,
             INDEPENDIENTE,
-            CategoriaJoker.ANIMAL
+            CategoriaJoker.TRUCO, CategoriaJoker.FIGURA, CategoriaJoker.FAUNA
         );
     }
 

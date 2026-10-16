@@ -21,6 +21,10 @@ public class Mazo {
         this.cartasDescartadas = new ArrayList<>();
     }
 
+    public ArrayList<Carta> getCartasTomadas() {
+        return this.cartasTomadas;
+    }
+
     public static Mazo crearMazoBase() {
         Mazo mazo = new Mazo();
         for (Palo palo : Palo.values()) {

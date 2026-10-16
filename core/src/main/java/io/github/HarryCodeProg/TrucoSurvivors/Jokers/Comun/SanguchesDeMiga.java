@@ -14,17 +14,17 @@ public class SanguchesDeMiga extends Joker {
             53,
             "Sanguches de Miga",
             "SanguchesDeMiga",
-            "Gana +25 puntos truco por cada joker 'Comida'",
+            "Gana +25 puntos truco por cada joker 'GASTRONOMIA'",
             Rareza.comun,
             3,
             Joker.FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.COMIDA, CategoriaJoker.NACIONAL, CategoriaJoker.SALADO
+            CategoriaJoker.TRUCO, CategoriaJoker.GASTRONOMIA
         );
     }
 
     @Override
     public String getDescripcionRenderizada() {
-        return "Gana +25 puntos truco por cada joker 'Comida' (Actual: +" + (int) getAcumulado() + ")";
+        return "Gana +25 puntos truco por cada joker 'GASTRONOMIA' (Actual: +" + (int) getAcumulado() + ")";
     }
 
     @Override
@@ -40,7 +40,7 @@ public class SanguchesDeMiga extends Joker {
         if (evento == EventoJuego.TERMINO_MANO) {
             int cantidadComida = 0;
             for (Joker joker : ctx.getJugador().getJokers()) {
-                if (joker.tieneCategoria(CategoriaJoker.COMIDA)) {
+                if (joker.tieneCategoria(CategoriaJoker.GASTRONOMIA)) {
                     cantidadComida++;
                 }
             }

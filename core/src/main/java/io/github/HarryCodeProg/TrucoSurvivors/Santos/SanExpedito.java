@@ -30,6 +30,10 @@ public class SanExpedito extends Santo {
 
     @Override
     public void aplicarEfecto(Jugador jugador, ArrayList<Carta> seleccionadas, ContextoJuego ctx) {
-        jugador.sumarPesos(jugador.getMazo().getTamañoMazo());
+       if (jugador.tieneDobleEfectoSantos()) {
+            jugador.sumarPesos(jugador.getMazo().getTamañoMazo() * 2);
+            return;
+       }
+       jugador.sumarPesos(jugador.getMazo().getTamañoMazo());
     }
 }

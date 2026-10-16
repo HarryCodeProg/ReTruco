@@ -12,7 +12,8 @@ public class Mendoza extends Joker {
     public Mendoza() {
         super(92, "Mendoza", "Mendoza", "Los jokers pueden aparecer duplicados", Rareza.raro, 6,
             FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.NACIONAL
+            CategoriaJoker.MAZO,
+            CategoriaJoker.TERRITORIO
         );
     }
 

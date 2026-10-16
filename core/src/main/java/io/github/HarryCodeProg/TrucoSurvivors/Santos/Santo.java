@@ -52,4 +52,7 @@ public abstract class Santo {
         this.accionesDiferidas.addAll(otro.getAccionesDiferidas());
         otro.limpiarDiferidos();
     }
+
+    public String getEstadoExtra() { return null; }
+    public void setEstadoExtra(String data) { }
 }

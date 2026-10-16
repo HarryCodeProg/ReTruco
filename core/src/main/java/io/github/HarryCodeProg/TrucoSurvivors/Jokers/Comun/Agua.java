@@ -14,7 +14,9 @@ public class Agua extends Joker {
     public Agua(){
         super(39, "Agua?", "Agua", "La primer carta figura que active otorga x2 multiplicador truco",
             Rareza.comun, 4, Joker.FaseActivacion.AL_PUNTUAR_CARTA,
-            CategoriaJoker.TV, CategoriaJoker.SECUENCIA);
+            CategoriaJoker.ACTIVACION,
+            CategoriaJoker.BEBIDA,
+            CategoriaJoker.FIGURA);
     }
 
     @Override

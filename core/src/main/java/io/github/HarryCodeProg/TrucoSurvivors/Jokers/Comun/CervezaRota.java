@@ -16,11 +16,14 @@ public class CervezaRota extends Joker {
             9,
             "Cerveza Rota",
             "CervezaRota",
-            "+20 puntos truco y envido. +15 por cada otro joker con la categoria 'Alcohol'",
+            "+20 puntos truco y envido. +15 por cada otro joker con la categoria 'BEBIDA'",
             Rareza.comun,
             3,
             INDEPENDIENTE,
-            CategoriaJoker.NACIONAL, CategoriaJoker.ALCOHOL
+            CategoriaJoker.TRUCO,
+            CategoriaJoker.ENVIDO,
+            CategoriaJoker.BEBIDA
+
         );
     }
 
@@ -35,7 +38,7 @@ public class CervezaRota extends Joker {
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego){
         if (evento != EventoJuego.ANTES_DE_SUMAR_TRUCO && evento != EventoJuego.ANTES_DE_SUMAR_ENVIDO) return;
         double bonus = 20;
-        int otrosConAlcohol = ctx.contarJokersConCategoria(CategoriaJoker.ALCOHOL, this);
+        int otrosConAlcohol = ctx.contarJokersConCategoria(CategoriaJoker.BEBIDA, this);
         bonus += 15 * otrosConAlcohol;
         ctx.getResolucionActual().sumarChips(bonus, this.getNombre(), this);
     }

@@ -307,4 +307,28 @@ public class Carta {
         }
         return this.numero == 10 || this.numero == 11 || this.numero == 12;
     }
+
+    public void setBonusPermanentesYMultiplicadores(
+        int bonusPT, int bonusAT, int bonusPE, int bonusAE,
+        double multPT, double multAT, double multPE, double multAE) {
+        this.bonusPoderTrucoPermanente = bonusPT;
+        this.bonusAporteTrucoPermanente = bonusAT;
+        this.bonusPoderEnvidoPermanente = bonusPE;
+        this.bonusAporteEnvidoPermanente = bonusAE;
+        this.multiplicadorPoderTrucoBase = multPT;
+        this.multiplicadorAporteTrucoBase = multAT;
+        this.multiplicadorPoderEnvidoBase = multPE;
+        this.multiplicadorAporteEnvidoBase = multAE;
+        resetearValores();
+    }
+
+    public int getBonusPoderTrucoPermanente() { return bonusPoderTrucoPermanente; }
+    public int getBonusAporteTrucoPermanente() { return bonusAporteTrucoPermanente; }
+    public int getBonusPoderEnvidoPermanente() { return bonusPoderEnvidoPermanente; }
+    public int getBonusAporteEnvidoPermanente() { return bonusAporteEnvidoPermanente; }
+    public double getMultiplicadorPoderTrucoBase() { return multiplicadorPoderTrucoBase; }
+    public double getMultiplicadorAporteTrucoBase() { return multiplicadorAporteTrucoBase; }
+    public double getMultiplicadorPoderEnvidoBase() { return multiplicadorPoderEnvidoBase; }
+    public double getMultiplicadorAporteEnvidoBase() { return multiplicadorAporteEnvidoBase; }
+
 }

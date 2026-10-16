@@ -14,13 +14,15 @@ public class LaPampa extends Joker {
     public LaPampa() {
         super(
             93,
-            "LaPampa",
+            "La Pampa",
             "LaPampa",
             "X4 multiplicador envido.\nPierde X0.25 por cada joker vendido o comprado.",
             Rareza.raro,
             5,
             INDEPENDIENTE,
-            CategoriaJoker.NACIONAL
+            CategoriaJoker.ENVIDO,
+            CategoriaJoker.ECONOMIA,
+            CategoriaJoker.TERRITORIO
         );
         setAcumulado(4.0);
     }
@@ -60,6 +62,6 @@ public class LaPampa extends Joker {
         if (multTexto.endsWith(".0")) {
             multTexto = multTexto.substring(0, multTexto.length() - 2); // Quita el ".0" si es un número entero
         }
-        return "X4 multiplicador envido.\nPierde X0.25 por cada Joker vendido o comprado.\n\n(Actual: X" + multTexto + ")";
+        return "X4 multiplicador envido.\nPierde X0.25 por cada Joker vendido o comprado.\n(Actual: X" + multTexto + ")";
     }
 }

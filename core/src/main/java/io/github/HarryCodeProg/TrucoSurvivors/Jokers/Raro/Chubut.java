@@ -20,7 +20,9 @@ public class Chubut extends Joker {
             Rareza.raro,
             5,
             INDEPENDIENTE,
-            CategoriaJoker.NACIONAL
+            CategoriaJoker.TRUCO,
+            CategoriaJoker.ENVIDO,
+            CategoriaJoker.TERRITORIO
         );
         // Arranca en X1.0 (sin efecto extra)
         setAcumulado(1.0);

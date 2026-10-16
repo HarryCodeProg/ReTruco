@@ -21,20 +21,22 @@ public class Roca extends Joker {
             Rareza.legendario,
             15,
             Joker.FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.NACIONAL, CategoriaJoker.HISTORIA
+            CategoriaJoker.ECONOMIA,
+            CategoriaJoker.TRUCO,
+            CategoriaJoker.PERSONA
         );
     }
 
     @Override
     public String getDescripcionRenderizada() {
-        return "x0.1 por cada peso que tengas (Actual: x" + String.format("%.1f", 1 + getAcumulado()) + ")";
+        return "x0.1 por cada peso que tengas \n(Actual: x" + String.format("%.1f", 1 + getAcumulado()) + ")";
     }
 
     @Override
     public String getDescripcionRenderizada(Juego juego) {
         if (juego != null && juego.getJugador() != null) {
             double mult = 1 + juego.getJugador().getPesos() * MULT_POR_PESO;
-            return "x0.1 por cada peso que tengas (Actual: x" + String.format("%.1f", mult) + ")";
+            return "x0.1 por cada peso que tengas \n(Actual: x" + String.format("%.1f", mult) + ")";
         }
 
         return getDescripcionRenderizada();

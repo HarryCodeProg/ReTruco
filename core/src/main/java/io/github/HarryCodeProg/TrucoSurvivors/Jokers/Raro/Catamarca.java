@@ -20,7 +20,7 @@ public class Catamarca extends Joker {
         super(78, "Catamarca", "Catamarca",
             "+1 tamaño mano. Gana $2 peso cada vez que [numero] se active (numero cambia cada ronda)",
             Rareza.raro, 6, Joker.FaseActivacion.AL_PUNTUAR_CARTA,
-            CategoriaJoker.NACIONAL);
+            CategoriaJoker.ECONOMIA, CategoriaJoker.MAZO, CategoriaJoker.TERRITORIO);
         this.random = new Random();
         this.numeroAleatorio = random.nextInt(12) + 1; // 1 a 12
     }

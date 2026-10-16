@@ -20,7 +20,7 @@ public class Consola extends Joker {
             Rareza.comun,
             3,
             Joker.FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.INTERNACIONAL, CategoriaJoker.HISTORIA
+            CategoriaJoker.ENVIDO, CategoriaJoker.OBJETO
         );
     }
 

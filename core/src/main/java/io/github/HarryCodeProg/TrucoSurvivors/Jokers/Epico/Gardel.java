@@ -13,7 +13,7 @@ public class Gardel extends Joker {
         super(136, "Gardel", "Gardel",
             "+15 puntos truco cada vez que una carta se activa (actual: +0)",
             Rareza.epico, 8, Joker.FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.NACIONAL, CategoriaJoker.MUSICA);
+            CategoriaJoker.TRUCO, CategoriaJoker.ACTIVACION, CategoriaJoker.PERSONA);
     }
 
     @Override

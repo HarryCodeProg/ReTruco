@@ -16,7 +16,7 @@ public class CañaConRuda extends Joker {
     public CañaConRuda(){
         super(60, "Caña Con Ruda", "CañaConRuda", "+2 multiplicador truco por cada roll en la tienda",
             Rareza.comun, 5, Joker.FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.BEBIDA);
+            CategoriaJoker.ECONOMIA, CategoriaJoker.TRUCO, CategoriaJoker.BEBIDA);
     }
 
     @Override

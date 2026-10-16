@@ -30,9 +30,10 @@ public class SanRoque extends Santo {
 
     @Override
     public void aplicarEfecto(Jugador jugador, ArrayList<Carta> seleccionadas, ContextoJuego ctx) {
+        int num = jugador.tieneDobleEfectoSantos() ? 6 : 3;
         int limite = Math.min(2, seleccionadas.size());
         for (int i = 0; i < limite; i++) {
-            seleccionadas.get(i).modificarValorTrucoPermanente(3);
+            seleccionadas.get(i).modificarValorTrucoPermanente(num);
         }
     }
 }

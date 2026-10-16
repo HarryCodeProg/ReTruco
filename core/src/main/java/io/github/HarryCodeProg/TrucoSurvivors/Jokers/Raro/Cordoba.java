@@ -16,7 +16,7 @@ public class Cordoba extends Joker {
     public Cordoba() {
         super(87, "Cordoba", "Cordoba", "+5 multiplicador envido por cada $5 que tengas (actual: 0)",
                 Rareza.raro, 6, Joker.FaseActivacion.INDEPENDIENTE,
-                CategoriaJoker.NACIONAL);
+                CategoriaJoker.ENVIDO, CategoriaJoker.ECONOMIA, CategoriaJoker.TERRITORIO);
     }
 
     @Override

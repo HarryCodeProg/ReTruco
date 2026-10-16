@@ -2,22 +2,21 @@ package io.github.HarryCodeProg.TrucoSurvivors.Gestores;
 
 import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Carta;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.Accion;
-import io.github.HarryCodeProg.TrucoSurvivors.Estados.EstadoCombate;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.ResolucionPuntaje;
-import io.github.HarryCodeProg.TrucoSurvivors.Screens.GameScreenV2;
+import io.github.HarryCodeProg.TrucoSurvivors.Screens.GameScreen;
 import io.github.HarryCodeProg.TrucoSurvivors.Vista.VistaCarta;
 
 import java.util.ArrayList;
 
 public class GestorAccion {
     private final Juego juego;
-    private final GameScreenV2 gScreen;
+    private final GameScreen gScreen;
     private final ControladorCombate cCombate;
     private final GestorInputArrastrable<VistaCarta> gestorCartas;
     private final GestorAnimacionesMano gestorAnimaciones;
 
-    public GestorAccion(Juego juego, GameScreenV2 gScreen, ControladorCombate cCombate,
+    public GestorAccion(Juego juego, GameScreen gScreen, ControladorCombate cCombate,
                         GestorInputArrastrable<VistaCarta> gestorCartas,
                         GestorAnimacionesMano gestorAnimaciones) {
         this.juego = juego;
@@ -57,38 +56,16 @@ public class GestorAccion {
                             gScreen.setEsperandoTransicion(false);
                             juego.aplicarResultadoEnvido();
                             cCombate.comprobarFinDelCombate();
+                            gScreen.guardarProgreso(); // NUEVO
                         });
                     } else {
                         juego.aplicarResultadoEnvido();
                         cCombate.comprobarFinDelCombate();
+                        gScreen.guardarProgreso(); // NUEVO
                     }
                 } else if (juego.hayCantoTrucoPendiente()) {
                     juego.responderTruco(true);
-                }
-                break;
-            case NO_QUIERO:
-                if (juego.hayCantoEnvidoPendiente()) {
-                    juego.responderEnvido(false); // arma resolución simple, no aplica todavía
-                    ResolucionPuntaje resolucionEnvido = juego.getUltimaResolucionEnvido();
-                    if (resolucionEnvido != null && !resolucionEnvido.getLog().isEmpty()) {
-                        gScreen.setEsperandoTransicion(true);
-                        gScreen.iniciarAnimacionResolucion(resolucionEnvido, false, () -> {
-                            gScreen.setEsperandoTransicion(false);
-                            juego.aplicarResultadoEnvido();
-                            cCombate.comprobarFinDelCombate();
-                        });
-                    } else {
-                        juego.aplicarResultadoEnvido();
-                        cCombate.comprobarFinDelCombate();
-                    }
-                } else if (juego.hayCantoTrucoPendiente()) {
-                    juego.responderTruco(false);
-                    cCombate.comprobarFinDelCombate();
-                    if (juego.verificarEstadoCombate() == EstadoCombate.EN_PROGRESO) {
-                        gScreen.setEsperandoTransicion(true);
-                        gScreen.setIniciarNuevaRondaPendiente(true);
-                        gScreen.setTiempoNuevaRonda();
-                    }
+                    gScreen.guardarProgreso(); // NUEVO
                 }
                 break;
             case IR_AL_MAZO:
@@ -108,6 +85,7 @@ public class GestorAccion {
                     juego.setTurnoActual(juego.getRival());
                 }
                 cCombate.comprobarGanadorRonda();
+                gScreen.guardarProgreso(); // NUEVO
                 break;
             case DESCARTAR:
                 if (gestorCartas.getSeleccionados().isEmpty()) break;
@@ -121,6 +99,7 @@ public class GestorAccion {
                 gestorCartas.getSeleccionados().clear();
                 gScreen.getCartasJugador().removeAll(vistasADescartar);
                 gestorAnimaciones.iniciarDescarte(vistasADescartar, cartasNuevas);
+                gScreen.guardarProgreso(); // NUEVO
                 break;
         }
     }

@@ -25,7 +25,9 @@ public class JokerEspañol extends Joker {
             Rareza.comun,
             3,
             INDEPENDIENTE,
-            CategoriaJoker.INTERNACIONAL
+            CategoriaJoker.MAZO,
+            CategoriaJoker.AZAR
+
         );
     }
 

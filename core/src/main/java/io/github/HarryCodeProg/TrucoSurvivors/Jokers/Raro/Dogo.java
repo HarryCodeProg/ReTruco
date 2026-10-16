@@ -21,7 +21,7 @@ public class Dogo extends Joker {
             Rareza.raro,
             5,
             INDEPENDIENTE,
-            CategoriaJoker.MASCOTA, CategoriaJoker.ANIMAL
+            CategoriaJoker.ENVIDO, CategoriaJoker.FIGURA, CategoriaJoker.FAUNA
         );
     }
 

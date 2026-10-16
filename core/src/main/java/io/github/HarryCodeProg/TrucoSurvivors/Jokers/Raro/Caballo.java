@@ -12,7 +12,8 @@ public class Caballo extends Joker {
 
     public Caballo() {
         super(66, "Caballo", "Caballo", "+6 multiplicador truco por cada figura en tu mano",
-            Rareza.raro, 6, Joker.FaseActivacion.INDEPENDIENTE, CategoriaJoker.NACIONAL);
+            Rareza.raro, 6, Joker.FaseActivacion.INDEPENDIENTE,
+            CategoriaJoker.TRUCO, CategoriaJoker.FIGURA, CategoriaJoker.FAUNA);
     }
 
     @Override

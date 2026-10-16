@@ -13,7 +13,7 @@ public class VirgenDeLujan extends Joker {
         super(126, "Virgen de Luján", "VirgenDeLujan",
             "En cada ronda consume los descartes hasta dejarlos en 0, obtiene el multiplicador envido igual a lo consumido (actual: +0)",
             Rareza.muyRaro, 8, Joker.FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.HISTORIA);
+            CategoriaJoker.ENVIDO, CategoriaJoker.CONSUMIBLES, CategoriaJoker.TERRITORIO);
     }
 
     @Override

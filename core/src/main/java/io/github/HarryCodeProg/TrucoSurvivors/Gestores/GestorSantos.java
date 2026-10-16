@@ -7,16 +7,12 @@ import io.github.HarryCodeProg.TrucoSurvivors.Jugador;
 import io.github.HarryCodeProg.TrucoSurvivors.Main;
 import io.github.HarryCodeProg.TrucoSurvivors.Santos.SantaRita;
 import io.github.HarryCodeProg.TrucoSurvivors.Santos.Santo;
-import io.github.HarryCodeProg.TrucoSurvivors.Vista.OverlayConsumoSanto;
-import io.github.HarryCodeProg.TrucoSurvivors.Vista.OverlaySeleccionCartaSanto;
-import io.github.HarryCodeProg.TrucoSurvivors.Vista.VistaCarta;
-import io.github.HarryCodeProg.TrucoSurvivors.Vista.VistaSanto;
+import io.github.HarryCodeProg.TrucoSurvivors.Vista.*;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 public class GestorSantos {
     private final Main game;
@@ -30,6 +26,8 @@ public class GestorSantos {
     private Jugador jugadorActual;
     private Runnable alConsumirSantoCallback;
     private final GestorReordenamiento gestorReordenamiento = new GestorReordenamiento();
+    private final ModoSeleccionSanto modoSeleccion = new ModoSeleccionSanto();
+    private java.util.function.Supplier<ArrayList<VistaCarta>> supplierCartasJugador;
 
     public GestorSantos(Main game, float areaX, float areaY, float areaAncho, float altoSanto) {
         this.game = game;
@@ -39,10 +37,6 @@ public class GestorSantos {
 
     public void setBuscadorVistaCarta(Function<Carta, VistaCarta> buscador) {
         this.buscadorVistaCarta = buscador;
-    }
-
-    public boolean agregarComprado(Santo santo, Jugador jugador) {
-        return agregarVistaDesdeModelo(santo, jugador);
     }
 
     private void aplicarCambiosDiferidosConFlipYEsperar(Santo santo, Runnable alTerminarTodo) {
@@ -57,24 +51,26 @@ public class GestorSantos {
         for (int i = 0; i < cartas.size(); i++) {
             Carta carta = cartas.get(i);
             Runnable accion = acciones.get(i);
-            VistaCarta vista = overlaySeleccion.buscarVistaPorCarta(carta);
+            VistaCarta vista = null;
+            if (buscadorVistaCarta != null) {
+                vista = buscadorVistaCarta.apply(carta);
+            }
             if (vista == null && buscadorVistaCarta != null) {
                 vista = buscadorVistaCarta.apply(carta);
             }
             if (vista != null && dorso != null) {
                 cambiosPorVista.computeIfAbsent(vista, ignorada -> new ArrayList<>()).add(accion);
             } else {
-                accion.run(); // sin vista: aplicar directo
+                accion.run();
             }
         }
         santo.limpiarDiferidos();
-
         if (cambiosPorVista.isEmpty()) {
             terminarSeleccionCuandoCorresponda(alTerminarTodo);
             return;
         }
-
-        final int[] flipsPendientes = { cambiosPorVista.size() };
+        // Todos arrancan a la vez, esperamos a que terminen todos
+        final int[] pendientes = { cambiosPorVista.size() };
         for (Map.Entry<VistaCarta, ArrayList<Runnable>> entrada : cambiosPorVista.entrySet()) {
             VistaCarta vista = entrada.getKey();
             ArrayList<Runnable> cambios = entrada.getValue();
@@ -82,16 +78,17 @@ public class GestorSantos {
                 for (Runnable cambio : cambios) cambio.run();
                 vista.actualizarRegionDesdeCarta(game.getAtlasCartas());
             }, () -> {
-                flipsPendientes[0]--;
-                if (flipsPendientes[0] == 0 && !overlaySeleccion.estaVisible() && alTerminarTodo != null) {
-                    alTerminarTodo.run();
+                pendientes[0]--;
+                if (pendientes[0] == 0) {
+                    if (overlaySeleccion.estaVisible()) {
+                        overlaySeleccion.esperarFlipsYLuegoVolver(alTerminarTodo);
+                    } else if (alTerminarTodo != null) {
+                        alTerminarTodo.run();
+                    }
                 }
             });
         }
-
-        if (overlaySeleccion.estaVisible()) {
-            overlaySeleccion.esperarFlipsYLuegoVolver(alTerminarTodo);
-        }
+        if (alTerminarTodo != null) alTerminarTodo.run();
     }
 
     private void terminarSeleccionCuandoCorresponda(Runnable alTerminarTodo) {
@@ -108,6 +105,7 @@ public class GestorSantos {
         if (!hayOverlayActivo()) {
             gestorVenta.update(mouseX, mouseY, santos, jugador, r -> area.distribuir(santos, gestorInput.getArrastrado()));
         }
+        modoSeleccion.update(mouseX, mouseY, delta, jugador != null ? supplyCartasJugador() : new ArrayList<>());
     }
 
     public void update(float mouseX, float mouseY, float delta) {
@@ -151,7 +149,12 @@ public class GestorSantos {
         for (VistaSanto v : santos) v.render(batch);
         overlaySeleccion.render(batch, game);
         overlayConsumo.render(batch, game);
-        gestorVenta.render(batch); // FIX
+        modoSeleccion.render(batch, game);
+        gestorVenta.render(batch);
+    }
+
+    public boolean hayOverlayActivo() {
+        return overlayConsumo.estaActivo() || overlaySeleccion.estaVisible() || modoSeleccion.estaActivo();
     }
 
     public ArrayList<VistaSanto> getSantos() { return santos; }
@@ -181,68 +184,86 @@ public class GestorSantos {
         }
     }
 
-    public boolean hayOverlayActivo() {
-        return overlayConsumo.estaActivo() || overlaySeleccion.estaVisible();
-    }
-
     public void comprarYUsar(Santo santo, Jugador jugador) {
         if (santo == null) return;
         TextureRegion region = game.getAtlasSantos().findRegion(santo.getNombreRegion());
         if (region == null) return;
+        // Posición "de aparición" para la quema cuando se compra desde la tienda
+        float anchoSanto = 110f;
+        float altoSanto  = 150f;
+        float xSanto = 1280f / 2f - anchoSanto / 2f;
+        float ySanto = 720f / 2f - altoSanto / 2f;
         Santo santoParaRequisitos = resolverSantoEfectivo(santo, jugador);
         int requeridas = (santoParaRequisitos != null) ? santoParaRequisitos.cartasRequeridas() : 0;
         if (requeridas == 0) {
-            overlayConsumo.abrir(santo, region, () -> {
+            overlayConsumo.abrir(santo, region, xSanto, ySanto, anchoSanto, altoSanto, () -> {
                 santo.aplicarEfecto(jugador, new ArrayList<>(), null);
-                registrarUsoParaTracking(santo, jugador);
-                aplicarCambiosDiferidosConFlipYEsperar(santo, overlayConsumo::confirmarCierre);
-            });
-            return;
-        }
-        ArrayList<Carta> cartas = jugador.getMazo().getCartasAleatoriasParaSanto(10);
-        overlaySeleccion.abrir(santo, cartas, game.getAtlasCartas(), seleccion ->
-            overlayConsumo.abrir(santo, region, () -> {
-                santo.aplicarEfecto(jugador, seleccion, null);
                 registrarUsoParaTracking(santo, jugador);
                 aplicarCambiosDiferidosConFlipYEsperar(santo, () -> {
                     overlayConsumo.confirmarCierre();
                     if (alConsumirSantoCallback != null) alConsumirSantoCallback.run();
                 });
-            })
+            });
+            return;
+        }
+        // Requiere selección: se elige en la tienda, se quema desde el centro
+        ArrayList<Carta> cartas = jugador.getMazo().getCartasAleatoriasParaSanto(10);
+        modoSeleccion.abrir(santo,
+            seleccion -> {
+                overlayConsumo.abrir(santo, region, xSanto, ySanto, anchoSanto, altoSanto, () -> {
+                    santo.aplicarEfecto(jugador, seleccion, null);
+                    registrarUsoParaTracking(santo, jugador);
+                    aplicarCambiosDiferidosConFlipYEsperar(santo, () -> {
+                        overlayConsumo.confirmarCierre();
+                        if (alConsumirSantoCallback != null) alConsumirSantoCallback.run();
+                    });
+                });
+            },
+            () -> { /* cancelado */ }
         );
     }
 
-    public void usarSeleccionado(VistaSanto vista, Jugador jugador) {
+    public void usarSeleccionado(VistaSanto vista, Jugador jugador, ArrayList<Carta> seleccion) {
         if (vista == null || jugador == null) return;
         Santo santo = vista.getSanto();
         TextureRegion region = game.getAtlasSantos().findRegion(santo.getNombreRegion());
         if (region == null) return;
-        Santo santoParaRequisitos = resolverSantoEfectivo(santo, jugador);
-        int requeridas = (santoParaRequisitos != null) ? santoParaRequisitos.cartasRequeridas() : 0;
-        if (requeridas == 0) {
-            overlayConsumo.abrir(santo, region, () -> {
-                santo.aplicarEfecto(jugador, new ArrayList<>(), null);
+        if (!seleccionValidaParaUso(santo, seleccion)) return;
+        final ArrayList<Carta> seleccionFinal = new ArrayList<>(seleccion);
+        // Ocultamos el VistaSanto real mientras la disolución lo reemplaza visualmente
+        vista.setOculto(true);
+        overlayConsumo.abrir(santo, region,
+            vista.getX(), vista.getY(), vista.getWidth(), vista.getHeight(),
+            () -> {
+                santo.aplicarEfecto(jugador, seleccionFinal, null);
                 registrarUsoParaTracking(santo, jugador);
                 aplicarCambiosDiferidosConFlipYEsperar(santo, () -> {
                     jugador.eliminarSanto(santo);
                     overlayConsumo.confirmarCierre();
+                    if (alConsumirSantoCallback != null) alConsumirSantoCallback.run();
                 });
             });
-            return;
-        }
-        ArrayList<Carta> cartasParaElegir = new ArrayList<>(jugador.getMano());
-        overlaySeleccion.abrir(santo, cartasParaElegir, game.getAtlasCartas(),
-            seleccion ->
-                overlayConsumo.abrir(santo, region, () -> {
-                    santo.aplicarEfecto(jugador, seleccion, null);
-                    registrarUsoParaTracking(santo, jugador);
-                    aplicarCambiosDiferidosConFlipYEsperar(santo, () -> {
-                        jugador.eliminarSanto(santo);
-                        overlayConsumo.confirmarCierre();
-                    });
-                })
-        );
     }
+
+    private boolean seleccionValidaParaUso(Santo santo, ArrayList<Carta> seleccion) {
+        int req = santo.cartasRequeridas();
+        if (req == 0) return seleccion.isEmpty();
+        if (req == -1) {
+            int max = santo.maxCartasSeleccionables();
+            return seleccion.size() >= 1 && (max <= 0 || seleccion.size() <= max);
+        }
+        return seleccion.size() == req;
+    }
+
+    public void setSupplierCartasJugador(java.util.function.Supplier<ArrayList<VistaCarta>> s) {
+        this.supplierCartasJugador = s;
+    }
+
+    private ArrayList<VistaCarta> supplyCartasJugador() {
+        return supplierCartasJugador != null ? supplierCartasJugador.get() : new ArrayList<>();
+    }
+
+    public ModoSeleccionSanto getModoSeleccion() { return modoSeleccion; }
 
     private Santo resolverSantoEfectivo(Santo santo, Jugador jugador) {
         if (santo instanceof SantaRita) {

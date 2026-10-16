@@ -26,7 +26,9 @@ public class SantaCruz extends Joker {
             Rareza.raro,
             5,
             INDEPENDIENTE,
-            CategoriaJoker.NACIONAL
+            CategoriaJoker.TRUCO,
+            CategoriaJoker.ACTIVACION,
+            CategoriaJoker.TERRITORIO
         );
         // Sorteamos el primer palo apenas se crea el Joker
         cambiarPaloAleatorio();

@@ -14,13 +14,15 @@ public class SantaFe extends Joker {
     public SantaFe() {
         super(
             88,
-            "SantaFe",
+            "Santa Fe",
             "SantaFe",
             "X0.1 multiplicador envido por cada santo usado.",
             Rareza.raro,
             5,
             INDEPENDIENTE,
-            CategoriaJoker.NACIONAL
+            CategoriaJoker.ENVIDO,
+            CategoriaJoker.CONSUMIBLES,
+            CategoriaJoker.TERRITORIO
         );
         setAcumulado(1.0);
     }

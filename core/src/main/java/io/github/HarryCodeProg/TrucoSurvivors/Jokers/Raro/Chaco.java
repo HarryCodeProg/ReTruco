@@ -20,7 +20,9 @@ public class Chaco extends Joker {
             Rareza.raro,
             5,
             INDEPENDIENTE,
-            CategoriaJoker.NACIONAL
+            CategoriaJoker.TRUCO,
+            CategoriaJoker.RACHAS,
+            CategoriaJoker.TERRITORIO
         );
         // Inicializamos el X-Mult en X1 (no hace nada en la primera mano)
         setAcumulado(1.0);

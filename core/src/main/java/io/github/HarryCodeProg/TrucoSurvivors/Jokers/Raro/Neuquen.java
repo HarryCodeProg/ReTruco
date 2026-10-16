@@ -16,6 +16,8 @@ public class Neuquen extends Joker {
             Rareza.raro,
             7,
             FaseActivacion.INDEPENDIENTE,
+            CategoriaJoker.CONSUMIBLES,
+            CategoriaJoker.TERRITORIO,
             CategoriaJoker.NACIONAL);
     }
 

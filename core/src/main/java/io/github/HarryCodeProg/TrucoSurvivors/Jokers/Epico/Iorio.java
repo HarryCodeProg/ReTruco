@@ -14,7 +14,7 @@ public class Iorio extends Joker {
         super(135, "Iorio", "Iorio",
             "+3 manos",
             Rareza.epico, 8, Joker.FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.NACIONAL, CategoriaJoker.MUSICA);
+            CategoriaJoker.TRUCO, CategoriaJoker.PERSONA);
     }
 
     @Override

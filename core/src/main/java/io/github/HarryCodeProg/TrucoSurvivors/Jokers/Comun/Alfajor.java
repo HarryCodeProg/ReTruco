@@ -14,7 +14,8 @@ public class Alfajor extends Joker {
     public Alfajor() {
         super(24, "Alfajor", "Alfajor", "Las cartas de Espada que no maten reciben +20 puntos truco",
             Rareza.comun, 4, Joker.FaseActivacion.AL_PUNTUAR_CARTA,
-            CategoriaJoker.NACIONAL, CategoriaJoker.COMIDA, CategoriaJoker.DULCE, CategoriaJoker.POSTRE);
+            CategoriaJoker.TRUCO,
+            CategoriaJoker.GASTRONOMIA);
     }
 
     @Override

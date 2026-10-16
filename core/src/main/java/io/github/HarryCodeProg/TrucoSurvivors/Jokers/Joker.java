@@ -133,4 +133,7 @@ public abstract class Joker {
         if (idx <= 0) return false; // no tiene alguien a su izquierda
         return lista.get(idx - 1) instanceof io.github.HarryCodeProg.TrucoSurvivors.Jokers.Raro.Gallina;
     }
+
+    public String getEstadoExtra() { return null; }
+    public void setEstadoExtra(String data) { }
 }

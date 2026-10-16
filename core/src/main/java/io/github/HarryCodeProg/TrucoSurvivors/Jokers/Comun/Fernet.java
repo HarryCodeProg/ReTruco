@@ -20,7 +20,10 @@ public class Fernet extends Joker {
             Rareza.comun,
             3,
             INDEPENDIENTE,
-            CategoriaJoker.NACIONAL,CategoriaJoker.BEBIDA,CategoriaJoker.ALCOHOL
+            CategoriaJoker.TRUCO,
+            CategoriaJoker.ENVIDO,
+            CategoriaJoker.BEBIDA
+
         );
     }
 

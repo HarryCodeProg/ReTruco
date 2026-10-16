@@ -10,7 +10,10 @@ public class Aconcagua extends JokerCopiaVecino {
 
     public Aconcagua() {
         super(144, "Aconcagua", "Aconcagua", "Copia el efecto del joker a la izquierda",
-            Rareza.epico, 8, CategoriaJoker.NACIONAL, CategoriaJoker.NATURALEZA);
+            Rareza.epico, 8,
+            CategoriaJoker.ACTIVACION,
+            CategoriaJoker.TERRITORIO
+        );
     }
 
     @Override

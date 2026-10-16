@@ -14,7 +14,8 @@ public class MediaLuna extends Joker {
     public MediaLuna(){
         super(21, "Media Luna", "MediaLuna", "Las cartas de Copa que no maten reciben +20 puntos truco",
             Rareza.comun, 3, Joker.FaseActivacion.AL_PUNTUAR_CARTA,
-            CategoriaJoker.NACIONAL, CategoriaJoker.COMIDA, CategoriaJoker.DULCE);
+            CategoriaJoker.TRUCO,
+            CategoriaJoker.GASTRONOMIA);
     }
 
     @Override

@@ -21,7 +21,8 @@ public class Misiones extends Joker {
             Rareza.comun,
             5,
             INDEPENDIENTE,
-            CategoriaJoker.NACIONAL
+            CategoriaJoker.ENVIDO,
+            CategoriaJoker.TERRITORIO
         );
     }
 
