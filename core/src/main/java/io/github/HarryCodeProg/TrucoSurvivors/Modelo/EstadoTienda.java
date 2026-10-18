@@ -83,7 +83,12 @@ public class EstadoTienda {
         filaZodiaco.remove(item);
     }
 
-    public void aplicarDescuento50() { multiplicadorPrecio = 0.5; }
+    public void aplicarDescuento50() { multiplicadorPrecio *= 0.5; }
+    /** Redondea hacia arriba: un artículo pago nunca se vuelve gratis por redondeo. */
+    public int precioConDescuento(int precioBase) {
+        return Math.max(0, (int) Math.ceil(precioBase * multiplicadorPrecio));
+    }
+
     public double getMultiplicadorPrecio() { return multiplicadorPrecio; }
 
     public void sumarRerollsGratis(int cantidad) { rerollsGratis += cantidad; }

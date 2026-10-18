@@ -31,6 +31,10 @@ public class GameBotones {
     }
 
     public void actualizarEstados(Juego juego, boolean puedeInteractuar, int cartasSeleccionadas) {
+        // Texto dinámico: refleja los bonus de rasgos (ej: "TRUCO +2,25")
+        truco.setTexto("TRUCO +" + Juego.formatearValorCanto(juego.getValorCantoTruco()));
+        envido.setTexto("ENVIDO +" + Juego.formatearValorCanto(juego.getValorCantoEnvido()));
+
         gestor.setHabilitado(Accion.DESCARTAR, puedeInteractuar);
         gestor.setHabilitado(Accion.TRUCO, puedeInteractuar);
 
@@ -45,7 +49,7 @@ public class GameBotones {
 
         int proximoTruco = juego.proximoNivelTrucoDisponible(juego.getJugador());
         truco.setHabilitado(puedeInteractuar && proximoTruco == 1);
-        truco.setVisible(proximoTruco == 1 || (juego.getMesa().getMesaJugador().isEmpty() && juego.getMesa().getMesaRival().isEmpty()));
+        truco.setVisible(true);
 
         valeCuatro.setHabilitado(puedeInteractuar && juego.puedeEscalarTruco(juego.getJugador()));
         valeCuatro.setVisible(juego.hayCantoTrucoPendiente() && juego.puedeEscalarTruco(juego.getJugador()));

@@ -2,9 +2,7 @@ package io.github.HarryCodeProg.TrucoSurvivors.Estados;
 
 public enum CantoTruco {
 
-    TRUCO(2),
-    RETRUCO(3),
-    VALE_CUATRO(4);
+    TRUCO(2);
 
     private final double puntos;
 

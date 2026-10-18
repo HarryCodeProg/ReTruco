@@ -177,15 +177,21 @@ public class Boton {
         // TEXTO
         String textoRender = obtenerTexto();
         float escalaOriginal = font.getScaleX();
-        font.getData().setScale(escalaOriginal * (height >= 48f ? 1.04f : 0.94f));
+        float escalaTexto = escalaOriginal * (height >= 48f ? 1.04f : 0.94f);
+        font.getData().setScale(escalaTexto);
         layout.setText(font, textoRender);
+// Si el texto no entra en el botón (ej: "TRUCO +2,25"), lo achicamos para que quepa
+        float anchoMaximo = width - 16f;
+        if (layout.width > anchoMaximo) {
+            escalaTexto *= anchoMaximo / layout.width;
+            font.getData().setScale(escalaTexto);
+            layout.setText(font, textoRender);
+        }
         float textX = drawX + (drawWidth - layout.width) / 2f;
         float textY = drawY + (drawHeight + layout.height) / 2f - (estaPresionado ? 1f : 0f);
         font.setColor(colorTextoActual);
         font.draw(batch, textoRender, textX, textY);
         font.getData().setScale(escalaOriginal);
-        font.setColor(UITheme.TEXTO_PRINCIPAL);
-        batch.setColor(1f, 1f, 1f, 1f);
     }
 
     public void update(float mouseX, float mouseY) {

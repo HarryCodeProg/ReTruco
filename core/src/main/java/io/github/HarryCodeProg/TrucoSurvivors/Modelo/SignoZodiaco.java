@@ -6,13 +6,32 @@ import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Rareza;
 import io.github.HarryCodeProg.TrucoSurvivors.Jugador;
 
 public enum SignoZodiaco {
-    ARIES("01_aries"), TAURO("02_tauro"), GEMINIS("03_geminis"), CANCER("04_cancer"),
-    LEO("05_leo"), VIRGO("06_virgo"), LIBRA("07_libra"), ESCORPIO("08_escorpio"),
-    SAGITARIO("09_sagitario"), CAPRICORNIO("10_capricornio"), ACUARIO("11_acuario"), PISCIS("12_piscis");
+    ARIES("01_aries", "Aries", "+1 lugar para ofertas de jokers en las tiendas."),
+    TAURO("02_tauro", "Tauro", "+1 descarte disponible por ronda."),
+    GEMINIS("03_geminis", "Géminis", "Duplica los pesos que tenés al consumirlo."),
+    CANCER("04_cancer", "Cáncer", "+1 lugar para ofertas de cartas en las tiendas."),
+    LEO("05_leo", "Leo", "+1 carta al tamaño de tu mano."),
+    VIRGO("06_virgo", "Virgo", "+1 espacio para llevar santos."),
+    LIBRA("07_libra", "Libra", "El próximo signo que no sea Libra aplica su efecto dos veces. No se acumula."),
+    ESCORPIO("08_escorpio", "Escorpio", "+1 lugar para ofertas de santos en las tiendas."),
+    SAGITARIO("09_sagitario", "Sagitario", "+1 espacio para llevar jokers."),
+    CAPRICORNIO("10_capricornio", "Capricornio", "Reduce a la mitad los precios de los artículos de esta tienda y las siguientes (redondeo hacia arriba)."),
+    ACUARIO("11_acuario", "Acuario", "+10 rerolls gratis. Los que sobren se guardan para las próximas tiendas."),
+    PISCIS("12_piscis", "Piscis", "Recibís un joker legendario aleatorio, si hay uno disponible y tenés espacio libre.");
 
     private final String nombreRegion;
-    SignoZodiaco(String nombreRegion) { this.nombreRegion = nombreRegion; }
+    private final String nombre;
+    private final String descripcion;
+
+    SignoZodiaco(String nombreRegion, String nombre, String descripcion) {
+        this.nombreRegion = nombreRegion;
+        this.nombre = nombre;
+        this.descripcion = descripcion;
+    }
+
     public String getNombreRegion() { return nombreRegion; }
+    public String getNombre() { return nombre; }
+    public String getDescripcion() { return descripcion; }
 
     public void aplicarEfecto(Jugador jugador, Juego juego, EstadoTienda tienda, Carta cartaSeleccionada) {
         int mult = (this == LIBRA) ? 1 : jugador.consumirMultiplicadorZodiaco();

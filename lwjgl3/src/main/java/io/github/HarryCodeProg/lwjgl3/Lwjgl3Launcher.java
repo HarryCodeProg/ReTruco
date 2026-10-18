@@ -17,10 +17,10 @@ public class Lwjgl3Launcher {
         settings.filterMag = Texture.TextureFilter.Linear;
         settings.stripWhitespaceX = false;
         settings.stripWhitespaceY = false;
-        TexturePacker.process(settings, "assets/imagenesCartas", "assets/atlas", "cartas");
+        /*TexturePacker.process(settings, "assets/imagenesCartas", "assets/atlas", "cartas");
         TexturePacker.process(settings, "assets/jokers", "assets/atlas", "jokers");
         TexturePacker.process(settings, "assets/zodiaco_src", "assets/atlas", "zodiaco");
-        TexturePacker.process(settings, "assets/santos", "assets/atlas", "santos");
+        TexturePacker.process(settings, "assets/santos", "assets/atlas", "santos");*/
         createApplication();
     }
 

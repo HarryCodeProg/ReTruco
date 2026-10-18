@@ -69,6 +69,10 @@ public class GestorVentaJoker {
         }
     }
 
+    public boolean isMouseOverButton() {
+        return botonVender != null && botonVender.isVisible() && botonVender.isHovered();
+    }
+
     public Boton getBotonVender() {
         return botonVender;
     }

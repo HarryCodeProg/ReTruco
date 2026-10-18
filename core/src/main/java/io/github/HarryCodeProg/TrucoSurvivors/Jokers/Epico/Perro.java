@@ -11,14 +11,14 @@ import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 public class Perro extends Joker {
 
     private static final int META_GASTO = 50;
-    private static final double MULT = 2;
+    private static final double MULT = 3;
 
     public Perro() {
         super(
             131,
             "Perro",
             "Perro",
-            "X2 multiplicador, después de gastar ($50) este joker no consume espacio",
+            "X3 multiplicador, después de gastar ($50) otorga +1 tamaño jokers",
             Rareza.epico,
             8,
             Joker.FaseActivacion.INDEPENDIENTE,
@@ -39,22 +39,40 @@ public class Perro extends Joker {
     }
 
     @Override
-    public void onPesosGastados(int cantidad, Jugador jugador) {
-        if (getAcumulado() < META_GASTO) {
-            sumarAcumulado(cantidad);
+    public void aplicarEfectoInstantaneo(Jugador jugador) {
+        // Si al cargarlo desde un guardado ya estaba completado, le devolvemos el espacio
+        if (getAcumulado() >= META_GASTO) {
+            jugador.setTamañoJokers(jugador.getTamañoJokers() + 1);
         }
     }
 
     @Override
-    public boolean ocupaEspacio() {
-        return getAcumulado() < META_GASTO;
+    public void desAplicarEfectoInstantaneo(Jugador jugador) {
+        // Si lo vendemos o destruimos y ya nos había dado el espacio, se lo quitamos
+        if (getAcumulado() >= META_GASTO) {
+            jugador.setTamañoJokers(jugador.getTamañoJokers() - 1);
+        }
     }
 
     @Override
-    public String getDescripcionRenderizada() {
+    public void onPesosGastados(int cantidad, Jugador jugador) {
+        boolean estabaCompletado = getAcumulado() >= META_GASTO;
+
+        if (!estabaCompletado) {
+            sumarAcumulado(cantidad);
+
+            // Si con este gasto exacto acabamos de llegar a la meta, otorgamos el espacio
+            if (getAcumulado() >= META_GASTO) {
+                jugador.setTamañoJokers(jugador.getTamañoJokers() + 1);
+            }
+        }
+    }
+
+    @Override
+    public String getDescripcionRenderizada(Juego juego) {
         int gastado = (int) Math.min(getAcumulado(), META_GASTO);
         if (gastado >= META_GASTO) {
-            return "X2 multiplicador. No consume espacio (gastado $" + META_GASTO + ")";
+            return "X3 multiplicador. +1 tamaño jokers (gastado $" + META_GASTO + ")";
         }
         return getDescripcion() + " ($" + gastado + "/" + META_GASTO + ")";
     }

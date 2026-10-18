@@ -2,9 +2,7 @@ package io.github.HarryCodeProg.TrucoSurvivors.Estados;
 
 public enum CantoEnvido {
 
-    ENVIDO(2),
-    REAL_ENVIDO(3),
-    FALTA_ENVIDO(10);
+    ENVIDO(2);
 
     private final double valorBase;
 

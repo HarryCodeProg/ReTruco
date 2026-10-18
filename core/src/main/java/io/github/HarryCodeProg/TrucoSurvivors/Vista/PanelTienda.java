@@ -67,6 +67,7 @@ public class PanelTienda {
     private RuedaZodiaco ruedaZodiaco;
     private final OverlayConsumoZodiaco overlayConsumo = new OverlayConsumoZodiaco();
     private final OverlaySeleccionCarta overlaySeleccion = new OverlaySeleccionCarta();
+    private final GuiaZodiaco guiaZodiaco = new GuiaZodiaco();
     private SignoZodiaco signoObtenido;
     private final Consumer<VistaItemTienda> alComprarJoker;
     private final Consumer<Santo> alComprarYUsarSanto;
@@ -91,7 +92,7 @@ public class PanelTienda {
         botonComprar.setHabilitado(false);
         botonComprar.setVisible(false);
         botonReroll = new Boton(PANEL_X + 22f, PANEL_Y + PANEL_ALTO - 62f, ANCHO_BOTON, ALTO_BOTON, Boton.TipoColor.AZUL, Accion.REROLL_JOKERS);
-        botonReroll.setTexto("Reroll $" + estadoTienda.costoRerollTienda());
+        actualizarTextoReroll();
         botonContinuar = new Boton(COLUMNA_ACCIONES_X, PANEL_Y + PANEL_ALTO - 62f, ANCHO_BOTON, ALTO_BOTON, Boton.TipoColor.DORADO, Accion.CONTINUAR_TIENDA);
         botonComprarYUsar = new Boton(0, 0, 120f, 35f, Boton.TipoColor.DORADO, Accion.COMPRAR_Y_USAR_SANTO);
         botonComprarYUsar.setVisible(false);
@@ -186,11 +187,44 @@ public class PanelTienda {
     public void update(float mouseWorldX, float mouseWorldY, float delta) {
         if (isAnimando() || bloqueadoPorModalExterno) return;
         boolean justTouched = Gdx.input.justTouched();
+        overlayConsumo.update(delta);
+        if (overlayConsumo.debeAplicarEfectoAhora()) {
+            SignoZodiaco s = signoObtenido;
+            s.aplicarEfecto(jugador, null, estadoTienda, null);
+            Joker neuquenAConsumir = null;
+            for (Joker joker : jugador.getJokers()) {
+                if (joker.getId() == 95) {
+                    neuquenAConsumir = joker;
+                    break;
+                }
+            }
+            if (neuquenAConsumir != null) {
+                jugador.eliminarJoker(neuquenAConsumir);
+            }
+            boolean quedaNeuquen = jugador.getJokers().stream().anyMatch(j -> j.getId() == 95);
+            jugador.setProximoZodiacoForzado(quedaNeuquen ? SignoZodiaco.PISCIS : null);
+            overlayConsumo.confirmarCierre();
+            reconstruirVistas();
+            actualizarTextoReroll();
+            return;
+        }
+        if (overlayConsumo.estaActivo()) return;
+        if (guiaZodiaco.update(mouseWorldX, mouseWorldY, justTouched)) return;
         // 1. DETERMINAR HOVER EXCLUSIVO GLOBAL
+        // 1. CHEQUEO DE BOTONES UI (antes del hover)
+        boolean mouseSobreBotonUI = (botonComprar.isVisible() && botonComprar.isHovered())
+            || (botonComprarYUsar.isVisible() && botonComprarYUsar.isHovered())
+            || botonReroll.isHovered()
+            || botonContinuar.isHovered();
+            // 2. DETERMINAR HOVER EXCLUSIVO GLOBAL
+            // Si el mouse está sobre un botón, ningún item de tienda recibe hover,
+            // así no se superponen tooltips ni estados visuales sobre los que están debajo.
         VistaItemTienda ganadorHover = null;
-        for (VistaItemTienda v : vistasCartas) { if (v.contiene(mouseWorldX, mouseWorldY)) ganadorHover = v; }
-        for (VistaItemTienda v : vistasJokers) { if (v.contiene(mouseWorldX, mouseWorldY)) ganadorHover = v; }
-        for (VistaItemTienda v : vistasSantos) { if (v.contiene(mouseWorldX, mouseWorldY)) ganadorHover = v; }
+        if (!mouseSobreBotonUI) {
+            for (VistaItemTienda v : vistasCartas) { if (v.contiene(mouseWorldX, mouseWorldY)) ganadorHover = v; }
+            for (VistaItemTienda v : vistasJokers) { if (v.contiene(mouseWorldX, mouseWorldY)) ganadorHover = v; }
+            for (VistaItemTienda v : vistasSantos) { if (v.contiene(mouseWorldX, mouseWorldY)) ganadorHover = v; }
+        }
         // 2. ACTUALIZAR ITEMS
         for (VistaItemTienda v : vistasCartas) {
             if (v == ganadorHover) v.update(mouseWorldX, mouseWorldY, delta);
@@ -210,35 +244,16 @@ public class PanelTienda {
         botonReroll.update(mouseWorldX, mouseWorldY);
         botonContinuar.update(mouseWorldX, mouseWorldY);
         ruedaZodiaco.update(delta);
-        overlayConsumo.update(delta);
         overlaySeleccion.update(mouseWorldX, mouseWorldY, delta);
-        if (overlayConsumo.debeAplicarEfectoAhora()) {
-            SignoZodiaco s = ruedaZodiaco.getUltimoSignoConsumido();
-            if (jugador.getProximoZodiacoForzado() != null) {
-                s = jugador.getProximoZodiacoForzado();
-            }
-            s.aplicarEfecto(jugador, null, estadoTienda, null);
-            Joker neuquenAConsumir = null;
-            for (Joker joker : jugador.getJokers()) {
-                if (joker.getId() == 95) {
-                    neuquenAConsumir = joker;
-                    break;
-                }
-            }
-            if (neuquenAConsumir != null) {
-                jugador.eliminarJoker(neuquenAConsumir);
-            }
-            boolean quedaNeuquen = jugador.getJokers().stream().anyMatch(j -> j.getId() == 95);
-            jugador.setProximoZodiacoForzado(quedaNeuquen ? SignoZodiaco.PISCIS : null);
-            overlayConsumo.confirmarCierre();
-        }
         if (justTouched) {
             ruedaZodiaco.click(mouseWorldX, mouseWorldY,
                 signo -> {
                     SignoZodiaco signoFinal = jugador.getProximoZodiacoForzado() != null ? jugador.getProximoZodiacoForzado() : signo;
+                    signoObtenido = signoFinal;
                     overlayConsumo.abrir(signoFinal, game.getAtlasZodiaco().findRegion(signoFinal.getNombreRegion()), () -> {});
                 }
             );
+            if (overlayConsumo.estaActivo()) return;
             overlaySeleccion.click(mouseWorldX, mouseWorldY, jugador, null);
         }
         // --- EJECUCIÓN DE BOTONES AL SOLTAR (RELEASE) ---
@@ -263,13 +278,12 @@ public class PanelTienda {
                 GestorSonidos sonidos = Main.getInstance().getGestorSonidos();
                 if (sonidos != null) sonidos.reproducirSonidoGastarPeso();
                 reconstruirVistas();
-                botonReroll.setTexto("Reroll $" + estadoTienda.costoRerollTienda());
+                actualizarTextoReroll();
             }
             return;
         }
-
         // --- LÓGICA DE SELECCIÓN / DESELECCIÓN AL PRESIONAR (PRESS) ---
-        boolean mouseSobreBotonUI = botonComprar.isHovered() || botonReroll.isHovered() || botonContinuar.isHovered() || botonComprarYUsar.isHovered();
+        mouseSobreBotonUI = botonComprar.isHovered() || botonReroll.isHovered() || botonContinuar.isHovered() || botonComprarYUsar.isHovered();
         if (justTouched && !mouseSobreBotonUI) {
             VistaItemTienda itemClickeado = ganadorHover;
             if (itemClickeado != null) {
@@ -293,15 +307,12 @@ public class PanelTienda {
                     } else {
                         espacioDisponible = true;
                     }
-
                     botonComprar.setVisible(true);
                     botonComprar.setHabilitado(dineroSuficiente && espacioDisponible);
-
                     // --- REPOSICIONAMIENTO LATERAL DE BOTONES ---
                     // Determinamos si el item está en la mitad izquierda o derecha de la pantalla
                     boolean estaEnMitadIzquierda = seleccionado.getX() + (ANCHO_ITEM / 2f) < Gdx.graphics.getWidth() / 2f;
                     float gapLateral = 15f;
-
                     float botX;
                     if (estaEnMitadIzquierda) {
                         // Si está a la izquierda, los botones salen a la derecha del ítem
@@ -310,18 +321,14 @@ public class PanelTienda {
                         // Si está a la derecha, los botones salen a la izquierda del ítem
                         botX = seleccionado.getX() - botonComprar.getWidth() - gapLateral;
                     }
-
                     // Centramos los botones verticalmente respecto al ítem
                     float centerY = seleccionado.getY() + (ALTO_ITEM / 2f);
-
                     if (esSanto) {
                         // Si es un Santo, hay dos botones apilados (Comprar, y Comprar/Usar)
                         botonComprarYUsar.setVisible(true);
                         botonComprarYUsar.setHabilitado(esSanto && dineroSuficiente && espacioDisponible);
-
                         // Posicionamos el boton Comprar arriba, y el ComprarYUsar abajo
                         botonComprar.setPosition(botX, centerY + 5f);
-
                         // Si aparece a la izquierda, el segundo botón podría tener distinto ancho, lo alineamos a la derecha
                         float botYUsarX = estaEnMitadIzquierda ? botX : seleccionado.getX() - botonComprarYUsar.getWidth() - gapLateral;
                         botonComprarYUsar.setPosition(botYUsarX, centerY - botonComprarYUsar.getHeight() - 5f);
@@ -344,6 +351,12 @@ public class PanelTienda {
         return jugador.getJokers().stream().anyMatch(j -> j.getId() == 105);
     }
 
+    private void actualizarTextoReroll() {
+        int gratis = jugador.getRerollsGratisTienda();
+        botonReroll.setTexto(gratis > 0 ? "Reroll gratis (" + gratis + ")"
+            : "Reroll $" + estadoTienda.costoRerollTienda());
+    }
+
     private int precioEfectivo(ItemTienda item) {
         if (item.getTipo() == ItemTienda.Tipo.SANTO && tieneRevolucionDeMayo()) {
             return 0;
@@ -357,7 +370,7 @@ public class PanelTienda {
                 }
             }
         }
-        return item.getPrecio();
+        return estadoTienda.precioConDescuento(item.getPrecio());
     }
 
     public void setBloqueadoPorModalExterno(boolean b) { this.bloqueadoPorModalExterno = b; }
@@ -377,24 +390,29 @@ public class PanelTienda {
         GestorSonidos sonidos = Main.getInstance().getGestorSonidos();
         if (sonidos != null) sonidos.reproducirSonidoGastarPeso();
         if (item.getTipo() == ItemTienda.Tipo.CARTA) {
-            juego.agregarCartaAlMazoJugador(item.getCarta());
+            if (juego != null) {
+                juego.agregarCartaAlMazoJugador(item.getCarta());
+            } else {
+                // Fallback cuando no hay Juego (cargado desde guardado en estado TIENDA)
+                jugador.getMazo().agregarCarta(item.getCarta());
+            }
             estadoTienda.removerItemComprado(item);
-            juego.notificarCartaComprada();
+            if (juego != null) juego.notificarCartaComprada();
         } else if (item.getTipo() == ItemTienda.Tipo.JOKER) {
             if (alComprarJoker != null) {
                 estadoTienda.removerItemComprado(item);
                 reconstruirVistas();
                 alComprarJoker.accept(vista);
-                juego.notificarJokerComprado();
+                if (juego != null) juego.notificarJokerComprado();
             } else {
                 jugador.agregarJoker(item.getJoker());
                 estadoTienda.removerItemComprado(item);
-                juego.notificarJokerComprado();
+                if (juego != null) juego.notificarJokerComprado();
             }
         } else if (item.getTipo() == ItemTienda.Tipo.SANTO) {
             Santo santo = item.getSanto();
             if (!jugador.agregarSanto(santo)) {
-                jugador.sumarPesos(item.getPrecio());
+                jugador.sumarPesos(precioEfectivo(item));
                 return;
             }
             estadoTienda.removerItemComprado(item);
@@ -470,6 +488,11 @@ public class PanelTienda {
 
         // --- 1. Rueda Zodiaco (dibuja antes que los carteles de stats) ---
         ruedaZodiaco.render(batch);
+        SignoZodiaco resultado = ruedaZodiaco.getEstado() == RuedaZodiaco.Estado.DETENIDA
+            ? (jugador.getProximoZodiacoForzado() != null ? jugador.getProximoZodiacoForzado()
+            : ruedaZodiaco.getUltimoSignoConsumido()) : null;
+        guiaZodiaco.renderResumen(batch, game, ruedaZodiaco.getEstado(), resultado);
+
 
         // --- 2. Carteles de Stats (ahora dibujados POR ENCIMA de la rueda) ---
         for (VistaItemTienda v : vistasCartas) v.renderCartelStats(batch, game);
@@ -477,6 +500,7 @@ public class PanelTienda {
         for (VistaItemTienda v : vistasSantos) v.renderCartelStats(batch, game);
 
         // OVERLAYS (al final)
+        guiaZodiaco.render(batch, game);
         overlayConsumo.render(batch, game);
         overlaySeleccion.render(batch, game);
         batch.setProjectionMatrix(matrizOriginal);
@@ -539,6 +563,8 @@ public class PanelTienda {
         font.setColor(com.badlogic.gdx.graphics.Color.WHITE);
         batch.setColor(1f, 1f, 1f, 1f);
     }
+
+    public boolean hayModalZodiaco() { return guiaZodiaco.estaAbierta() || overlayConsumo.estaActivo(); }
 
     public boolean isAnimando() { return offsetY != offsetYObjetivo; }
 

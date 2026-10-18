@@ -34,6 +34,7 @@ public class GestorEstadoPartida {
     public void inicializar(Jugador jugador, Jugador rival, DatosRival datosRival,
                             GestorInputArrastrable<VistaCarta> gestorCartas,
                             GestorAnimacionesMano gestorAnimaciones) {
+        if (this.juego != null) this.juego.desconectar();
         this.tocoJugar = 0;
         this.esperandoTransicion = false;
         this.iniciarNuevaRondaPendiente = false;
@@ -91,6 +92,7 @@ public class GestorEstadoPartida {
                                          GestorInputArrastrable<VistaCarta> gestorCartas,
                                          GestorAnimacionesMano gestorAnimaciones,
                                          DatosJuego datosJuego) {
+        if (this.juego != null) this.juego.desconectar();
         this.tocoJugar = 0;
         this.esperandoTransicion = false;
         this.iniciarNuevaRondaPendiente = false;

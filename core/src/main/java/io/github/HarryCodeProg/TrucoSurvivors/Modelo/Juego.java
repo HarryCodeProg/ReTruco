@@ -6,12 +6,14 @@ import io.github.HarryCodeProg.TrucoSurvivors.Activacion.ContextoJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Activacion.GestorJokers;
 import io.github.HarryCodeProg.TrucoSurvivors.Gestores.GestorRasgos;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
+import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jugador;
 import io.github.HarryCodeProg.TrucoSurvivors.Rasgos.EfectoRasgo;
 import io.github.HarryCodeProg.TrucoSurvivors.Rasgos.EfectoTrucoBonus;
 import io.github.HarryCodeProg.TrucoSurvivors.Rasgos.EfectoTrucoMultiplicador;
 
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 public class Juego {
     private Jugador jugador;
@@ -54,6 +56,7 @@ public class Juego {
     private int renovacionesTotal = 0;
     private double mejorEnvidoLogrado = 0;
     private final GestorRasgos gestorRasgos = new GestorRasgos();
+    private Consumer<Joker> listenerRasgos;
 
     public Juego(Jugador jugador, Jugador rival, Mazo mazoRival, boolean saltarRepartoInicial) {
         this.jugador = jugador;
@@ -65,8 +68,11 @@ public class Juego {
         this.resultados = new ArrayList<>();
         this.rival.setMazo(mazoRival);
         this.gestorJokers = new GestorJokers(jugador);
-        jugador.addJokerAddedListener(j -> gestorRasgos.recalcular(jugador.getJokers()));
-        jugador.addJokerRemovedListener(j -> gestorRasgos.recalcular(jugador.getJokers()));
+        jugador.getBonosRasgos().limpiar();   // los bonus de rasgos se reconstruyen desde cero en cada Juego
+        gestorRasgos.setJuego(this);          // ANTES de recalcular
+        listenerRasgos = j -> gestorRasgos.recalcular(jugador.getJokers());
+        jugador.addJokerAddedListener(listenerRasgos);
+        jugador.addJokerRemovedListener(listenerRasgos);
         gestorRasgos.recalcular(jugador.getJokers());
         gestorRasgos.setJuego(this);
         gestorRasgos.addListener(new GestorRasgos.Listener() {
@@ -150,10 +156,39 @@ public class Juego {
         return mazo;
     }
 
+    public void desconectar() {
+        if (listenerRasgos != null) {
+            jugador.removeJokerAddedListener(listenerRasgos);
+            jugador.removeJokerRemovedListener(listenerRasgos);
+            listenerRasgos = null;
+        }
+    }
+
+    public double getBonusCantoTruco()        { return gestorRasgos.getBonusCanto(EfectoRasgo.TipoCanto.TRUCO); }
+    public double getMultiplicadorCantoTruco(){ return gestorRasgos.getMultiplicadorCanto(EfectoRasgo.TipoCanto.TRUCO); }
+    public double getBonusCantoEnvido()       { return gestorRasgos.getBonusCanto(EfectoRasgo.TipoCanto.ENVIDO); }
+    public double getMultiplicadorCantoEnvido(){ return gestorRasgos.getMultiplicadorCanto(EfectoRasgo.TipoCanto.ENVIDO); }
+
+    public void ajustarDescartesActuales(int delta) {
+        descartesActuales = Math.max(0, descartesActuales + delta);
+    }
+
+    public void notificarJokerComprado(Joker joker) {
+        gestorRasgos.setUltimoJokerComprado(joker);
+        notificarJokerComprado();
+        gestorRasgos.setUltimoJokerComprado(null);
+    }
+
+    public void notificarJokerVendido(Joker joker) {
+        gestorRasgos.setUltimoJokerVendido(joker);
+        notificarJokerVendido();
+        gestorRasgos.setUltimoJokerVendido(null);
+    }
+
     public void ganadorEnvido() {
         double puntosEJ = jugador.getPuntosEnvido();
         double puntosER = rival.getPuntosEnvido();
-        double sumMult = calcularPuntosEnvido();
+        double sumMult = aplicarBonusEnvido(calcularPuntosEnvido());
         jugador.aumentarMultiplicadorEnvidoTemporal(sumMult);
         rival.aumentarMultiplicadorEnvidoTemporal(sumMult);
         boolean ganaJugador = (puntosEJ == puntosER) ? jugadorEsMano : (puntosEJ > puntosER);
@@ -169,12 +204,37 @@ public class Juego {
             resolutorSecuencia.resolverEnvido(cartasEnvido, ctx, EventoJuego.AL_PUNTUAR_CARTA_ENVIDO, EventoJuego.ANTES_DE_SUMAR_ENVIDO);
             this.ultimaResolucionEnvido = resolucion;
         } else {
-            // FIX: Ahora el rival también crea una resolución para disparar la animación visual
             ResolucionPuntaje resolucion = new ResolucionPuntaje(0, rival.getMultiplicadorEnvido());
-            resolucion.sumarChips(puntosER, "Cartas Rival", null); // Esto hace que aparezca "+33 (Cartas Rival)" en pantalla
+            resolucion.sumarChips(puntosER, "Cartas Rival", null);
             this.ultimaResolucionEnvido = resolucion;
             dispararTodo(EventoJuego.AL_PERDER_ENVIDO);
         }
+    }
+
+    private double aplicarBonusTruco(double base) {
+        return (base + getBonusCantoTruco()) * getMultiplicadorCantoTruco();
+    }
+
+    private double aplicarBonusEnvido(double base) {
+        return (base + getBonusCantoEnvido()) * getMultiplicadorCantoEnvido();
+    }
+
+    /** Lo que suma un Truco aceptado ahora mismo, con los rasgos aplicados. */
+    public double getValorCantoTruco() {
+        return aplicarBonusTruco(CantoTruco.TRUCO.getPuntos());
+    }
+
+    /** Lo que suma un Envido aceptado ahora mismo, con los rasgos aplicados. */
+    public double getValorCantoEnvido() {
+        return aplicarBonusEnvido(CantoEnvido.ENVIDO.getValorBase());
+    }
+
+    /** 2 -> "2", 2.25 -> "2,25", 4.5 -> "4,5" (coma, igual que los textos de rasgos). */
+    public static String formatearValorCanto(double v) {
+        if (v == Math.rint(v)) return String.valueOf((long) v);
+        String s = String.format(java.util.Locale.US, "%.2f", v);
+        s = s.replaceAll("0+$", "").replaceAll("\\.$", "");
+        return s.replace('.', ',');
     }
 
     public double calcularPuntosEnvido() {
@@ -467,13 +527,13 @@ public class Juego {
         agregarCantoTruco(nivelTrucoPendiente);
         ultimaRespuestaTrucoFueNoQuiero = !quiero;
         if (quiero) {
-            double puntosCanto = valorNivelTruco(nivelTrucoPendiente);
+            double puntosCanto = aplicarBonusTruco(valorNivelTruco(nivelTrucoPendiente));
             jugador.aumentarMultiplicadorTrucoTemporal(puntosCanto);
             rival.aumentarMultiplicadorTrucoTemporal(puntosCanto);
             dispararTodo(EventoJuego.AL_DECIR_QUIERO_TRUCO);
         } else {
             resolverNoQuieroTruco(canter);
-            dispararTodo(EventoJuego.AL_DECIR_NO_QUIERO_TRUCO); // NUEVO
+            dispararTodo(EventoJuego.AL_DECIR_NO_QUIERO_TRUCO);
         }
         cantorTrucoPendiente = null;
         nivelTrucoPendiente = null;
@@ -488,10 +548,6 @@ public class Juego {
         switch (nivel) {
             case 1:
                 return CantoTruco.TRUCO.getPuntos();
-            case 2:
-                return CantoTruco.RETRUCO.getPuntos();
-            case 3:
-                return CantoTruco.VALE_CUATRO.getPuntos();
         }
         return 0;
     }
@@ -513,12 +569,6 @@ public class Juego {
         switch (i) {
             case 1:
                 cantosTruco.add(CantoTruco.TRUCO);
-                break;
-            case 2:
-                cantosTruco.add(CantoTruco.RETRUCO);
-                break;
-            case 3:
-                cantosTruco.add(CantoTruco.VALE_CUATRO);
                 break;
         }
     }
@@ -668,12 +718,6 @@ public class Juego {
             case 1:
                 this.cantosEnvido.add(CantoEnvido.ENVIDO);
                 break;
-            case 2:
-                this.cantosEnvido.add(CantoEnvido.REAL_ENVIDO);
-                break;
-            case 3:
-                this.cantosEnvido.add(CantoEnvido.FALTA_ENVIDO);
-                break;
         }
     }
 
@@ -759,30 +803,6 @@ public class Juego {
         cartasJugadasTotal++; // NUEVO
         jugador.eliminarCarta(carta);
         mesa.agregarCartaJugador(carta);
-    }
-
-    public double getBonusCantoTruco() {
-        EfectoRasgo e = gestorRasgos.getEfectoActivo(CategoriaJoker.TRUCO);
-        if (e instanceof EfectoTrucoBonus) return ((EfectoTrucoBonus) e).getBonus();
-        return 0.0;
-    }
-
-    public double getMultiplicadorCantoTruco() {
-        EfectoRasgo e = gestorRasgos.getEfectoActivo(CategoriaJoker.TRUCO);
-        if (e instanceof EfectoTrucoMultiplicador) return ((EfectoTrucoMultiplicador) e).getMultiplicador();
-        return 1.0;
-    }
-
-    public double getBonusCantoEnvido() {
-        EfectoRasgo e = gestorRasgos.getEfectoActivo(CategoriaJoker.ENVIDO);
-        if (e instanceof EfectoTrucoBonus) return ((EfectoTrucoBonus) e).getBonus();
-        return 0.0;
-    }
-
-    public double getMultiplicadorCantoEnvido() {
-        EfectoRasgo e = gestorRasgos.getEfectoActivo(CategoriaJoker.ENVIDO);
-        if (e instanceof EfectoTrucoMultiplicador) return ((EfectoTrucoMultiplicador) e).getMultiplicador();
-        return 1.0;
     }
 
     public void notificarSantoConsumido() {

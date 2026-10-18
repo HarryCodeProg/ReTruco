@@ -161,8 +161,10 @@ public class PanelPuntajes {
         currentY -= ESPACIO_LINEA;
         dibujarEtiqueta(batch, "TRUCO", x, currentY, anchoCajaDoble);
         boolean animacionActiva = gestorAnimacion != null && gestorAnimacion.isActiva();
-        double puntosTrucoAMostrar = animacionActiva ? puntosTrucoDisplay : 0;
-        double multTrucoAMostrar = animacionActiva ? multTrucoDisplay : (jugador != null ? jugador.getMultiplicadorTruco() : 0);
+        boolean animandoTruco = animacionActiva && (puntosTrucoDisplay != 0 || multTrucoDisplay != 1);
+        boolean animandoEnvido = animacionActiva && (puntosEnvidoDisplay != 0 || multEnvidoDisplay != 1);
+        double puntosTrucoAMostrar = animandoTruco ? puntosTrucoDisplay : 0;
+        double multTrucoAMostrar = animandoTruco ? multTrucoDisplay : (jugador != null ? jugador.getMultiplicadorTruco() : 0);
         dibujarTextoCentrado(batch, fuenteNumeros, FormateadorPuntaje.formatear(puntosTrucoAMostrar), x, ANCHO_CAJA_BASE, currentY, Color.WHITE);
         dibujarTextoCentrado(batch, fuenteNumeros, "X", xSeparador, ESPACIO_X, currentY, Color.WHITE);
         dibujarTextoCentrado(batch, fuenteNumeros, FormateadorPuntaje.formatear(multTrucoAMostrar), xSeparador + ESPACIO_X, ANCHO_CAJA_MULT, currentY, Color.WHITE);

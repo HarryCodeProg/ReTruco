@@ -270,6 +270,12 @@ public class Main extends Game {
         idiomaBundle = I18NBundle.createBundle(Gdx.files.internal("idiomas/" + codigoIdioma), locale);
     }
 
+    public static String getTexto(String clave, Object... args) {
+        if (instancia == null || instancia.idiomaBundle == null) return clave;
+        try { return instancia.idiomaBundle.format(clave, args); }
+        catch (Exception e) { return clave; }
+    }
+
     // Agregalo en Main.java
     public void sincronizarRivalesConProgreso(int indiceGuardado) {
         for (int i = 0; i < listaRivales.size(); i++) {

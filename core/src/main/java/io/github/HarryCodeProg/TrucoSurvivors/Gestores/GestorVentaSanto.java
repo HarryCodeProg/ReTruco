@@ -63,4 +63,8 @@ public class GestorVentaSanto {
             botonVender.render(batch);
         }
     }
+
+    public boolean isMouseOverButton() {
+        return botonVender != null && botonVender.isVisible() && botonVender.isHovered();
+    }
 }

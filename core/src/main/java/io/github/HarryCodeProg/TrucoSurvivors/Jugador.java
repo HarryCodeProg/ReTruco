@@ -7,10 +7,13 @@ import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Raro.Tucuman;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Mazo;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.SignoZodiaco;
+import io.github.HarryCodeProg.TrucoSurvivors.Rasgos.BonosRasgos;
 import io.github.HarryCodeProg.TrucoSurvivors.Santos.Santo;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
@@ -27,7 +30,7 @@ public class Jugador {
     private double multiplicadorTrucoTemporal;
     private double multiplicadorEnvidoTemporal;
     private double puntajeTotal;
-    private int pesos = 10000;
+    private int pesos = 5;
     private static final int INTERVALO_INTERES = 5;
     private static final int TOPE_INTERES = 5;
     private int descartesBase = 6;
@@ -55,6 +58,8 @@ public class Jugador {
     private SignoZodiaco proximoZodiacoForzado;
     private double totalPesosGanados = 0;
     private double totalPesosGastados = 0;
+    private final BonosRasgos bonosRasgos = new BonosRasgos();
+    private final Map<String, Double> acumuladosRasgos = new HashMap<>();
 
     public Jugador(String nombre) {
         this.nombre = nombre;
@@ -108,11 +113,8 @@ public class Jugador {
     public Mazo getMazo() { return this.mazo; }
     public void setMazo(Mazo mazo) { this.mazo = mazo; }
 
-    public int getTamañoMano() { return this.tamañoMano; }
     public void setTamañoMano(int tamañoMano) { this.tamañoMano = tamañoMano; }
     public void aumentarTamañoMano(int i) { this.tamañoMano += i; }
-
-    public int getTamañoJokers() { return this.tamañoJokers; }
     public void setTamañoJokers(int tamañoJokers) { this.tamañoJokers = tamañoJokers; }
 
     public ArrayList<Carta> getMano() { return this.mano; }
@@ -130,10 +132,6 @@ public class Jugador {
 
     /** Devuelve la cantidad de dinero que tiene el jugador (pesos). */
     public int getDinero() { return pesos; }
-
-    public int calcularInteres() {
-        return Math.min(pesos / INTERVALO_INTERES, TOPE_INTERES + topeInteresExtra);
-    }
 
     public int getNumeroMasGrande() {
         if (mano.isEmpty()) return 0;
@@ -229,8 +227,6 @@ public class Jugador {
     public void multEnvidoOriginal() { this.multiplicadorEnvidoTemporal = multiplicadorEnvido; }
     public void multTrucoOriginal() { this.multiplicadorTrucoTemporal = multiplicadorTruco; }
 
-    public int getDescartesMaximos() {return descartesBase + descartesExtra;}
-
     public void sumarDescartesExtra(int cantidad) {this.descartesExtra += cantidad;}
 
     public void sumarEspacioSantos(int cantidad) { espacioSantosExtra += cantidad; }
@@ -249,8 +245,6 @@ public class Jugador {
     public void sumarBonusEnvidoFinal(double cantidad) { this.bonusEnvidoFinal += cantidad; }
 
     public ArrayList<Santo> getSantos() { return santos; }
-    public int getTamañoSantos() { return tamañoSantos + espacioSantosExtra; } // espacioSantosExtra ya definido para Virgo
-
     public void addJokerAddedListener(Consumer<Joker> listener) {
         jokerAddedListeners.add(listener);
     }
@@ -288,10 +282,6 @@ public class Jugador {
     public void sumarEspacioSantosTiendaPersistente(int c) { espacioSantosTiendaExtra += c; }
     public void aplicarDescuentoTiendaPersistente(double factor) { multiplicadorPrecioTienda *= factor; }
     public void sumarRerollsGratisTienda(int c) { rerollsGratisTienda += c; }
-
-    public int getEspacioJokersTiendaExtra() { return espacioJokersTiendaExtra; }
-    public int getEspacioCartasTiendaExtra() { return espacioCartasTiendaExtra; }
-    public int getEspacioSantosTiendaExtra() { return espacioSantosTiendaExtra; }
     public double getMultiplicadorPrecioTienda() { return multiplicadorPrecioTienda; }
     public int getRerollsGratisTienda() { return rerollsGratisTienda; }
 
@@ -336,6 +326,18 @@ public class Jugador {
         }
         return palo;
     }
+
+    public int getTamañoMano()    { return tamañoMano + bonosRasgos.v(bonosRasgos.tamanoMano); }
+    public int getTamañoJokers()  { return tamañoJokers + bonosRasgos.v(bonosRasgos.espacioJokers); }
+    public int getDescartesMaximos() { return descartesBase + descartesExtra + bonosRasgos.v(bonosRasgos.descartes); }
+    public int getTamañoSantos()  { return tamañoSantos + espacioSantosExtra + bonosRasgos.v(bonosRasgos.espacioSantos); }
+    public int calcularInteres()  {
+        return Math.min(pesos / INTERVALO_INTERES,
+            TOPE_INTERES + topeInteresExtra + bonosRasgos.v(bonosRasgos.topeInteres));
+    }
+    public int getEspacioJokersTiendaExtra() { return espacioJokersTiendaExtra + bonosRasgos.v(bonosRasgos.tiendaJokers); }
+    public int getEspacioCartasTiendaExtra() { return espacioCartasTiendaExtra + bonosRasgos.v(bonosRasgos.tiendaCartas); }
+    public int getEspacioSantosTiendaExtra() { return espacioSantosTiendaExtra + bonosRasgos.v(bonosRasgos.tiendaSantos); }
 
     public boolean cartaCuentaComoPalo(Carta carta, Palo paloObjetivo) {
         return paloEfectivo(carta.getPalo()) == paloEfectivo(paloObjetivo);
@@ -393,6 +395,10 @@ public class Jugador {
         return true;
     }
 
+    public BonosRasgos getBonosRasgos() { return bonosRasgos; }
+    public double getAcumuladoRasgo(String clave) { return acumuladosRasgos.getOrDefault(clave, 0.0); }
+    public void sumarAcumuladoRasgo(String clave, double v) { acumuladosRasgos.merge(clave, v, Double::sum); }
+
     public double getTotalPesosGanados() { return totalPesosGanados; }
     public double getTotalPesosGastados() { return totalPesosGastados; }
     public void setTotalPesosGanados(double v) { this.totalPesosGanados = v; }
@@ -403,6 +409,8 @@ public class Jugador {
         mano.clear();
         jokers.clear();
         santos.clear();
+        bonosRasgos.limpiar();
+        acumuladosRasgos.clear();
         tamañoMano = 3;
         tamañoJokers = 5;
         multiplicadorTruco = 1;

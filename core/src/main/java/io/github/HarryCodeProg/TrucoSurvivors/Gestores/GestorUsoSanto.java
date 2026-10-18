@@ -90,6 +90,10 @@ public class GestorUsoSanto {
         return seleccion.size() == req;
     }
 
+    public boolean isMouseOverButton() {
+        return botonUsar != null && botonUsar.isVisible() && botonUsar.isHovered();
+    }
+
     public void render(SpriteBatch batch) {
         if (botonUsar.isVisible()) botonUsar.render(batch);
     }

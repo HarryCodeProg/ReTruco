@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.utils.Align;
 import io.github.HarryCodeProg.TrucoSurvivors.Gestores.GestorRasgos;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
 import io.github.HarryCodeProg.TrucoSurvivors.Main;
@@ -12,14 +13,15 @@ import io.github.HarryCodeProg.TrucoSurvivors.Main;
 import java.util.List;
 
 public class PanelRasgos {
+    private static final float ALTO_FILA     = 42f;   // filas cómodas
+    private static final float GAP_FILAS     = 3f;    // poco gap para que no se estire
+    private static final int   MAX_VISIBLES  = 5;     // 5 filas
+    private static final float RADIO_FILA    = 10f;
+    private static final float ALTO_FLECHA   = 20f;
+    private static final float GAP_FLECHA    = 3f;
     private static final float ANCHO_PANEL   = 250f;
-    private static final float ALTO_FILA     = 42f;
-    private static final float GAP_FILAS     = 6f;
     private static final float BARRA_ANCHO   = 4f;
-    private static final int   MAX_VISIBLES  = 5;
-    private static final float ALTO_FLECHA   = 22f;
     private static final float ANCHO_FLECHA  = 40f;
-    private static final float GAP_FLECHA    = 4f;
     private static final float CHAFLAN       = 8f;
     // Escalas del progreso
     private static final float ESCALA_NUM_NORMAL    = 0.90f;
@@ -33,14 +35,17 @@ public class PanelRasgos {
     private boolean hoverAbajo  = false;
     private float tiempoAnimacion = 0f;
     private final GlyphLayout layout = new GlyphLayout();
-    private static final float RADIO_FILA = 12f;
+    private CategoriaJoker hoverCat = null;
+    private float hoverX = 0f, hoverFilaY = 0f;
+    private float mouseX = -9999f, mouseY = -9999f;
 
     public PanelRasgos() { }
 
     public void update(float mx, float my, float delta, boolean click,
                        GestorRasgos gestor, float x, float yTop) {
+        mouseX = mx; mouseY = my;
         tiempoAnimacion += delta;
-        List<CategoriaJoker> activas = gestor.getCategoriasActivas();
+        List<CategoriaJoker> activas = gestor.getCategoriasParaMostrar();
         int total = activas.size();
         if (total <= MAX_VISIBLES) {
             scrollIndex = 0; hoverArriba = false; hoverAbajo = false;
@@ -55,13 +60,18 @@ public class PanelRasgos {
         hoverArriba = dentroDeFlecha(mx, my, flechaX, flechaArribaY, ANCHO_FLECHA, ALTO_FLECHA);
         hoverAbajo  = dentroDeFlecha(mx, my, flechaX, flechaAbajoY, ANCHO_FLECHA, ALTO_FLECHA);
         if (click) {
-            if (hoverArriba && scrollIndex > 0) scrollIndex--;
-            if (hoverAbajo && scrollIndex < maxScroll) scrollIndex++;
+            if (hoverArriba && scrollIndex > 0) {
+                scrollIndex = Math.max(0, scrollIndex - MAX_VISIBLES);
+            }
+            if (hoverAbajo && scrollIndex < maxScroll) {
+                scrollIndex = Math.min(maxScroll, scrollIndex + MAX_VISIBLES);
+            }
         }
     }
 
     public void render(SpriteBatch batch, GestorRasgos gestor, Main game, float x, float yTop) {
-        List<CategoriaJoker> activas = gestor.getCategoriasActivas();
+        List<CategoriaJoker> activas = gestor.getCategoriasParaMostrar();
+        hoverCat = null;
         if (activas.isEmpty()) return;
         int total = activas.size();
         boolean hayPaginacion = total > MAX_VISIBLES;
@@ -92,7 +102,52 @@ public class PanelRasgos {
             int tier     = gestor.getTier(cat);
             int idx = i - inicio;
             float filaY = filaYTopBase - (idx + 1) * ALTO_FILA - idx * GAP_FILAS;
+            if (mouseX >= x && mouseX <= x + ANCHO_PANEL && mouseY >= filaY && mouseY <= filaY + ALTO_FILA) {
+                hoverCat = cat; hoverX = x; hoverFilaY = filaY;
+            }
             dibujarFila(batch, pixel, fNombre, cat, cantidad, tier, x, filaY);
+        }
+    }
+
+    public void renderTooltip(SpriteBatch batch, GestorRasgos gestor, Main game) {
+        if (hoverCat == null) return;
+        CategoriaJoker cat = hoverCat;
+        BitmapFont fTit = game.getFuenteTooltipTitulo();
+        BitmapFont fDesc = game.getFuenteTooltipDescripcion();
+        Texture pixel = game.getPixelBlanco();
+        int tierActual = gestor.getTier(cat);
+        final float ancho = 330f, pad = 12f, gap = 6f, anchoTexto = ancho - pad * 2f;
+        GlyphLayout lTitulo = new GlyphLayout(fTit,
+            cat.getTexto() + "  (" + gestor.getCantidad(cat) + ")",
+            cat.getColor().cpy().lerp(Color.WHITE, 0.45f), anchoTexto, Align.left, true);
+        GlyphLayout lDesc = new GlyphLayout(fDesc,
+            Main.getTexto("rasgo." + cat.name() + ".desc", gestor.getArgsDescripcion(cat)),
+            Color.WHITE, anchoTexto, Align.left, true);
+        GlyphLayout[] lTiers = new GlyphLayout[cat.getMaxTier()];
+        float alto = pad * 2f + lTitulo.height + gap + lDesc.height + gap * 2f;
+        for (int i = 1; i <= cat.getMaxTier(); i++) {
+            Color c = (i == tierActual) ? UITheme.DORADO_BRILLANTE
+                : (i < tierActual ? Color.WHITE : UITheme.TEXTO_SECUNDARIO);
+            String t = cat.getCantidadParaTier(i) + ": " + Main.getTexto("rasgo." + cat.name() + ".tier" + i);
+            lTiers[i - 1] = new GlyphLayout(fDesc, t, c, anchoTexto, Align.left, true);
+            alto += lTiers[i - 1].height + gap;
+        }
+        float x = hoverX + ANCHO_PANEL + 10f;
+        if (x + ancho > 1270f) x = hoverX - ancho - 10f;
+        float top = hoverFilaY + ALTO_FILA;
+        float bottom = top - alto;
+        if (bottom < 10f) { bottom = 10f; top = bottom + alto; }
+        if (top > 710f) { top = 710f; bottom = top - alto; }
+        dibujarRectRedondeado(batch, pixel, x - 3f, bottom - 3f, ancho + 6f, alto + 6f, 9f, UITheme.BORDE);
+        dibujarRectRedondeado(batch, pixel, x, bottom, ancho, alto, 7f, UITheme.PANEL_PRINCIPAL);
+        float cy = top - pad;
+        fTit.draw(batch, lTitulo, x + pad, cy);
+        cy -= lTitulo.height + gap;
+        fDesc.draw(batch, lDesc, x + pad, cy);
+        cy -= lDesc.height + gap * 2f;
+        for (GlyphLayout l : lTiers) {
+            fDesc.draw(batch, l, x + pad, cy);
+            cy -= l.height + gap;
         }
     }
 

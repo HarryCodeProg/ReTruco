@@ -280,4 +280,8 @@ public class GestorSantos {
     public void setAlConsumirSanto(Runnable callback) {
         this.alConsumirSantoCallback = callback;
     }
+
+    public boolean isMouseOverButton() {
+        return gestorVenta.isMouseOverButton();
+    }
 }

@@ -60,13 +60,21 @@ public class ResolutorSecuencia {
         for (Carta carta : cartas) {
             cola.addLast(Activacion.deCarta(carta, eventoPorCarta));
         }
+// Rasgo Activación: reactiva la primera carta N veces
+        int reactivaciones = juego.getGestorRasgos().getReactivacionesPrimeraCarta();
+        if (reactivaciones > 0 && !cartas.isEmpty()) {
+            for (int i = 0; i < reactivaciones; i++) {
+                cola.addLast(Activacion.deCarta(cartas.get(0), eventoPorCarta));
+            }
+        }
         for (Joker j : ctx.getJugador().getJokers()) {
-            if (j.getFase() == Joker.FaseActivacion.INDEPENDIENTE && ctx.jokerPermitidoPorFiltro(j)) { // FIX
+            if (j.getFase() == Joker.FaseActivacion.INDEPENDIENTE && ctx.jokerPermitidoPorFiltro(j)) {
                 cola.addLast(Activacion.deJoker(j, eventoIndependiente));
             }
         }
         ctx.setColaActivaciones(cola);
         procesarCola(cola, ctx, extractorPuntos);
+        dispararRasgos(ctx, eventoIndependiente); // los rasgos aplican al final, después de cartas y jokers
     }
 
     public void resolverSoloJokers(ContextoJuego ctx, EventoJuego eventoIndependiente) {
@@ -96,6 +104,12 @@ public class ResolutorSecuencia {
             if (esDeEstaFase || esCopiaDeEstaFase) {
                 j.aplicarEfecto(act.evento, ctx, juego);
             }
+        }
+    }
+
+    private void dispararRasgos(ContextoJuego ctx, EventoJuego ev) {
+        if (ev == EventoJuego.ANTES_DE_SUMAR_TRUCO || ev == EventoJuego.ANTES_DE_SUMAR_ENVIDO) {
+            juego.getGestorRasgos().dispararEvento(ev, ctx, juego);
         }
     }
 }
