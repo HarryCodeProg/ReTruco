@@ -20,7 +20,7 @@ public class PanelPuntajes {
     private static final Color BORDE_PANEL = new Color(0.18f, 0.22f, 0.28f, 1f);
     private static final Color SEPARADOR_PANEL = new Color(0.35f, 0.40f, 0.48f, 0.55f);
     private static final Color FONDO_PANEL = new Color(0.08f, 0.11f, 0.14f, 1f);
-    public static final float ESPACIO_LINEA = 50f;
+    public static final float ESPACIO_LINEA = 60f;
     public static final float ALTO_CAJA = 34f;
     public static final float ANCHO_CAJA_BASE = 72f;
     public static final float ANCHO_CAJA_MULT = 68f;
@@ -29,20 +29,15 @@ public class PanelPuntajes {
     private final ShapeRenderer shapeRenderer;
     private final GlyphLayout layout = new GlyphLayout();
     private String rivalNombre = "";
-
-    // ─── NUEVO: moneda animada ─────────────────────────────────
     private static final String SPRITE_MONEDA_PATH = "ui/unpeso-spritesheet.png";
-    private static final int    FRAMES_MONEDA       = 12;
-    private static final float  FPS_MONEDA          = 12f;
-    private static final float  TAMANO_MONEDA       = 30f;
-
+    private static final int FRAMES_MONEDA = 12;
+    private static final float FPS_MONEDA = 12f;
+    private static final float TAMANO_MONEDA = 30f;
     private Texture spriteMoneda;
     private Animation<TextureRegion> animacionMoneda;
     private float estadoAnimacionMoneda = 0f;
-    // ───────────────────────────────────────────────────────────
 
     public PanelPuntajes() {
-        // ─── NUEVO: cargar spritesheet de la moneda ────────────
         if (Gdx.files.internal(SPRITE_MONEDA_PATH).exists()) {
             spriteMoneda = new Texture(Gdx.files.internal(SPRITE_MONEDA_PATH));
             int w = spriteMoneda.getWidth();
@@ -75,10 +70,11 @@ public class PanelPuntajes {
         dibujarRectanguloRedondeado(fondoX + 2f, 2f, anchoFondo - 4f, altoFondo - 4f, RADIO_ESQUINA - 1f);
         shapeRenderer.setColor(UITheme.DORADO);
         shapeRenderer.rect(fondoX + anchoFondo - 3f, 0f, 3f, altoFondo);
+
         float currentY = y + 70f;
-        float rivalTrucoY = currentY;
-        float rivalEnvidoY = rivalTrucoY - ESPACIO_LINEA;
-        float puntosRivalY = rivalEnvidoY - ESPACIO_LINEA;
+
+        // ELIMINADO: rivalTrucoY y rivalEnvidoY
+        float puntosRivalY = currentY;
         float metaY = puntosRivalY - ESPACIO_LINEA;
         float puntosJugadorY = metaY - ESPACIO_LINEA;
         float jugadorTrucoY = puntosJugadorY - ESPACIO_LINEA;
@@ -86,17 +82,19 @@ public class PanelPuntajes {
         float manosY = jugadorEnvidoY - ESPACIO_LINEA;
         float descartesY = manosY - ESPACIO_LINEA;
         float pesosY = descartesY - ESPACIO_LINEA - 5f;
-        dibujarCajaBaseYMultiplicador(x, rivalTrucoY, UITheme.PANEL_SECUNDARIO, UITheme.BORDE, UITheme.AZUL, UITheme.BORDE);
-        dibujarCajaBaseYMultiplicador(x, rivalEnvidoY, UITheme.PANEL_SECUNDARIO, UITheme.BORDE, UITheme.AZUL, UITheme.BORDE);
+        // BLOQUE RIVAL (Solo puntos)
         dibujarCajaSimple(x, puntosRivalY, UITheme.AZUL, UITheme.BORDE);
         dibujarSeparador(x, puntosRivalY - 11f, anchoFondo - margenX * 2f);
-        dibujarCajaSimple(x, metaY, UITheme.DORADO, UITheme.BORDE);
-        dibujarCajaSimple(x, puntosJugadorY, UITheme.TRUCO, UITheme.BORDE);
+        // BLOQUE OBJETIVO
+        dibujarCajaSimple(x, metaY, new Color(0.3f, 0.3f, 0.3f, 1f), UITheme.BORDE); // Fondo gris
+        dibujarCajaSimple(x, puntosJugadorY, new Color(0.3f, 0.3f, 0.3f, 1f), UITheme.BORDE); // Fondo gris
         dibujarSeparador(x, puntosJugadorY - 11f, anchoFondo - margenX * 2f);
+        // BLOQUE JUGADOR
         dibujarCajaBaseYMultiplicador(x, jugadorTrucoY, UITheme.TURQUESA, UITheme.BORDE, UITheme.ROJO, UITheme.BORDE);
         dibujarCajaBaseYMultiplicador(x, jugadorEnvidoY, UITheme.ENVIDO, UITheme.BORDE, UITheme.ROJO, UITheme.BORDE);
-        dibujarCajaSimple(x, manosY, UITheme.TRUCO, UITheme.BORDE);
+        dibujarCajaSimple(x, manosY, new Color(0.1f, 0.15f, 0.3f, 1f), UITheme.BORDE); // Fondo Azul Oscuro
         dibujarCajaSimple(x, descartesY, UITheme.ROJO, UITheme.BORDE);
+        // DINERO
         dibujarCajaConBorde(x, pesosY, UITheme.DORADO, UITheme.BORDE, UITheme.PANEL_PRINCIPAL);
         shapeRenderer.end();
     }
@@ -141,24 +139,23 @@ public class PanelPuntajes {
         double puntosRival = (juego != null) ? juego.getPuntosRival() : 0;
         double puntajeMeta = (juego != null) ? juego.getPuntajeMeta() : 0;
         double puntosJugador = (juego != null) ? juego.getPuntosJugador() : 0;
+
         float currentY = y + 70f;
         float xSeparador = x + ANCHO_CAJA_BASE;
         float anchoCajaSimple = anchoCajaDoble;
-        dibujarEtiqueta(batch, "TRUCO", x, currentY, anchoCajaDoble);
-        dibujarTextoCentrado(batch, fuenteNumeros, FormateadorPuntaje.formatear(rival != null ? rival.getMultiplicadorTruco() : 0), xSeparador + ESPACIO_X, ANCHO_CAJA_MULT, currentY, Color.WHITE);
-        currentY -= ESPACIO_LINEA;
-        dibujarEtiqueta(batch, "ENVIDO", x, currentY, anchoCajaDoble);
-        dibujarTextoCentrado(batch, fuenteNumeros, FormateadorPuntaje.formatear(rival != null ? rival.getMultiplicadorEnvido() : 0), xSeparador + ESPACIO_X, ANCHO_CAJA_MULT, currentY, Color.WHITE);
-        currentY -= ESPACIO_LINEA;
+        // Puntos Rival
         dibujarEtiqueta(batch, "PUNTOS RIVAL", x, currentY, anchoCajaSimple);
         dibujarTextoCentrado(batch, fuenteNumeros, FormateadorPuntaje.formatear(puntosRival), x, anchoCajaSimple, currentY, Color.BLACK);
         currentY -= ESPACIO_LINEA;
+        // Meta (Fondo gris, Números Rojos)
         dibujarEtiqueta(batch, "META", x, currentY, anchoCajaSimple);
-        dibujarTextoCentrado(batch, fuenteNumeros, FormateadorPuntaje.formatear(puntajeMeta), x, anchoCajaSimple, currentY, Color.BLACK);
+        dibujarTextoCentrado(batch, fuenteNumeros, FormateadorPuntaje.formatear(puntajeMeta), x, anchoCajaSimple, currentY, Color.RED);
         currentY -= ESPACIO_LINEA;
+        // Puntos Jugador (Fondo gris, Números Blancos)
         dibujarEtiqueta(batch, "PUNTOS JUGADOR", x, currentY, anchoCajaSimple);
-        dibujarTextoCentrado(batch, fuenteNumeros, FormateadorPuntaje.formatear(puntosJugador), x, anchoCajaSimple, currentY, Color.BLACK);
+        dibujarTextoCentrado(batch, fuenteNumeros, FormateadorPuntaje.formatear(puntosJugador), x, anchoCajaSimple, currentY, Color.WHITE);
         currentY -= ESPACIO_LINEA;
+        // Truco Jugador
         dibujarEtiqueta(batch, "TRUCO", x, currentY, anchoCajaDoble);
         boolean animacionActiva = gestorAnimacion != null && gestorAnimacion.isActiva();
         boolean animandoTruco = animacionActiva && (puntosTrucoDisplay != 0 || multTrucoDisplay != 1);
@@ -169,6 +166,7 @@ public class PanelPuntajes {
         dibujarTextoCentrado(batch, fuenteNumeros, "X", xSeparador, ESPACIO_X, currentY, Color.WHITE);
         dibujarTextoCentrado(batch, fuenteNumeros, FormateadorPuntaje.formatear(multTrucoAMostrar), xSeparador + ESPACIO_X, ANCHO_CAJA_MULT, currentY, Color.WHITE);
         currentY -= ESPACIO_LINEA;
+        // Envido Jugador
         dibujarEtiqueta(batch, "ENVIDO", x, currentY, anchoCajaDoble);
         double puntosEnvidoAMostrar = animacionActiva ? puntosEnvidoDisplay : 0;
         double multEnvidoAMostrar = animacionActiva ? multEnvidoDisplay : (jugador != null ? jugador.getMultiplicadorEnvido() : 0);
@@ -176,28 +174,30 @@ public class PanelPuntajes {
         dibujarTextoCentrado(batch, fuenteNumeros, "X", xSeparador, ESPACIO_X, currentY, Color.WHITE);
         dibujarTextoCentrado(batch, fuenteNumeros, FormateadorPuntaje.formatear(multEnvidoAMostrar), xSeparador + ESPACIO_X, ANCHO_CAJA_MULT, currentY, Color.WHITE);
         currentY -= ESPACIO_LINEA;
+        // Manos
         dibujarEtiqueta(batch, "MANOS", x, currentY, anchoCajaSimple);
         int handsActuales = (juego != null) ? juego.getJugador().getManosActuales() : 0;
-        dibujarTextoCentrado(batch, fuenteNumeros, String.valueOf(handsActuales), x, anchoCajaSimple, currentY, Color.WHITE); // Manos puede quedar como String.valueOf porque siempre es un entero chico
+        dibujarTextoCentrado(batch, fuenteNumeros, String.valueOf(handsActuales), x, anchoCajaSimple, currentY, Color.WHITE);
         currentY -= ESPACIO_LINEA;
+        // Descartes
         dibujarEtiqueta(batch, "DESCARTES", x, currentY, anchoCajaSimple);
         int descartesActuales = (juego != null) ? juego.getDescartesActuales() : 0;
-        dibujarTextoCentrado(batch, fuenteNumeros, String.valueOf(descartesActuales), x, anchoCajaSimple, currentY, Color.WHITE); // Descartes igual
+        dibujarTextoCentrado(batch, fuenteNumeros, String.valueOf(descartesActuales), x, anchoCajaSimple, currentY, Color.WHITE);
         currentY -= ESPACIO_LINEA;
         // ───moneda animada ──────────────────────────────
         if (jugador != null) {
             float pesosY = currentY - 5f;
-            // Opcional: Si el jugador puede tener millones de pesos, podés usar FormateadorPuntaje acá también
             String textoPesos = "$" + FormateadorPuntaje.formatear(jugador.getPesos());
-            fuente.setColor(Color.WHITE);
+            fuente.setColor(UITheme.DORADO); // Por si acaso
             if (animacionMoneda != null) {
                 estadoAnimacionMoneda += Gdx.graphics.getDeltaTime();
                 TextureRegion frame = animacionMoneda.getKeyFrame(estadoAnimacionMoneda, true);
                 batch.draw(frame, x + 8f, pesosY + 2f, TAMANO_MONEDA, TAMANO_MONEDA);
-                dibujarTextoCentrado(batch, fuente, textoPesos, x + 25, anchoCajaDoble - 25, pesosY, Color.WHITE);
+                // Cambiamos Color.WHITE por UITheme.DORADO
+                dibujarTextoCentrado(batch, fuente, textoPesos, x + 25, anchoCajaDoble - 25, pesosY, UITheme.DORADO);
             } else {
-                // Fallback: si el spritesheet no existe, muestra solo el texto
-                dibujarTextoCentrado(batch, fuente, textoPesos, x, anchoCajaDoble, pesosY, Color.WHITE);
+                // Cambiamos Color.WHITE por UITheme.DORADO
+                dibujarTextoCentrado(batch, fuente, textoPesos, x, anchoCajaDoble, pesosY, UITheme.DORADO);
             }
         }
     }
@@ -276,21 +276,20 @@ public class PanelPuntajes {
     }
 
     private void dibujarEtiqueta(SpriteBatch batch, String texto, float x, float y, float ancho) {
-        BitmapFont fuenteUI = Main.getInstance().getFuenteUI();
-        fuenteUI.getData().setScale(0.52f);
-        fuenteUI.setColor(new Color(0.70f, 0.74f, 0.84f, 1f));
-        layout.setText(fuenteUI, texto.toUpperCase());
+        BitmapFont fuenteEtiqueta = Main.getInstance().getFuentePrincipal();
+        float escalaOriginal = fuenteEtiqueta.getScaleX();
+        fuenteEtiqueta.getData().setScale(escalaOriginal * 0.7f);
+        fuenteEtiqueta.setColor(new Color(0.95f, 0.95f, 0.95f, 1f));
+        layout.setText(fuenteEtiqueta, texto.toUpperCase());
         float xTexto = x + (ancho - layout.width) / 2f;
-        float yTexto = y + ALTO_CAJA + 11f;
-        fuenteUI.draw(batch, texto.toUpperCase(), xTexto, yTexto);
-        fuenteUI.getData().setScale(0.9f);
-        fuenteUI.setColor(Color.WHITE);
+        float yTexto = y + ALTO_CAJA + 10f;
+        fuenteEtiqueta.draw(batch, texto.toUpperCase(), xTexto, yTexto);
+        fuenteEtiqueta.getData().setScale(escalaOriginal);
+        fuenteEtiqueta.setColor(Color.WHITE);
     }
 
     public void dispose() {
         shapeRenderer.dispose();
-        // ─── NUEVO: liberar spritesheet ────────────────────────
         if (spriteMoneda != null) spriteMoneda.dispose();
-        // ───────────────────────────────────────────────────────
     }
 }

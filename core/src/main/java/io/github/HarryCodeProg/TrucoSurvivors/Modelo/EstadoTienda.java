@@ -28,6 +28,8 @@ public class EstadoTienda {
     private int rerollsTienda = 0;
     private final Jugador jugador;
     private static final int ID_MENDOZA = 92;
+    private boolean ruedaUsada = false;
+    private SignoZodiaco signoPendiente = null;
 
     public EstadoTienda(Jugador jugador) {
         this.jugador = jugador;
@@ -184,4 +186,25 @@ public class EstadoTienda {
     }
 
     public int getRerollsTiendaActual() { return rerollsTienda; }
+
+    public boolean isRuedaUsada() { return ruedaUsada; }
+    public SignoZodiaco getSignoPendiente() { return signoPendiente; }
+
+    /** La rueda dio un signo: queda bloqueada y el signo pendiente hasta que se aplique su efecto. */
+    public void registrarSignoRueda(SignoZodiaco signo) { ruedaUsada = true; signoPendiente = signo; }
+    public void confirmarSignoAplicado() { signoPendiente = null; }
+    public void restaurarRueda(boolean usada, SignoZodiaco pendiente) { ruedaUsada = usada; signoPendiente = pendiente; }
+
+    public int getRerollsGratis() { return rerollsGratis; }
+    public int getCantidadCartas() { return cantidadCartas; }
+    public int getCantidadJokers() { return cantidadJokers; }
+    public int getCantidadSantos() { return cantidadSantos; }
+
+    public void restaurarAjustes(double multPrecio, int gratis, int cCartas, int cJokers, int cSantos) {
+        if (multPrecio >= 0) multiplicadorPrecio = multPrecio;
+        if (gratis >= 0) rerollsGratis = gratis;
+        if (cCartas >= 0) cantidadCartas = cCartas;
+        if (cJokers >= 0) cantidadJokers = cJokers;
+        if (cSantos >= 0) cantidadSantos = cSantos;
+    }
 }

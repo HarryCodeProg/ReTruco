@@ -75,7 +75,7 @@ public class Main extends Game {
         if (indiceGuardado < 0 || indiceGuardado >= PISTAS_MUSICA.length) indiceGuardado = 0;
         musicaFondo = Gdx.audio.newMusic(Gdx.files.internal(PISTAS_MUSICA[indiceGuardado][1]));
         musicaFondo.setLooping(true);
-        musicaFondo.setVolume(0.05f * configuracionJuego.getVolumenMusica());
+        musicaFondo.setVolume(configuracionJuego.getVolumenMusica());
         musicaFondo.play();
         gestorSonidos = new GestorSonidos();
         configuracionJuego.aplicarAudio(gestorSonidos); // FIX: aplica volumen general/efectos guardados
@@ -95,8 +95,10 @@ public class Main extends Game {
         for (Texture texture : atlasSantos.getTextures()) {
             texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         }
-        assetsRasgos = new AssetsRasgos();
         atlasZodiaco = new TextureAtlas(Gdx.files.internal("atlas/zodiaco.atlas"));
+        for (Texture texture : atlasZodiaco.getTextures()) {
+            texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        }
         texturaRuletaFondo = new Texture("ui/zodiaco_ruleta.png");
         cambiarIdioma("es");
     }
@@ -285,7 +287,7 @@ public class Main extends Game {
     }
 
     private final String[][] PISTAS_MUSICA = {
-        {"Second Dealing", "music/Second_Dealing/second_dealing_full.ogg"},
+        //{"Second Dealing", "music/Second_Dealing/second_dealing_full.ogg"},
         {"retrucoEnergetico1", "music/retrucoEnergetico1.ogg"},
         {"retrucoEnergetico2", "music/retrucoEnergetico2.ogg"},
         {"retrucoMetal1", "music/retrucoMetal1.ogg"},
@@ -307,7 +309,7 @@ public class Main extends Game {
         {"Not a freak1", "music/Not a freak1.ogg"},
         {"Not a freak2", "music/Not a freak2.ogg"},
         {"real envido", "music/real envido.ogg"},
-        {"real envido2", "music/real envido2.ogg"},
+        {"real envido2", "music/real envido 2.ogg"},
         {"retruco dance1", "music/retruco dance1.ogg"},
         {"retruco dance2", "music/retruco dance2.ogg"},
         {"retruco db1", "music/retruco db1.ogg"},
@@ -380,7 +382,7 @@ public class Main extends Game {
         }
         musicaFondo = Gdx.audio.newMusic(Gdx.files.internal(PISTAS_MUSICA[indice][1]));
         musicaFondo.setLooping(true);
-        musicaFondo.setVolume(0.05f * configuracionJuego.getVolumenMusica());
+        musicaFondo.setVolume(configuracionJuego.getVolumenMusica());
         if (sonando) musicaFondo.play();
         configuracionJuego.setMusicaIndex(indice);
         configuracionJuego.guardar();

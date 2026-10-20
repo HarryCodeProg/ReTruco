@@ -9,4 +9,13 @@ public class DatosEstadoTienda {
     public int rerollsCartas;
     public int rerollsJokers;
     public int rerollsTienda;
+    // Rueda del zodiaco
+    public boolean ruedaUsada = false;
+    public String signoPendiente = null; // signo ya sacado cuyo efecto todavía no se aplicó
+    // Ajustes que los signos le hacen a la tienda (-1 = guardado viejo, no restaurar)
+    public double multiplicadorPrecio = -1;
+    public int rerollsGratis = -1;
+    public int cantidadCartas = -1;
+    public int cantidadJokers = -1;
+    public int cantidadSantos = -1;
 }

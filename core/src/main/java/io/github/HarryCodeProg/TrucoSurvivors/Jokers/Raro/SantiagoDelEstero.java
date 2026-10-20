@@ -55,7 +55,7 @@ public class SantiagoDelEstero extends Joker {
     @Override
     public String getDescripcionRenderizada(Juego juego) {
         if (juego == null || juego.getJugador() == null) {
-            return getDescripcion() + "\n\n(Actual: X1)";
+            return getDescripcion() + "\n(Actual: X1)";
         }
         int capacidadMaxima = juego.getJugador().getTamañoSantos();
         int santosActuales = juego.getJugador().getSantos().size();

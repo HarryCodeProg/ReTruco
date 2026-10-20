@@ -24,7 +24,6 @@ public class ControladorCombate {
             Jugador jugadorGanador = juego.getJugador();
             int pesosVictoria = ConfiguracionEconomia.DINERO_POR_VICTORIA;
             int pesosInteres = jugadorGanador.calcularInteres();
-            jugadorGanador.sumarPesos(pesosVictoria + pesosInteres); // FIX: se había perdido al refactorizar, el dinero real se suma acá, la animación es solo visual
             screen.prepararVictoria(pesosVictoria, pesosInteres);
             screen.setEsperandoTransicion(true);
             screen.getGame().habilitarSiguiente(screen.getDatosRival().getIndice());

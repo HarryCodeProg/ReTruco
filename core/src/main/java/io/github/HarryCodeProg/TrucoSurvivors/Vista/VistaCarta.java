@@ -150,13 +150,13 @@ public class VistaCarta implements Arrastrable{
         Color grisOscuro = new Color(0.15f, 0.15f, 0.17f, 1f);
         String lineaNombrePura = carta.getNumero() + " de " + carta.paloToString();
         String lineaNombre = io.github.HarryCodeProg.TrucoSurvivors.Cartas.Palo.colorearTexto(lineaNombrePura);
-        String etiquetaValorTruco = "Valor Truco: ";
+        String etiquetaValorTruco = "Valor Truco:";
         String numeroValorTruco = String.valueOf((int) carta.getValorTrucoEfectivo());
-        String etiquetaPuntosTruco = "Puntos Truco: ";
+        String etiquetaPuntosTruco = "Puntos Truco:";
         String numeroPuntosTruco = String.valueOf((int) carta.getPuntosTrucoAporteEfectivo());
-        String etiquetaValorEnvido = "Valor Envido: ";
+        String etiquetaValorEnvido = "Valor Envido:";
         String numeroValorEnvido = String.valueOf((int) carta.getValorEnvidoEfectivo());
-        String etiquetaPuntosEnvido = "Puntos Envido: ";
+        String etiquetaPuntosEnvido = "Puntos Envido:";
         String numeroPuntosEnvido = String.valueOf((int) carta.getPuntosEnvidoAporteEfectivo());
         // --- 3. MEDIMOS LOS TEXTOS ---
         layout.setText(fontTitulo, lineaNombre);
@@ -349,18 +349,18 @@ public class VistaCarta implements Arrastrable{
         layout.setText(font, etiqueta);
         float anchoEtiqueta = layout.width;
         layout.setText(fontNumeros, numero);
-        return anchoEtiqueta + layout.width;
+        return anchoEtiqueta + layout.width + 4f;
     }
 
-    private void dibujarLineaConNumeroColoreado(SpriteBatch batch, com.badlogic.gdx.graphics.g2d.BitmapFont font,
-                                                com.badlogic.gdx.graphics.g2d.BitmapFont fontNumeros, com.badlogic.gdx.graphics.g2d.GlyphLayout layout, String etiqueta, String numero,
-                                                float x, float y, com.badlogic.gdx.graphics.Color colorEtiqueta, com.badlogic.gdx.graphics.Color colorNumero) {
+    private void dibujarLineaConNumeroColoreado(SpriteBatch batch, BitmapFont font,
+                                                BitmapFont fontNumeros, GlyphLayout layout, String etiqueta, String numero,
+                                                float x, float y, Color colorEtiqueta, Color colorNumero) {
         font.setColor(colorEtiqueta);
         font.draw(batch, etiqueta, x, y);
         layout.setText(font, etiqueta);
         float anchoEtiqueta = layout.width;
         fontNumeros.setColor(colorNumero);
-        fontNumeros.draw(batch, numero, x + anchoEtiqueta, y);
+        fontNumeros.draw(batch, numero, x + anchoEtiqueta + 4f, y - 2f);
     }
 
     /** Ya no hace falta disponer nada: la textura del atlas es compartida y se dispone una sola vez en Main. */

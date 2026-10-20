@@ -188,13 +188,13 @@ public class GestorSantos {
         if (santo == null) return;
         TextureRegion region = game.getAtlasSantos().findRegion(santo.getNombreRegion());
         if (region == null) return;
-        // Posición "de aparición" para la quema cuando se compra desde la tienda
+        Santo santoParaRequisitos = resolverSantoEfectivo(santo, jugador);
+        int requeridas = (santoParaRequisitos != null) ? santoParaRequisitos.cartasRequeridas() : 0;
+        // Posición central para la animación de quema
         float anchoSanto = 110f;
         float altoSanto  = 150f;
         float xSanto = 1280f / 2f - anchoSanto / 2f;
         float ySanto = 720f / 2f - altoSanto / 2f;
-        Santo santoParaRequisitos = resolverSantoEfectivo(santo, jugador);
-        int requeridas = (santoParaRequisitos != null) ? santoParaRequisitos.cartasRequeridas() : 0;
         if (requeridas == 0) {
             overlayConsumo.abrir(santo, region, xSanto, ySanto, anchoSanto, altoSanto, () -> {
                 santo.aplicarEfecto(jugador, new ArrayList<>(), null);
@@ -206,21 +206,17 @@ public class GestorSantos {
             });
             return;
         }
-        // Requiere selección: se elige en la tienda, se quema desde el centro
         ArrayList<Carta> cartas = jugador.getMazo().getCartasAleatoriasParaSanto(10);
-        modoSeleccion.abrir(santo,
-            seleccion -> {
-                overlayConsumo.abrir(santo, region, xSanto, ySanto, anchoSanto, altoSanto, () -> {
-                    santo.aplicarEfecto(jugador, seleccion, null);
-                    registrarUsoParaTracking(santo, jugador);
-                    aplicarCambiosDiferidosConFlipYEsperar(santo, () -> {
-                        overlayConsumo.confirmarCierre();
-                        if (alConsumirSantoCallback != null) alConsumirSantoCallback.run();
-                    });
+        overlaySeleccion.abrir(santo, cartas, game.getAtlasCartas(), seleccion -> {
+            overlayConsumo.abrir(santo, region, xSanto, ySanto, anchoSanto, altoSanto, () -> {
+                santo.aplicarEfecto(jugador, seleccion, null);
+                registrarUsoParaTracking(santo, jugador);
+                aplicarCambiosDiferidosConFlipYEsperar(santo, () -> {
+                    overlayConsumo.confirmarCierre();
+                    if (alConsumirSantoCallback != null) alConsumirSantoCallback.run();
                 });
-            },
-            () -> { /* cancelado */ }
-        );
+            });
+        });
     }
 
     public void usarSeleccionado(VistaSanto vista, Jugador jugador, ArrayList<Carta> seleccion) {

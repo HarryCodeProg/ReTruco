@@ -96,12 +96,11 @@ public class GestorSonidos implements Disposable {
 
     public void setVolumenGeneral(float volumen) { this.volumenGeneral = MathUtils.clamp(volumen, 0f, 1f); }
     public float getVolumenGeneral() { return volumenGeneral; }
-    public void setVolumenEfectos(float volumen) { this.volumenEfectos = MathUtils.clamp(volumen, 0f, 0.5f); }
+    public void setVolumenEfectos(float volumen) { this.volumenEfectos = MathUtils.clamp(volumen, 0f, 1f); }
     public float getVolumenEfectos() { return volumenEfectos; }
     public void setVolumenMusica(float volumen) { this.volumenMusica = MathUtils.clamp(volumen, 0f, 1f); } // reservado, sin música implementada aún
     public float getVolumenMusica() { return volumenMusica; }
 
-    // FIX: alias viejo, por si algo más en el código todavía llama setVolumenGlobal
     public void setVolumenGlobal(float volumen) { setVolumenGeneral(volumen); }
 
     public void toggleMute() { this.silenciado = !this.silenciado; }

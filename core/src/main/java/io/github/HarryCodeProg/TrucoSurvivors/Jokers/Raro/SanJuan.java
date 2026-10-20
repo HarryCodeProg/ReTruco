@@ -14,7 +14,7 @@ public class SanJuan extends Joker {
     public SanJuan() {
         super(
             89,
-            "SanJuan",
+            "San Juan",
             "SanJuan",
             "+50 multiplicador truco, -1 por cada mano jugada.\n(Se destruye al llegar a 0)",
             Rareza.raro,

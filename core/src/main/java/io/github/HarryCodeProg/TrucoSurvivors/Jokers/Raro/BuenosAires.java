@@ -14,7 +14,7 @@ public class BuenosAires extends Joker {
     public BuenosAires() {
         super(
             94,
-            "BuenosAires",
+            "Buenos Aires",
             "BuenosAires",
             "+10 multiplicador envido. Evita que aparezcan jokers \"comun\" en la tienda",
             Rareza.raro,

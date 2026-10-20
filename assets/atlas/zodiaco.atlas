@@ -1,96 +1,89 @@
-
-zodiaco.png
-size: 2048, 2048
+zodiaco_iconos.png
+size: 768, 576
 format: RGBA8888
 filter: Linear, Linear
 repeat: none
-01_aries
+aries
   rotate: false
-  xy: 2, 1030
-  size: 512, 512
-  orig: 512, 512
+  xy: 0, 0
+  size: 192, 192
+  orig: 192, 192
   offset: 0, 0
   index: -1
-02_tauro
+tauro
   rotate: false
-  xy: 2, 516
-  size: 512, 512
-  orig: 512, 512
+  xy: 192, 0
+  size: 192, 192
+  orig: 192, 192
   offset: 0, 0
   index: -1
-03_geminis
+geminis
   rotate: false
-  xy: 516, 1030
-  size: 512, 512
-  orig: 512, 512
+  xy: 384, 0
+  size: 192, 192
+  orig: 192, 192
   offset: 0, 0
   index: -1
-04_cancer
+cancer
   rotate: false
-  xy: 2, 2
-  size: 512, 512
-  orig: 512, 512
+  xy: 576, 0
+  size: 192, 192
+  orig: 192, 192
   offset: 0, 0
   index: -1
-05_leo
+leo
   rotate: false
-  xy: 516, 516
-  size: 512, 512
-  orig: 512, 512
+  xy: 0, 192
+  size: 192, 192
+  orig: 192, 192
   offset: 0, 0
   index: -1
-06_virgo
+virgo
   rotate: false
-  xy: 1030, 1030
-  size: 512, 512
-  orig: 512, 512
+  xy: 192, 192
+  size: 192, 192
+  orig: 192, 192
   offset: 0, 0
   index: -1
-07_libra
+libra
   rotate: false
-  xy: 516, 2
-  size: 512, 512
-  orig: 512, 512
+  xy: 384, 192
+  size: 192, 192
+  orig: 192, 192
   offset: 0, 0
   index: -1
-08_escorpio
+escorpio
   rotate: false
-  xy: 1030, 516
-  size: 512, 512
-  orig: 512, 512
+  xy: 576, 192
+  size: 192, 192
+  orig: 192, 192
   offset: 0, 0
   index: -1
-09_sagitario
+sagitario
   rotate: false
-  xy: 1030, 2
-  size: 512, 512
-  orig: 512, 512
+  xy: 0, 384
+  size: 192, 192
+  orig: 192, 192
   offset: 0, 0
   index: -1
-
-zodiaco2.png
-size: 2048, 1024
-format: RGBA8888
-filter: Linear, Linear
-repeat: none
-10_capricornio
+capricornio
   rotate: false
-  xy: 2, 2
-  size: 512, 512
-  orig: 512, 512
+  xy: 192, 384
+  size: 192, 192
+  orig: 192, 192
   offset: 0, 0
   index: -1
-11_acuario
+acuario
   rotate: false
-  xy: 516, 2
-  size: 512, 512
-  orig: 512, 512
+  xy: 384, 384
+  size: 192, 192
+  orig: 192, 192
   offset: 0, 0
   index: -1
-12_piscis
+piscis
   rotate: false
-  xy: 1030, 2
-  size: 512, 512
-  orig: 512, 512
+  xy: 576, 384
+  size: 192, 192
+  orig: 192, 192
   offset: 0, 0
   index: -1

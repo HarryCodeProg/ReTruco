@@ -14,7 +14,7 @@ public class TierraDelFuego extends Joker {
     public TierraDelFuego() {
         super(
             99,
-            "TierraDelFuego",
+            "Tierra Del Fuego",
             "TierraDelFuego",
             "+5 puntos envido y truco cada vez que se active otro joker (actual: +0)",
             Rareza.raro,

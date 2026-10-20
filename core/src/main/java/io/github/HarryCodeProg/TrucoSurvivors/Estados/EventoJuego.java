@@ -13,11 +13,12 @@ public enum EventoJuego {
     AL_DESCARTAR,
     TERMINO_MANO,
     AL_JUGAR_SEGUNDA_CARTA,
-    AL_CANTAR_ENVIDO,      // el jugador o el rival propone/escala un canto de envido
-    AL_GANAR_ENVIDO_CANTO, // se resolvio el envido y el jugador gano (antes de sumar puntos)
-    AL_PERDER_ENVIDO,      // se resolvio el envido y el jugador perdio
-    AL_MATAR_CARTA,      // la carta del jugador gano su baza individual (dispara CON ctx.cartaEnResolucion = esa carta)
-    AL_SER_MATADO,       // la carta del jugador perdio su baza individual (idem)
+    AL_CANTAR_ENVIDO,
+    AL_GANAR_ENVIDO_CANTO,
+    AL_PERDER_ENVIDO,
+    AL_MATAR_CARTA,
+    AL_SER_MATADO,
+    AL_CANTAR_TRUCO,
 
     ANTES_DE_SUMAR_ENVIDO,
     ANTES_DE_SUMAR_TRUCO,

@@ -3,7 +3,6 @@ package io.github.HarryCodeProg.TrucoSurvivors.Estados;
 import com.badlogic.gdx.graphics.Color;
 import io.github.HarryCodeProg.TrucoSurvivors.Vista.UITheme;
 
-/** Colores visuales compartidos para valores de juego mostrados con markup de LibGDX. */
 public enum ColorMecanica {
     MULTIPLICADOR(UITheme.ROJO),
     VALOR_TRUCO(UITheme.TRUCO),
@@ -19,35 +18,22 @@ public enum ColorMecanica {
         this.color = color;
     }
 
-    public String getColorHex() {
-        return color.toString();
-    }
-
     public Color getColor() {
         return color;
     }
 
-    public String colorear(String texto) {
-        return "[#" + color.toString().substring(0, 6) + "]" + texto + "[]";
-    }
-
-    /**
-     * Colorea valores escritos en descripciones.
-     *
-     * Ejemplos:
-     * x2 multiplicador truco
-     * +10 puntos envido
-     * $50
-     * selecciona 2 cartas
-     */
     public static String colorearTexto(String texto) {
         if (texto == null) return "";
-        texto = reemplazarNumero(texto, MULTIPLICADOR, "(?i)([x×+]?\\s*\\d+(?:[.,]\\d+)?)\\s+(multiplicador(?:\\s+de)?\\s+(?:truco|envido))");
-        texto = reemplazarNumero(texto, VALOR_TRUCO, "(?i)([+−-]?\\s*\\d+(?:[.,]\\d+)?)\\s+(valor(?:\\s+de)?\\s+truco)");
-        texto = reemplazarNumero(texto, PUNTOS_TRUCO, "(?i)([+−-]?\\s*\\d+(?:[.,]\\d+)?)\\s+(puntos?\\s+(?:de\\s+)?truco)");
-        texto = reemplazarNumero(texto, VALOR_ENVIDO, "(?i)([+−-]?\\s*\\d+(?:[.,]\\d+)?)\\s+(valor(?:\\s+de)?\\s+envido)");
-        texto = reemplazarNumero(texto, PUNTOS_ENVIDO, "(?i)([+−-]?\\s*\\d+(?:[.,]\\d+)?)\\s+(puntos?\\s+(?:de\\s+)?envido)");
-        texto = reemplazarNumero(texto, PESOS, "(\\$\\s*\\d+(?:[.,]\\d+)?)");
+        // Usamos la versión que preserva el grupo 2 (las palabras)
+        texto = reemplazarNumeroConPalabras(texto, MULTIPLICADOR, "(?i)([x×+]?\\s*\\d+(?:[.,]\\d+)?)\\s+(multiplicador(?:\\s+de)?\\s+(?:truco|envido))");
+        texto = reemplazarNumeroConPalabras(texto, VALOR_TRUCO, "(?i)([+−-]?\\s*\\d+(?:[.,]\\d+)?)\\s+(valor(?:\\s+de)?\\s+truco)");
+        texto = reemplazarNumeroConPalabras(texto, PUNTOS_TRUCO, "(?i)([+−-]?\\s*\\d+(?:[.,]\\d+)?)\\s+(puntos?\\s+(?:de\\s+)?truco)");
+        texto = reemplazarNumeroConPalabras(texto, VALOR_ENVIDO, "(?i)([+−-]?\\s*\\d+(?:[.,]\\d+)?)\\s+(valor(?:\\s+de)?\\s+envido)");
+        texto = reemplazarNumeroConPalabras(texto, PUNTOS_ENVIDO, "(?i)([+−-]?\\s*\\d+(?:[.,]\\d+)?)\\s+(puntos?\\s+(?:de\\s+)?envido)");
+
+        // Para pesos, el patrón tiene un solo grupo (el $ y el número), así que usamos la función normal
+        texto = reemplazarNumeroSimple(texto, PESOS, "(\\$\\s*\\d+(?:[.,]\\d+)?)");
+
         String patronNumero = "(?<![\\w#])\\d+(?:[.,]\\d+)?(?![\\w])";
         StringBuilder resultado = new StringBuilder();
         java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("(\\[#[0-9A-Fa-f]{6}\\].*?\\[\\])").matcher(texto);
@@ -63,7 +49,13 @@ public enum ColorMecanica {
         return resultado.toString();
     }
 
-    private static String reemplazarNumero(String texto, ColorMecanica color, String patron) {
+    /** Preserva el grupo 2 (las palabras que acompañan al número). */
+    private static String reemplazarNumeroConPalabras(String texto, ColorMecanica color, String patron) {
+        return texto.replaceAll(patron, color.colorHex() + "$1[] $2");
+    }
+
+    /** Para patrones de un solo grupo (como PESOS). */
+    private static String reemplazarNumeroSimple(String texto, ColorMecanica color, String patron) {
         return texto.replaceAll(patron, color.colorHex() + "$1[]");
     }
 

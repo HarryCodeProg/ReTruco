@@ -15,7 +15,7 @@ public class Background {
 
     public static class TemaFondo {
         public String nombre;
-        public int efecto; // 0=Cielo, 1=Ondas, 2=Matrix, 3=Plasma (Balatro)
+        public int efecto; // 0=Cielo, 1=Ondas, 2=Matrix, 3=Plasma, 4=Aurora, 5=Estrellas, 6=Agua, 7=Brasas, 8=Topo, 9=Portal, 10=Glitch, 11=Luciernagas
         public float[] c1, c2, c3;
         public float spinAmount = 0.5f;  // solo para efecto 3
         public float contraste  = 1.0f;  // solo para efecto 3
@@ -68,6 +68,48 @@ public class Background {
             new float[]{0.35f, 0.72f, 0.95f},
             new float[]{0.92f, 0.98f, 1.00f},
             0.25f, 0.8f),
+
+        // ─── NUEVOS EFECTOS (4 al 11) ────────────────────────────────
+
+        new TemaFondo("Aurora Boreal", 4,
+            new float[]{0.02f, 0.08f, 0.15f}, // c1: Noche profunda
+            new float[]{0.0f,  0.8f,  0.4f},  // c2: Verde neón
+            new float[]{0.1f,  0.5f,  0.9f}), // c3: Azul brillante
+
+        new TemaFondo("Campo Estelar", 5,
+            new float[]{0.01f, 0.01f, 0.03f}, // c1: Espacio
+            new float[]{0.6f,  0.2f,  0.8f},  // c2: Nebulosa púrpura
+            new float[]{0.9f,  0.9f,  1.0f}), // c3: Estrellas blancas
+
+        new TemaFondo("Agua Profunda", 6,
+            new float[]{0.0f,  0.15f, 0.3f},  // c1: Fondo marino
+            new float[]{0.0f,  0.6f,  0.8f},  // c2: Reflejos cian
+            new float[]{0.5f,  0.9f,  1.0f}), // c3: Cáusticas claras
+
+        new TemaFondo("Brasas Flotantes", 7,
+            new float[]{0.1f,  0.0f,  0.0f},  // c1: Oscuridad rojiza
+            new float[]{0.9f,  0.3f,  0.0f},  // c2: Fuego intenso
+            new float[]{1.0f,  0.8f,  0.2f}), // c3: Chispas amarillas
+
+        new TemaFondo("Radar Topográfico", 8,
+            new float[]{0.05f, 0.08f, 0.05f}, // c1: Pantalla militar
+            new float[]{0.2f,  0.8f,  0.3f},  // c2: Líneas verdes
+            new float[]{0.6f,  1.0f,  0.7f}), // c3: Relieves marcados
+
+        new TemaFondo("Portal Dimensional", 9,
+            new float[]{0.05f, 0.0f,  0.1f},  // c1: Borde del portal
+            new float[]{0.7f,  0.0f,  0.5f},  // c2: Magia magenta
+            new float[]{0.9f,  0.5f,  1.0f}), // c3: Núcleo brillante
+
+        new TemaFondo("Interferencia Glitch", 10,
+            new float[]{0.08f, 0.08f, 0.08f}, // c1: Estática oscura
+            new float[]{0.0f,  1.0f,  0.8f},  // c2: Cian digital
+            new float[]{1.0f,  0.0f,  0.4f}), // c3: Magenta digital
+
+        new TemaFondo("Luciérnagas", 11,
+            new float[]{0.03f, 0.08f, 0.05f}, // c1: Bosque nocturno
+            new float[]{0.5f,  0.9f,  0.2f},  // c2: Bioluminiscencia verde
+            new float[]{0.8f,  1.0f,  0.5f})  // c3: Núcleo amarillo
     };
 
     public Background() {
@@ -98,7 +140,6 @@ public class Background {
                 "uniform float u_spin_amount;\n" +
                 "uniform float u_contrast;\n" +
                 "uniform sampler2D u_texture;\n" +
-
                 // ─── utilidades ────────────────────────────────────────
                 "float random(vec2 st){ return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123); }\n" +
                 "float noise(vec2 st){\n" +
@@ -127,7 +168,8 @@ public class Background {
                 "    float n2 = fbm(q * 2.1 + vec2(sin(t * 0.7 + semilla), cos(t * 0.55 + semilla)));\n" +
                 "    return mix(n1, n2, 0.28);\n" +
                 "}\n" +
-
+                // ─── FUNCIONES DE FONDOS NUEVOS (4 a 11) ───────────────
+                FondosShaders.FUNCIONES +
                 // ─── efecto 3: plasma Balatro ─────────────────────────
                 "vec3 efectoPlasma() {\n" +
                 "    float pixel_size = length(u_resolution) / 700.0;\n" +
@@ -153,65 +195,54 @@ public class Background {
                 "    float c3p = 1.0 - min(1.0, c1p + c2p);\n" +
                 "    return (0.3 / u_contrast) * u_c1 + (1.0 - 0.3 / u_contrast) * (u_c1 * c1p + u_c2 * c2p + u_c3 * c3p);\n" +
                 "}\n" +
-
                 "void main(){\n" +
                 "    vec2 uv = gl_FragCoord.xy / u_resolution.xy;\n" +
                 "    uv.x *= u_resolution.x / u_resolution.y;\n" +
                 "    float t = u_time;\n" +
                 "    vec3 color = vec3(0.0);\n" +
-
                 // ───────────────────────── EFECTO 0: CIELO (intacto) ─────────────────────
                 "    if (u_efecto == 0) {\n" +
                 "        vec3 cieloArriba = mix(vec3(0.12, 0.32, 0.58), u_c1, 0.35) * u_brillo;\n" +
                 "        vec3 cieloAbajo  = mix(vec3(0.58, 0.78, 0.93), u_c2, 0.22) * u_brillo;\n" +
                 "        float gradiente = smoothstep(0.0, 1.0, uv.y);\n" +
                 "        color = mix(cieloAbajo, cieloArriba, gradiente);\n" +
-
                 "        float nube1 = nubeOrganica(uv + vec2(0.0, 0.20), 2.1, 0.22, 1.7);\n" +
-                "        float mascara1 = smoothstep(0.58, 0.73, nube1);\n" +
+                "        float mascara1 = smoothstep(0.50, 0.70, nube1);\n" +
                 "        color = mix(color, vec3(0.78, 0.86, 0.94), mascara1 * 0.26);\n" +
-
                 "        float nube2 = nubeOrganica(uv + vec2(3.7, -0.4), 3.4, 0.40, 7.2);\n" +
-                "        float mascara2 = smoothstep(0.56, 0.72, nube2);\n" +
+                "        float mascara2 = smoothstep(0.48, 0.70, nube2);\n" +
                 "        color = mix(color, vec3(0.88, 0.92, 0.96), mascara2 * 0.34);\n" +
-
                 "        float nube3 = nubeOrganica(uv + vec2(-2.5, 1.4), 5.0, 0.68, 13.5);\n" +
-                "        float mascara3 = smoothstep(0.57, 0.75, nube3);\n" +
+                "        float mascara3 = smoothstep(0.52, 0.72, nube3);\n" +
                 "        color = mix(color, vec3(0.94, 0.96, 0.98), mascara3 * 0.34);\n" +
-
-                "        float sombra = smoothstep(0.45, 0.62, nube2);\n" +
+                "        float nube4 = nubeOrganica(uv + vec2(-5.0, -2.0), 1.5, 0.12, 21.4);\n" +
+                "        float mascara4 = smoothstep(0.55, 0.75, nube4);\n" +
+                "        color = mix(color, vec3(0.85, 0.90, 0.95), mascara4 * 0.20);\n" +
+                "        float nube5 = nubeOrganica(uv + vec2(8.0, 3.0), 4.2, 0.55, 33.1);\n" +
+                "        float mascara5 = smoothstep(0.46, 0.68, nube5);\n" +
+                "        color = mix(color, vec3(0.90, 0.94, 0.97), mascara5 * 0.25);\n" +
+                "        float sombra = smoothstep(0.40, 0.60, nube2) * 0.6 + smoothstep(0.45, 0.65, nube4) * 0.4;\n" +
                 "        color -= vec3(0.025, 0.035, 0.05) * sombra;\n" +
-
                 "        vec2 posicionSol = vec2(0.72, 0.78);\n" +
                 "        vec2 uvNormalizada = vec2(uv.x / (u_resolution.x / u_resolution.y), uv.y);\n" +
                 "        float distanciaSol = distance(uvNormalizada, posicionSol);\n" +
                 "        float halo = smoothstep(0.48, 0.0, distanciaSol);\n" +
                 "        color += vec3(1.0, 0.91, 0.72) * halo * 0.09;\n" +
-
                 "        color *= 0.985 + 0.015 * sin(u_time * 0.25);\n" +
                 "    }\n" +
-
                 // ───────────────────────── EFECTO 1: ONDAS RETRO ─────────────────────────
                 "    else if (u_efecto == 1) {\n" +
                 "        vec3 base = mix(u_c1, u_c2, 0.5) * u_brillo;\n" +
                 "        color = base * 0.55;\n" +
-
-                "        // Grilla en perspectiva: horizonte en y=0.45\n" +
                 "        float horizonte = 0.45;\n" +
                 "        if (uv.y > horizonte) {\n" +
-                "            // Zona superior: cielo con sol retro\n" +
                 "            vec2 solCentro = vec2(uv.x / (u_resolution.x / u_resolution.y) * 0.5 + 0.5, 1.0);\n" +
-                "            // Reinterpretamos para centrar horizontalmente\n" +
                 "        }\n" +
-
-                "        // Distorsión principal por senos (lo que ya tenías)\n" +
                 "        vec2 uvs = uv;\n" +
                 "        uvs.y += sin(uvs.x * 5.0 + u_time) * 0.10;\n" +
                 "        float linea = abs(0.02 / sin(uvs.y * 20.0 - u_time * 2.0));\n" +
                 "        color = mix(u_c1, u_c2 * u_brillo, linea);\n" +
                 "        color += u_c3 * (1.0 - uvs.y) * 0.30;\n" +
-
-                "        // Grilla synthwave: líneas que convergen al horizonte\n" +
                 "        float yGrid = uv.y - 0.45;\n" +
                 "        if (yGrid > 0.001) {\n" +
                 "            float persp = 1.0 / max(yGrid, 0.05);\n" +
@@ -220,12 +251,9 @@ public class Background {
                 "            float lineaGrid = step(0.94, gridX) + step(0.94, gridY);\n" +
                 "            color += u_c3 * lineaGrid * 0.35 * smoothstep(0.0, 0.35, yGrid);\n" +
                 "        }\n" +
-
-                "        // Sol retro en el horizonte\n" +
                 "        float sol = smoothstep(0.28, 0.24, distance(uv, vec2(0.55, 0.45)));\n" +
                 "        color += u_c3 * sol * 0.6;\n" +
                 "    }\n" +
-
                 // ───────────────────────── EFECTO 2: MATRIX ─────────────────────────
                 "    else if (u_efecto == 2) {\n" +
                 "        float n = fbm(uv * 10.0 - vec2(0.0, u_time * 0.5));\n" +
@@ -233,20 +261,18 @@ public class Background {
                 "        vec2 grid = fract(uv * 15.0);\n" +
                 "        float border = step(0.95, grid.x) + step(0.95, grid.y);\n" +
                 "        color = mix(color, u_c3, border * 0.5);\n" +
-                "        // Glow pulsante suave\n" +
                 "        float pulso = 0.5 + 0.5 * sin(u_time * 2.0 + uv.y * 8.0);\n" +
                 "        color += u_c3 * pulso * 0.04;\n" +
                 "    }\n" +
-
                 // ───────────────────────── EFECTO 3: PLASMA BALATRO ─────────────────────────
                 "    else if (u_efecto == 3) {\n" +
                 "        color = efectoPlasma();\n" +
                 "    }\n" +
-
+                // ─── RAMAS DE FONDOS NUEVOS (4 a 11) ───────────────────
+                FondosShaders.RAMAS +
                 "    vec4 tex = texture2D(u_texture, v_texCoords) * 0.00001;\n" +
                 "    gl_FragColor = vec4(color, 1.0) + tex;\n" +
                 "}";
-
         shaderPlasma = new ShaderProgram(vertexShader, fragmentShader);
         if (!shaderPlasma.isCompiled()) System.err.println("¡ERROR SHADER!: " + shaderPlasma.getLog());
 

@@ -14,7 +14,7 @@ public class SanLuis extends Joker {
     public SanLuis() {
         super(
             90,
-            "SanLuis",
+            "San Luis",
             "SanLuis",
             "+3 multiplicador envido por cada mano jugada, -1 por cada descarte.",
             Rareza.raro,

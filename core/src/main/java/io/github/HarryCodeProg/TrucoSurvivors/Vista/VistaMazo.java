@@ -80,7 +80,6 @@ public class VistaMazo {
         float altoBoton = 48f;
         Rectangle boundsBotonAtras = new Rectangle(1280 / 2f - anchoBoton / 2f, MARCO_Y + 24f, anchoBoton, altoBoton);
         this.botonAtras = new Boton(boundsBotonAtras.x, boundsBotonAtras.y, boundsBotonAtras.width, boundsBotonAtras.height, "ATRÁS", Boton.TipoColor.BORDO, Accion.OPCIONES);
-
         float botonAbajoY = MARCO_Y + 24f + altoBoton + 16f;
         this.areaContenido = new Rectangle(
             MARCO_X + GROSOR_BORDE, botonAbajoY,

@@ -13,7 +13,7 @@ public class MercedesSosa extends Joker {
     public MercedesSosa() {
         super(137, "Mercedes Sosa",
             "MercedesSosa",
-            "+2 tamaño jokers.\n+2 Multiplicador de Envido\npor cada joker que tengas.",
+            "+2 tamaño jokers.\n+2 Multiplicador de Envido por cada joker que tengas.",
             Rareza.epico,
             10,
             FaseActivacion.INDEPENDIENTE,
@@ -32,7 +32,7 @@ public class MercedesSosa extends Joker {
         }
         int bonusActual = cantidadJokers * 2;
         // Usamos ROJO (o el color que prefieras) para el Multiplicador
-        return getDescripcion() + "\n(actual: [RED]+" + bonusActual + " Mult[])";
+        return getDescripcion() + "\n(actual: [RED]+" + bonusActual + "[])";
     }
 
     @Override

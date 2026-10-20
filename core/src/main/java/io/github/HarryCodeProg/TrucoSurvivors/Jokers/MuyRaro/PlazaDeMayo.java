@@ -14,7 +14,7 @@ public class PlazaDeMayo extends Joker {
             127,
             "Plaza de Mayo",
             "PlazaDeMayo",
-            "+7 puntos envido por cada activación de carta (Actual: +)",
+            "+7 puntos envido por cada activación de carta (Actual: +0)",
             Rareza.muyRaro,
             12,
             Joker.FaseActivacion.INDEPENDIENTE,
@@ -34,7 +34,7 @@ public class PlazaDeMayo extends Joker {
 
     @Override
     public String getDescripcion() {
-        return "+7 puntos envido por cada activación de carta.\n(Actual: +" + (int) getAcumulado() + " puntos)";
+        return "+7 puntos envido por cada activación de carta.\n(Actual: +" + (int) getAcumulado() + "0 puntos)";
     }
 
     @Override

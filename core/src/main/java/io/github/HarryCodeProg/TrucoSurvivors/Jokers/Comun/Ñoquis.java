@@ -9,12 +9,12 @@ import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 
 public class Ñoquis extends Joker {
 
-    private static final double MULT_POR_ACEPTAR = 2.0;
+    private static final double MULT_POR_CANTO = 2.0;
 
     public Ñoquis(){
-        super(26, "Ñoquis", "Ñoquis", "Gana +2 Multiplicador truco cada vez que cantás \"Quiero\"",
+        super(26, "Ñoquis", "Ñoquis", "Gana +2 Multiplicador envido cada vez que cantás \"Envido\"",
             Rareza.comun, 4, Joker.FaseActivacion.INDEPENDIENTE,
-            CategoriaJoker.TRUCO,
+            CategoriaJoker.ENVIDO,
             CategoriaJoker.RACHAS,
             CategoriaJoker.GASTRONOMIA
         );
@@ -22,12 +22,12 @@ public class Ñoquis extends Joker {
 
     @Override
     public String getDescripcionRenderizada() {
-        return "Gana +2 Multiplicador truco cada vez que cantás \"Quiero\" (Actual: +" + (int) getAcumulado() + ")";
+        return "Gana +2 Multiplicador envido cada vez que cantás \"Envido\" (Actual: +" + (int) getAcumulado() + ")";
     }
 
     @Override
     public String getDescripcionRenderizada(Juego juego) {
-        return "Gana +2 Multiplicador truco cada vez que cantás \"Quiero\" (Actual: +" + (int) getAcumulado() + ")";
+        return "Gana +2 Multiplicador envido cada vez que cantás \"Envido\" (Actual: +" + (int) getAcumulado() + ")";
     }
 
     @Override
@@ -40,12 +40,11 @@ public class Ñoquis extends Joker {
 
     @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego){
-        if (evento == EventoJuego.AL_DECIR_QUIERO_TRUCO) {
-            sumarAcumulado(MULT_POR_ACEPTAR);
+        if (evento == EventoJuego.AL_CANTAR_ENVIDO) {
+            sumarAcumulado(MULT_POR_CANTO);
             return;
         }
-        if (evento != EventoJuego.ANTES_DE_SUMAR_TRUCO) return;
-
+        if (evento != EventoJuego.ANTES_DE_SUMAR_ENVIDO) return;
         if (getAcumulado() > 0) {
             ctx.getResolucionActual().sumarMult(getAcumulado(), getNombre(), this);
         }

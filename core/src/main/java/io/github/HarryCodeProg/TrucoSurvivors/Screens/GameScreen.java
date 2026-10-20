@@ -280,6 +280,7 @@ public class GameScreen implements Screen {
             if (resPausa == PanelPausa.Resultado.VOLVER_MENU) {
                 guardarProgreso();
                 game.setScreen(new MainMenuScreen(game));
+                dispose();
                 return;
             }
             pausaVisible = panelPausa.isVisible(); // puede haber cambiado (REANUDAR)
@@ -315,6 +316,7 @@ public class GameScreen implements Screen {
         resolverPendingEstado();
         if (estado == EstadoPantalla.DERROTA) {
             if (panelDerrota != null) panelDerrota.update(mouseWorld.x, mouseWorld.y);
+            if (game.getScreen() != this) return;
             renderizar(delta);
             game.batch.begin();
             if (panelDerrota != null) panelDerrota.render(game.batch);
@@ -324,6 +326,7 @@ public class GameScreen implements Screen {
         }
         if (estado == EstadoPantalla.VICTORIA_FINAL) {
             if (panelVictoriaFinal != null) panelVictoriaFinal.update(mouseWorld.x, mouseWorld.y);
+            if (game.getScreen() != this) return;
             renderizar(delta);
             game.batch.begin();
             if (panelVictoriaFinal != null) panelVictoriaFinal.render(game.batch);
@@ -505,6 +508,12 @@ public class GameScreen implements Screen {
                 if (panelPausa != null) panelPausa.render(game.batch, mouseWorld.x, mouseWorld.y);
             }
         );
+        // La guía zodiaco se dibuja al final, encima de todo
+        if (panelTienda != null && panelTiendaVisible) {
+            game.batch.begin();
+            panelTienda.renderGuiaZodiaco(game.batch);
+            game.batch.end();
+        }
     }
 
     private void renderConSeleccionRival(float delta, boolean modalBloqueante, float mx, float my) {
@@ -1061,6 +1070,8 @@ public class GameScreen implements Screen {
         }
         this.gestorJokers = new GestorInputArrastrable<>(jokers);
         organizarJokers(true);
+        for (Santo s : jugador.getSantos()) gestorSantos.agregarVistaDesdeModelo(s, jugador);
+        registrarListenersSantos();
         this.datosRival = game.getListaRivales().get(d.rivalIndice);
         game.setNivelInfinito(d.nivelInfinito);
         if (game.isModoInfinito()) this.datosRival = game.crearRivalInfinito();
@@ -1171,6 +1182,16 @@ public class GameScreen implements Screen {
         float posX = 1280f - anchoMazo - 25f, posY = 130f;
         this.vistaMazo = new VistaMazo(posX, posY, anchoMazo, altoMazo, game.getAtlasCartas(), game.getFuentePrincipal(), game.getPixelBlanco(), camera);
         this.hudController = new HUDController(this.vistaMazo);
+    }
+
+    /** Registra los listeners de santos del Jugador y los vincula a ESTE gestorSantos. Seguro de llamar varias veces. */
+    private void registrarListenersSantos() {
+        if (jugadorSantoAddedListener != null) jugador.removeSantoAddedListener(jugadorSantoAddedListener);
+        if (jugadorSantoRemovedListener != null) jugador.removeSantoRemovedListener(jugadorSantoRemovedListener);
+        jugadorSantoAddedListener = santo -> gestorSantos.agregarVistaDesdeModelo(santo, jugador);
+        jugadorSantoRemovedListener = santo -> gestorSantos.eliminarVistaDesdeModelo(santo);
+        jugador.addSantoAddedListener(jugadorSantoAddedListener);
+        jugador.addSantoRemovedListener(jugadorSantoRemovedListener);
     }
 
     private void iniciarPartidaNuevaDesdeVictoriaFinal() {

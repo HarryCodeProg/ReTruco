@@ -15,7 +15,7 @@ public class LaRioja extends Joker {
     public LaRioja() {
         super(
             86,
-            "LaRioja",
+            "La Rioja",
             "LaRioja",
             "Agrega a tu mazo una copia de todas las cartas jugadas en la mano.",
             Rareza.raro,

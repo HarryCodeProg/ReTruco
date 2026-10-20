@@ -5,6 +5,7 @@ import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Palo;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Raro.Salta;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Raro.Tucuman;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
+import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Guardado.DatosJugador;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Mazo;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.SignoZodiaco;
 import io.github.HarryCodeProg.TrucoSurvivors.Rasgos.BonosRasgos;
@@ -60,6 +61,12 @@ public class Jugador {
     private double totalPesosGastados = 0;
     private final BonosRasgos bonosRasgos = new BonosRasgos();
     private final Map<String, Double> acumuladosRasgos = new HashMap<>();
+    public boolean tieneExtras = false; // false = guardado viejo, no se toca nada
+    public int multiplicadorZodiaco = 1;
+    public double multiplicadorTrucoBase = 1, multiplicadorEnvidoBase = 1;
+    public ArrayList<String> acumuladosClaves = new ArrayList<>();
+    public ArrayList<Double> acumuladosValores = new ArrayList<>();
+    private boolean cargandoGuardado = false;
 
     public Jugador(String nombre) {
         this.nombre = nombre;
@@ -83,7 +90,7 @@ public class Jugador {
 
     public boolean agregarJoker(Joker joker) {
         int necesita = joker.ocupaEspacio() ? 1 : 0;
-        if (getEspacioJokersUsados() + necesita <= tamañoJokers) {
+        if (cargandoGuardado || getEspacioJokersUsados() + necesita <= tamañoJokers) {
             this.jokers.add(joker);
             joker.setJugadorPropietario(this);
             joker.aplicarEfectoInstantaneo(this);
@@ -259,7 +266,7 @@ public class Jugador {
     }
 
     public boolean agregarSanto(Santo santo) {
-        if (santos.size() < getTamañoSantos()) {
+        if (cargandoGuardado || santos.size() < getTamañoSantos()) {
             santos.add(santo);
             for (Consumer<Santo> l : santoAddedListeners) { try { l.accept(santo); } catch (Exception e) { e.printStackTrace(); } }
             return true;
@@ -271,6 +278,8 @@ public class Jugador {
         santos.remove(santo);
         for (Consumer<Santo> l : santoRemovedListeners) { try { l.accept(santo); } catch (Exception e) { e.printStackTrace(); } }
     }
+
+    public void setCargandoGuardado(boolean v) { cargandoGuardado = v; }
 
     public void addSantoAddedListener(Consumer<Santo> l) { santoAddedListeners.add(l); }
     public void removeSantoAddedListener(Consumer<Santo> l) { santoAddedListeners.remove(l); }
@@ -436,5 +445,63 @@ public class Jugador {
         topeInteresExtra = 0;
         totalPesosGanados = 0;
         totalPesosGastados = 0;
+    }
+
+    public void exportarExtras(DatosJugador d) {
+        d.tieneExtras = true;
+        d.tamañoMano = tamañoMano;          // valores crudos, sin bonus de rasgos
+        d.tamañoJokers = tamañoJokers;
+        d.manosMaximas = manosMaximas;
+        d.manosActuales = manosActuales;
+        d.multiplicadorTrucoBase = multiplicadorTruco;
+        d.multiplicadorEnvidoBase = multiplicadorEnvido;
+        d.descartesExtra = descartesExtra;
+        d.espacioSantosExtra = espacioSantosExtra;
+        d.bonusEnvidoFinal = bonusEnvidoFinal;
+        d.multiplicadorZodiaco = proximoEfectoZodiacoMultiplicador;
+        d.proximoZodiacoForzado = proximoZodiacoForzado != null ? proximoZodiacoForzado.name() : null;
+        d.rerollsTienda = rerollsTienda;
+        d.rerollsGratisTienda = rerollsGratisTienda;
+        d.espacioJokersTiendaExtra = espacioJokersTiendaExtra;
+        d.espacioCartasTiendaExtra = espacioCartasTiendaExtra;
+        d.espacioSantosTiendaExtra = espacioSantosTiendaExtra;
+        d.multiplicadorPrecioTienda = multiplicadorPrecioTienda;
+        d.deudaMaxima = deudaMaxima;
+        d.topeInteresExtra = topeInteresExtra;
+        d.acumuladosClaves = new ArrayList<>(acumuladosRasgos.keySet());
+        d.acumuladosValores = new ArrayList<>();
+        for (String k : d.acumuladosClaves) d.acumuladosValores.add(acumuladosRasgos.get(k));
+    }
+
+    public void aplicarExtrasGuardados(DatosJugador d) {
+        if (!d.tieneExtras) return;
+        tamañoMano = d.tamañoMano;
+        tamañoJokers = d.tamañoJokers;
+        manosMaximas = d.manosMaximas;
+        manosActuales = Math.min(d.manosActuales, d.manosMaximas);
+        multiplicadorTruco = d.multiplicadorTrucoBase;
+        multiplicadorEnvido = d.multiplicadorEnvidoBase;
+        multiplicadorTrucoTemporal = multiplicadorTruco;
+        multiplicadorEnvidoTemporal = multiplicadorEnvido;
+        descartesExtra = d.descartesExtra;
+        espacioSantosExtra = d.espacioSantosExtra;
+        bonusEnvidoFinal = d.bonusEnvidoFinal;
+        proximoEfectoZodiacoMultiplicador = Math.max(1, d.multiplicadorZodiaco);
+        proximoZodiacoForzado = null;
+        if (d.proximoZodiacoForzado != null) {
+            try { proximoZodiacoForzado = SignoZodiaco.valueOf(d.proximoZodiacoForzado); } catch (IllegalArgumentException ignored) { }
+        }
+        rerollsTienda = d.rerollsTienda;
+        rerollsGratisTienda = d.rerollsGratisTienda;
+        espacioJokersTiendaExtra = d.espacioJokersTiendaExtra;
+        espacioCartasTiendaExtra = d.espacioCartasTiendaExtra;
+        espacioSantosTiendaExtra = d.espacioSantosTiendaExtra;
+        multiplicadorPrecioTienda = d.multiplicadorPrecioTienda;
+        deudaMaxima = d.deudaMaxima;
+        topeInteresExtra = d.topeInteresExtra;
+        acumuladosRasgos.clear();
+        for (int i = 0; i < d.acumuladosClaves.size() && i < d.acumuladosValores.size(); i++) {
+            acumuladosRasgos.put(d.acumuladosClaves.get(i), d.acumuladosValores.get(i));
+        }
     }
 }

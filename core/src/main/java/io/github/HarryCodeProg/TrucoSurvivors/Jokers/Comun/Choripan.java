@@ -9,10 +9,10 @@ import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 
 public class Choripan extends Joker {
 
-    private static final double MULT_POR_RECHAZO = 4.0;
+    private static final double MULT_POR_CANTO = 4.0;
 
     public Choripan(){
-        super(28, "Choripan", "Choripan", "Gana +4 Multiplicador truco cada vez que cantás \"No Quiero\"",
+        super(28, "Choripan", "Choripan", "Gana +4 Multiplicador truco cada vez que cantás \"Truco\"",
             Rareza.comun, 3, Joker.FaseActivacion.INDEPENDIENTE,
             CategoriaJoker.TRUCO,
             CategoriaJoker.RACHAS,
@@ -22,12 +22,12 @@ public class Choripan extends Joker {
 
     @Override
     public String getDescripcionRenderizada() {
-        return "Gana +4 Multiplicador truco cada vez que cantás \"No Quiero\" (Actual: +" + (int) getAcumulado() + ")";
+        return "Gana +4 Multiplicador truco cada vez que cantás \"Truco\" (Actual: +" + (int) getAcumulado() + ")";
     }
 
     @Override
     public String getDescripcionRenderizada(Juego juego) {
-        return "Gana +4 Multiplicador truco cada vez que cantás \"No Quiero\" (Actual: +" + (int) getAcumulado() + ")";
+        return "Gana +4 Multiplicador truco cada vez que cantás \"Truco\" (Actual: +" + (int) getAcumulado() + ")";
     }
 
     @Override
@@ -40,8 +40,9 @@ public class Choripan extends Joker {
 
     @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego){
-        if (evento == EventoJuego.AL_DECIR_NO_QUIERO_TRUCO) {
-            sumarAcumulado(MULT_POR_RECHAZO);
+        // CAMBIO: Ahora reacciona a cantar truco en vez de decir "No Quiero"
+        if (evento == EventoJuego.AL_CANTAR_TRUCO) {
+            sumarAcumulado(MULT_POR_CANTO);
             return;
         }
         if (evento != EventoJuego.ANTES_DE_SUMAR_TRUCO) return;

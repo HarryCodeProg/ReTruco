@@ -20,7 +20,7 @@ public class SantaCruz extends Joker {
     public SantaCruz() {
         super(
             98,
-            "SantaCruz",
+            "Santa Cruz",
             "SantaCruz",
             "", // La descripción la armamos dinámica para mostrar el palo
             Rareza.raro,

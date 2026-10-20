@@ -52,10 +52,12 @@ public class RuedaZodiaco {
             "    vec4 color = texture2D(u_texture, v_texCoords) * v_color;\n" +
             "    vec2 centro = v_texCoords - vec2(0.5);\n" +
             "    float distancia = length(centro) * 2.0;\n" +
-            "    float aro = smoothstep(0.58, 0.92, distancia) * (1.0 - smoothstep(0.92, 1.0, distancia));\n" +
-            "    float pulso = 0.62 + 0.38 * sin(u_time * 2.4);\n" +
+            "    float pulso = 0.6 + 0.4 * sin(u_time * 3.0);\n" +
             "    vec3 dorado = vec3(1.0, 0.72, 0.10);\n" +
-            "    color.rgb += dorado * aro * pulso * 0.72 * color.a;\n" +
+            "    float aroExterior = smoothstep(0.75, 0.95, distancia);\n" +
+            "    float haloInterior = smoothstep(1.0, 0.0, distancia) * 0.4;\n" +
+            "    float brilloTotal = (aroExterior * 1.5 + haloInterior) * pulso;\n" +
+            "    color.rgb += dorado * brilloTotal * color.a;\n" +
             "    gl_FragColor = color;\n" +
             "}\n";
 
@@ -115,7 +117,7 @@ public class RuedaZodiaco {
     public void renderFondo(SpriteBatch batch) {
         float diametro = radio * 2f;
         ShaderProgram shaderAnterior = batch.getShader();
-        boolean brilloDisponible = estado == Estado.SIN_GIRAR && shaderBrillo.isCompiled();
+        boolean brilloDisponible = (estado == Estado.SIN_GIRAR || estado == Estado.GIRANDO || estado == Estado.DETENIDA) && shaderBrillo.isCompiled();
         if (brilloDisponible) {
             batch.setShader(shaderBrillo);
             shaderBrillo.bind();
@@ -132,11 +134,36 @@ public class RuedaZodiaco {
         if (brilloDisponible) batch.setShader(shaderAnterior);
     }
 
+    public void setUsada(boolean usada, SignoZodiaco signoPendiente) {
+        if (usada) {
+            this.estado = Estado.DETENIDA;
+            // Si nos pasaron el signo que salió, buscamos su índice para que lo muestre
+            if (signoPendiente != null) {
+                for (int i = 0; i < signos.length; i++) {
+                    if (signos[i] == signoPendiente) {
+                        this.indiceResultado = i;
+                        break;
+                    }
+                }
+            }
+        } else {
+            this.estado = Estado.SIN_GIRAR;
+            this.indiceResultado = -1;
+        }
+        this.girando = false;
+    }
+
+    public SignoZodiaco getUltimoSignoConsumido() {
+        // Protección para evitar el IndexOutOfBounds si no hay índice
+        if (indiceResultado >= 0 && indiceResultado < signos.length) {
+            return signos[indiceResultado];
+        }
+        return null;
+    }
+
     public Estado getEstado() { return estado; }
 
     public void dispose() { shaderBrillo.dispose(); }
-
-    public SignoZodiaco getUltimoSignoConsumido() { return signos[indiceResultado]; }
 
     public void setAlIniciarGiro(Runnable callback) {
         this.alIniciarGiro = callback;

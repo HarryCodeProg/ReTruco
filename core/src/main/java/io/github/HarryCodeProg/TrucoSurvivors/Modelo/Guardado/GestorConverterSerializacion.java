@@ -103,21 +103,28 @@ public class GestorConverterSerializacion {
         for (Carta c : j.getMano()) d.mano.add(aDatos(c));
         for (Joker jo : j.getJokers()) d.jokers.add(aDatos(jo));
         for (Santo s : j.getSantos()) d.santos.add(aDatos(s));
+        j.exportarExtras(d);
         return d;
     }
 
     public static void aplicarDatos(Jugador j, DatosJugador d) {
-        j.resetearABase(); // vuelve a estado de constructor antes de reaplicar nada
-        j.setMazo(desdeDatos(d.mazo));
-        for (DatosCarta dc : d.mano) j.agregarCarta(desdeDatos(dc));
-        for (DatosJoker dj : d.jokers) {
-            Joker jo = desdeDatos(dj);
-            if (jo != null) j.agregarJoker(jo); // reaplica efecto instantáneo, pero ahora desde base limpia
+        j.resetearABase();
+        j.setCargandoGuardado(true);
+        try {
+            j.setMazo(desdeDatos(d.mazo));
+            for (DatosCarta dc : d.mano) j.agregarCarta(desdeDatos(dc));
+            for (DatosJoker dj : d.jokers) {
+                Joker jo = desdeDatos(dj);
+                if (jo != null) j.agregarJoker(jo);
+            }
+            for (DatosSanto ds : d.santos) {
+                Santo s = desdeDatos(ds);
+                if (s != null) j.agregarSanto(s);
+            }
+        } finally {
+            j.setCargandoGuardado(false);
         }
-        for (DatosSanto ds : d.santos) {
-            Santo s = desdeDatos(ds);
-            if (s != null) j.agregarSanto(s);
-        }
+        j.aplicarExtrasGuardados(d);
         j.sumarPesos(d.pesos - j.getPesos());
         j.setTotalPesosGanados(d.totalPesosGanados);
         j.setTotalPesosGastados(d.totalPesosGastados);
@@ -155,6 +162,13 @@ public class GestorConverterSerializacion {
         for (ItemTienda it : et.getFilaJokers()) d.filaJokers.add(aDatos(it));
         for (ItemTienda it : et.getFilaSantos()) d.filaSantos.add(aDatos(it));
         d.rerollsTienda = et.getRerollsTiendaActual();
+        d.ruedaUsada = et.isRuedaUsada();
+        d.signoPendiente = et.getSignoPendiente() != null ? et.getSignoPendiente().name() : null;
+        d.multiplicadorPrecio = et.getMultiplicadorPrecio();
+        d.rerollsGratis = et.getRerollsGratis();
+        d.cantidadCartas = et.getCantidadCartas();
+        d.cantidadJokers = et.getCantidadJokers();
+        d.cantidadSantos = et.getCantidadSantos();
         return d;
     }
 

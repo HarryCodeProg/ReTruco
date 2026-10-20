@@ -482,6 +482,7 @@ public class Juego {
         nivelTrucoPendiente = nivel;
         nivelTrucoActual = nivel;
         ultimoCantorTruco = quien;
+        dispararTodo(EventoJuego.AL_CANTAR_TRUCO);
         return true;
     }
 
