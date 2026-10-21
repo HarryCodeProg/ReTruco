@@ -35,7 +35,7 @@ public class GameBotones {
         truco.setTexto("TRUCO +" + Juego.formatearValorCanto(juego.getValorCantoTruco()));
         envido.setTexto("ENVIDO +" + Juego.formatearValorCanto(juego.getValorCantoEnvido()));
 
-        gestor.setHabilitado(Accion.DESCARTAR, puedeInteractuar);
+        gestor.setHabilitado(Accion.DESCARTAR, puedeInteractuar && juego.hayDescartes());
         gestor.setHabilitado(Accion.TRUCO, puedeInteractuar);
 
         boolean hayCantoPendiente = juego.hayCantoEnvidoPendiente() || juego.hayCantoTrucoPendiente();

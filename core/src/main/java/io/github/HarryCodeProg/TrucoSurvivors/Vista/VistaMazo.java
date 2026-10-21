@@ -225,9 +225,9 @@ public class VistaMazo {
         batch.draw(pixelBlanco, MARCO_X, MARCO_Y, GROSOR_BORDE, MARCO_H);
         batch.draw(pixelBlanco, MARCO_X + MARCO_W - GROSOR_BORDE, MARCO_Y, GROSOR_BORDE, MARCO_H);
         batch.setColor(UITheme.PANEL_SECUNDARIO);
-        batch.draw(pixelBlanco, MARCO_X + GROSOR_BORDE, MARCO_Y + MARCO_H - ALTURA_TITULO - GROSOR_BORDE, MARCO_W - GROSOR_BORDE * 2, ALTURA_TITULO);
+        batch.draw(pixelBlanco, MARCO_X + GROSOR_BORDE, MARCO_Y + MARCO_H - ALTURA_TITULO - GROSOR_BORDE, MARCO_W - GROSOR_BORDE * 2f, ALTURA_TITULO);
         batch.setColor(UITheme.BORDE);
-        batch.draw(pixelBlanco, MARCO_X + GROSOR_BORDE, MARCO_Y + MARCO_H - ALTURA_TITULO - GROSOR_BORDE - 3f, MARCO_W - GROSOR_BORDE * 2, 3f);
+        batch.draw(pixelBlanco, MARCO_X + GROSOR_BORDE, MARCO_Y + MARCO_H - ALTURA_TITULO - GROSOR_BORDE - 3f, MARCO_W - GROSOR_BORDE * 2f, 3f);
         String titulo = "MAZO";
         float escalaX = fontTitulo.getData().scaleX;
         float escalaY = fontTitulo.getData().scaleY;
@@ -247,8 +247,7 @@ public class VistaMazo {
         Rectangle clipBounds = new Rectangle(areaContenido);
         Rectangle scissors = new Rectangle();
         batch.flush();
-        ScissorStack.calculateScissors(camera, batch.getTransformMatrix(), clipBounds, scissors);
-        boolean pushed = ScissorStack.pushScissors(scissors);
+        boolean pushed = ScissorUtil.push(camera, batch.getTransformMatrix(), clipBounds, scissors);
         for (int fila = 0; fila < PALOS.length; fila++) {
             Palo palo = PALOS[fila];
             ArrayList<GrupoCarta> grupos = gruposPorPalo.get(palo);

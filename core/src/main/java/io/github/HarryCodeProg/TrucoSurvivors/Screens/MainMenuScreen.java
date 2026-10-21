@@ -21,6 +21,7 @@ import io.github.HarryCodeProg.TrucoSurvivors.Vista.FisicaTiltArrastre;
 import io.github.HarryCodeProg.TrucoSurvivors.Vista.PanelPersonalizar;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.InputAdapter;
+import io.github.HarryCodeProg.TrucoSurvivors.Vista.ScissorUtil;
 
 public class MainMenuScreen implements Screen {
     private Main game;
@@ -120,10 +121,14 @@ public class MainMenuScreen implements Screen {
     @Override
     public void render(float delta) {
         viewport.apply();
+        ScissorUtil.setViewport(viewport);
         camera.update();
         game.batch.setProjectionMatrix(camera.combined);
+
         mouseWorld.set(Gdx.input.getX(), Gdx.input.getY(), 0);
-        camera.unproject(mouseWorld);
+        // El viewport ajusta el mapeo del mouse restando las barras negras
+        viewport.unproject(mouseWorld);
+
         actualizarEspadaDecorativa();
 
         boolean click = Gdx.input.justTouched();
@@ -198,31 +203,37 @@ public class MainMenuScreen implements Screen {
                 estadoActual = EstadoMenu.PRINCIPAL;
             }
         }
+
         // --- RENDERIZADO ---
         Gdx.gl.glClearColor(0f, 0f, 0f, 1f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         tiempoDecoracion += delta;
+
         game.batch.begin();
         fondoPlasma.render(game.batch, delta);
         dibujarDecoracion(game.batch);
         game.batch.end();
+
         game.batch.begin();
         // Logo y espada siempre visibles en el menú principal (o podés condicionarlo)
         float logoAncho = 420f, logoAlto = 140f;
         float logoX = (viewport.getWorldWidth() - logoAncho) / 2f;
         game.batch.setColor(Color.WHITE);
         game.batch.draw(logo1, logoX, 550f, logoAncho, logoAlto);
+
         if (espadaUno != null) {
             float espadaAncho = 62f, espadaAlto = 88f;
             game.batch.setColor(Color.WHITE);
             game.batch.draw(espadaUno, espadaX, espadaY, espadaAncho / 2f, espadaAlto / 2f, espadaAncho, espadaAlto, 1f, 1f, rotacionEspada);
         }
+
         BitmapFont fontUI = game.getFuenteUI();
         fontUI.setColor(1f, 1f, 1f, 0.75f);
         GlyphLayout subtituloLayout = new GlyphLayout(fontUI, subtituloActual);
         fontUI.draw(game.batch, subtituloActual, 640f - subtituloLayout.width / 2f, 550f);
         fontUI.setColor(1f, 1f, 1f, 0.55f);
         fontUI.draw(game.batch, "v1.0.10", 1160f, 30f);
+
         // Render de paneles según estado
         if (estadoActual == EstadoMenu.PRINCIPAL) {
             dibujarCajaBotones(game.batch);
@@ -237,7 +248,7 @@ public class MainMenuScreen implements Screen {
             botonPartidaNueva.render(game.batch);
             botonVolverContinuar.render(game.batch);
         } else if (estadoActual == EstadoMenu.PERSONALIZAR) {
-            panelPersonalizar.render(game.batch,camera, delta);
+            panelPersonalizar.render(game.batch, camera, delta);
         } else if (estadoActual == EstadoMenu.OPCIONES) {
             panelOpciones.render(game.batch, delta);
         } else if (estadoActual == EstadoMenu.COLECCION) {

@@ -26,6 +26,9 @@ public class PanelPersonalizar {
 
     private final Boton botonMusica, botonFondo, botonVolver;
 
+    // Almacenamiento de coordenadas del mouse en el mundo
+    private float mouseMundoX = -9999f, mouseMundoY = -9999f;
+
     // --- Lógica de Música ---
     private static final float FILA_ALTO = 44f, FILA_GAP = 2f, PANEL_MUSICA_ANCHO = 420f, PANEL_PAD_X = 22f;
     private static final float HEADER_ALTO = 145f, FOOTER_ALTO = 95f;
@@ -66,6 +69,9 @@ public class PanelPersonalizar {
     }
 
     public boolean update(float delta, float mx, float my, boolean click) {
+        mouseMundoX = mx;
+        mouseMundoY = my;
+
         if (estado == Estado.MENU) {
             botonMusica.update(mx, my); botonFondo.update(mx, my); botonVolver.update(mx, my);
             if (botonMusica.fueCliqueado(mx, my)) estado = Estado.MUSICA;
@@ -184,36 +190,30 @@ public class PanelPersonalizar {
     private void dibujarPanelMusica(SpriteBatch batch, OrthographicCamera camera) {
         Texture pixel = game.getPixelBlanco();
         float x = panelMusicaX, y = panelMusicaY, w = PANEL_MUSICA_ANCHO, h = panelMusicaAlto;
-
         dibujarRectRedondeado(batch, pixel, x + 6f, y - 8f, w, h, 12f, UITheme.SOMBRA);
         dibujarRectRedondeado(batch, pixel, x - 4f, y - 4f, w + 8f, h + 8f, 13f, UITheme.BORDE);
         dibujarRectRedondeado(batch, pixel, x, y, w, h, 10f, UITheme.PANEL_PRINCIPAL);
         batch.setColor(UITheme.DORADO);
         batch.draw(pixel, x + 18f, y + h - 6f, w - 36f, 3f);
         batch.setColor(Color.WHITE);
-
         BitmapFont fTitulo = game.getFuentePrincipal();
         BitmapFont fUI = game.getFuenteUI();
         BitmapFont fNum = game.getFuenteNumeros();
         float centroX = x + w / 2f;
         float cursorY = y + h - 30f;
-
         fTitulo.getData().setScale(1.05f);
         fTitulo.setColor(UITheme.DORADO_BRILLANTE);
         fTitulo.draw(batch, "MUSICA DE FONDO", x, cursorY, w, Align.center, false);
         fTitulo.getData().setScale(1f);
         fTitulo.setColor(Color.WHITE);
         cursorY -= 26f;
-
         fUI.setColor(UITheme.TEXTO_SECUNDARIO);
         fUI.draw(batch, "Selecciona una cancion", x, cursorY, w, Align.center, false);
         fUI.setColor(Color.WHITE);
         cursorY -= 28f;
-
         int indiceActual = game.getIndicePistaActual();
         String[][] pistas = game.getPistasMusica();
         String nombreActual = (indiceActual >= 0 && indiceActual < pistas.length) ? pistas[indiceActual][0] : "-";
-
         fUI.getData().setScale(0.65f);
         fUI.setColor(UITheme.TEXTO_SECUNDARIO);
         fUI.draw(batch, "REPRODUCIENDO", x, cursorY, w, Align.center, false);
@@ -224,7 +224,6 @@ public class PanelPersonalizar {
         fUI.setColor(Color.WHITE);
         fNum.setColor(Color.WHITE);
         cursorY -= 22f;
-
         float barraBaseX = centroX - 24f;
         float barraY = cursorY - 10f;
         for (int b = 0; b < 4; b++) {
@@ -234,28 +233,23 @@ public class PanelPersonalizar {
             batch.draw(pixel, barraBaseX + b * 14f, barraY, 8f, altoBarra);
         }
         batch.setColor(Color.WHITE);
-
         batch.flush();
         Rectangle scissor = new Rectangle();
         Rectangle clipBounds = new Rectangle(areaLista.x, areaLista.y, areaLista.width, areaLista.height);
-        ScissorStack.calculateScissors(camera, batch.getTransformMatrix(), clipBounds, scissor);
-        boolean enmascaradoExitoso = ScissorStack.pushScissors(scissor);
-
+        // Implementación usando ScissorUtil
+        boolean enmascaradoExitoso = ScissorUtil.push(camera, batch.getTransformMatrix(), clipBounds, scissor);
         if (enmascaradoExitoso) {
-            float mx = Gdx.input.getX();
-            float my = Gdx.graphics.getHeight() - Gdx.input.getY();
+            float mx = mouseMundoX;
+            float my = mouseMundoY;
             boolean mouseDentroDePanel = areaLista.contains(mx, my);
-
             for (int i = 0; i < filasCanciones.size(); i++) {
                 Rectangle rBase = filasCanciones.get(i);
                 float filaYActual = rBase.y + scrollY;
                 if (filaYActual + rBase.height < areaLista.y || filaYActual > areaLista.y + areaLista.height) continue;
-
                 boolean seleccionada = (i == indiceActual);
                 boolean hover = mouseDentroDePanel && !arrastrandoLista &&
                     mx >= rBase.x && mx <= rBase.x + rBase.width &&
                     my >= filaYActual && my <= filaYActual + rBase.height;
-
                 Color colorFondo, colorBorde, colorTexto;
                 if (seleccionada) {
                     colorFondo = UITheme.DORADO; colorBorde = UITheme.NARANJA; colorTexto = new Color(0.08f, 0.08f, 0.08f, 1f);
@@ -264,10 +258,8 @@ public class PanelPersonalizar {
                 } else {
                     colorFondo = UITheme.PANEL_SECUNDARIO; colorBorde = UITheme.AZUL; colorTexto = UITheme.TEXTO_PRINCIPAL;
                 }
-
                 dibujarRectRedondeado(batch, pixel, rBase.x - 2f, filaYActual - 2f, rBase.width + 4f, rBase.height + 4f, 7f, colorBorde);
                 dibujarRectRedondeado(batch, pixel, rBase.x, filaYActual, rBase.width, rBase.height, 6f, colorFondo);
-
                 if (seleccionada) {
                     batch.setColor(colorTexto);
                     float indicadorX = rBase.x + 14f;
@@ -277,7 +269,6 @@ public class PanelPersonalizar {
                     batch.draw(pixel, indicadorX + 6f, indicadorCy - 2f, 3f, 4f);
                     batch.setColor(Color.WHITE);
                 }
-
                 String nombre = pistas[i][0].toUpperCase();
                 fUI.setColor(colorTexto);
                 fUI.draw(batch, nombre, rBase.x + 34f, filaYActual + rBase.height / 2f + 7f, rBase.width - 46f, Align.left, false);
@@ -286,7 +277,6 @@ public class PanelPersonalizar {
             batch.flush();
             ScissorStack.popScissors();
         }
-
         if (maxScrollY > 0) {
             float barraTotalH = areaLista.height;
             float barraVisibleH = (listaAltoVisible / listaAltoTotal) * barraTotalH;

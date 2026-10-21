@@ -79,7 +79,8 @@ public class GameRenderSystem {
             BitmapFont fuente = game.getFuentePrincipal();
             layout.setText(fuente, textoFlotanteActual);
             // (Arreglé los signos '-' que se habían perdido acá)
-            float tx = ((Gdx.graphics.getWidth() - layout.width) / 2f) + 270f;
+            //float tx = ((Gdx.graphics.getWidth() - layout.width) / 2f) + 270f;
+            float tx = ((1280f - layout.width) / 2f) + 310f;
             float ty = GameLayout.TECHO_MESA - 30f;
             Color colorTexto = Color.WHITE;
             if (textoFlotanteActual.toLowerCase().contains("mult")) {
@@ -171,24 +172,22 @@ public class GameRenderSystem {
         batch.setColor(Color.WHITE);
     }
 
-    // 1. Agregamos OrthographicCamera como parámetro
     private void renderJugador(ArrayList<VistaCarta> cartasJugador, VistaCarta cartaArrastrada, OrthographicCamera camera) {
         float areaX = MARGEN_AREA_LATERAL;
         float areaY = Y_MANO_JUGADOR - 10f;
         float areaAncho = ANCHO_AREA_JUGADOR;
         float areaAlto = ALTO_AREA_CARTAS;
         float bleed = 30f;
-        com.badlogic.gdx.math.Rectangle clipBounds = new com.badlogic.gdx.math.Rectangle(areaX - bleed, areaY - bleed, areaAncho + (bleed * 2), areaAlto + (bleed * 2));
+        com.badlogic.gdx.math.Rectangle clipBounds = new com.badlogic.gdx.math.Rectangle(
+            areaX - bleed,
+            areaY - bleed,
+            areaAncho + (bleed * 2f),
+            areaAlto + (bleed * 2f)
+        );
         com.badlogic.gdx.math.Rectangle scissors = new com.badlogic.gdx.math.Rectangle();
         game.batch.flush();
-        // 2. Ahora pasamos "camera" directamente como primer argumento
-        com.badlogic.gdx.scenes.scene2d.utils.ScissorStack.calculateScissors(
-            camera,
-            game.batch.getTransformMatrix(),
-            clipBounds,
-            scissors
-        );
-        boolean pushed = com.badlogic.gdx.scenes.scene2d.utils.ScissorStack.pushScissors(scissors);
+        // Usamos tu nueva utilidad para simplificar el cálculo y el push de las tijeras (scissors)
+        boolean pushed = ScissorUtil.push(camera, game.batch.getTransformMatrix(), clipBounds, scissors);
         if (pushed) {
             for (VistaCarta c : cartasJugador) {
                 if (c != cartaArrastrada) {

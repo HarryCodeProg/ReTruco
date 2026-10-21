@@ -170,18 +170,9 @@ public class ContextoJuego {
     public int getCartasRepartidasEsteEvento() { return cartasRepartidasEsteEvento; }
     public void setCartasRepartidasEsteEvento(int cantidad) { this.cartasRepartidasEsteEvento = cantidad; }
 
-    /** true si el jugador tiene algún joker activo cuyo efecto desactiva jokers de otras categorías. */
-    public boolean hayFiltroDeCategoriaActivo() {
-        for (Joker j : jugador.getJokers()) {
-            if (j instanceof SanMartin) return true;
-        }
-        return false;
-    }
 
     public boolean jokerPermitidoPorFiltro(Joker j) {
-        if (!hayFiltroDeCategoriaActivo()) return true;
-        if (j instanceof SanMartin) return true; // San Martín siempre se activa a sí mismo
-        return j.tieneCategoria(CategoriaJoker.NACIONAL);
+        return true;
     }
 
     public boolean puedeEntrarACopia() {

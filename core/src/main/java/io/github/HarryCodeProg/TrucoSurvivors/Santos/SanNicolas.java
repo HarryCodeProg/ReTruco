@@ -9,7 +9,7 @@ import java.util.ArrayList;
 public class SanNicolas extends Santo {
 
     public SanNicolas() {
-        super(21, "San Nicolás", "SanNicolas", "Restaura una jugada de mano", 6);
+        super(21, "San Nicolás", "SanNicolas", "Restaura una jugada de mano", 10);
     }
 
     @Override

@@ -13,7 +13,7 @@ public class SanPantaleon extends Santo{
             22,
             "San Pantaleon",
             "SanPantaleon",
-            "Restaura todos tus Descartes\n",
+            "Restaura todos tus Descartes",
             5
         );
     }

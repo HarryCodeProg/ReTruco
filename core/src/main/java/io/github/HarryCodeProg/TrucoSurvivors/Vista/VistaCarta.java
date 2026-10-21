@@ -9,6 +9,7 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Rectangle;
 import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Carta;
 import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Palo;
+import io.github.HarryCodeProg.TrucoSurvivors.Gestores.GestorShaderDisolucion;
 import io.github.HarryCodeProg.TrucoSurvivors.Gestores.GestorSonidos;
 import io.github.HarryCodeProg.TrucoSurvivors.Main;
 import com.badlogic.gdx.utils.TimeUtils;
@@ -82,6 +83,10 @@ public class VistaCarta implements Arrastrable{
     private static long ultimoMsSonidoInicioFlip = 0;
     private static long ultimoMsSonidoFinFlip = 0;
     private static final long DEBOUNCE_SONIDO_FLIP_MS = 60;
+    private GestorShaderDisolucion gestorDisolucion;
+    private float progresoQuema = 0f;
+    private boolean quemando = false;
+    private Runnable alTerminarQuema;
 
     /** Ahora recibe el TextureAtlas compartido en vez de crear su propia Texture. */
     public VistaCarta(Carta carta, boolean bocaAbajo, TextureAtlas atlas) {
@@ -99,6 +104,14 @@ public class VistaCarta implements Arrastrable{
     }
 
     public void render(SpriteBatch batch, Main game) {
+        if (quemando) {
+            float drawY = y + visualOffsetY;
+            batch.flush();
+            // Usamos el mismo shader que el santo
+            gestorDisolucion.dibujarConDisolucion(batch, region, x, drawY, width * scale, height * scale,
+                progresoQuema, false, new Color(1f, 0.55f, 0.1f, 1f), new Color(0.8f, 0.15f, 0.05f, 1f));
+            return;
+        }
         if (estadoFlip != EstadoFlip.NINGUNO) {
             renderFlip(batch);
             return;
@@ -227,6 +240,15 @@ public class VistaCarta implements Arrastrable{
     }
 
     public void setCartelHaciaAbajo(boolean haciaAbajo) { this.cartelHaciaAbajo = haciaAbajo; }
+
+    public void iniciarQuema(Runnable alTerminar) {
+        if (gestorDisolucion == null) gestorDisolucion = new GestorShaderDisolucion();
+        this.quemando = true;
+        this.progresoQuema = 0f;
+        this.alTerminarQuema = alTerminar;
+    }
+
+    public boolean isQuemando() { return quemando; }
 
     /** Feedback puramente visual: sombra, halo de hover y marco de selección. */
     private void dibujarProfundidadYMarco(SpriteBatch batch, Main game, float drawY, float scaleExtra) {
@@ -417,6 +439,15 @@ public class VistaCarta implements Arrastrable{
     }
 
     public void update(float mouseX, float mouseY, float delta) {
+        if (quemando) {
+            progresoQuema += delta / 0.8f;
+            if (gestorDisolucion != null) gestorDisolucion.update(delta);
+            if (progresoQuema >= 1f) {
+                quemando = false;
+                if (alTerminarQuema != null) alTerminarQuema.run();
+            }
+            return;
+        }
         if (estadoFlip != EstadoFlip.NINGUNO) {
             actualizarFlip(delta);
             return;
@@ -437,6 +468,8 @@ public class VistaCarta implements Arrastrable{
             if (Math.abs(x - animTargetX) < 2f && Math.abs(y - animTargetY) < 2f) {
                 x = animTargetX;
                 y = animTargetY;
+                targetX = animTargetX;
+                targetY = animTargetY;
                 animando = false;
                 if (accionAlTerminar != null) {
                     accionAlTerminar.run();

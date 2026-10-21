@@ -46,7 +46,7 @@ public class Rivadavia extends Joker {
             if (repartidas <= 0) return;
             cartasRestantes -= repartidas;
             while (cartasRestantes <= 0) { // por si en un solo reparto se cruzan varios umbrales
-                multiplicadorAcumulado *= FACTOR_POR_UMBRAL;
+                multiplicadorAcumulado += FACTOR_POR_UMBRAL;
                 cartasRestantes += UMBRAL_CARTAS;
             }
             return;

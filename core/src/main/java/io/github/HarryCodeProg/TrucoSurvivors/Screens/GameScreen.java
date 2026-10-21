@@ -232,6 +232,7 @@ public class GameScreen implements Screen {
         this.gestorAnimaciones = new GestorAnimacionesMano(cartasJugador, cartasRival, cartasMesaJugador, cartasMesaRival, this::organizarCartas);
         // 1. INICIALIZAMOS EL JUEGO PRIMERO
         gestorPartida.inicializar(jugador, rival, datosRival, gestorCartas, gestorAnimaciones);
+        gestorSantos.setJuego(gestorPartida.getJuego());
         // 2. AHORA SÍ PODEMOS OBTENER EL GESTOR DE RASGOS
         gestorPartida.getJuego().getGestorRasgos().recalcular(jugador.getJokers());
         organizarJokers(true);
@@ -264,6 +265,7 @@ public class GameScreen implements Screen {
     @Override
     public void render(float delta) {
         prepararFrame();
+        ScissorUtil.setViewport(viewport);
         boolean modalZodiaco = estado == EstadoPantalla.TIENDA && panelTienda != null && panelTienda.hayModalZodiaco();
         boolean puedeAbrirPausa = (estado == EstadoPantalla.JUGANDO || estado == EstadoPantalla.TIENDA || estado == EstadoPantalla.SELECCION_RIVAL);
         boolean pausaVisible = panelPausa != null && panelPausa.isVisible();
@@ -274,7 +276,11 @@ public class GameScreen implements Screen {
         float mx = pausaVisible ? -9999f : mouseWorld.x;
         float my = pausaVisible ? -9999f : mouseWorld.y;
         com.badlogic.gdx.math.Vector3 mouseEfectivo = pausaVisible ? new com.badlogic.gdx.math.Vector3(-9999f, -9999f, 0) : mouseWorld;
-        // Update de pausa: ahora corre en cualquiera de los 3 estados que la permiten, ANTES de ramificar
+        // Si el mouse está sobre un botón contextual (Vender/Usar), bloqueamos el input de los arrastrables
+        boolean bloquearInput = mouseSobreBotonContextual();
+        float mxInput = bloquearInput ? -9999f : mx;
+        float myInput = bloquearInput ? -9999f : my;
+        // Update de pausa
         if (puedeAbrirPausa && panelPausa != null) {
             PanelPausa.Resultado resPausa = panelPausa.update(delta, mouseWorld.x, mouseWorld.y);
             if (resPausa == PanelPausa.Resultado.VOLVER_MENU) {
@@ -283,9 +289,9 @@ public class GameScreen implements Screen {
                 dispose();
                 return;
             }
-            pausaVisible = panelPausa.isVisible(); // puede haber cambiado (REANUDAR)
+            pausaVisible = panelPausa.isVisible();
         }
-        if (!modalZodiaco) actualizarJokersYVenta(delta, mx, my);
+        if (!modalZodiaco) actualizarJokersYVenta(delta, mx, my, bloquearInput);
         Joker jokerAgregado = gestorCompraJoker.update(delta, jokers, areaJokers);
         if (jokerAgregado != null) {
             suppressJugadorJokerListener = true;
@@ -359,26 +365,28 @@ public class GameScreen implements Screen {
         }
         VistaCarta cartaArrastradaAntes = gestorCartas.getArrastrado();
         if (!modalBloqueante) {
-            gestorCartas.update(mx, my, delta, puedeInteract);
+            gestorCartas.update(mxInput, myInput, delta, puedeInteract);
         }
         boolean modoSantoActivo = gestorSantos.getModoSeleccion().estaActivo();
         if (modoSantoActivo) {
             for (VistaCarta c : new ArrayList<>(cartasJugador)) {
-                c.input(mx, my);   // habilita el click-to-select
+                c.input(mxInput, myInput);
             }
         }
         if (!puedeInteract) {
-            for (VistaCarta c : new ArrayList<>(cartasJugador)) c.update(mx, my, delta);
+            for (VistaCarta c : new ArrayList<>(cartasJugador)) c.update(mxInput, myInput, delta);
         }
         resolverHoverExclusivo(cartasJugador);
         for (VistaCarta c : new ArrayList<>(cartasRival)) c.update(mx, my, delta);
-        actualizarCartasMesa(delta, mx, my);
+        actualizarCartasMesa(delta, mxInput, myInput);
         if (!modalBloqueante) {
             actualizarPreviewsCartas(puedeInteract);
         }
         hudController.actualizarSeleccion(gestorPartida.getJuego(), puedeInteract, gestorCartas, gestorJokers, cartasJugador, jokers);
         if (cartaArrastradaAntes != null && gestorCartas.getArrastrado() == null) organizarCartas();
-        gestorSantos.update(mx, my, delta, jugador);
+        // Santos: Le pasamos el flag de bloqueo, las coordenadas reales se manejan adentro
+        gestorSantos.update(mx, my, delta, jugador, bloquearInput);
+        // El gestor de uso SIEMPRE recibe mx/my reales para que el botón USAR tenga hover
         gestorUsoSanto.update(mx, my, gestorSantos.getSantos(), jugador, (vistaSanto, jug, cartas) -> {
             gestorSantos.usarSeleccionado(vistaSanto, jug, cartas);
             for (VistaCarta v : cartasJugador) v.setSeleccionada(false);
@@ -389,13 +397,13 @@ public class GameScreen implements Screen {
             }
         }
         if (vistaMazo != null) vistaMazo.update(mx, my);
-        // Update del panel de rasgos (para detectar clicks en las flechas)
         if (estado == EstadoPantalla.JUGANDO && gestorPartida.getJuego() != null && panelRasgos != null) {
             boolean clickRasgos = !modalBloqueante && Gdx.input.justTouched() && !pausaVisible;
             panelRasgos.update(mx, my, delta, clickRasgos, gestorPartida.getJuego().getGestorRasgos(),
                 GameLayout.MARGEN_AREA_LATERAL - 20f,
                 GameLayout.Y_JOKERS - GameLayout.ALTO_AREA_JOKERS + 95f);
         }
+        procesarCartasConsumidas();
         renderizar(delta);
     }
 
@@ -488,19 +496,21 @@ public class GameScreen implements Screen {
                     organizarJokers(true);}
                 ,gestorPartida.getJuego());
         }
-        boolean bloquearSantos = panelTienda != null && panelTienda.hayModalZodiaco();
         if (panelTienda != null && panelTiendaVisible) {
             panelTienda.updateAnimacion(delta);
             panelTienda.setBloqueadoPorModalExterno(modalBloqueante);
             panelTienda.update(mx, my, delta);
         }
-        if (!bloquearSantos && !panelTienda.hayModalZodiaco()) {
-            gestorSantos.update(mx, my, delta, jugador);
-            gestorUsoSanto.update(mx, my, gestorSantos.getSantos(), jugador, (vistaSanto, jug, cartas) -> {
-                gestorSantos.usarSeleccionado(vistaSanto, jug, cartas);
-                for (VistaCarta v : cartasJugador) v.setSeleccionada(false);
-            });
-        }
+        // Calculamos si bloqueamos el input (por el modal o por estar sobre un botón)
+        boolean bloquearInput = mouseSobreBotonContextual() || panelTienda.hayModalZodiaco();
+        // SIEMPRE actualizamos los santos (esto permite que el flip progrese)
+        gestorSantos.update(mx, my, delta, jugador, bloquearInput);
+        // El gestor de uso recibe coordenadas reales
+        gestorUsoSanto.update(mx, my, gestorSantos.getSantos(), jugador, (vistaSanto, jug, cartas) -> {
+            gestorSantos.usarSeleccionado(vistaSanto, jug, cartas);
+            for (VistaCarta v : cartasJugador) v.setSeleccionada(false);
+        });
+        procesarCartasConsumidas();
         renderComun(delta, true, true, null, null,
             () -> { if (panelTienda != null && panelTiendaVisible) panelTienda.render(game.batch); },
             () -> {
@@ -521,7 +531,9 @@ public class GameScreen implements Screen {
             panelSeleccionRival.updateAnimacion(delta);
             panelSeleccionRival.update(mx, my);
         }
-        gestorSantos.update(mx, my, delta, jugador);
+        boolean bloquearInput = mouseSobreBotonContextual();
+        // Le pasamos el flag al update
+        gestorSantos.update(mx, my, delta, jugador, bloquearInput);
         gestorUsoSanto.update(mx, my, gestorSantos.getSantos(), jugador, (vistaSanto, jug, cartas) -> {
             gestorSantos.usarSeleccionado(vistaSanto, jug, cartas);
             for (VistaCarta v : cartasJugador) v.setSeleccionada(false);
@@ -580,6 +592,36 @@ public class GameScreen implements Screen {
             new Color(0.06f, 0.09f, 0.13f, 0.78f));
     }
 
+    private void procesarCartasConsumidas() {
+        if (gestorPartida.getJuego() == null) return;
+        ArrayList<Carta> consumidas = gestorPartida.getJuego().getCartasConsumidas();
+        if (consumidas.isEmpty()) return;
+
+        for (Carta c : consumidas) {
+            VistaCarta vc = buscarVistaCartaPorModelo(c);
+            if (vc != null && !vc.isQuemando()) {
+                vc.iniciarQuema(() -> {
+                    // Cuando termina de quemarse, la sacamos de las listas visuales
+                    cartasJugador.remove(vc);
+                    cartasMesaJugador.remove(vc);
+                    cartasRival.remove(vc);
+                    cartasMesaRival.remove(vc);
+                    organizarCartas();
+                    organizarMesa();
+                });
+            }
+        }
+        gestorPartida.getJuego().limpiarCartasConsumidas();
+    }
+
+    private VistaCarta buscarVistaCartaPorModelo(Carta carta) {
+        for (VistaCarta v : cartasJugador) if (v.getCarta() == carta) return v;
+        for (VistaCarta v : cartasMesaJugador) if (v.getCarta() == carta) return v;
+        for (VistaCarta v : cartasRival) if (v.getCarta() == carta) return v;
+        for (VistaCarta v : cartasMesaRival) if (v.getCarta() == carta) return v;
+        return null; // Si está en el mazo, no se ve, no se anima
+    }
+
     private void dibujarRectRedondeado(SpriteBatch batch, Texture pixel,
                                        float x, float y, float w, float h,
                                        float radio, Color color) {
@@ -617,7 +659,7 @@ public class GameScreen implements Screen {
         camera.update();
         game.batch.setProjectionMatrix(camera.combined);
         mouseWorld.set(Gdx.input.getX(), Gdx.input.getY(), 0);
-        camera.unproject(mouseWorld);
+        viewport.unproject(mouseWorld);
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
     }
@@ -668,11 +710,32 @@ public class GameScreen implements Screen {
         }
     }
 
-    private void actualizarJokersYVenta(float delta, float mx, float my) {
+    private void actualizarJokersYVenta(float delta, float mx, float my, boolean bloquearInput) {
         boolean modalBloqueante = (vistaMazo != null && vistaMazo.isModalAbierto()) || gestorSantos.hayOverlayActivo();
         if (modalBloqueante) return;
-        actualizarJokers(delta, mx, my);
+        actualizarJokers(delta, mx, my, bloquearInput);
+        // El botón de vender recibe las coordenadas reales para el hover
         gestorVentaJoker.update(mx, my, jokers, jugador, (v) -> organizarJokers());
+    }
+
+    private void actualizarJokers(float delta, float mx, float my, boolean bloquearInput) {
+        float mxInput = bloquearInput ? -9999f : mx;
+        float myInput = bloquearInput ? -9999f : my;
+        VistaJoker antes = gestorJokers.getArrastrado();
+        for (VistaJoker vj : jokers) {
+            vj.update(mxInput, myInput, delta);
+        }
+        if (bloquearInput) {
+            for (VistaJoker vj : jokers) vj.limpiarHover();
+        }
+        resolverHoverExclusivoJokers();
+        gestorJokers.update(mxInput, myInput, delta, true);
+        boolean cambio = gestorReordenamiento.previsualizarReordenamientoJokers(gestorJokers, jokers);
+        if (cambio) organizarJokers();
+        if (antes != null && gestorJokers.getArrastrado() == null) {
+            organizarJokers();
+            sincronizarOrdenJokersModelo();
+        }
     }
 
     private void organizarJokers() { organizarJokers(false); }
@@ -730,7 +793,8 @@ public class GameScreen implements Screen {
         float pasoX = ANCHO_CARTA_MESA + 20f;
         int cantidadColumnas = Math.max(cartasMesaJugador.size(), cartasMesaRival.size());
         float anchoFormacion = cantidadColumnas > 0 ? ANCHO_CARTA_MESA + (cantidadColumnas - 1) * pasoX : 0f;
-        float inicioX = (Gdx.graphics.getWidth() - anchoFormacion) / 2f;
+        //float inicioX = (Gdx.graphics.getWidth() - anchoFormacion) / 2f;
+        float inicioX = (viewport.getWorldWidth() - anchoFormacion) / 2f;
         for (int i = 0; i < cartasMesaJugador.size(); i++) {
             VistaCarta view = cartasMesaJugador.get(i);
             float posX = inicioX + i * pasoX;
@@ -838,26 +902,6 @@ public class GameScreen implements Screen {
     private void actualizarCartasMesa(float delta, float mx, float my) {
         for (VistaCarta c : new ArrayList<>(cartasMesaJugador)) c.update(mx, my, delta);
         for (VistaCarta c : new ArrayList<>(cartasMesaRival)) c.update(mx, my, delta);
-    }
-
-    private void actualizarJokers(float delta, float mx, float my) {
-        VistaJoker antes = gestorJokers.getArrastrado();
-        for (VistaJoker vj : jokers) {
-            vj.update(mx, my, delta);
-        }
-        if (mouseSobreBotonContextual()) {
-            for (VistaJoker vj : jokers) {
-                vj.limpiarHover();
-            }
-        }
-        resolverHoverExclusivoJokers();
-        gestorJokers.update(mx, my, delta, true);
-        boolean cambio = gestorReordenamiento.previsualizarReordenamientoJokers(gestorJokers, jokers);
-        if (cambio) organizarJokers();
-        if (antes != null && gestorJokers.getArrastrado() == null) {
-            organizarJokers();
-            sincronizarOrdenJokersModelo();
-        }
     }
 
     private void resolverHoverExclusivo(ArrayList<VistaCarta> lista) {
@@ -1048,9 +1092,8 @@ public class GameScreen implements Screen {
 
     public void prepararVictoria(int pesosVictoria, int pesosInteres) {
         int recompensaManos = jugador.getManosActuales() * 1;
-        int recompensaDescartes = gestorPartida.getJuego().getDescartesActuales() * 1;
-        gestorVictoria.preparar(pesosVictoria, recompensaManos, recompensaDescartes, pesosInteres);
-        jugador.sumarPesos(pesosVictoria + recompensaManos + recompensaDescartes + pesosInteres);
+        gestorVictoria.preparar(pesosVictoria, recompensaManos, pesosInteres);
+        jugador.sumarPesos(pesosVictoria + recompensaManos + pesosInteres);
     }
 
     public void sumarPesosExtrasVictoria(int cantidad) {
@@ -1175,6 +1218,7 @@ public class GameScreen implements Screen {
         this.gestorJokers = new GestorInputArrastrable<>(jokers);
         this.gestorAnimaciones = new GestorAnimacionesMano(cartasJugador, cartasRival, cartasMesaJugador, cartasMesaRival, this::organizarCartas);
         gestorPartida.inicializarDesdeGuardado(jugador, rival, datosRival, gestorCartas, gestorAnimaciones, dj);
+        gestorSantos.setJuego(gestorPartida.getJuego());
         organizarJokers(true);
         organizarCartas();
         organizarMesa();

@@ -107,10 +107,6 @@ public class Juego {
         }
     }
 
-    private ContextoJuego crearContexto() {
-        return new ContextoJuego(jugador, rival, jugador.getMazo(), mesa, this);
-    }
-
     private void dispararTodo(EventoJuego evento) {
         ContextoJuego ctx = crearContexto();
         gestorJokers.disparar(evento, ctx, this);
@@ -144,6 +140,10 @@ public class Juego {
     private void limpiarEstadoResidualDeCombateAnterior() {
         jugador.getMazo().reciclarCartasTomadas();
         jugador.limpiarMano();
+    }
+
+    public ContextoJuego crearContexto() {
+        return new ContextoJuego(jugador, rival, jugador.getMazo(), mesa, this);
     }
 
     public int getEnvidosGanadosConsecutivos() { return envidosGanadosConsecutivos; }
@@ -792,6 +792,20 @@ public class Juego {
 
     public void consumirHand() {
         jugador.consumirMano();
+    }
+
+    private ArrayList<Carta> cartasConsumidas = new ArrayList<>();
+
+    public void registrarCartaConsumida(Carta carta) {
+        cartasConsumidas.add(carta);
+    }
+
+    public ArrayList<Carta> getCartasConsumidas() {
+        return cartasConsumidas;
+    }
+
+    public void limpiarCartasConsumidas() {
+        cartasConsumidas.clear();
     }
 
     public int getCartasJugadasTotal() { return cartasJugadasTotal; }

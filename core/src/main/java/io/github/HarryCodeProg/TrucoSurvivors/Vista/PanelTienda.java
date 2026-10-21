@@ -311,7 +311,8 @@ public class PanelTienda {
                     botonComprar.setHabilitado(dineroSuficiente && espacioDisponible);
                     // --- REPOSICIONAMIENTO LATERAL DE BOTONES ---
                     // Determinamos si el item está en la mitad izquierda o derecha de la pantalla
-                    boolean estaEnMitadIzquierda = seleccionado.getX() + (ANCHO_ITEM / 2f) < Gdx.graphics.getWidth() / 2f;
+                    //boolean estaEnMitadIzquierda = seleccionado.getX() + (ANCHO_ITEM / 2f) < Gdx.graphics.getWidth() / 2f;
+                    boolean estaEnMitadIzquierda = seleccionado.getX() + (ANCHO_ITEM / 2f) < 1280f / 2f;
                     float gapLateral = 15f;
                     float botX;
                     if (estaEnMitadIzquierda) {
@@ -326,7 +327,7 @@ public class PanelTienda {
                     if (esSanto) {
                         // Si es un Santo, hay dos botones apilados (Comprar, y Comprar/Usar)
                         botonComprarYUsar.setVisible(true);
-                        botonComprarYUsar.setHabilitado(esSanto && dineroSuficiente && espacioDisponible);
+                        botonComprarYUsar.setHabilitado(esSanto && dineroSuficiente);
                         // Posicionamos el boton Comprar arriba, y el ComprarYUsar abajo
                         botonComprar.setPosition(botX, centerY + 5f);
                         // Si aparece a la izquierda, el segundo botón podría tener distinto ancho, lo alineamos a la derecha
@@ -427,7 +428,6 @@ public class PanelTienda {
         ItemTienda item = vista.getItem();
         Santo santo = item.getSanto();
         if (santo == null) return;
-        if (jugador.getSantos().size() >= jugador.getTamañoSantos()) return;
         if (!jugador.gastarPesos(precioEfectivo(item))) return;
         aplicarBuffSarmientoSiCorresponde();
         GestorSonidos sonidos = Main.getInstance().getGestorSonidos();

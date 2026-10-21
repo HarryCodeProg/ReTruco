@@ -43,6 +43,7 @@ public class VistaSanto implements Arrastrable {
     private boolean tooltipLateral = false;
     private final FisicaTiltArrastre fisicaTiltArrastre = new FisicaTiltArrastre();
     private boolean oculto = false;
+    private boolean hoverControlado = false;
 
     public VistaSanto(Santo santo, TextureAtlas atlasSantos) {
         this.santo = santo;
@@ -87,6 +88,9 @@ public class VistaSanto implements Arrastrable {
 
     @Override
     public void update(float mouseX, float mouseY, float delta) {
+        if (!hoverControlado) {
+            hover = !ALGUN_DRAG_ACTIVO && contiene(mouseX, mouseY);
+        }
         hover = !ALGUN_DRAG_ACTIVO && contiene(mouseX, mouseY);
         float offsetHover = hover ? OFFSET_HOVER : 0f;
         float offsetSel = seleccionada ? OFFSET_SELECCIONADA : 0f;
@@ -168,12 +172,21 @@ public class VistaSanto implements Arrastrable {
             targetY = mouseY - dragOffsetY;
         }
     }
+
     private float moverHacia(float v, float t, float max) {
         float d = t - v;
         if (Math.abs(d) <= max) return t;
         return v + Math.signum(d) * max;
     }
 
+    public void setHoverControlado(boolean hover) {
+        this.hover = hover;
+        this.hoverControlado = true;
+    }
+
+    public void liberarHoverControlado() {
+        this.hoverControlado = false;
+    }
 
     public void render(SpriteBatch batch) {
         if (oculto) return;

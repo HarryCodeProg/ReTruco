@@ -9,7 +9,10 @@ import java.util.ArrayList;
 public class GauchitoGil extends Santo {
 
     public GauchitoGil() {
-        super(3, "Gauchito Gil", "GauchitoGil", "Otorga $15", 0);
+        super(3, "Gauchito Gil",
+            "GauchitoGil",
+            "Otorga $10",
+            0);
     }
 
     @Override public int cartasRequeridas() { return 0; }
@@ -21,7 +24,7 @@ public class GauchitoGil extends Santo {
 
     @Override
     public void aplicarEfecto(Jugador jugador, ArrayList<Carta> seleccionadas, ContextoJuego ctx) {
-        int pesos = jugador.tieneDobleEfectoSantos() ? 30 : 15;
+        int pesos = jugador.tieneDobleEfectoSantos() ? 20 : 10;
         jugador.sumarPesos(pesos);
     }
 }

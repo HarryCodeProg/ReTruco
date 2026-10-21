@@ -299,7 +299,7 @@ public class PanelPausa {
         if (botonEfxMas.fueCliqueado(mx,my))   { config.setVolumenEfectos(config.getVolumenEfectos()+paso); cambio=true; }
         if (cambio) {
             config.aplicarAudio(sonidos);
-            game.getMusicaFondo().setVolume(0.05f * config.getVolumenMusica());
+            game.getMusicaFondo().setVolume(0.5f * config.getVolumenMusica());
             config.guardar();
             if (sonidos != null) sonidos.reproducirConVariacion("seleccionar");
         }

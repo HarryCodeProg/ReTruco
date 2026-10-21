@@ -16,7 +16,7 @@ public class SanLaMuerte extends Santo {
             19,
             "San La Muerte",
             "SanLaMuerte",
-            "Selecciona 2 cartas, estas se eliminan y se genera un joker epico aleatorio (si hay espacio)",
+            "Selecciona 2 cartas, estas se consumen y se genera un joker epico aleatorio (si hay espacio)",
             8
         );
     }
@@ -38,6 +38,7 @@ public class SanLaMuerte extends Santo {
         for (Carta carta : seleccionadas) {
             jugador.eliminarCarta(carta);
             jugador.getMazo().restarTamañoMazo(1);
+            ctx.getJuego().registrarCartaConsumida(carta);
         }
         PoolJokersTienda pool = new PoolJokersTienda();
         Joker joker = pool.tomarAleatorioDeRareza(Rareza.epico, jugador);

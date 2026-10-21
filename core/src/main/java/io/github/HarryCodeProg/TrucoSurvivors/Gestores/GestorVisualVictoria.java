@@ -18,10 +18,8 @@ public class GestorVisualVictoria {
     private final Main game;
     private final Boton botonCobrar;
     private Texture iconoPesoVictoria;
-
     private int pesosVictoria = 0;
     private int pesosManos = 0;
-    private int pesosDescartes = 0;
     private int pesosInteres = 0;
     private int pesosExtras = 0;
 
@@ -60,10 +58,9 @@ public class GestorVisualVictoria {
     }
 
     // Ahora preparamos TODA la info de base
-    public void preparar(int pesosVictoria, int pesosManos, int pesosDescartes, int pesosInteres) {
+    public void preparar(int pesosVictoria, int pesosManos, int pesosInteres) {
         this.pesosVictoria = pesosVictoria;
         this.pesosManos = pesosManos;
-        this.pesosDescartes = pesosDescartes;
         this.pesosInteres = pesosInteres;
         this.pesosExtras = 0;
         this.pesosVictoriaMostrados = 0;
@@ -81,7 +78,7 @@ public class GestorVisualVictoria {
     }
 
     private int totalVictoria() {
-        int total = pesosVictoria + pesosManos + pesosDescartes + pesosInteres + pesosExtras;
+        int total = pesosVictoria + pesosManos + pesosInteres + pesosExtras;
         for (RecompensaJoker j : jokersActivados) {
             total += j.monto;
         }
@@ -172,7 +169,6 @@ public class GestorVisualVictoria {
         // 1. Calcular cuántas filas tenemos para que el panel crezca dinámicamente
         int cantidadFilas = 1; // Victoria (siempre está)
         if (pesosManos > 0) cantidadFilas++;
-        if (pesosDescartes > 0) cantidadFilas++;
         if (pesosInteres > 0) cantidadFilas++;
         cantidadFilas += jokersActivados.size();
         if (pesosExtras > 0) cantidadFilas++;
@@ -203,10 +199,6 @@ public class GestorVisualVictoria {
         if (pesosManos > 0) {
             filaY -= altoFila;
             dibujarFilaDetalle(batch, fuente, "Manos Restantes", pesosManos, panelX + 45f, filaY, panelAncho - 90f);
-        }
-        if (pesosDescartes > 0) {
-            filaY -= altoFila;
-            dibujarFilaDetalle(batch, fuente, "Descartes Restantes", pesosDescartes, panelX + 45f, filaY, panelAncho - 90f);
         }
         if (pesosInteres > 0) {
             filaY -= altoFila;

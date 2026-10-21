@@ -36,6 +36,7 @@ public class PanelPuntajes {
     private Texture spriteMoneda;
     private Animation<TextureRegion> animacionMoneda;
     private float estadoAnimacionMoneda = 0f;
+    private static final float ALTO_PANTALLA = 720f; // alto del mundo virtual, no de la ventana
 
     public PanelPuntajes() {
         if (Gdx.files.internal(SPRITE_MONEDA_PATH).exists()) {
@@ -59,7 +60,8 @@ public class PanelPuntajes {
         shapeRenderer.setProjectionMatrix(camera.combined);
         float margenX = 15f;
         float anchoFondo = (ANCHO_CAJA_BASE + ESPACIO_X + ANCHO_CAJA_MULT) + (margenX * 2f);
-        float altoFondo = Gdx.graphics.getHeight();
+        //float altoFondo = Gdx.graphics.getHeight();
+        float altoFondo = ALTO_PANTALLA;
         float fondoX = x - margenX;
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         shapeRenderer.setColor(new Color(0.015f, 0.018f, 0.025f, 0.75f));
@@ -121,7 +123,8 @@ public class PanelPuntajes {
         float escalaUI = fuenteUI.getScaleX();
         fuenteUI.getData().setScale(0.68f);
         fuenteUI.setColor(UITheme.DORADO);
-        dibujarTextoCentrado(batch, fuenteUI, "MARCADOR", x, anchoCajaDoble, Gdx.graphics.getHeight() - 31f, UITheme.DORADO);
+        //dibujarTextoCentrado(batch, fuenteUI, "MARCADOR", x, anchoCajaDoble, Gdx.graphics.getHeight() - 31f, UITheme.DORADO);
+        dibujarTextoCentrado(batch, fuenteUI, "MARCADOR", x, anchoCajaDoble, ALTO_PANTALLA - 31f, UITheme.DORADO);
         fuenteUI.getData().setScale(escalaUI);
         if (nombreARender != null && !nombreARender.isEmpty()) {
             float escalaOriginal = fuente.getScaleX();
@@ -130,7 +133,8 @@ public class PanelPuntajes {
             GlyphLayout nameLayout = new GlyphLayout();
             nameLayout.setText(fuente, nombreARender);
             float nameX = x + (anchoCajaDoble - nameLayout.width) / 2f;
-            float nameY = Gdx.graphics.getHeight() - 56f;
+            //float nameY = Gdx.graphics.getHeight() - 56f;
+            float nameY = ALTO_PANTALLA - 56f;
             fuente.draw(batch, nombreARender, nameX, nameY);
             fuente.getData().setScale(escalaOriginal);
         }
@@ -139,7 +143,6 @@ public class PanelPuntajes {
         double puntosRival = (juego != null) ? juego.getPuntosRival() : 0;
         double puntajeMeta = (juego != null) ? juego.getPuntajeMeta() : 0;
         double puntosJugador = (juego != null) ? juego.getPuntosJugador() : 0;
-
         float currentY = y + 70f;
         float xSeparador = x + ANCHO_CAJA_BASE;
         float anchoCajaSimple = anchoCajaDoble;

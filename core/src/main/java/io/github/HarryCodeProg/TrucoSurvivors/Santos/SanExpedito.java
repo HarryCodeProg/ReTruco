@@ -13,7 +13,7 @@ public class SanExpedito extends Santo {
             16,
             "San Expedito",
             "SanExpedito",
-            "Gana $1 por cada carta que tengas",
+            "Otorga $5 + $1 por cada 10 cartas en tu mazo",
             4
         );
     }
@@ -30,10 +30,12 @@ public class SanExpedito extends Santo {
 
     @Override
     public void aplicarEfecto(Jugador jugador, ArrayList<Carta> seleccionadas, ContextoJuego ctx) {
-       if (jugador.tieneDobleEfectoSantos()) {
-            jugador.sumarPesos(jugador.getMazo().getTamañoMazo() * 2);
+        int cartas = jugador.getMazo().getTamañoMazo();
+        int recompensa = 5 + (cartas / 10);
+        if (jugador.tieneDobleEfectoSantos()) {
+            jugador.sumarPesos(recompensa * 2);
             return;
-       }
-       jugador.sumarPesos(jugador.getMazo().getTamañoMazo());
+        }
+        jugador.sumarPesos(recompensa);
     }
 }

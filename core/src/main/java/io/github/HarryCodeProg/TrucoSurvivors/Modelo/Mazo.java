@@ -42,6 +42,14 @@ public class Mazo {
         sumarTamañoMazo(1);
     }
 
+    public void consumirCartas(ArrayList<Carta> cartas) {
+        // Las sacamos de todas las listas para que no vuelvan nunca más
+        this.mazo.removeAll(cartas);
+        this.cartasTomadas.removeAll(cartas);
+        this.cartasDescartadas.removeAll(cartas);
+        restarTamañoMazo(cartas.size());
+    }
+
     public void devolverCarta(Carta carta) {
         this.mazo.add(carta);
     }

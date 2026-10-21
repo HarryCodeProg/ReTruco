@@ -31,19 +31,22 @@ public class OverlaySeleccionCartaSanto {
     private static final float ANCHO_BOTON = 180f;
     private static final float ALTO_BOTON = 50f;
     private final Boton botonConfirmar;
-    // --- sistema de arrastre/reordenamiento, mismo patrón que la mano del jugador ---
+
     private static final float MARGEN_AREA = 220f;
     private final AreaElementos<VistaCarta> area =
         new AreaElementos<>(MARGEN_AREA, Y_CARTAS, 1280f - MARGEN_AREA * 2, CARTA_ALTO, CARTA_ANCHO, CARTA_ALTO, SEPARACION);
     private final GestorInputArrastrable<VistaCarta> gestorInput = new GestorInputArrastrable<>(vistasCartas);
     private final GestorReordenamiento gestorReordenamiento = new GestorReordenamiento();
-    // destino "mazo" al cerrar
+
     private static final float DECK_X = 1195f;
     private static final float DECK_Y = 130f;
     private boolean cerrando = false;
     private int animacionesPendientes = 0;
     private boolean esperandoFlips = false;
     private Runnable alTerminarFlipsYCerrar;
+
+    // Para controlar cuándo mostrar el tooltip
+    private VistaCarta cartaHover = null;
 
     public OverlaySeleccionCartaSanto() {
         botonConfirmar = new Boton(550f, 120f, ANCHO_BOTON, ALTO_BOTON,
@@ -60,6 +63,7 @@ public class OverlaySeleccionCartaSanto {
         this.seleccionadas.clear();
         this.vistasCartas.clear();
         this.cerrando = false;
+        this.esperandoFlips = false;
         this.cartasDisponibles = new ArrayList<>(cartas);
         construirVistas();
         visible = true;
@@ -75,49 +79,60 @@ public class OverlaySeleccionCartaSanto {
             vista.setTamaño(CARTA_ANCHO, CARTA_ALTO);
             vistasCartas.add(vista);
         }
-        // area.distribuir posiciona Y fija el target (setHandPosition internamente) -> nada de esquina
         area.distribuir(vistasCartas, null);
         for (VistaCarta v : vistasCartas) {
-            v.setPosition(v.getHandTargetX(), Y_CARTAS); // instantáneo al abrir, sin animación de entrada
+            v.setPosition(v.getHandTargetX(), Y_CARTAS);
         }
     }
 
     public void update(float mouseWorldX, float mouseWorldY, float delta) {
         if (!visible) return;
+
         if (cerrando) {
             for (VistaCarta vista : new ArrayList<>(vistasCartas)) {
                 vista.update(mouseWorldX, mouseWorldY, delta);
             }
             return;
         }
+
         if (esperandoFlips) {
             for (VistaCarta vista : new ArrayList<>(vistasCartas)) {
-                vista.update(mouseWorldX, mouseWorldY, delta); // deja progresar todos los flips
+                vista.update(mouseWorldX, mouseWorldY, delta);
             }
             if (!hayAlgunaCartaFlipeando()) {
                 esperandoFlips = false;
                 iniciarCierre();
             }
-            return; // bloqueado: sin drag, reordenamiento, clicks ni botón mientras espera
+            return;
         }
+
         VistaCarta arrastradoAntes = gestorInput.getArrastrado();
         gestorInput.update(mouseWorldX, mouseWorldY, delta, true);
         for (VistaCarta v : vistasCartas) v.update(mouseWorldX, mouseWorldY, delta);
-        // reordenamiento en vivo (mismo mecanismo que la mano)
+
         boolean cambio = gestorReordenamiento.previsualizarReordenamiento(gestorInput, vistasCartas);
         if (cambio) reorganizar();
-        // al soltar, recalcular distribución final
         if (arrastradoAntes != null && gestorInput.getArrastrado() == null) reorganizar();
+
         botonConfirmar.update(mouseWorldX, mouseWorldY);
-        // click simple (sin arrastre real) togglea selección — lo maneja VistaCarta.input() vía gestorInput
+
         for (VistaCarta vista : vistasCartas) {
             boolean quiereSeleccionar = vista.isSeleccionada();
             boolean yaEstaba = seleccionadas.contains(vista.getCarta());
             if (quiereSeleccionar != yaEstaba) sincronizarSeleccion(vista, quiereSeleccionar);
         }
-        // CORRECCIÓN: Quitamos Gdx.input.justTouched()
+
         if (botonConfirmar.fueCliqueado(mouseWorldX, mouseWorldY)) {
             confirmar();
+        }
+
+        // Actualizamos el hover para el tooltip
+        cartaHover = null;
+        for (VistaCarta vista : vistasCartas) {
+            if (vista.isHover()) {
+                cartaHover = vista;
+                break;
+            }
         }
     }
 
@@ -163,19 +178,29 @@ public class OverlaySeleccionCartaSanto {
 
     public void render(SpriteBatch batch, Main game) {
         if (!visible) return;
+
         batch.setColor(0f, 0f, 0f, 0.75f);
         batch.draw(game.getPixelBlanco(), 0, 0, 1280f, 720f);
         batch.setColor(Color.WHITE);
+
         game.getFuentePrincipal().draw(batch, santo.getNombre(), 500f, 660f);
         game.getFuentePrincipal().draw(batch, santo.getDescripcion(), 400f, 620f);
+
         VistaCarta arrastrado = gestorInput.getArrastrado();
         for (VistaCarta vista : vistasCartas) {
             if (vista != arrastrado) vista.render(batch, game);
         }
-        if (arrastrado != null) arrastrado.render(batch, game); // arrastrada al final: queda por encima
+        if (arrastrado != null) arrastrado.render(batch, game);
+
         String texto = seleccionadas.size() + "/" + obtenerTextoMaximo();
         game.getFuentePrincipal().draw(batch, texto, 600f, 190f);
         botonConfirmar.render(batch);
+
+        // Dibujar el tooltip de la carta que tiene hover
+        if (cartaHover != null) {
+            cartaHover.renderCartelStats(batch, game);
+        }
+
         batch.setColor(Color.WHITE);
     }
 
@@ -197,6 +222,11 @@ public class OverlaySeleccionCartaSanto {
         if (!seleccionValida() || cerrando) return;
         ArrayList<Carta> resultado = new ArrayList<>(seleccionadas);
         botonConfirmar.setHabilitado(false);
+
+        // MAGIA: Activamos el estado de espera de flips ANTES de llamar al callback.
+        // Así el juego se congela esperando que las cartas terminen de girar.
+        esperandoFlips = true;
+
         if (alConfirmar != null) {
             alConfirmar.accept(resultado);
         }
@@ -221,6 +251,11 @@ public class OverlaySeleccionCartaSanto {
             finalizarCierre();
             return;
         }
+        io.github.HarryCodeProg.TrucoSurvivors.Gestores.GestorSonidos sonidos =
+            io.github.HarryCodeProg.TrucoSurvivors.Main.getInstance().getGestorSonidos();
+        if (sonidos != null) {
+            sonidos.reproducirSonidoReparto();
+        }
         for (VistaCarta vista : vistasCartas) {
             vista.animarHacia(DECK_X, DECK_Y, this::onCartaTerminoAnimacion);
         }
@@ -234,12 +269,11 @@ public class OverlaySeleccionCartaSanto {
     private void finalizarCierre() {
         visible = false;
         cerrando = false;
+        esperandoFlips = false;
         vistasCartas.clear();
         alConfirmar = null;
         Runnable callback = alTerminarFlipsYCerrar;
         alTerminarFlipsYCerrar = null;
         if (callback != null) callback.run();
     }
-
-
 }

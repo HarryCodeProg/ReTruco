@@ -62,9 +62,9 @@ public class Main extends Game {
         batch = new SpriteBatch();
         listaRivales = new ArrayList<>();
         crearRivales();
-        configuracionJuego = new ConfiguracionJuego(); // FIX
-        configuracionJuego.cargar();                   // FIX: lee lo guardado la sesión anterior
-        configuracionJuego.aplicarVideo();              // FIX: aplica modo ventana/resolución/vsync guardados
+        configuracionJuego = new ConfiguracionJuego();
+        configuracionJuego.cargar();
+        configuracionJuego.aplicarVideo();
         Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
         pixmap.setColor(1, 1, 1, 1);
         pixmap.fill();
@@ -75,10 +75,10 @@ public class Main extends Game {
         if (indiceGuardado < 0 || indiceGuardado >= PISTAS_MUSICA.length) indiceGuardado = 0;
         musicaFondo = Gdx.audio.newMusic(Gdx.files.internal(PISTAS_MUSICA[indiceGuardado][1]));
         musicaFondo.setLooping(true);
-        musicaFondo.setVolume(configuracionJuego.getVolumenMusica());
+        musicaFondo.setVolume(0.5f * configuracionJuego.getVolumenMusica());
         musicaFondo.play();
         gestorSonidos = new GestorSonidos();
-        configuracionJuego.aplicarAudio(gestorSonidos); // FIX: aplica volumen general/efectos guardados
+        configuracionJuego.aplicarAudio(gestorSonidos);
         assets = new AssetManager();
         setScreen(new LoadingScreenCentered(this, assets, "ui/unpeso-spritesheet.png", 12, 1.0f, () -> {
             this.setScreen(new MainMenuScreen(this));
@@ -382,7 +382,7 @@ public class Main extends Game {
         }
         musicaFondo = Gdx.audio.newMusic(Gdx.files.internal(PISTAS_MUSICA[indice][1]));
         musicaFondo.setLooping(true);
-        musicaFondo.setVolume(configuracionJuego.getVolumenMusica());
+        musicaFondo.setVolume(0.5f * configuracionJuego.getVolumenMusica());
         if (sonando) musicaFondo.play();
         configuracionJuego.setMusicaIndex(indice);
         configuracionJuego.guardar();

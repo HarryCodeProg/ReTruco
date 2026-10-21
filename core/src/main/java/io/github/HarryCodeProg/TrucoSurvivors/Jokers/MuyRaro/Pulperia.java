@@ -35,22 +35,16 @@ public class Pulperia extends Joker {
         if (evento == EventoJuego.POST_REPARTO) {
             yaDescartoEstaRonda = false;
         }
-
         if (evento == EventoJuego.AL_DESCARTAR && !yaDescartoEstaRonda) {
             yaDescartoEstaRonda = true;
-
             Mazo mazo = ctx.getJugador().getMazo();
             ArrayList<Carta> descartadas = mazo.getCartasDescartadas();
             int cartasConsumidas = descartadas.size();
-
             if (cartasConsumidas > 0) {
                 // Dar pesos
                 ctx.getJugador().sumarPesos(cartasConsumidas * 2);
-
-                // Remover permanentemente del tamaño del mazo y limpiar descartes para que no vuelvan
-                mazo.restarTamañoMazo(cartasConsumidas);
-                descartadas.clear();
-
+                // Consumir permanentemente las cartas del mazo (las borra de tomadas y descartadas)
+                mazo.consumirCartas(new ArrayList<>(descartadas));
                 // Reproducir sonido para dar feedback
                 GestorSonidos sonidos = Main.getInstance().getGestorSonidos();
                 if (sonidos != null) sonidos.reproducirSonidoGastarPeso();

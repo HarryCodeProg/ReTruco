@@ -14,7 +14,7 @@ public class SanMartinDePorres extends Santo{
             "San Martin De Porres",
             "SanMartinDePorres",
             "+1 rolleo de tienda gratuito",
-            8
+            3
         );
     }
 

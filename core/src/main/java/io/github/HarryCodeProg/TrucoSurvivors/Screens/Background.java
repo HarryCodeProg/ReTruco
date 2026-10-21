@@ -301,7 +301,9 @@ public class Background {
         shaderPlasma.setUniformf("u_c3", temaActual.c3[0], temaActual.c3[1], temaActual.c3[2]);
         shaderPlasma.setUniformf("u_spin_amount", temaActual.spinAmount);
         shaderPlasma.setUniformf("u_contrast",   temaActual.contraste);
-        batch.draw(texturaVacia, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        batch.draw(texturaVacia, 0, 0,
+            Math.max(Gdx.graphics.getWidth(), 1280),
+            Math.max(Gdx.graphics.getHeight(), 720));
         batch.setShader(shaderOriginal);
     }
 
