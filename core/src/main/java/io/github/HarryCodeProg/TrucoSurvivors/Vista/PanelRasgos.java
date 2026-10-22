@@ -43,16 +43,17 @@ public class PanelRasgos {
 
     public void update(float mx, float my, float delta, boolean click,
                        GestorRasgos gestor, float x, float yTop) {
-        mouseX = mx; mouseY = my;
         tiempoAnimacion += delta;
+        this.mouseX = mx;
+        this.mouseY = my;
         List<CategoriaJoker> activas = gestor.getCategoriasParaMostrar();
         int total = activas.size();
+        int maxScroll = Math.max(0, total - MAX_VISIBLES);
         if (total <= MAX_VISIBLES) {
-            scrollIndex = 0; hoverArriba = false; hoverAbajo = false;
-            return;
+            scrollIndex = 0;
+        } else {
+            scrollIndex = Math.max(0, Math.min(scrollIndex, maxScroll));
         }
-        int maxScroll = total - MAX_VISIBLES;
-        scrollIndex = Math.max(0, Math.min(scrollIndex, maxScroll));
         float panelAlto = MAX_VISIBLES * ALTO_FILA + (MAX_VISIBLES - 1) * GAP_FILAS;
         float flechaArribaY = yTop - ALTO_FLECHA;
         float flechaAbajoY  = yTop - (ALTO_FLECHA + GAP_FLECHA) - panelAlto - ALTO_FLECHA;
@@ -60,6 +61,7 @@ public class PanelRasgos {
         hoverArriba = dentroDeFlecha(mx, my, flechaX, flechaArribaY, ANCHO_FLECHA, ALTO_FLECHA);
         hoverAbajo  = dentroDeFlecha(mx, my, flechaX, flechaAbajoY, ANCHO_FLECHA, ALTO_FLECHA);
         if (click) {
+            // CAMBIO: Cambio de página, en vez de scroll de 1 en 1
             if (hoverArriba && scrollIndex > 0) {
                 scrollIndex = Math.max(0, scrollIndex - MAX_VISIBLES);
             }
@@ -74,34 +76,35 @@ public class PanelRasgos {
         hoverCat = null;
         if (activas.isEmpty()) return;
         int total = activas.size();
-        boolean hayPaginacion = total > MAX_VISIBLES;
+        int maxScroll = Math.max(0, total - MAX_VISIBLES);
         int inicio = scrollIndex;
         int fin = Math.min(total, inicio + MAX_VISIBLES);
         BitmapFont fNombre = game.getFuentePrincipal();
         Texture pixel = game.getPixelBlanco();
-        float offsetArriba = hayPaginacion ? (ALTO_FLECHA + GAP_FLECHA) : 0f;
+        // Siempre dejamos el espacio para la flecha de arriba
+        float offsetArriba = ALTO_FLECHA + GAP_FLECHA;
         float filaYTopBase = yTop - offsetArriba;
-        if (hayPaginacion) {
-            int maxScroll = total - MAX_VISIBLES;
-            Color colorArriba = (scrollIndex > 0) ? new Color(0.85f, 0.85f, 0.90f, 1f)
-                : new Color(0.35f, 0.35f, 0.40f, 0.7f);
-            if (hoverArriba && scrollIndex > 0) colorArriba = UITheme.DORADO_BRILLANTE;
-            dibujarFlecha(batch, pixel, x + (ANCHO_PANEL - ANCHO_FLECHA) / 2f, yTop - ALTO_FLECHA,
-                ANCHO_FLECHA, ALTO_FLECHA, true, colorArriba);
-            float panelAlto = MAX_VISIBLES * ALTO_FILA + (MAX_VISIBLES - 1) * GAP_FILAS;
-            float flechaAbajoY = yTop - (ALTO_FLECHA + GAP_FLECHA) - panelAlto - ALTO_FLECHA;
-            Color colorAbajo = (scrollIndex < maxScroll) ? new Color(0.85f, 0.85f, 0.90f, 1f)
-                : new Color(0.35f, 0.35f, 0.40f, 0.7f);
-            if (hoverAbajo && scrollIndex < maxScroll) colorAbajo = UITheme.DORADO_BRILLANTE;
-            dibujarFlecha(batch, pixel, x + (ANCHO_PANEL - ANCHO_FLECHA) / 2f, flechaAbajoY,
-                ANCHO_FLECHA, ALTO_FLECHA, false, colorAbajo);
-        }
+        // Dibujamos las flechas SIEMPRE
+        float panelAlto = MAX_VISIBLES * ALTO_FILA + (MAX_VISIBLES - 1) * GAP_FILAS;
+        float flechaArribaY = yTop - ALTO_FLECHA;
+        float flechaAbajoY  = yTop - (ALTO_FLECHA + GAP_FLECHA) - panelAlto - ALTO_FLECHA;
+        float flechaX = x + (ANCHO_PANEL - ANCHO_FLECHA) / 2f;
+        // Color flecha arriba (Gris si no hay a dónde ir)
+        Color colorArriba = (scrollIndex > 0) ? new Color(0.85f, 0.85f, 0.90f, 1f) : new Color(0.35f, 0.35f, 0.40f, 0.5f);
+        if (hoverArriba && scrollIndex > 0) colorArriba = UITheme.DORADO_BRILLANTE;
+        dibujarFlecha(batch, pixel, flechaX, flechaArribaY, ANCHO_FLECHA, ALTO_FLECHA, true, colorArriba);
+        // Color flecha abajo (Gris si no hay más para ver)
+        Color colorAbajo = (scrollIndex < maxScroll) ? new Color(0.85f, 0.85f, 0.90f, 1f) : new Color(0.35f, 0.35f, 0.40f, 0.5f);
+        if (hoverAbajo && scrollIndex < maxScroll) colorAbajo = UITheme.DORADO_BRILLANTE;
+        dibujarFlecha(batch, pixel, flechaX, flechaAbajoY, ANCHO_FLECHA, ALTO_FLECHA, false, colorAbajo);
+        // Dibujar las filas
         for (int i = inicio; i < fin; i++) {
             CategoriaJoker cat = activas.get(i);
             int cantidad = gestor.getCantidad(cat);
             int tier     = gestor.getTier(cat);
             int idx = i - inicio;
             float filaY = filaYTopBase - (idx + 1) * ALTO_FILA - idx * GAP_FILAS;
+            // ACÁ ESTÁ EL CAMBIO: Usamos mouseX y mouseY en vez de mx y my
             if (mouseX >= x && mouseX <= x + ANCHO_PANEL && mouseY >= filaY && mouseY <= filaY + ALTO_FILA) {
                 hoverCat = cat; hoverX = x; hoverFilaY = filaY;
             }

@@ -91,21 +91,21 @@ public class GestorEstadoPartida {
     public void inicializarDesdeGuardado(Jugador jugador, Jugador rival, DatosRival datosRival,
                                          GestorInputArrastrable<VistaCarta> gestorCartas,
                                          GestorAnimacionesMano gestorAnimaciones,
-                                         DatosJuego datosJuego) {
+                                         DatosJuego datosJuego,
+                                         ArrayList<Carta> manoRival, ArrayList<Carta> mesaJug, ArrayList<Carta> mesaRiv) {
         if (this.juego != null) this.juego.desconectar();
         this.tocoJugar = 0;
         this.esperandoTransicion = false;
         this.iniciarNuevaRondaPendiente = false;
         this.tiempoNuevaRonda = 0f;
-        Mazo mazoRival = Juego.crearMazoRival(datosRival.getNivelDificultad());
+        Mazo mazoRival = (datosJuego.mazoRival != null)
+            ? GestorConverterSerializacion.desdeDatos(datosJuego.mazoRival)
+            : Juego.crearMazoRival(datosRival.getNivelDificultad());
+        ArrayList<Carta> rivalEnJuego = new ArrayList<>(manoRival);
+        rivalEnJuego.addAll(mesaRiv);
+        GestorConverterSerializacion.vincularTomadas(mazoRival.getCartasTomadas(), rivalEnJuego);
         this.juego = new Juego(jugador, rival, mazoRival, true);
         this.juego.setPuntajeMeta(datosRival.getPuntosMeta());
-        ArrayList<Carta> manoRival = new ArrayList<>();
-        for (DatosCarta dc : datosJuego.manoRival) manoRival.add(GestorConverterSerializacion.desdeDatos(dc));
-        ArrayList<Carta> mesaJug = new ArrayList<>();
-        for (DatosCarta dc : datosJuego.mesaJugador) mesaJug.add(GestorConverterSerializacion.desdeDatos(dc));
-        ArrayList<Carta> mesaRiv = new ArrayList<>();
-        for (DatosCarta dc : datosJuego.mesaRival) mesaRiv.add(GestorConverterSerializacion.desdeDatos(dc));
         ArrayList<ResultadoMano> resultados = new ArrayList<>();
         for (String s : datosJuego.resultados) resultados.add(ResultadoMano.valueOf(s));
         this.juego.restaurarEstado(
@@ -116,10 +116,20 @@ public class GestorEstadoPartida {
             datosJuego.cartasCompradasTotal, datosJuego.renovacionesTotal,
             resultados, datosJuego.manoFinalizada
         );
+        this.juego.restaurarExtras(datosJuego);   // cantos, turno, multiplicadores, rachas, contadores
         this.tocoJugar = datosJuego.tocoJugar;
         this.controladorCombate = new ControladorCombate(screen, juego);
         this.controladorIARival = new ControladorIARival(juego, controladorCombate, screen);
         this.gestorAccion = new GestorAccion(juego, screen, controladorCombate, gestorCartas, gestorAnimaciones);
+    }
+
+    /** Juego sin reparto para tienda / selección de rival al cargar: activa los rasgos (slots extra, Persona, Cultura...). */
+    public void inicializarReposo(Jugador jugador) {
+        if (this.juego != null) this.juego.desconectar();
+        this.tocoJugar = 0;
+        this.esperandoTransicion = false;
+        this.iniciarNuevaRondaPendiente = false;
+        this.juego = new Juego(jugador, new Jugador("-"), Mazo.crearMazoBase(), true);
     }
 
     public void setTocoJugar(int valor) { this.tocoJugar = valor; }

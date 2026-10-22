@@ -35,6 +35,7 @@ public class ControladorCombate {
                 }
             }, 0.2f);
         } else if (estado == EstadoCombate.VICTORIA_RIVAL) {
+            GestorGuardado.borrarGuardado();
             screen.setEsperandoTransicion(true);
             Timer.schedule(new Timer.Task() {
                 @Override

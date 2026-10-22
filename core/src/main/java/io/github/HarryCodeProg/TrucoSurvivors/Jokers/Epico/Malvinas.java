@@ -11,10 +11,10 @@ public class Malvinas extends Joker {
 
     public Malvinas() {
         super(133, "Malvinas", "Malvinas",
-            "Obtiene multiplicador truco igual al Valor Truco de la primer carta que mate (actual: x1)",
+            "Obtiene multiplicador truco igual al Valor Truco de la primer carta que mate (actual: +0)",
             Rareza.epico, 8, Joker.FaseActivacion.INDEPENDIENTE,
             CategoriaJoker.TRUCO, CategoriaJoker.ACTIVACION, CategoriaJoker.NACIONAL);
-        setAcumulado(1.0);
+        setAcumulado(0);
     }
 
     @Override
@@ -25,12 +25,11 @@ public class Malvinas extends Joker {
                 juego.marcarPrimeraCartaQueMataAplicada();
                 if (ctx.getCartaEnResolucion() != null) {
                     double valorTruco = ctx.getCartaEnResolucion().getValorTrucoActual();
-                    setAcumulado(1.0 + valorTruco);
+                    setAcumulado(valorTruco);
                 }
             }
             return;
         }
-
         if (evento == EventoJuego.ANTES_DE_SUMAR_TRUCO) {
             if (getAcumulado() > 1.0) {
                 ctx.getResolucionActual().multiplicarMult(getAcumulado(), getNombre(), this);
@@ -40,8 +39,8 @@ public class Malvinas extends Joker {
 
     @Override
     public String getDescripcionRenderizada() {
-        return "Obtiene multiplicador truco igual al Valor Truco de la primer carta que mate (actual: x"
-            + String.format("%.2f", getAcumulado()) + ")";
+        return "Obtiene multiplicador truco igual al Valor Truco de la primer carta que mate (actual: +"
+            + (int) getAcumulado() + ")";
     }
 
     @Override

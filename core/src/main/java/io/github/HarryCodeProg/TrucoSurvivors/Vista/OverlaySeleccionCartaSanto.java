@@ -8,11 +8,10 @@ import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Carta;
 import io.github.HarryCodeProg.TrucoSurvivors.Gestores.AreaElementos;
 import io.github.HarryCodeProg.TrucoSurvivors.Gestores.GestorInputArrastrable;
 import io.github.HarryCodeProg.TrucoSurvivors.Gestores.GestorReordenamiento;
-import io.github.HarryCodeProg.TrucoSurvivors.Jugador;
+import io.github.HarryCodeProg.TrucoSurvivors.Gestores.GestorSonidos;
 import io.github.HarryCodeProg.TrucoSurvivors.Main;
 import io.github.HarryCodeProg.TrucoSurvivors.Santos.Santo;
 import java.util.ArrayList;
-import java.util.Random;
 import java.util.function.Consumer;
 
 public class OverlaySeleccionCartaSanto {
@@ -28,9 +27,11 @@ public class OverlaySeleccionCartaSanto {
     private static final float CARTA_ALTO = 135f;
     private static final float SEPARACION = 15f;
     private static final float Y_CARTAS = 250f;
+
     private static final float ANCHO_BOTON = 180f;
     private static final float ALTO_BOTON = 50f;
     private final Boton botonConfirmar;
+    private final Boton botonOmitir; // NUEVO
 
     private static final float MARGEN_AREA = 220f;
     private final AreaElementos<VistaCarta> area =
@@ -45,14 +46,28 @@ public class OverlaySeleccionCartaSanto {
     private boolean esperandoFlips = false;
     private Runnable alTerminarFlipsYCerrar;
 
-    // Para controlar cuándo mostrar el tooltip
+    // NUEVO: Variables para la animación de reparto inicial
+    private boolean repartiendo = false;
+    private float tiempoReparto = 0f;
+    private int indiceReparto = 0;
+    private static final float DELAY_REPARTO = 0.08f;
+    private ArrayList<float[]> posicionesObjetivo = new ArrayList<>();
+
     private VistaCarta cartaHover = null;
 
     public OverlaySeleccionCartaSanto() {
-        botonConfirmar = new Boton(550f, 120f, ANCHO_BOTON, ALTO_BOTON,
+        // Botón confirmar movido a la izquierda
+        botonConfirmar = new Boton(450f, 120f, ANCHO_BOTON, ALTO_BOTON,
             Boton.TipoColor.VERDE, io.github.HarryCodeProg.TrucoSurvivors.Estados.Accion.CONFIRMAR_SELECCION_SANTO
         );
         botonConfirmar.setHabilitado(false);
+
+        // NUEVO: Botón Omitir a la derecha
+        botonOmitir = new Boton(650f, 120f, ANCHO_BOTON, ALTO_BOTON,
+            Boton.TipoColor.BORDO, io.github.HarryCodeProg.TrucoSurvivors.Estados.Accion.OPCIONES
+        );
+        botonOmitir.setTexto("OMITIR");
+        botonOmitir.setHabilitado(true);
     }
 
     public void abrir(Santo santo, ArrayList<Carta> cartas, TextureAtlas atlasCartas,
@@ -65,37 +80,66 @@ public class OverlaySeleccionCartaSanto {
         this.cerrando = false;
         this.esperandoFlips = false;
         this.cartasDisponibles = new ArrayList<>(cartas);
+        botonOmitir.setHabilitado(true);
+        botonConfirmar.setHabilitado(false);
         construirVistas();
+        this.repartiendo = true;
+        this.tiempoReparto = 0f;
+        this.indiceReparto = 0;
         visible = true;
-        actualizarEstadoBoton();
+        actualizarEstadoBotones();
     }
 
     private void construirVistas() {
         int cantidad = Math.min(MAX_CARTAS_MOSTRADAS, cartasDisponibles.size());
         if (cantidad == 0) return;
+
         for (int i = 0; i < cantidad; i++) {
             Carta carta = cartasDisponibles.get(i);
             VistaCarta vista = new VistaCarta(carta, false, atlasCartas);
             vista.setTamaño(CARTA_ANCHO, CARTA_ALTO);
             vistasCartas.add(vista);
         }
+
         area.distribuir(vistasCartas, null);
+
+        // NUEVO: Guardamos las posiciones finales y mandamos todas las cartas al mazo
+        posicionesObjetivo.clear();
         for (VistaCarta v : vistasCartas) {
-            v.setPosition(v.getHandTargetX(), Y_CARTAS);
+            posicionesObjetivo.add(new float[]{v.getHandTargetX(), Y_CARTAS});
+            v.setPosition(DECK_X, DECK_Y);
+            v.setHandPosition(DECK_X, DECK_Y); // El target también va al mazo
         }
     }
 
     public void update(float mouseWorldX, float mouseWorldY, float delta) {
         if (!visible) return;
 
-        if (cerrando) {
+        if (repartiendo) {
+            tiempoReparto += delta;
+            if (tiempoReparto >= DELAY_REPARTO) {
+                tiempoReparto = 0f;
+                if (indiceReparto < vistasCartas.size()) {
+                    float[] pos = posicionesObjetivo.get(indiceReparto);
+                    vistasCartas.get(indiceReparto).setHandPosition(pos[0], pos[1]);
+                    GestorSonidos sonidos = Main.getInstance().getGestorSonidos();
+                    if (sonidos != null) sonidos.reproducirSonidoReparto();
+                    indiceReparto++;
+                } else {
+                    repartiendo = false;
+                }
+            }
+            for (VistaCarta vista : vistasCartas) {
+                vista.update(mouseWorldX, mouseWorldY, delta);
+            }
+        }
+        else if (cerrando) {
             for (VistaCarta vista : new ArrayList<>(vistasCartas)) {
                 vista.update(mouseWorldX, mouseWorldY, delta);
             }
             return;
         }
-
-        if (esperandoFlips) {
+        else if (esperandoFlips) {
             for (VistaCarta vista : new ArrayList<>(vistasCartas)) {
                 vista.update(mouseWorldX, mouseWorldY, delta);
             }
@@ -105,28 +149,32 @@ public class OverlaySeleccionCartaSanto {
             }
             return;
         }
-
-        VistaCarta arrastradoAntes = gestorInput.getArrastrado();
-        gestorInput.update(mouseWorldX, mouseWorldY, delta, true);
-        for (VistaCarta v : vistasCartas) v.update(mouseWorldX, mouseWorldY, delta);
-
-        boolean cambio = gestorReordenamiento.previsualizarReordenamiento(gestorInput, vistasCartas);
-        if (cambio) reorganizar();
-        if (arrastradoAntes != null && gestorInput.getArrastrado() == null) reorganizar();
-
-        botonConfirmar.update(mouseWorldX, mouseWorldY);
-
-        for (VistaCarta vista : vistasCartas) {
-            boolean quiereSeleccionar = vista.isSeleccionada();
-            boolean yaEstaba = seleccionadas.contains(vista.getCarta());
-            if (quiereSeleccionar != yaEstaba) sincronizarSeleccion(vista, quiereSeleccionar);
+        else {
+            // Update normal
+            VistaCarta arrastradoAntes = gestorInput.getArrastrado();
+            gestorInput.update(mouseWorldX, mouseWorldY, delta, true);
+            for (VistaCarta v : vistasCartas) v.update(mouseWorldX, mouseWorldY, delta);
+            boolean cambio = gestorReordenamiento.previsualizarReordenamiento(gestorInput, vistasCartas);
+            if (cambio) reorganizar();
+            if (arrastradoAntes != null && gestorInput.getArrastrado() == null) reorganizar();
+            for (VistaCarta vista : vistasCartas) {
+                boolean quiereSeleccionar = vista.isSeleccionada();
+                boolean yaEstaba = seleccionadas.contains(vista.getCarta());
+                if (quiereSeleccionar != yaEstaba) sincronizarSeleccion(vista, quiereSeleccionar);
+            }
         }
 
+        // UI Updates (siempre corren)
+        botonConfirmar.update(mouseWorldX, mouseWorldY);
+        botonOmitir.update(mouseWorldX, mouseWorldY);
+        actualizarEstadoBotones();
         if (botonConfirmar.fueCliqueado(mouseWorldX, mouseWorldY)) {
             confirmar();
         }
 
-        // Actualizamos el hover para el tooltip
+        if (botonOmitir.fueCliqueado(mouseWorldX, mouseWorldY)) {
+            omitirAnimacionYConfirmar();
+        }
         cartaHover = null;
         for (VistaCarta vista : vistasCartas) {
             if (vista.isHover()) {
@@ -151,7 +199,7 @@ public class OverlaySeleccionCartaSanto {
         } else {
             seleccionadas.remove(carta);
         }
-        actualizarEstadoBoton();
+        actualizarEstadoBotones();
     }
 
     private boolean puedeAgregarCarta() {
@@ -172,35 +220,30 @@ public class OverlaySeleccionCartaSanto {
         return seleccionadas.size() == requeridas;
     }
 
-    private void actualizarEstadoBoton() {
-        botonConfirmar.setHabilitado(seleccionValida());
+    private void actualizarEstadoBotones() {
+        boolean valida = seleccionValida();
+        botonConfirmar.setHabilitado(valida);
     }
 
     public void render(SpriteBatch batch, Main game) {
         if (!visible) return;
-
         batch.setColor(0f, 0f, 0f, 0.75f);
         batch.draw(game.getPixelBlanco(), 0, 0, 1280f, 720f);
         batch.setColor(Color.WHITE);
-
         game.getFuentePrincipal().draw(batch, santo.getNombre(), 500f, 660f);
         game.getFuentePrincipal().draw(batch, santo.getDescripcion(), 400f, 620f);
-
         VistaCarta arrastrado = gestorInput.getArrastrado();
         for (VistaCarta vista : vistasCartas) {
             if (vista != arrastrado) vista.render(batch, game);
         }
         if (arrastrado != null) arrastrado.render(batch, game);
-
         String texto = seleccionadas.size() + "/" + obtenerTextoMaximo();
         game.getFuentePrincipal().draw(batch, texto, 600f, 190f);
         botonConfirmar.render(batch);
-
-        // Dibujar el tooltip de la carta que tiene hover
+        botonOmitir.render(batch);
         if (cartaHover != null) {
             cartaHover.renderCartelStats(batch, game);
         }
-
         batch.setColor(Color.WHITE);
     }
 
@@ -219,14 +262,32 @@ public class OverlaySeleccionCartaSanto {
     }
 
     private void confirmar() {
-        if (!seleccionValida() || cerrando) return;
+        if (!seleccionValida() || cerrando || esperandoFlips) return;
         ArrayList<Carta> resultado = new ArrayList<>(seleccionadas);
         botonConfirmar.setHabilitado(false);
-
-        // MAGIA: Activamos el estado de espera de flips ANTES de llamar al callback.
-        // Así el juego se congela esperando que las cartas terminen de girar.
+        botonOmitir.setHabilitado(false);
         esperandoFlips = true;
+        if (alConfirmar != null) {
+            alConfirmar.accept(resultado);
+        }
+    }
 
+    private void omitirAnimacionYConfirmar() {
+        if (cerrando || esperandoFlips) return;
+        // Si no es válida, cancela el uso del santo
+        if (!seleccionValida()) {
+            visible = false;
+            cerrando = false;
+            esperandoFlips = false;
+            repartiendo = false;
+            return;
+        }
+        // Si es válida, saltea la animación y usa el santo
+        ArrayList<Carta> resultado = new ArrayList<>(seleccionadas);
+        repartiendo = false;
+        cerrando = false;
+        esperandoFlips = false;
+        visible = false;
         if (alConfirmar != null) {
             alConfirmar.accept(resultado);
         }
@@ -251,11 +312,9 @@ public class OverlaySeleccionCartaSanto {
             finalizarCierre();
             return;
         }
-        io.github.HarryCodeProg.TrucoSurvivors.Gestores.GestorSonidos sonidos =
-            io.github.HarryCodeProg.TrucoSurvivors.Main.getInstance().getGestorSonidos();
-        if (sonidos != null) {
-            sonidos.reproducirSonidoReparto();
-        }
+        // Sonido al momento de cerrar
+        GestorSonidos sonidos = Main.getInstance().getGestorSonidos();
+        if (sonidos != null) sonidos.reproducirSonidoReparto();
         for (VistaCarta vista : vistasCartas) {
             vista.animarHacia(DECK_X, DECK_Y, this::onCartaTerminoAnimacion);
         }

@@ -74,6 +74,8 @@ public class PanelTienda {
     private final Runnable onBeforeReroll;
     private Juego juego;
     private boolean bloqueadoPorModalExterno = false;
+    private Runnable alGuardar;
+    private boolean cambioPendiente = false;
 
     public PanelTienda(Main game, Jugador jugador, Runnable alContinuar, Consumer<VistaItemTienda> alComprarJoker,
                        Consumer<Santo> alComprarYUsarSanto, Runnable onBeforeReroll, Juego juego) {
@@ -422,6 +424,7 @@ public class PanelTienda {
             estadoTienda.removerItemComprado(item);
         }
         reconstruirVistas();
+        if (!(item.getTipo() == ItemTienda.Tipo.JOKER && alComprarJoker != null)) cambioPendiente = true;
     }
 
     private void comprarYUsarSanto(VistaItemTienda vista) {
@@ -568,10 +571,9 @@ public class PanelTienda {
         this.offsetYObjetivo = -(PANEL_Y + PANEL_ALTO);
     }
 
-    public void dispose() {
-        if (iconoPeso != null) iconoPeso.dispose();
-        if (ruedaZodiaco != null) ruedaZodiaco.dispose();
-    }
+    public void setAlGuardar(Runnable r) { this.alGuardar = r; }
+    public boolean isCambioPendiente() { return cambioPendiente; }
+    public void limpiarCambioPendiente() { cambioPendiente = false; }
 
     private boolean tieneSarmiento() {
         return jugador.getJokers().stream().anyMatch(j -> j.getId() == 148);
@@ -622,4 +624,10 @@ public class PanelTienda {
         actualizarTextoReroll();
         reconstruirVistas();
     }
+
+    public void dispose() {
+        if (iconoPeso != null) iconoPeso.dispose();
+        if (ruedaZodiaco != null) ruedaZodiaco.dispose();
+    }
+
 }

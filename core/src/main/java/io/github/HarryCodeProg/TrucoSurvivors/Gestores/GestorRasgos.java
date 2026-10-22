@@ -178,6 +178,16 @@ public class GestorRasgos {
         }
     }
 
+    public void exportarContadores(List<String> claves, List<Double> valores) {
+        claves.clear(); valores.clear();
+        for (Map.Entry<String, Double> e : contadores.entrySet()) { claves.add(e.getKey()); valores.add(e.getValue()); }
+    }
+
+    public void restaurarContadores(List<String> claves, List<Double> valores) {
+        contadores.clear();
+        for (int i = 0; i < claves.size() && i < valores.size(); i++) contadores.put(claves.get(i), valores.get(i));
+    }
+
     private static String fmt(double v) {
         return v == Math.rint(v) ? String.valueOf((long) v) : String.valueOf(v);
     }

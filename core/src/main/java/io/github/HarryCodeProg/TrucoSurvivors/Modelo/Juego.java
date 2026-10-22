@@ -8,6 +8,7 @@ import io.github.HarryCodeProg.TrucoSurvivors.Gestores.GestorRasgos;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jugador;
+import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Guardado.DatosJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Rasgos.EfectoRasgo;
 import io.github.HarryCodeProg.TrucoSurvivors.Rasgos.EfectoTrucoBonus;
 import io.github.HarryCodeProg.TrucoSurvivors.Rasgos.EfectoTrucoMultiplicador;
@@ -57,6 +58,7 @@ public class Juego {
     private double mejorEnvidoLogrado = 0;
     private final GestorRasgos gestorRasgos = new GestorRasgos();
     private Consumer<Joker> listenerRasgos;
+    private boolean resultadoEnvidoPendiente = false;
 
     public Juego(Jugador jugador, Jugador rival, Mazo mazoRival, boolean saltarRepartoInicial) {
         this.jugador = jugador;
@@ -162,6 +164,20 @@ public class Juego {
             jugador.removeJokerRemovedListener(listenerRasgos);
             listenerRasgos = null;
         }
+    }
+
+    private ArrayList<Joker> jokersConsumidos = new ArrayList<>();
+
+    public void registrarJokerConsumido(Joker joker) {
+        jokersConsumidos.add(joker);
+    }
+
+    public ArrayList<Joker> getJokersConsumidos() {
+        return jokersConsumidos;
+    }
+
+    public void limpiarJokersConsumidos() {
+        jokersConsumidos.clear();
     }
 
     public double getBonusCantoTruco()        { return gestorRasgos.getBonusCanto(EfectoRasgo.TipoCanto.TRUCO); }
@@ -625,8 +641,9 @@ public class Juego {
         if (quiero) {
             ganadorEnvido();
         } else {
-            prepararResolucionNoQuieroEnvido(canter); // FIX: arma una ResolucionPuntaje simple, no aplica todavía
+            prepararResolucionNoQuieroEnvido(canter);
         }
+        resultadoEnvidoPendiente = true;
         cantorEnvidoPendiente = null;
         nivelEnvidoPendiente = null;
     }
@@ -648,6 +665,7 @@ public class Juego {
     }
 
     public void aplicarResultadoEnvido() {
+        resultadoEnvidoPendiente = false;
         if (ultimaResolucionEnvido != null) {
             double puntosFinales = ultimaResolucionEnvido.calcularPuntajeFinal();
             if (ultimoGanadorEnvidoFueJugador) {
@@ -663,6 +681,70 @@ public class Juego {
         verificarEstadoCombate();
     }
 
+    public boolean hayResultadoEnvidoPendiente() { return resultadoEnvidoPendiente; }
+
+    /** Combate resuelto (gane quien gane): guardarlo haría cobrar la recompensa dos veces. */
+    public boolean combateDecidido() {
+        return puntosJugador >= puntajeMeta || puntosRival >= puntajeMeta || jugador.getManosActuales() <= 0;
+    }
+
+    private int codigoJugador(Jugador j) { return j == null ? 0 : (j == jugador ? 1 : 2); }
+    private Jugador jugadorDesdeCodigo(int c) { return c == 1 ? jugador : (c == 2 ? rival : null); }
+
+    public void exportarEstado(DatosJuego d) {
+        d.tieneEstadoCantos = true;
+        d.turnoEsJugador = (turnoActual == null || turnoActual == jugador);
+        d.nivelTrucoActual = nivelTrucoActual;
+        d.ultimoCantorTruco = codigoJugador(ultimoCantorTruco);
+        d.cantorTrucoPendiente = codigoJugador(cantorTrucoPendiente);
+        d.nivelTrucoPendiente = nivelTrucoPendiente != null ? nivelTrucoPendiente : 0;
+        d.cantosTruco.clear();
+        for (CantoTruco c : cantosTruco) d.cantosTruco.add(c.name());
+        d.nivelEnvidoActual = nivelEnvidoActual;
+        d.ultimoCantorEnvido = codigoJugador(ultimoCantorEnvido);
+        d.cantorEnvidoPendiente = codigoJugador(cantorEnvidoPendiente);
+        d.nivelEnvidoPendiente = nivelEnvidoPendiente != null ? nivelEnvidoPendiente : 0;
+        d.cantosEnvido.clear();
+        for (CantoEnvido c : cantosEnvido) d.cantosEnvido.add(c.name());
+        d.multTrucoJugador = jugador.getMultiplicadorTruco();    // los getters devuelven el multiplicador temporal
+        d.multEnvidoJugador = jugador.getMultiplicadorEnvido();
+        d.multTrucoRival = rival.getMultiplicadorTruco();
+        d.multEnvidoRival = rival.getMultiplicadorEnvido();
+        d.manosGanadasConsecutivas = manosGanadasConsecutivas;
+        d.envidosGanadosConsecutivos = envidosGanadosConsecutivos;
+        d.primeraCartaQueMataAplicada = primeraCartaQueMataAplicada;
+        d.primeraCartaQueNoMataAplicada = primeraCartaQueNoMataAplicada;
+        gestorRasgos.exportarContadores(d.contadoresClaves, d.contadoresValores);
+    }
+
+    /** Llamar después de restaurarEstado(...). */
+    public void restaurarExtras(DatosJuego d) {
+        if (!d.tieneEstadoCantos) return;
+        turnoActual = d.turnoEsJugador ? jugador : rival;
+        nivelTrucoActual = d.nivelTrucoActual;
+        ultimoCantorTruco = jugadorDesdeCodigo(d.ultimoCantorTruco);
+        cantorTrucoPendiente = jugadorDesdeCodigo(d.cantorTrucoPendiente);
+        nivelTrucoPendiente = cantorTrucoPendiente != null ? d.nivelTrucoPendiente : null;
+        cantosTruco.clear();
+        for (String s : d.cantosTruco) {
+            try { cantosTruco.add(CantoTruco.valueOf(s)); } catch (IllegalArgumentException ignored) { }
+        }
+        nivelEnvidoActual = d.nivelEnvidoActual;
+        ultimoCantorEnvido = jugadorDesdeCodigo(d.ultimoCantorEnvido);
+        cantorEnvidoPendiente = jugadorDesdeCodigo(d.cantorEnvidoPendiente);
+        nivelEnvidoPendiente = cantorEnvidoPendiente != null ? d.nivelEnvidoPendiente : null;
+        cantosEnvido.clear();
+        for (String s : d.cantosEnvido) {
+            try { cantosEnvido.add(CantoEnvido.valueOf(s)); } catch (IllegalArgumentException ignored) { }
+        }
+        jugador.setMultiplicadoresTemporales(d.multTrucoJugador, d.multEnvidoJugador);
+        rival.setMultiplicadoresTemporales(d.multTrucoRival, d.multEnvidoRival);
+        manosGanadasConsecutivas = d.manosGanadasConsecutivas;
+        envidosGanadosConsecutivos = d.envidosGanadosConsecutivos;
+        primeraCartaQueMataAplicada = d.primeraCartaQueMataAplicada;
+        primeraCartaQueNoMataAplicada = d.primeraCartaQueNoMataAplicada;
+        gestorRasgos.restaurarContadores(d.contadoresClaves, d.contadoresValores);
+    }
 
     public void agregarCartaAlMazoJugador(Carta carta) {
         jugador.getMazo().agregarCarta(carta);

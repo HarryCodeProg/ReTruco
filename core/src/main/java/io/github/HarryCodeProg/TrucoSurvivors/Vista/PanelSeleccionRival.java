@@ -1,6 +1,5 @@
 package io.github.HarryCodeProg.TrucoSurvivors.Vista;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -57,13 +56,20 @@ public class PanelSeleccionRival {
 
         float anchoCuadro = 220;
         float espacio = 30;
-        float xInicial = PANEL_X + 20;
+
+        // NUEVO: Calculamos cuántos rivales hay en este bloque y centramos el grupo
+        int rivalesEnBloque = Math.min(3, listaRivales.size() - inicioIndice);
+        float anchoTotalBloque = rivalesEnBloque * anchoCuadro + Math.max(0, rivalesEnBloque - 1) * espacio;
+        float xInicial = PANEL_X + (PANEL_ANCHO - anchoTotalBloque) / 2f;
+
         float yCuadro = PANEL_Y + 20;
 
         botonesJugar.clear();
-        for (int slot = 0; slot < 3; slot++) {
+        // Solo creamos botones para los rivales que existen
+        for (int slot = 0; slot < rivalesEnBloque; slot++) {
             float cuadroX = xInicial + slot * (anchoCuadro + espacio);
             Boton btn = new Boton(cuadroX + (anchoCuadro - 170) / 2f, yCuadro + 15, 170, 50, "SELECCIONAR", Boton.TipoColor.DORADO, Accion.JUGAR_CARTA);
+            btn.setHabilitado(false);
             botonesJugar.add(btn);
         }
     }
@@ -93,14 +99,15 @@ public class PanelSeleccionRival {
 
     public void update(float mouseWorldX, float mouseWorldY) {
         if (isAnimando()) return;
-        for (int slot = 0; slot < 3; slot++) {
+        // NUEVO: Iteramos solo sobre los botones que fueron creados
+        for (int slot = 0; slot < botonesJugar.size(); slot++) {
             int indice = inicioIndice + slot;
             if (indice < listaRivales.size()) {
                 DatosRival rival = listaRivales.get(indice);
                 Boton btn = botonesJugar.get(slot);
                 btn.setHabilitado(rival.isDesbloqueado());
                 btn.update(mouseWorldX, mouseWorldY - offsetY);
-                if (btn.fueCliqueado(mouseWorldX, mouseWorldY - offsetY)) { // Fix: el click también debe compensar el offsetY
+                if (btn.fueCliqueado(mouseWorldX, mouseWorldY - offsetY)) {
                     alElegirRival.accept(rival);
                     return;
                 }
@@ -131,10 +138,16 @@ public class PanelSeleccionRival {
         float anchoCuadro = 220;
         float altoCuadro = 370;
         float espacio = 30;
-        float xInicial = PANEL_X + 20;
+
+        // NUEVO: Calculamos el centrado de forma idéntica a como se hizo en inicializarRivales
+        int rivalesEnBloque = botonesJugar.size();
+        float anchoTotalBloque = rivalesEnBloque * anchoCuadro + Math.max(0, rivalesEnBloque - 1) * espacio;
+        float xInicial = PANEL_X + (PANEL_ANCHO - anchoTotalBloque) / 2f;
+
         float yCuadro = PANEL_Y + 45;
 
-        for (int slot = 0; slot < 3; slot++) {
+        // NUEVO: Iteramos solo sobre los rivales que existen
+        for (int slot = 0; slot < rivalesEnBloque; slot++) {
             int indice = inicioIndice + slot;
             if (indice < listaRivales.size()) {
                 DatosRival rival = listaRivales.get(indice);

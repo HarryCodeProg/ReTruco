@@ -9,32 +9,57 @@ import io.github.HarryCodeProg.TrucoSurvivors.Jugador;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.*;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Guardado.*;
 
-import java.util.ArrayList;
-
 public class GestorGuardado {
     private static final String ARCHIVO = "save.json";
+    private static final String ARCHIVO_TMP = "save.json.tmp";
+    private static final String ARCHIVO_BACKUP = "save.bak.json";
 
+    /** Solo cuenta si hay un guardado que realmente se puede leer. */
     public static boolean existeGuardado() {
-        return Gdx.files.local(ARCHIVO).exists();
+        return cargar() != null;
     }
 
     public static void borrarGuardado() {
-        FileHandle f = Gdx.files.local(ARCHIVO);
-        if (f.exists()) f.delete();
+        for (String nombre : new String[]{ARCHIVO, ARCHIVO_TMP, ARCHIVO_BACKUP}) {
+            FileHandle f = Gdx.files.local(nombre);
+            if (f.exists()) f.delete();
+        }
     }
 
     public static void guardar(DatosGuardado datos) {
-        Json json = new Json();
-        FileHandle f = Gdx.files.local(ARCHIVO);
-        f.writeString(json.toJson(datos), false);
+        try {
+            datos.version = DatosGuardado.VERSION_ACTUAL;
+            FileHandle tmp = Gdx.files.local(ARCHIVO_TMP);
+            tmp.writeString(new Json().toJson(datos), false);
+            // Si lo que escribimos no se puede leer, no pisamos nada
+            if (leer(ARCHIVO_TMP) == null) { tmp.delete(); return; }
+            FileHandle principal = Gdx.files.local(ARCHIVO);
+            // El respaldo solo se actualiza desde un archivo principal sano
+            if (principal.exists() && leer(ARCHIVO) != null) {
+                principal.copyTo(Gdx.files.local(ARCHIVO_BACKUP));
+            }
+            tmp.moveTo(principal);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static DatosGuardado cargar() {
-        FileHandle f = Gdx.files.local(ARCHIVO);
+        for (String nombre : new String[]{ARCHIVO, ARCHIVO_TMP, ARCHIVO_BACKUP}) {
+            DatosGuardado d = leer(nombre);
+            if (d != null) return d;
+        }
+        return null;
+    }
+
+    private static DatosGuardado leer(String nombre) {
+        FileHandle f = Gdx.files.local(nombre);
         if (!f.exists()) return null;
-        Json json = new Json();
         try {
-            return json.fromJson(DatosGuardado.class, f.readString());
+            Json json = new Json();
+            json.setIgnoreUnknownFields(true); // permite quitar/renombrar campos entre versiones
+            DatosGuardado d = json.fromJson(DatosGuardado.class, f.readString());
+            return (d != null && d.jugador != null && d.estadoPantalla != null) ? d : null;
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -68,7 +93,9 @@ public class GestorGuardado {
             dj.cartasDescartadasTotal = juegoOpcional.getCartasDescartadasTotal();
             dj.cartasCompradasTotal = juegoOpcional.getCartasCompradasTotal();
             dj.renovacionesTotal = juegoOpcional.getRenovacionesTotal();
-            dj.tocoJugar = tocoJugarActual; // NUEVO
+            dj.tocoJugar = tocoJugarActual;
+            juegoOpcional.exportarEstado(dj);   // NUEVO: cantos, turno, multiplicadores, rachas, contadores
+            dj.mazoRival = GestorConverterSerializacion.aDatos(juegoOpcional.getRival().getMazo()); // NUEVO
             d.juego = dj;
         }
         if (estadoTiendaOpcional != null) {

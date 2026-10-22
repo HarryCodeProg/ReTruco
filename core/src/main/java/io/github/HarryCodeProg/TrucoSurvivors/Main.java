@@ -14,6 +14,7 @@ import io.github.HarryCodeProg.TrucoSurvivors.Modelo.ConfiguracionJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.DatosRival;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Guardado.DatosGuardado;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.PerfilJugador;
+import io.github.HarryCodeProg.TrucoSurvivors.Screens.GameScreen;
 import io.github.HarryCodeProg.TrucoSurvivors.Screens.LoadingScreenCentered;
 import io.github.HarryCodeProg.TrucoSurvivors.Screens.MainMenuScreen;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -388,28 +389,6 @@ public class Main extends Game {
         configuracionJuego.guardar();
     }
 
-    @Override
-    public void dispose() {
-        batch.dispose();
-        if (musicaFondo != null) {
-            musicaFondo.stop();
-            musicaFondo.dispose();
-        }
-        if (fuentePrincipal != null) fuentePrincipal.dispose();
-        if (fuenteTitulo != null) fuenteTitulo.dispose();
-        if (fuenteBotones != null) fuenteBotones.dispose();
-        if (fuenteNumeros != null) fuenteNumeros.dispose();
-        gestorSonidos.dispose();
-        if (atlasCartas != null) atlasCartas.dispose();
-        if (atlasJokers != null) atlasJokers.dispose();
-        if (atlasZodiaco != null) atlasZodiaco.dispose();
-        if (texturaRuletaFondo != null) texturaRuletaFondo.dispose();
-        if (fuenteUI != null) fuenteUI.dispose();
-        if (fuenteTooltipTitulo != null) fuenteTooltipTitulo.dispose();
-        if (fuenteTooltipDescripcion != null) fuenteTooltipDescripcion.dispose();
-        if (assetsRasgos != null) assetsRasgos.dispose();
-    }
-
     public void reiniciarDesbloqueoRivales() {
         for (int i = 0; i < listaRivales.size(); i++) {
             listaRivales.get(i).setDesbloqueado(i == 0);
@@ -444,6 +423,36 @@ public class Main extends Game {
         double meta = META_BASE_INFINITO * Math.pow(FACTOR_INFINITO, nivelInfinito);
         return new DatosRival(base.getNombre(), "Ronda infinita " + nivelInfinito, meta, false,
             listaRivales.size() - 1); // índice máximo: dificultad y fondo del último rival
+    }
+
+    public int getIndiceRivalDesbloqueado() {
+        for (int i = 0; i < listaRivales.size(); i++) if (listaRivales.get(i).isDesbloqueado()) return i;
+        return 0;
+    }
+
+    @Override
+    public void dispose() {
+        try {
+            if (getScreen() instanceof GameScreen) ((GameScreen) getScreen()).guardarProgreso();
+        } catch (Exception e) { e.printStackTrace(); }
+        batch.dispose();
+        if (musicaFondo != null) {
+            musicaFondo.stop();
+            musicaFondo.dispose();
+        }
+        if (fuentePrincipal != null) fuentePrincipal.dispose();
+        if (fuenteTitulo != null) fuenteTitulo.dispose();
+        if (fuenteBotones != null) fuenteBotones.dispose();
+        if (fuenteNumeros != null) fuenteNumeros.dispose();
+        gestorSonidos.dispose();
+        if (atlasCartas != null) atlasCartas.dispose();
+        if (atlasJokers != null) atlasJokers.dispose();
+        if (atlasZodiaco != null) atlasZodiaco.dispose();
+        if (texturaRuletaFondo != null) texturaRuletaFondo.dispose();
+        if (fuenteUI != null) fuenteUI.dispose();
+        if (fuenteTooltipTitulo != null) fuenteTooltipTitulo.dispose();
+        if (fuenteTooltipDescripcion != null) fuenteTooltipDescripcion.dispose();
+        if (assetsRasgos != null) assetsRasgos.dispose();
     }
 
 }

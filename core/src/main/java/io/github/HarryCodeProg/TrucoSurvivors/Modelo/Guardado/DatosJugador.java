@@ -37,4 +37,5 @@ public class DatosJugador {
     public double multiplicadorPrecioTienda = 1.0;
     public java.util.ArrayList<String> acumuladosClaves = new java.util.ArrayList<>();
     public java.util.ArrayList<Double> acumuladosValores = new java.util.ArrayList<>();
+    public int ultimoSantoUsadoId;
 }

@@ -111,8 +111,6 @@ public class GestorConverterSerializacion {
         j.resetearABase();
         j.setCargandoGuardado(true);
         try {
-            j.setMazo(desdeDatos(d.mazo));
-            for (DatosCarta dc : d.mano) j.agregarCarta(desdeDatos(dc));
             for (DatosJoker dj : d.jokers) {
                 Joker jo = desdeDatos(dj);
                 if (jo != null) j.agregarJoker(jo);
@@ -124,10 +122,41 @@ public class GestorConverterSerializacion {
         } finally {
             j.setCargandoGuardado(false);
         }
+        if (d.mazo != null) j.setMazo(desdeDatos(d.mazo));
+        for (DatosCarta dc : d.mano) j.agregarCarta(desdeDatos(dc));
         j.aplicarExtrasGuardados(d);
+        j.setUltimoSantoUsado(d.ultimoSantoUsadoId >= 0 ? poolSantos.crearPorId(d.ultimoSantoUsadoId) : null);
         j.sumarPesos(d.pesos - j.getPesos());
         j.setTotalPesosGanados(d.totalPesosGanados);
         j.setTotalPesosGastados(d.totalPesosGastados);
+    }
+
+    public static void vincularTomadas(java.util.List<Carta> tomadas, java.util.List<Carta> reales) {
+        if (tomadas == null || reales == null) return;
+        boolean[] usada = new boolean[tomadas.size()];
+        for (Carta real : reales) {
+            boolean yaEsta = false;
+            for (int i = 0; i < tomadas.size(); i++) {
+                if (tomadas.get(i) == real) { usada[i] = true; yaEsta = true; break; }
+            }
+            if (yaEsta) continue;
+            for (int i = 0; i < tomadas.size(); i++) {
+                if (!usada[i] && mismaCarta(tomadas.get(i), real)) { tomadas.set(i, real); usada[i] = true; break; }
+            }
+        }
+    }
+
+    private static boolean mismaCarta(Carta a, Carta b) {
+        DatosCarta x = aDatos(a), y = aDatos(b);
+        return x.numero == y.numero && x.palo.equals(y.palo)
+            && x.bonusPoderTrucoPermanente == y.bonusPoderTrucoPermanente
+            && x.bonusAporteTrucoPermanente == y.bonusAporteTrucoPermanente
+            && x.bonusPoderEnvidoPermanente == y.bonusPoderEnvidoPermanente
+            && x.bonusAporteEnvidoPermanente == y.bonusAporteEnvidoPermanente
+            && x.multiplicadorPoderTrucoBase == y.multiplicadorPoderTrucoBase
+            && x.multiplicadorAporteTrucoBase == y.multiplicadorAporteTrucoBase
+            && x.multiplicadorPoderEnvidoBase == y.multiplicadorPoderEnvidoBase
+            && x.multiplicadorAporteEnvidoBase == y.multiplicadorAporteEnvidoBase;
     }
 
     public static DatosItemTienda aDatos(ItemTienda item) {

@@ -124,7 +124,7 @@ public class PanelPuntajes {
         fuenteUI.getData().setScale(0.68f);
         fuenteUI.setColor(UITheme.DORADO);
         //dibujarTextoCentrado(batch, fuenteUI, "MARCADOR", x, anchoCajaDoble, Gdx.graphics.getHeight() - 31f, UITheme.DORADO);
-        dibujarTextoCentrado(batch, fuenteUI, "MARCADOR", x, anchoCajaDoble, ALTO_PANTALLA - 31f, UITheme.DORADO);
+        dibujarTextoCentrado(batch, fuenteUI, "RIVAL:", x, anchoCajaDoble, ALTO_PANTALLA - 31f, UITheme.DORADO);
         fuenteUI.getData().setScale(escalaUI);
         if (nombreARender != null && !nombreARender.isEmpty()) {
             float escalaOriginal = fuente.getScaleX();

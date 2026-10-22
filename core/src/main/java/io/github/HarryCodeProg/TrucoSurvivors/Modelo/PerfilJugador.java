@@ -38,4 +38,6 @@ public class PerfilJugador {
     public Jugador getJugador() {
         return jugador;
     }
+
+    public void setNivelActual(int nivel) { this.nivelActual = nivel; }
 }

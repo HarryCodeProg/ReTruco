@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.*;
 import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Palo;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.ColorMecanica;
+import io.github.HarryCodeProg.TrucoSurvivors.Gestores.GestorShaderDisolucion;
 import io.github.HarryCodeProg.TrucoSurvivors.Gestores.GestorSonidos;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
@@ -78,6 +79,13 @@ public class VistaJoker implements Arrastrable{
     }
 
     public void render(SpriteBatch batch) {
+        if (quemando) {
+            float drawY = y + visualOffsetY;
+            batch.flush();
+            gestorDisolucion.dibujarConDisolucion(batch, regionJoker, x, drawY, width * scale, height * scale,
+                progresoQuema, false, new Color(1f, 0.55f, 0.1f, 1f), new Color(0.8f, 0.15f, 0.05f, 1f));
+            return;
+        }
         float drawY = y + visualOffsetY;
         float scaleExtra = resaltado ? 1f + (float)(Math.sin(pulso) * 0.06f) : 1f;
         Main game = Main.getInstance();
@@ -265,6 +273,15 @@ public class VistaJoker implements Arrastrable{
     }
 
     public void update(float mouseX, float mouseY, float delta) {
+        if (quemando) {
+            progresoQuema += delta / 0.8f;
+            if (gestorDisolucion != null) gestorDisolucion.update(delta);
+            if (progresoQuema >= 1f) {
+                quemando = false;
+                if (alTerminarQuema != null) alTerminarQuema.run();
+            }
+            return;
+        }
         if (resaltado) {
             pulso = Math.min(pulso + delta * 6f, (float) Math.PI);
             hover = false;
@@ -434,6 +451,20 @@ public class VistaJoker implements Arrastrable{
         fontDesc.setColor(colorDescAnterior);
         batch.setColor(Color.WHITE);
     }
+
+    private GestorShaderDisolucion gestorDisolucion;
+    private float progresoQuema = 0f;
+    private boolean quemando = false;
+    private Runnable alTerminarQuema;
+
+    public void iniciarQuema(Runnable alTerminar) {
+        if (gestorDisolucion == null) gestorDisolucion = new GestorShaderDisolucion();
+        this.quemando = true;
+        this.progresoQuema = 0f;
+        this.alTerminarQuema = alTerminar;
+    }
+
+    public boolean isQuemando() { return quemando; }
 
     public float getCentroX() { return x + (width * scale) / 2f; }
     public float getX() { return x; }

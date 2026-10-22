@@ -19,14 +19,23 @@ public class Ceibo extends Joker {
 
     @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego) {
-        if (evento != EventoJuego.INICIO_COMBATE) return;
-        Jugador jugador = ctx.getJugador();
-        Joker vecino = ctx.obtenerJokerALaDerecha(this);
-        if (vecino == null) return;
-        double bonus = vecino.getPrecioVenta() * 2;
-        jugador.eliminarJoker(vecino);
-        jugador.aumentarMultiplicadorTruco(bonus);
-        sumarAcumulado(bonus);
+        if (evento == EventoJuego.INICIO_COMBATE) {
+            Jugador jugador = ctx.getJugador();
+            Joker vecino = ctx.obtenerJokerALaDerecha(this);
+            if (vecino == null) return;
+            double bonus = vecino.getPrecioVenta() * 2;
+            juego.registrarJokerConsumido(vecino);
+            jugador.eliminarJoker(vecino);
+            jugador.aumentarMultiplicadorTruco(bonus);
+            sumarAcumulado(bonus);
+            return;
+        }
+        if (evento == EventoJuego.ANTES_DE_SUMAR_TRUCO) {
+            if (getAcumulado() > 0 && ctx.getResolucionActual() != null) {
+                ctx.getResolucionActual().sumarMult(getAcumulado(), getNombre(), this);
+            }
+            return;
+        }
     }
 
     @Override

@@ -471,6 +471,7 @@ public class Jugador {
         d.acumuladosClaves = new ArrayList<>(acumuladosRasgos.keySet());
         d.acumuladosValores = new ArrayList<>();
         for (String k : d.acumuladosClaves) d.acumuladosValores.add(acumuladosRasgos.get(k));
+        d.ultimoSantoUsadoId = (ultimoSantoUsado != null) ? ultimoSantoUsado.getId() : -1;
     }
 
     public void aplicarExtrasGuardados(DatosJugador d) {
@@ -503,5 +504,10 @@ public class Jugador {
         for (int i = 0; i < d.acumuladosClaves.size() && i < d.acumuladosValores.size(); i++) {
             acumuladosRasgos.put(d.acumuladosClaves.get(i), d.acumuladosValores.get(i));
         }
+    }
+
+    public void setMultiplicadoresTemporales(double truco, double envido) {
+        this.multiplicadorTrucoTemporal = truco;
+        this.multiplicadorEnvidoTemporal = envido;
     }
 }
