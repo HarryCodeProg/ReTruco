@@ -26,7 +26,7 @@ public class DameLaMochila extends Joker {
 
     @Override
     public String getDescripcionRenderizada() {
-        return "+2 multiplicador envido por cada roll en la tienda (Actual: +" + (int) getAcumulado() + ")";
+        return "+2 multiplicador envido por cada roll en la tienda\n (Actual: +" + (int) getAcumulado() + ")";
     }
 
     @Override
@@ -34,7 +34,7 @@ public class DameLaMochila extends Joker {
         if (juego != null && juego.getJugador() != null) {
             int rerolls = juego.getJugador().getRerollsTienda() - rerollsAlComprarse;
             double actual = Math.max(0, rerolls) * MULT_POR_REROLL;
-            return "+2 multiplicador envido por cada roll en la tienda (Actual: +" + (int) actual + ")";
+            return "+2 multiplicador envido por cada roll en la tienda\n (Actual: +" + (int) actual + ")";
         }
         return getDescripcionRenderizada();
     }

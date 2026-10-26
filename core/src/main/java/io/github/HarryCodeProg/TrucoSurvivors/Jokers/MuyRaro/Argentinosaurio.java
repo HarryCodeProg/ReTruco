@@ -1,6 +1,7 @@
 package io.github.HarryCodeProg.TrucoSurvivors.Jokers.MuyRaro;
 
 import io.github.HarryCodeProg.TrucoSurvivors.Activacion.ContextoJuego;
+import io.github.HarryCodeProg.TrucoSurvivors.Estados.ColorMecanica;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.EventoJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
@@ -40,7 +41,7 @@ public class Argentinosaurio extends Joker {
 
     @Override
     public String getDescripcionRenderizada() {
-        return "(+" + (int) getAcumulado() + ") puntos, se duplica despues de derrotar un rival";
+        return "(+"+ ColorMecanica.PUNTOS.colorHex()+ (int) getAcumulado() + "[]) puntos, se duplica despues de derrotar un rival";
     }
 
     @Override

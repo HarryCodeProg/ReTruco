@@ -14,7 +14,7 @@ public class GlaciarPeritoMoreno extends Joker {
 
     public GlaciarPeritoMoreno() {
         super(142, "Glaciar Perito Moreno", "GlaciarPeritoMoreno",
-            "Gana x0.15 de multiplicador truco cada vez que vendas un joker (Actual: x1)",
+            "Gana x0.15 multiplicador truco cada vez que vendas un joker\n (Actual: x1)",
             Rareza.epico, 8, Joker.FaseActivacion.INDEPENDIENTE,
             CategoriaJoker.TRUCO,
             CategoriaJoker.ECONOMIA,
@@ -39,7 +39,7 @@ public class GlaciarPeritoMoreno extends Joker {
 
     @Override
     public String getDescripcionRenderizada() {
-        return "Gana x0.15 de multiplicador truco cada vez que vendas un joker (Actual: x"
+        return "Gana x0.15 multiplicador truco cada vez que vendas un joker\n (Actual: x"
             + String.format("%.2f", getAcumulado()) + ")";
     }
 

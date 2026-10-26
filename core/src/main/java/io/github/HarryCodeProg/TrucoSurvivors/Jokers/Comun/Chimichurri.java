@@ -20,12 +20,12 @@ public class Chimichurri extends Joker {
 
     @Override
     public String getDescripcionRenderizada() {
-        return "+2 Multiplicador truco por cada mano ganada de forma consecutiva (Actual: +" + (int) getAcumulado() + ")";
+        return "+2 Multiplicador truco por cada mano ganada de forma consecutiva\n (Actual: +" + (int) getAcumulado() + ")";
     }
 
     @Override
     public String getDescripcionRenderizada(Juego juego) {
-        return "+2 Multiplicador truco por cada mano ganada de forma consecutiva (Actual: +" + (int) getAcumulado() + ")";
+        return "+2 Multiplicador truco por cada mano ganada de forma consecutiva\n (Actual: +" + (int) getAcumulado() + ")";
     }
 
     @Override

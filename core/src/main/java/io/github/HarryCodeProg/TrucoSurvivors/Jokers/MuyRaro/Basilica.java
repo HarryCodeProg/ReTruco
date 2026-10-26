@@ -10,7 +10,10 @@ import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 public class Basilica extends Joker {
 
     public Basilica() {
-        super(130, "Basílica", "Basilica", "x0.25 de multiplicador por cada carta consumida",
+        super(130,
+            "Basílica",
+            "Basilica",
+            "x0.25 multiplicador por cada carta consumida",
             Rareza.muyRaro, 8, Joker.FaseActivacion.INDEPENDIENTE,
             CategoriaJoker.CONSUMIBLES, CategoriaJoker.MAZO, CategoriaJoker.CULTURA);
     }
@@ -46,6 +49,6 @@ public class Basilica extends Joker {
         if (formattedMult.endsWith(".00")) formattedMult = formattedMult.substring(0, formattedMult.length() - 3);
         else if (formattedMult.endsWith("0")) formattedMult = formattedMult.substring(0, formattedMult.length() - 1);
 
-        return "x0.25 de multiplicador por cada carta consumida (actual: x" + formattedMult + ")";
+        return "x0.25 multiplicador por cada carta consumida\n (actual: x" + formattedMult + ")";
     }
 }

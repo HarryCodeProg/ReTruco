@@ -35,4 +35,9 @@ public class Granadero extends Joker {
         copiarEstado(copia);
         return copia;
     }
+
+    @Override
+    public String getDescripcionRenderizada() {
+        return "x3 multiplicador en la última mano";
+    }
 }

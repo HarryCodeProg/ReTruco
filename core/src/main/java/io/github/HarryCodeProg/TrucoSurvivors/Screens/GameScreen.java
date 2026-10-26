@@ -133,7 +133,7 @@ public class GameScreen implements Screen {
         float anchoMazo = 60f;
         float altoMazo = 88f;
         float posX = 1280f - anchoMazo - 25f;
-        float posY = 130f;
+        float posY = 50f;
         this.vistaMazo = new VistaMazo(posX, posY, anchoMazo, altoMazo, game.getAtlasCartas(), game.getFuentePrincipal(), game.getPixelBlanco(), camera);
         DatosGuardado guardado = game.hayGuardadoDisponible() ? game.getGuardadoDetectado() : null;
         boolean cargado = false;
@@ -153,7 +153,7 @@ public class GameScreen implements Screen {
             panelTiendaVisible = false;
         }
         game.limpiarGuardadoDetectado();
-        panelPausa = new PanelPausa(game);
+        panelPausa = new PanelPausa(game, () -> fondoPlasma, camera);
     }
 
     private void inicializarJuego() {
@@ -277,6 +277,11 @@ public class GameScreen implements Screen {
     @Override
     public void render(float delta) {
         prepararFrame();
+        if (hayOperacionDeGuardadoPendiente()) guardadoPendiente = true;
+        if (guardadoPendiente && !hayOperacionDeGuardadoPendiente()) {
+            guardadoPendiente = false;
+            guardarProgreso();
+        }
         ScissorUtil.setViewport(viewport);
         boolean modalZodiaco = estado == EstadoPantalla.TIENDA && panelTienda != null && panelTienda.hayModalZodiaco();
         boolean puedeAbrirPausa = (estado == EstadoPantalla.JUGANDO || estado == EstadoPantalla.TIENDA || estado == EstadoPantalla.SELECCION_RIVAL);
@@ -306,6 +311,7 @@ public class GameScreen implements Screen {
         if (!modalZodiaco) actualizarJokersYVenta(delta, mx, my, bloquearInput);
         Joker jokerAgregado = gestorCompraJoker.update(delta, jokers, areaJokers);
         if (jokerAgregado != null) {
+            guardadoPendiente = true;
             suppressJugadorJokerListener = true;
             try { jugador.agregarJoker(jokerAgregado); }
             finally { suppressJugadorJokerListener = false; }
@@ -531,6 +537,7 @@ public class GameScreen implements Screen {
                 if (panelPausa != null) panelPausa.render(game.batch, mouseWorld.x, mouseWorld.y);
             }
         );
+        autoguardarTienda();
         // La guía zodiaco se dibuja al final, encima de todo
         if (panelTienda != null && panelTiendaVisible) {
             game.batch.begin();
@@ -1065,8 +1072,33 @@ public class GameScreen implements Screen {
         dispose();
     }
 
-    private void iniciarPartidaNuevaDesdeDerrota() {
+    /** Cambia las referencias antes del autoguardado de SELECCION_RIVAL. */
+    private void reiniciarJugadorDePantalla() {
+        if (jugador != null) {
+            if (jugadorJokerAddedListener != null) jugador.removeJokerAddedListener(jugadorJokerAddedListener);
+            if (jugadorSantoAddedListener != null) jugador.removeSantoAddedListener(jugadorSantoAddedListener);
+            if (jugadorSantoRemovedListener != null) jugador.removeSantoRemovedListener(jugadorSantoRemovedListener);
+        }
         game.getPerfilJugador().iniciarNuevaRun();
+        jugador = game.getPerfilJugador().getJugador();
+        for (VistaJoker v : jokers) v.dispose();
+        jokers.clear();
+        for (VistaSanto v : new ArrayList<>(gestorSantos.getSantos())) gestorSantos.eliminarVistaDesdeModelo(v.getSanto());
+        cartasJugador.clear();
+        if (cartasRival != null) cartasRival.clear();
+        if (cartasMesaJugador != null) cartasMesaJugador.clear();
+        if (cartasMesaRival != null) cartasMesaRival.clear();
+        datosRival = null;
+        guardadoPendiente = false;
+        gestorCompraJoker.cancel();
+        panelTienda = null;
+        gestorPartida.inicializarReposo(jugador);
+        gestorSantos.setJuego(gestorPartida.getJuego());
+        registrarListenersSantos();
+    }
+
+    private void iniciarPartidaNuevaDesdeDerrota() {
+        reiniciarJugadorDePantalla();
         game.reiniciarDesbloqueoRivales();
         panelDerrota = null;
         pendingEstado = EstadoPantalla.SELECCION_RIVAL;
@@ -1286,7 +1318,7 @@ public class GameScreen implements Screen {
     }
 
     private void iniciarPartidaNuevaDesdeVictoriaFinal() {
-        game.getPerfilJugador().iniciarNuevaRun();
+        reiniciarJugadorDePantalla();
         game.reiniciarDesbloqueoRivales(); // también resetea nivelInfinito
         panelVictoriaFinal = null;
         pendingEstado = EstadoPantalla.SELECCION_RIVAL;
@@ -1307,6 +1339,14 @@ public class GameScreen implements Screen {
         dispose();
     }
 
+    private boolean hayOperacionDeGuardadoPendiente() {
+        return (gestorSantos != null && gestorSantos.hayOperacionPendiente())
+            || gestorCompraJoker.isAnimando()
+            || (panelTienda != null && panelTienda.hayModalZodiaco());
+    }
+
+    private boolean guardadoPendiente;
+
     public void guardarProgreso() {
         if (jugador == null) return;
         String estadoActual = this.estado.name();
@@ -1315,6 +1355,11 @@ public class GameScreen implements Screen {
     }
 
     private void guardarSnapshot(String estadoNombre) {
+        // Nunca persistir un santo cobrado/consumido con cambios todavía en callbacks de animación.
+        if (hayOperacionDeGuardadoPendiente()) {
+            guardadoPendiente = true;
+            return;
+        }
         if (jugador == null) return;
         boolean enCombate = "JUGANDO".equals(estadoNombre);
         Juego juegoActual = enCombate ? gestorPartida.getJuego() : null;
@@ -1358,7 +1403,7 @@ public class GameScreen implements Screen {
 
     private void autoguardarTienda() {
         if (estado != EstadoPantalla.TIENDA || panelTienda == null || !panelTienda.isCambioPendiente()) return;
-        if (gestorSantos.hayOverlayActivo() || panelTienda.hayModalZodiaco()) return;
+        if (hayOperacionDeGuardadoPendiente()) return;
         panelTienda.limpiarCambioPendiente();
         guardarProgreso();
     }
@@ -1383,10 +1428,9 @@ public class GameScreen implements Screen {
         gestorPartida.getJuego().limpiarJokersConsumidos();
     }
 
-    /** Un guardado que no se pudo aplicar se descarta y se arranca limpio, en vez de dejar al juego colgado. */
+    /** Reinicia la pantalla tras una carga fallida, conservando los archivos para recuperación. */
     private void descartarCargaFallida() {
-        GestorGuardado.borrarGuardado();
-        game.getPerfilJugador().iniciarNuevaRun();
+        reiniciarJugadorDePantalla();
         game.reiniciarDesbloqueoRivales();
         game.setNivelInfinito(0);
         for (VistaJoker v : jokers) v.dispose();
@@ -1408,10 +1452,25 @@ public class GameScreen implements Screen {
     public Jugador getRival() { return rival; }
     public ArrayList<VistaCarta> getCartasJugador() { return cartasJugador; }
 
-    @Override public void show() {}
+    private com.badlogic.gdx.InputProcessor inputAnteriorPausa;
+    private com.badlogic.gdx.InputProcessor inputPausa;
+
+    @Override public void show() {
+        inputAnteriorPausa = Gdx.input.getInputProcessor();
+        com.badlogic.gdx.InputAdapter scrollPausa = new com.badlogic.gdx.InputAdapter() {
+            @Override public boolean scrolled(float amountX, float amountY) {
+                return panelPausa != null && panelPausa.scrolled(amountY);
+            }
+        };
+        inputPausa = inputAnteriorPausa == null ? scrollPausa
+            : new com.badlogic.gdx.InputMultiplexer(scrollPausa, inputAnteriorPausa);
+        Gdx.input.setInputProcessor(inputPausa);
+    }
     @Override public void pause() {}
     @Override public void resume() {}
-    @Override public void hide() {}
+    @Override public void hide() {
+        if (Gdx.input.getInputProcessor() == inputPausa) Gdx.input.setInputProcessor(inputAnteriorPausa);
+    }
 
     @Override
     public void dispose() {

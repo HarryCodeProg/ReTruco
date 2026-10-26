@@ -1,6 +1,7 @@
 package io.github.HarryCodeProg.TrucoSurvivors.Jokers.Raro;
 
 import io.github.HarryCodeProg.TrucoSurvivors.Activacion.ContextoJuego;
+import io.github.HarryCodeProg.TrucoSurvivors.Estados.ColorMecanica;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.EventoJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
@@ -63,6 +64,7 @@ public class RataBlanca extends Joker {
     @Override
     public String getDescripcionRenderizada(Juego juego) {
         int actual = (int) getAcumulado();
-        return getDescripcion() + "\n(Actual: +" + actual + " puntos)";
+        return getDescripcion() + "\n(Actual: "
+            + ColorMecanica.PUNTOS_TRUCO.colorHex() + "+" + actual + "[])";
     }
 }

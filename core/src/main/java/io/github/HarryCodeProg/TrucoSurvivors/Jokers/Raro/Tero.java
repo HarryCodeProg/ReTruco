@@ -1,6 +1,7 @@
 package io.github.HarryCodeProg.TrucoSurvivors.Jokers.Raro;
 
 import io.github.HarryCodeProg.TrucoSurvivors.Activacion.ContextoJuego;
+import io.github.HarryCodeProg.TrucoSurvivors.Estados.ColorMecanica;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.EventoJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
@@ -16,7 +17,7 @@ public class Tero extends Joker {
             61,
             "Tero",
             "Tero",
-            "+2 puntos por cada carta descartada (actual: +0)",
+            "+2 puntos por cada carta descartada (actual: +" + ColorMecanica.NUMERO.colorHex() + "0[])",
             Rareza.raro,
             6, // placeholder: ajustá coste real
             Joker.FaseActivacion.INDEPENDIENTE,
@@ -39,7 +40,7 @@ public class Tero extends Joker {
 
     @Override
     public String getDescripcionRenderizada() {
-        return "+2 puntos por cada carta descartada (actual: +" + (int) getAcumulado() + ")";
+        return "+2 puntos por cada carta descartada (actual: +" + ColorMecanica.NUMERO.colorHex() + (int) getAcumulado() + "[])";
     }
 
     @Override

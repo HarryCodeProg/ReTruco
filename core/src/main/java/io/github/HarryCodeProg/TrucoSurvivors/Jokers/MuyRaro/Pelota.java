@@ -1,6 +1,7 @@
 package io.github.HarryCodeProg.TrucoSurvivors.Jokers.MuyRaro;
 
 import io.github.HarryCodeProg.TrucoSurvivors.Activacion.ContextoJuego;
+import io.github.HarryCodeProg.TrucoSurvivors.Estados.ColorMecanica;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.EventoJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
@@ -37,7 +38,7 @@ public class Pelota extends Joker {
     @Override
     public String getDescripcionRenderizada(Juego juego) {
         int actual = juego != null ? juego.getEnvidosGanadosConsecutivos() : 0;
-        return "+1 mano. +50 puntos envido por cada envido ganado de forma consecutiva (Actual: +" + (actual * (int) PUNTOS_POR_CONSECUTIVO) + ")";
+        return "+1 mano. +50 puntos envido por cada envido ganado de forma consecutiva (Actual:"+ ColorMecanica.PUNTOS.colorHex()+" +" + (actual * (int) PUNTOS_POR_CONSECUTIVO) + "[])";
     }
 
     @Override

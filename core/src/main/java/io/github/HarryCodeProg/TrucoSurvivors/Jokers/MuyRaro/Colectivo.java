@@ -17,7 +17,7 @@ public class Colectivo extends Joker {
             115,
             "Colectivo",
             "Colectivo",
-            "X4 multiplicador truco, pierde X1 por mano jugada. Se resetea en cada rival (Actual: X4)",
+            "X4 multiplicador truco, pierde X1 por mano jugada. Se resetea en cada rival\n (Actual: X4)",
             Rareza.muyRaro,
             8, // placeholder: ajustá el coste real
             Joker.FaseActivacion.INDEPENDIENTE,
@@ -52,7 +52,7 @@ public class Colectivo extends Joker {
 
     @Override
     public String getDescripcionRenderizada() {
-        return "X" + (int) MULT_INICIAL + " multiplicador truco, pierde X1 por mano jugada. Se resetea en cada rival (Actual: X"
+        return "X" + (int) MULT_INICIAL + " multiplicador truco, pierde X1 por mano jugada. Se resetea en cada rival\n (Actual: X"
             + (int) getAcumulado() + ")";
     }
 

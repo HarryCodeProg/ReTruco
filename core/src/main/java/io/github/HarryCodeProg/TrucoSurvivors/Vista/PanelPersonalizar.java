@@ -19,16 +19,12 @@ import java.util.ArrayList;
 
 public class PanelPersonalizar {
     public enum Estado { MENU, MUSICA, FONDO }
-
     private final Main game;
     private final Background fondoPlasma;
     private Estado estado = Estado.MENU;
-
     private final Boton botonMusica, botonFondo, botonVolver;
-
     // Almacenamiento de coordenadas del mouse en el mundo
     private float mouseMundoX = -9999f, mouseMundoY = -9999f;
-
     // --- Lógica de Música ---
     private static final float FILA_ALTO = 44f, FILA_GAP = 2f, PANEL_MUSICA_ANCHO = 420f, PANEL_PAD_X = 22f;
     private static final float HEADER_ALTO = 145f, FOOTER_ALTO = 95f;
@@ -39,16 +35,19 @@ public class PanelPersonalizar {
     private float dragListaStartY = 0f, scrollYStart = 0f;
     private float panelMusicaX, panelMusicaY, panelMusicaAlto;
     private Boton botonVolverMusica;
-
     // --- Lógica de Fondo ---
     private int fondoIndexPendiente;
     private int hoverFondo = -1;
     private final Boton botonAplicarFondo, botonDescartarFondo;
-
     // Coordenadas de la grilla de fondos
     private static final float GRID_START_X = 25f;
     private static final float GRID_START_Y = 140f;
     private static final float BTN_W = 120f, BTN_H = 45f, GAP_X = 12f, GAP_Y = 15f;
+
+    private boolean arrastrandoScrollbar = false;
+    private float dragScrollbarStartY = 0f;
+    private float scrollbarStartScrollY = 0f;
+    private static final float SCROLLBAR_ANCHO_HIT = 18f; // más ancho que los 6px visuales para que sea fácil clickear
 
     public PanelPersonalizar(Main game, Background fondoPlasma) {
         this.game = game;
@@ -68,10 +67,25 @@ public class PanelPersonalizar {
         fondoIndexPendiente = game.getConfiguracionJuego().getFondoIndex();
     }
 
+    /** Escape vuelve un nivel y descarta una previsualización todavía no aplicada. */
+    public boolean retroceder() {
+        if (estado == Estado.MENU) return true;
+        cerrar();
+        return false;
+    }
+
+    public void cerrar() {
+        fondoIndexPendiente = game.getConfiguracionJuego().getFondoIndex();
+        fondoPlasma.setTema(fondoIndexPendiente);
+        arrastrandoLista = false;
+        arrastrandoScrollbar = false;
+        estado = Estado.MENU;
+    }
+
     public boolean update(float delta, float mx, float my, boolean click) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) return retroceder();
         mouseMundoX = mx;
         mouseMundoY = my;
-
         if (estado == Estado.MENU) {
             botonMusica.update(mx, my); botonFondo.update(mx, my); botonVolver.update(mx, my);
             if (botonMusica.fueCliqueado(mx, my)) estado = Estado.MUSICA;
@@ -83,39 +97,75 @@ public class PanelPersonalizar {
         } else if (estado == Estado.MUSICA) {
             botonVolverMusica.update(mx, my);
             if (botonVolverMusica.fueCliqueado(mx, my)) estado = Estado.MENU;
-
-            if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT) && areaLista.contains(mx, my)) {
-                arrastrandoLista = true; dragListaStartY = my; scrollYStart = scrollY;
+            boolean justPressed = Gdx.input.isButtonJustPressed(Input.Buttons.LEFT);
+            boolean pressed     = Gdx.input.isButtonPressed(Input.Buttons.LEFT);
+            // --- 1. SCROLLBAR: prioridad máxima ---
+            if (maxScrollY > 0f && justPressed && mouseEnScrollbar(mx, my)) {
+                float thumbY = scrollbarThumbY();
+                float thumbH = scrollbarThumbH();
+                float usableH = areaLista.height - thumbH;
+                if (usableH > 0f) {
+                    if (my >= thumbY && my <= thumbY + thumbH) {
+                        // Agarrar el thumb
+                        scrollbarStartScrollY = scrollY;
+                    } else {
+                        // Click en el track → saltar ahí y empezar a arrastrar
+                        float ratio = (areaLista.y + areaLista.height - thumbH / 2f - my) / usableH;
+                        ratio = MathUtils.clamp(ratio, 0f, 1f);
+                        scrollY = ratio * maxScrollY;
+                        scrollbarStartScrollY = scrollY;
+                    }
+                    arrastrandoScrollbar = true;
+                    dragScrollbarStartY = my;
+                    arrastrandoLista = false;
+                }
             }
-            if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) && arrastrandoLista) {
-                scrollY = MathUtils.clamp(scrollYStart + (my - dragListaStartY), 0, maxScrollY);
-            } else if (arrastrandoLista) {
-                arrastrandoLista = false;
-                if (Math.abs(my - dragListaStartY) < 10f) {
-                    for (int i = 0; i < filasCanciones.size(); i++) {
-                        Rectangle r = filasCanciones.get(i);
-                        if (mx >= r.x && mx <= r.x + r.width && my >= r.y + scrollY && my <= r.y + scrollY + r.height) {
-                            game.cambiarPistaMusica(i);
-                            break;
+            if (arrastrandoScrollbar) {
+                if (pressed) {
+                    float usableH = areaLista.height - scrollbarThumbH();
+                    if (usableH > 0f) {
+                        float deltaY = my - dragScrollbarStartY;
+                        scrollY = MathUtils.clamp(scrollbarStartScrollY - (deltaY / usableH) * maxScrollY, 0f, maxScrollY);
+                    }
+                } else {
+                    arrastrandoScrollbar = false;
+                }
+            }
+            // --- 2. DRAG EN LA LISTA (solo si no tocamos la scrollbar) ---
+            if (!arrastrandoScrollbar) {
+                if (justPressed && areaLista.contains(mx, my) && !mouseEnScrollbar(mx, my)) {
+                    arrastrandoLista = true;
+                    dragListaStartY = my;
+                    scrollYStart = scrollY;
+                }
+                if (pressed && arrastrandoLista) {
+                    scrollY = MathUtils.clamp(scrollYStart + (my - dragListaStartY), 0, maxScrollY);
+                } else if (arrastrandoLista) {
+                    arrastrandoLista = false;
+                    if (Math.abs(my - dragListaStartY) < 10f) {
+                        for (int i = 0; i < filasCanciones.size(); i++) {
+                            Rectangle r = filasCanciones.get(i);
+                            if (mx >= r.x && mx <= r.x + r.width
+                                && my >= r.y + scrollY && my <= r.y + scrollY + r.height) {
+                                game.cambiarPistaMusica(i);
+                                break;
+                            }
                         }
                     }
                 }
             }
-        } else if (estado == Estado.FONDO) {
+        }else if (estado == Estado.FONDO) {
             botonAplicarFondo.update(mx, my); botonDescartarFondo.update(mx, my);
-
             // --- LÓGICA DE LA GRILLA DE FONDOS ---
             hoverFondo = -1;
             float panelX = 640f - PANEL_MUSICA_ANCHO / 2f;
             float panelY = 60f; // Nuevo Y
             float panelH = 500f; // Nuevo Alto
-
             for (int i = 0; i < Background.TEMAS.length; i++) {
                 int col = i % 3;
                 int row = i / 3;
                 float bx = panelX + GRID_START_X + col * (BTN_W + GAP_X);
                 float by = panelY + panelH - GRID_START_Y - row * (BTN_H + GAP_Y);
-
                 if (mx >= bx && mx <= bx + BTN_W && my >= by && my <= by + BTN_H) {
                     hoverFondo = i;
                     if (click) {
@@ -126,7 +176,6 @@ public class PanelPersonalizar {
                 }
             }
             // --------------------------------------
-
             if (botonAplicarFondo.fueCliqueado(mx, my)) {
                 game.getConfiguracionJuego().setFondoIndex(fondoIndexPendiente);
                 game.getConfiguracionJuego().guardar();
@@ -282,10 +331,19 @@ public class PanelPersonalizar {
             float barraVisibleH = (listaAltoVisible / listaAltoTotal) * barraTotalH;
             float proporcionScroll = scrollY / maxScrollY;
             float barraScrollY = areaLista.y + barraTotalH - barraVisibleH - (proporcionScroll * (barraTotalH - barraVisibleH));
+            float barraX = areaLista.x + areaLista.width - 8f;
+            // Track
             batch.setColor(UITheme.BORDE.r, UITheme.BORDE.g, UITheme.BORDE.b, 0.6f);
-            dibujarRectRedondeado(batch, pixel, areaLista.x + areaLista.width - 8f, areaLista.y, 6f, barraTotalH, 3f, batch.getColor());
-            batch.setColor(UITheme.DORADO.r, UITheme.DORADO.g, UITheme.DORADO.b, 0.9f);
-            dibujarRectRedondeado(batch, pixel, areaLista.x + areaLista.width - 8f, barraScrollY, 6f, barraVisibleH, 3f, batch.getColor());
+            dibujarRectRedondeado(batch, pixel, barraX, areaLista.y, 6f, barraTotalH, 3f, batch.getColor());
+            // Thumb (se ilumina al arrastrar)
+            float alphaThumb = arrastrandoScrollbar ? 1f : 0.9f;
+            batch.setColor(UITheme.DORADO.r, UITheme.DORADO.g, UITheme.DORADO.b, alphaThumb);
+            dibujarRectRedondeado(batch, pixel, barraX, barraScrollY, 6f, barraVisibleH, 3f, batch.getColor());
+            // Brillo extra al arrastrar
+            if (arrastrandoScrollbar) {
+                batch.setColor(1f, 1f, 1f, 0.35f);
+                batch.draw(pixel, barraX + 1f, barraScrollY + 2f, 2f, barraVisibleH - 4f);
+            }
             batch.setColor(Color.WHITE);
         }
         botonVolverMusica.render(batch);
@@ -377,5 +435,25 @@ public class PanelPersonalizar {
             batch.draw(pixel, x + inset, y + height - i - 1f, width - inset * 2f, 1f);
         }
         batch.setColor(Color.WHITE);
+    }
+
+    private float scrollbarThumbH() {
+        if (maxScrollY <= 0f) return 0f;
+        return (listaAltoVisible / listaAltoTotal) * areaLista.height;
+    }
+
+    private float scrollbarThumbY() {
+        float barraTotalH = areaLista.height;
+        float thumbH = scrollbarThumbH();
+        float proporcion = maxScrollY > 0f ? scrollY / maxScrollY : 0f;
+        return areaLista.y + barraTotalH - thumbH - (proporcion * (barraTotalH - thumbH));
+    }
+
+    private boolean mouseEnScrollbar(float mx, float my) {
+        if (maxScrollY <= 0f) return false;
+        float barraX = areaLista.x + areaLista.width - 8f;
+        float hitX = barraX - (SCROLLBAR_ANCHO_HIT - 6f) / 2f;
+        return mx >= hitX && mx <= hitX + SCROLLBAR_ANCHO_HIT
+            && my >= areaLista.y && my <= areaLista.y + areaLista.height;
     }
 }

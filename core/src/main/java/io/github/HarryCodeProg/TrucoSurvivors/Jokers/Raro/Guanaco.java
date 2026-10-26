@@ -20,7 +20,7 @@ public class Guanaco extends Joker {
             67,
             "Guanaco",
             "Guanaco",
-            "+1 descarte. 12 multiplicador por cada descarte restante (actual: +0)",
+            "+1 descarte. +12 multiplicador por cada descarte restante (actual: +0)",
             Rareza.raro,
             5,
             INDEPENDIENTE,
@@ -61,14 +61,14 @@ public class Guanaco extends Joker {
 
     @Override
     public String getDescripcionRenderizada() {
-        return "+2 descarte. 12 multiplicador por cada descarte restante (actual: +0)";
+        return "+2 descarte. +12 multiplicador por cada descarte restante (actual: +0)";
     }
 
     @Override
     public String getDescripcionRenderizada(Juego juego) {
         if (juego != null) {
             double actual = MULT_POR_DESCARTE * juego.getDescartesActuales();
-            return "+2 descarte. 12 multiplicador por cada descarte restante (actual: +" + (int) actual + ")";
+            return "+2 descarte. +12 multiplicador por cada descarte restante (actual: +" + (int) actual + ")";
         }
         return getDescripcionRenderizada();
     }

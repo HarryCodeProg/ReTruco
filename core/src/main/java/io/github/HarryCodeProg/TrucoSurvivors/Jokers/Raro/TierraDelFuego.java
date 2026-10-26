@@ -1,6 +1,7 @@
 package io.github.HarryCodeProg.TrucoSurvivors.Jokers.Raro;
 
 import io.github.HarryCodeProg.TrucoSurvivors.Activacion.ContextoJuego;
+import io.github.HarryCodeProg.TrucoSurvivors.Estados.ColorMecanica;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.EventoJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
@@ -44,7 +45,7 @@ public class TierraDelFuego extends Joker {
 
     @Override
     public String getDescripcionRenderizada() {
-        return "+5 puntos envido y truco cada vez que se active otro joker (actual: +" + (int) getAcumulado() + ")";
+        return ColorMecanica.PUNTOS.colorHex()+"+5[] puntos envido y truco cada vez que se active otro joker (actual:"+ColorMecanica.PUNTOS.colorHex()+" +" + (int) getAcumulado() + ")";
     }
 
     @Override

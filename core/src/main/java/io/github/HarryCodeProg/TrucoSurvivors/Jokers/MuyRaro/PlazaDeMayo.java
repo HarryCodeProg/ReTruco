@@ -1,6 +1,7 @@
 package io.github.HarryCodeProg.TrucoSurvivors.Jokers.MuyRaro;
 
 import io.github.HarryCodeProg.TrucoSurvivors.Activacion.ContextoJuego;
+import io.github.HarryCodeProg.TrucoSurvivors.Estados.ColorMecanica;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.EventoJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
@@ -14,7 +15,7 @@ public class PlazaDeMayo extends Joker {
             127,
             "Plaza de Mayo",
             "PlazaDeMayo",
-            "+7 puntos envido por cada activación de carta (Actual: +0)",
+            "+7 puntos envido por cada activación de carta\n (Actual:"+ ColorMecanica.PUNTOS.colorHex()+ " 0[])",
             Rareza.muyRaro,
             12,
             Joker.FaseActivacion.INDEPENDIENTE,
@@ -34,7 +35,7 @@ public class PlazaDeMayo extends Joker {
 
     @Override
     public String getDescripcion() {
-        return "+7 puntos envido por cada activación de carta.\n(Actual: +" + (int) getAcumulado() + "0 puntos)";
+        return "+7 puntos envido por cada activación de carta.\n(Actual:"+ ColorMecanica.PUNTOS.colorHex()+" +" + (int) getAcumulado() + "0[])";
     }
 
     @Override

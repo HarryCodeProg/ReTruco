@@ -2,6 +2,7 @@ package io.github.HarryCodeProg.TrucoSurvivors.Jokers.Legendario;
 
 import io.github.HarryCodeProg.TrucoSurvivors.Activacion.ContextoJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Carta;
+import io.github.HarryCodeProg.TrucoSurvivors.Estados.ColorMecanica;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.EventoJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
@@ -16,7 +17,7 @@ import java.util.Set;
 
 public class Sarmiento extends Joker {
 
-    private static final int ESPACIO_EXTRA = 3;
+    private static final int ESPACIO_EXTRA = 1;
     private static final int PUNTOS_BONUS = 20;
 
     public Sarmiento() {
@@ -24,7 +25,7 @@ public class Sarmiento extends Joker {
             148,
             "Sarmiento",
             "Sarmiento",
-            "+3 espacios en la Tienda en todos los items. Cada vez que compras un item, Todas las cartas de tu mazo actual obtienen +20 Puntos de Truco y Envido.",
+            "+1 espacios en Tienda. Cada vez que compras un item, todas las cartas de tu mazo actual obtienen"+ ColorMecanica.PUNTOS.colorHex()+" +20[] puntos.",
             Rareza.legendario,
             12,
             Joker.FaseActivacion.INDEPENDIENTE,

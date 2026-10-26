@@ -16,7 +16,7 @@ public class Saavedra extends Joker {
             138,
             "Saavedra",
             "Saavedra",
-            "X0.25 multiplicador envido por cada santo usado (actual: X1)",
+            "X0.25 multiplicador envido por cada santo usado\n (actual: X1)",
             Rareza.epico,
             8, // placeholder: ajustá el coste real
             Joker.FaseActivacion.INDEPENDIENTE,
@@ -39,7 +39,7 @@ public class Saavedra extends Joker {
     @Override
     public String getDescripcionRenderizada() {
         double actual = 1 + (getAcumulado() * MULT_POR_SANTO);
-        return "X0.25 multiplicador envido por cada santo usado (actual: X" + formatear(actual) + ")";
+        return "X0.25 multiplicador envido por cada santo usado\n (actual: X" + formatear(actual) + ")";
     }
 
     private String formatear(double valor) {

@@ -1,6 +1,7 @@
 package io.github.HarryCodeProg.TrucoSurvivors.Jokers.Comun;
 
 import io.github.HarryCodeProg.TrucoSurvivors.Activacion.ContextoJuego;
+import io.github.HarryCodeProg.TrucoSurvivors.Estados.ColorMecanica;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.EventoJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
@@ -18,7 +19,7 @@ public class SosInumputable extends Joker {
             54,
             "Sos Inimputable",
             "SosInimputable",
-            "Genera un multiplicador truco aleatorio entre +1 y +20 al final de la mano",
+            "Genera entre +1 multiplicador truco y +20 multiplicador truco aleatorio al final de la mano",
             Rareza.comun,
             3,
             Joker.FaseActivacion.INDEPENDIENTE,

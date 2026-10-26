@@ -1,6 +1,7 @@
 package io.github.HarryCodeProg.TrucoSurvivors.Jokers.Raro;
 
 import io.github.HarryCodeProg.TrucoSurvivors.Activacion.ContextoJuego;
+import io.github.HarryCodeProg.TrucoSurvivors.Estados.ColorMecanica;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.EventoJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
@@ -16,7 +17,7 @@ public class Chubut extends Joker {
             97,
             "Chubut",
             "Chubut",
-            "X0.25 multiplicador truco cada vez que terminas una mano con 23 o menos de valor de Envido.\n(Se reinicia si tienes 24 o más)",
+            "X0.25 multiplicador truco cada vez que terminas una mano con 23 o menos de valor de Envido.\n(Se reinicia si tienes"+ ColorMecanica.NUMERO.colorHex()+ "24[] o más)",
             Rareza.raro,
             5,
             INDEPENDIENTE,

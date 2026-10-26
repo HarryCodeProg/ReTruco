@@ -93,7 +93,7 @@ public class PanelPuntajes {
         dibujarSeparador(x, puntosJugadorY - 11f, anchoFondo - margenX * 2f);
         // BLOQUE JUGADOR
         dibujarCajaBaseYMultiplicador(x, jugadorTrucoY, UITheme.TURQUESA, UITheme.BORDE, UITheme.ROJO, UITheme.BORDE);
-        dibujarCajaBaseYMultiplicador(x, jugadorEnvidoY, UITheme.ENVIDO, UITheme.BORDE, UITheme.ROJO, UITheme.BORDE);
+        dibujarCajaBaseYMultiplicador(x, jugadorEnvidoY, UITheme.NARANJA, UITheme.BORDE, UITheme.ROJO, UITheme.BORDE);
         dibujarCajaSimple(x, manosY, new Color(0.1f, 0.15f, 0.3f, 1f), UITheme.BORDE); // Fondo Azul Oscuro
         dibujarCajaSimple(x, descartesY, UITheme.ROJO, UITheme.BORDE);
         // DINERO

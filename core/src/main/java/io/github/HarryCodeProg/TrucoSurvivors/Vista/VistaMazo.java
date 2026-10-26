@@ -255,8 +255,15 @@ public class VistaMazo {
             ArrayList<VistaCarta> vistas = vistaCartasPorPalo.get(palo);
             if (slots.isEmpty()) continue;
             float etiquetaY = slots.get(0).y + CARTA_H + ALTO_ETIQUETA_PALO - 8f;
-            font.setColor(UITheme.TEXTO_SECUNDARIO);
-            font.draw(batch, NOMBRES_PALO[fila] + "  (" + contarCartas(grupos) + ")", areaContenido.x + 10f, etiquetaY);
+            BitmapFont fuentePalo = (Main.getInstance() != null && Main.getInstance().getFuenteTooltipTitulo() != null)
+                ? Main.getInstance().getFuenteTooltipTitulo()
+                : font;
+            boolean markupPrevio = fuentePalo.getData().markupEnabled;
+            fuentePalo.getData().markupEnabled = true;
+            fuentePalo.setColor(Color.WHITE);
+            String textoPalo = Palo.colorearTexto(NOMBRES_PALO[fila] + "  (" + contarCartas(grupos) + ")");
+            fuentePalo.draw(batch, textoPalo, areaContenido.x + 10f, etiquetaY);
+            fuentePalo.getData().markupEnabled = markupPrevio;
             for (int i = 0; i < grupos.size(); i++) {
                 GrupoCarta g = grupos.get(i);
                 Rectangle r = slots.get(i);
@@ -288,7 +295,7 @@ public class VistaMazo {
                 }
             }
             if (fila < PALOS.length - 1 && !slots.isEmpty()) {
-                float lineaY = slots.get(slots.size() - 1).y - 6f; // Ajustado al nuevo margen
+                float lineaY = slots.get(slots.size() - 1).y - 6f;
                 batch.setColor(UITheme.BORDE);
                 batch.draw(pixelBlanco, areaContenido.x + 24f, lineaY, areaContenido.width - 48f, 1f);
             }

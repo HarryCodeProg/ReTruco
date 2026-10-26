@@ -25,6 +25,7 @@ import java.util.Locale;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import io.github.HarryCodeProg.TrucoSurvivors.Vista.AssetsRasgos;
+import io.github.HarryCodeProg.TrucoSurvivors.Vista.OverlayConsumoZodiaco;
 
 public class Main extends Game {
     public SpriteBatch batch;
@@ -43,7 +44,6 @@ public class Main extends Game {
     private PerfilJugador perfilJugador;
     private TextureRegion pixelBlancoRegion;
     public AssetManager assets;
-    private TextureAtlas atlasZodiaco;
     private Texture texturaRuletaFondo;
     private TextureAtlas atlasSantos;
     private BitmapFont fuenteUI;
@@ -96,10 +96,6 @@ public class Main extends Game {
         for (Texture texture : atlasSantos.getTextures()) {
             texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         }
-        atlasZodiaco = new TextureAtlas(Gdx.files.internal("atlas/zodiaco.atlas"));
-        for (Texture texture : atlasZodiaco.getTextures()) {
-            texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
-        }
         texturaRuletaFondo = new Texture("ui/zodiaco_ruleta.png");
         cambiarIdioma("es");
     }
@@ -115,8 +111,6 @@ public class Main extends Game {
     public Music getMusicaFondo() {
         return this.musicaFondo;
     }
-
-    public TextureAtlas getAtlasZodiaco() { return atlasZodiaco; }
 
     public TextureRegion getPixelBlancoRegion() {
         return pixelBlancoRegion;
@@ -289,16 +283,16 @@ public class Main extends Game {
 
     private final String[][] PISTAS_MUSICA = {
         //{"Second Dealing", "music/Second_Dealing/second_dealing_full.ogg"},
-        {"retrucoEnergetico1", "music/retrucoEnergetico1.ogg"},
-        {"retrucoEnergetico2", "music/retrucoEnergetico2.ogg"},
-        {"retrucoMetal1", "music/retrucoMetal1.ogg"},
-        {"retrucoMetal2", "music/retrucoMetal2.ogg"},
-        {"retrucoPhonk1", "music/retrucoPhonk1.ogg"},
-        {"retrucoPhonk2", "music/retrucoPhonk2.ogg"},
-        {"retrucoPummel1", "music/retrucoPummel1.ogg"},
-        {"retrucoPummel2", "music/retrucoPummel2.ogg"},
-        {"retrucoScattering1", "music/retrucoScattering1.ogg"},
-        {"retrucoScattering2", "music/retrucoScattering2.ogg"},
+        {"Energetico1", "music/retrucoEnergetico1.ogg"},
+        {"Energetico2", "music/retrucoEnergetico2.ogg"},
+        {"Metal1", "music/retrucoMetal1.ogg"},
+        {"Metal2", "music/retrucoMetal2.ogg"},
+        {"Phonk1", "music/retrucoPhonk1.ogg"},
+        {"Phonk2", "music/retrucoPhonk2.ogg"},
+        {"Pummel1", "music/retrucoPummel1.ogg"},
+        {"Pummel2", "music/retrucoPummel2.ogg"},
+        {"Scattering1", "music/retrucoScattering1.ogg"},
+        {"Scattering2", "music/retrucoScattering2.ogg"},
         {"balatruco1", "music/balatruco1.ogg"},
         {"balatruco2", "music/balatruco2.ogg"},
         {"La Ultima Mano1", "music/La Ultima Mano1.ogg"},
@@ -309,65 +303,65 @@ public class Main extends Game {
         {"musicaFondo4", "music/musicaFondo4.ogg"},
         {"Not a freak1", "music/Not a freak1.ogg"},
         {"Not a freak2", "music/Not a freak2.ogg"},
-        {"real envido", "music/real envido.ogg"},
-        {"real envido2", "music/real envido 2.ogg"},
-        {"retruco dance1", "music/retruco dance1.ogg"},
-        {"retruco dance2", "music/retruco dance2.ogg"},
-        {"retruco db1", "music/retruco db1.ogg"},
-        {"retruco db2", "music/retruco db2.ogg"},
-        {"retruco one punch1", "music/retruco one punch1.ogg"},
-        {"retruco one punch2", "music/retruco one punch2.ogg"},
-        {"retruco persona1", "music/retruco persona1.ogg"},
-        {"retruco persona2", "music/retruco persona2.ogg"},
-        {"retruco silent1", "music/retruco silent1.ogg"},
-        {"retruco silent2", "music/retruco silent2.ogg"},
-        {"retruco8bit", "music/retruco8bit.ogg"},
-        {"retrucoAnime1", "music/retrucoAnime1.ogg"},
-        {"retrucoAnime2", "music/retrucoAnime2.ogg"},
-        {"retrucoBalatro", "music/retrucoBalatro.ogg"},
-        {"retrucoBoss1", "music/retrucoBoss1.ogg"},
-        {"retrucoBoss2", "music/retrucoBoss2.ogg"},
-        {"retrucoDerrota1", "music/retrucoDerrota1.ogg"},
-        {"retrucoDerrota2", "music/retrucoDerrota2.ogg"},
-        {"retrucoDramatico", "music/retrucoDramatico.ogg"},
-        {"retrucoElectronic", "music/retrucoElectronic.ogg"},
-        {"retrucoEmotional", "music/retrucoEmotional.ogg"},
-        {"retrucoEmotional2", "music/retrucoEmotional2.ogg"},
-        {"retrucoGameplay", "music/retrucoGameplay.ogg"},
-        {"retrucoGameplay2", "music/retrucoGameplay2.ogg"},
-        {"retrucoJazz", "music/retrucoJazz.ogg"},
-        {"retrucoJazz2", "music/retrucoJazz2.ogg"},
-        {"retrucoKuze1", "music/retrucoKuze1.ogg"},
-        {"retrucoKuze2", "music/retrucoKuze2.ogg"},
-        {"retrucoKuze3", "music/retrucoKuze3.ogg"},
-        {"retrucoMedieval", "music/retrucoMedieval.ogg"},
-        {"retrucoMedieval1", "music/retrucoMedieval1.ogg"},
-        {"retrucoMenu1", "music/retrucoMenu1.ogg"},
-        {"retrucoMenu2", "music/retrucoMenu2.ogg"},
-        {"retrucoMetal1", "music/retrucoMetal1.ogg"},
-        {"retrucoMetal2", "music/retrucoMetal2.ogg"},
-        {"retrucoOst", "music/retrucoOst.ogg"},
-        {"retrucoOst2", "music/retrucoOst2.ogg"},
-        {"retrucoPlants1", "music/retrucoPlants1.ogg"},
-        {"retrucoPlants2", "music/retrucoPlants2.ogg"},
-        {"retrucoPlants3", "music/retrucoPlants3.ogg"},
-        {"retrucoResident", "music/retrucoResident.ogg"},
-        {"retrucoResident2", "music/retrucoResident2.ogg"},
-        {"retrucoRondas1", "music/retrucoRondas1.ogg"},
-        {"retrucoRondas2", "music/retrucoRondas2.ogg"},
-        {"retrucoSave1", "music/retrucoSave1.ogg"},
-        {"retrucoSave2", "music/retrucoSave2.ogg"},
-        {"retrucoShop1", "music/retrucoShop1.ogg"},
-        {"retrucoShop2", "music/retrucoShop2.ogg"},
-        {"retrucoSoft", "music/retrucoSoft.ogg"},
-        {"retrucoSoft2", "music/retrucoSoft2.ogg"},
-        {"retrucoSynth", "music/retrucoSynth.ogg"},
-        {"retrucoSynth2", "music/retrucoSynth2.ogg"},
-        {"retrucoTension", "music/retrucoTension.ogg"},
-        {"retrucoTension2", "music/retrucoTension2.ogg"},
-        {"retrucoVictoria1", "music/retrucoVictoria1.ogg"},
-        {"retrucoVictoria2", "music/retrucoVictoria2.ogg"},
-        {"retrucoYakuza1", "music/retrucoYakuza1.ogg"}
+        {"Real envido", "music/real envido.ogg"},
+        {"Real envido2", "music/real envido 2.ogg"},
+        {"Cuento bajo 1", "music/retruco dance1.ogg"},
+        {"Cuento bajo 2", "music/retruco dance2.ogg"},
+        {"db1", "music/retruco db1.ogg"},
+        {"db2", "music/retruco db2.ogg"},
+        {"one punch1", "music/retruco one punch1.ogg"},
+        {"one punch2", "music/retruco one punch2.ogg"},
+        {"persona1", "music/retruco persona1.ogg"},
+        {"persona2", "music/retruco persona2.ogg"},
+        {"Silencio gil 1", "music/retruco silent1.ogg"},
+        {"Silencio gil 2", "music/retruco silent2.ogg"},
+        {"8bit", "music/retruco8bit.ogg"},
+        {"Anime1", "music/retrucoAnime1.ogg"},
+        {"Anime2", "music/retrucoAnime2.ogg"},
+        {"Balatro", "music/retrucoBalatro.ogg"},
+        {"Boss 1", "music/retrucoBoss1.ogg"},
+        {"Boss 2", "music/retrucoBoss2.ogg"},
+        {"Derrota 1", "music/retrucoDerrota1.ogg"},
+        {"Derrota 2", "music/retrucoDerrota2.ogg"},
+        {"Dramatico", "music/retrucoDramatico.ogg"},
+        {"Electronic", "music/retrucoElectronic.ogg"},
+        {"Emotional", "music/retrucoEmotional.ogg"},
+        {"Emotional2", "music/retrucoEmotional2.ogg"},
+        {"Gameplay", "music/retrucoGameplay.ogg"},
+        {"Gameplay2", "music/retrucoGameplay2.ogg"},
+        {"Jazz", "music/retrucoJazz.ogg"},
+        {"Jazz2", "music/retrucoJazz2.ogg"},
+        {"Kuze1", "music/retrucoKuze1.ogg"},
+        {"Kuze2", "music/retrucoKuze2.ogg"},
+        {"Kuze3", "music/retrucoKuze3.ogg"},
+        {"Medieval", "music/retrucoMedieval.ogg"},
+        {"Medieval1", "music/retrucoMedieval1.ogg"},
+        {"Menu1", "music/retrucoMenu1.ogg"},
+        {"Menu2", "music/retrucoMenu2.ogg"},
+        {"Metal1", "music/retrucoMetal1.ogg"},
+        {"Metal2", "music/retrucoMetal2.ogg"},
+        {"Ost", "music/retrucoOst.ogg"},
+        {"Ost 2", "music/retrucoOst2.ogg"},
+        {"Plants1", "music/retrucoPlants1.ogg"},
+        {"Plants2", "music/retrucoPlants2.ogg"},
+        {"Plants3", "music/retrucoPlants3.ogg"},
+        {"Resident", "music/retrucoResident.ogg"},
+        {"Resident2", "music/retrucoResident2.ogg"},
+        {"Rondas1", "music/retrucoRondas1.ogg"},
+        {"Rondas2", "music/retrucoRondas2.ogg"},
+        {"Save1", "music/retrucoSave1.ogg"},
+        {"Save2", "music/retrucoSave2.ogg"},
+        {"Shop1", "music/retrucoShop1.ogg"},
+        {"Shop2", "music/retrucoShop2.ogg"},
+        {"Soft", "music/retrucoSoft.ogg"},
+        {"Soft2", "music/retrucoSoft2.ogg"},
+        {"Synth", "music/retrucoSynth.ogg"},
+        {"Synth2", "music/retrucoSynth2.ogg"},
+        {"Tension", "music/retrucoTension.ogg"},
+        {"Tension2", "music/retrucoTension2.ogg"},
+        {"Victoria1", "music/retrucoVictoria1.ogg"},
+        {"Victoria2", "music/retrucoVictoria2.ogg"},
+        {"Yakuza1", "music/retrucoYakuza1.ogg"}
     };
 
     public String[][] getPistasMusica() { return PISTAS_MUSICA; }
@@ -447,12 +441,12 @@ public class Main extends Game {
         gestorSonidos.dispose();
         if (atlasCartas != null) atlasCartas.dispose();
         if (atlasJokers != null) atlasJokers.dispose();
-        if (atlasZodiaco != null) atlasZodiaco.dispose();
         if (texturaRuletaFondo != null) texturaRuletaFondo.dispose();
         if (fuenteUI != null) fuenteUI.dispose();
         if (fuenteTooltipTitulo != null) fuenteTooltipTitulo.dispose();
         if (fuenteTooltipDescripcion != null) fuenteTooltipDescripcion.dispose();
         if (assetsRasgos != null) assetsRasgos.dispose();
+        OverlayConsumoZodiaco.disposeTexturas();
     }
 
 }

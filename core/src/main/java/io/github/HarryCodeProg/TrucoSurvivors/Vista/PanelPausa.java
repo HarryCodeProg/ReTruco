@@ -75,20 +75,14 @@ public class PanelPausa {
     private final Boton botonAplicarFondo, botonDescartarFondo;
     private int fondoIndexPendiente;
 
-    // --- Panel Personalizar (música) ---
-    private static final float FILA_ALTO = 44f;
-    private static final float FILA_GAP = 2f;
-    private static final float PM_W = 420f;
-    private static final float PM_PAD = 22f;
-    private static final float HEADER_H = 118f;
-    private static final float FOOTER_H = 86f;
-    private float pmX, pmY, pmAlto;
-    private final ArrayList<Rectangle> filasCanciones = new ArrayList<>();
-    private final Boton botonVolverPersonalizar;
-    private float tiempoDecoracion = 0f;
+    private PanelPersonalizar panelPersonalizar;
+    private final java.util.function.Supplier<Background> fondoActual;
+    private final com.badlogic.gdx.graphics.OrthographicCamera camera;
 
-    public PanelPausa(Main game) {
+    public PanelPausa(Main game, java.util.function.Supplier<Background> fondoActual, com.badlogic.gdx.graphics.OrthographicCamera camera) {
         this.game = game;
+        this.fondoActual = fondoActual;
+        this.camera = camera;
         this.config = game.getConfiguracionJuego();
 
         float cy = PANEL_Y + PANEL_H - 120f;
@@ -97,7 +91,7 @@ public class PanelPausa {
         // Panel principal
         botonReanudar    = new Boton(BTN_X, cy,          BTN_W, BTN_H, "REANUDAR",        Boton.TipoColor.VERDE,   Accion.OPCIONES);
         botonOpciones    = new Boton(BTN_X, cy - gap,     BTN_W, BTN_H, "OPCIONES",         Boton.TipoColor.CELESTE, Accion.OPCIONES);
-        botonPersonalizar= new Boton(BTN_X, cy - gap*2f,  BTN_W, BTN_H, "PERSONALIZAR",     Boton.TipoColor.DORADO,  Accion.OPCIONES);
+        botonPersonalizar= new Boton(BTN_X, cy - gap*2f, BTN_W, BTN_H, "PERSONALIZAR", Boton.TipoColor.DORADO, Accion.OPCIONES);
         botonVolverMenu  = new Boton(BTN_X, cy - gap*3f,  BTN_W, BTN_H, "VOLVER AL MENÚ",  Boton.TipoColor.BORDO,   Accion.OPCIONES);
 
         // Opciones menú
@@ -136,30 +130,6 @@ public class PanelPausa {
         botonAplicarFondo  = new Boton(vx,              cy - gap, (vw-10f)/2f, BTN_H, "APLICAR",   Accion.OPCIONES);
         botonDescartarFondo= new Boton(vx+(vw+10f)/2f, cy - gap, (vw-10f)/2f, BTN_H, "DESCARTAR", Accion.OPCIONES);
 
-        // Personalizar (música)
-        float centroX = 640f;
-        float anchoVolver = 180f;
-        recalcularLayoutMusica(centroX);
-        float yVolver = pmY + (FOOTER_H - 50f) / 2f;
-        botonVolverPersonalizar = new Boton(centroX - anchoVolver / 2f, yVolver, anchoVolver, 48f, "VOLVER", Boton.TipoColor.BORDO, Accion.OPCIONES);
-    }
-
-    private void recalcularLayoutMusica(float centroX) {
-        String[][] pistas = game.getPistasMusica();
-        int cantidad = pistas.length;
-        float listaAlto = cantidad * FILA_ALTO + Math.max(0, cantidad - 1) * FILA_GAP;
-        pmAlto = HEADER_H + listaAlto + FOOTER_H;
-        pmX = centroX - PM_W / 2f;
-        pmY = (720f - pmAlto) / 2f + 10f;
-
-        filasCanciones.clear();
-        float anchoFila = PM_W - PM_PAD * 2f;
-        float xFila = pmX + PM_PAD;
-        float yTope = pmY + pmAlto - HEADER_H;
-        for (int i = 0; i < cantidad; i++) {
-            float yFila = yTope - (i + 1) * FILA_ALTO - i * FILA_GAP;
-            filasCanciones.add(new Rectangle(xFila, yFila, anchoFila, FILA_ALTO));
-        }
     }
 
     // ─── Ciclo de vida ───────────────────────────────────────────────
@@ -171,13 +141,13 @@ public class PanelPausa {
     }
 
     public void cerrar() {
+        if (panelPersonalizar != null) panelPersonalizar.cerrar();
         visible = false;
     }
 
     public boolean isVisible() { return visible; }
 
     public Resultado update(float delta, float mouseX, float mouseY) {
-        tiempoDecoracion += delta;
 
         // Fade
         if (visible) alpha = Math.min(1f, alpha + FADE_SPEED * delta);
@@ -197,6 +167,7 @@ public class PanelPausa {
                 cerrar();
                 return Resultado.REANUDAR;
             } else {
+                if (subPanel == SubPanel.PERSONALIZAR && !panelPersonalizar.retroceder()) return Resultado.NINGUNO;
                 subPanel = SubPanel.PRINCIPAL;
                 return Resultado.NINGUNO;
             }
@@ -208,7 +179,9 @@ public class PanelPausa {
             case OPCIONES_VIDEO: updateOpcionesVideo(mouseX, mouseY); break;
             case OPCIONES_AUDIO: updateOpcionesAudio(mouseX, mouseY); break;
             case OPCIONES_FONDO: updateOpcionesFondo(mouseX, mouseY); break;
-            case PERSONALIZAR:   updatePersonalizar(mouseX, mouseY); break;
+            case PERSONALIZAR:
+                if (panelPersonalizar.update(delta, mouseX, mouseY, Gdx.input.justTouched())) subPanel = SubPanel.PRINCIPAL;
+                break;
         }
         return Resultado.NINGUNO;
     }
@@ -227,7 +200,8 @@ public class PanelPausa {
             subPanel = SubPanel.OPCIONES_MENU;
         }
         if (botonPersonalizar.fueCliqueado(mx, my)) {
-            recalcularLayoutMusica(640f);
+            panelPersonalizar = new PanelPersonalizar(game, fondoActual.get());
+            panelPersonalizar.abrir();
             subPanel = SubPanel.PERSONALIZAR;
         }
         if (botonVolverMenu.fueCliqueado(mx, my)) {
@@ -326,17 +300,8 @@ public class PanelPausa {
         }
     }
 
-    private void updatePersonalizar(float mx, float my) {
-        botonVolverPersonalizar.update(mx, my);
-        if (botonVolverPersonalizar.fueCliqueado(mx, my)) subPanel = SubPanel.PRINCIPAL;
-        if (Gdx.input.justTouched()) {
-            for (int i = 0; i < filasCanciones.size(); i++) {
-                if (filasCanciones.get(i).contains(mx, my)) {
-                    game.cambiarPistaMusica(i);
-                    break;
-                }
-            }
-        }
+    public boolean scrolled(float amountY) {
+        return visible && subPanel == SubPanel.PERSONALIZAR && panelPersonalizar.scrolled(amountY);
     }
 
     // ─── Render ──────────────────────────────────────────────────────
@@ -349,7 +314,7 @@ public class PanelPausa {
 
         if (subPanel == SubPanel.PERSONALIZAR) {
             renderDimBackground(batch, pixel);
-            renderPersonalizar(batch, pixel, fTitulo, fUI, fPrinc, mouseX, mouseY);
+            panelPersonalizar.render(batch, camera, Gdx.graphics.getDeltaTime());
             return;
         }
 
@@ -451,86 +416,6 @@ public class PanelPausa {
         setAlpha(botonDescartarFondo);botonDescartarFondo.render(batch);
     }
 
-    private void renderPersonalizar(SpriteBatch batch, Texture pixel, BitmapFont fTitulo, BitmapFont fUI, BitmapFont fNum, float mx, float my) {
-        float x = pmX, y = pmY, w = PM_W, h = pmAlto;
-
-        // Panel
-        dibujarRect(batch, pixel, x+6f, y-8f, w, h, 12f, new Color(0.01f,0.015f,0.025f,0.7f*alpha));
-        dibujarRect(batch, pixel, x-4f, y-4f, w+8f, h+8f, 13f, new Color(UITheme.BORDE.r,UITheme.BORDE.g,UITheme.BORDE.b,alpha));
-        dibujarRect(batch, pixel, x, y, w, h, 10f, new Color(UITheme.PANEL_PRINCIPAL.r,UITheme.PANEL_PRINCIPAL.g,UITheme.PANEL_PRINCIPAL.b,alpha));
-        batch.setColor(UITheme.DORADO.r,UITheme.DORADO.g,UITheme.DORADO.b,alpha);
-        batch.draw(pixel, x+18f, y+h-6f, w-36f, 3f);
-        batch.setColor(Color.WHITE);
-
-        float centroX = x + w / 2f;
-        float cursorY = y + h - 30f;
-
-        fTitulo.getData().setScale(1.05f);
-        fTitulo.setColor(UITheme.DORADO_BRILLANTE.r,UITheme.DORADO_BRILLANTE.g,UITheme.DORADO_BRILLANTE.b,alpha);
-        fTitulo.draw(batch, "MÚSICA DE FONDO", x, cursorY, w, Align.center, false);
-        fTitulo.getData().setScale(1f); fTitulo.setColor(Color.WHITE);
-        cursorY -= 26f;
-
-        fUI.setColor(UITheme.TEXTO_SECUNDARIO.r,UITheme.TEXTO_SECUNDARIO.g,UITheme.TEXTO_SECUNDARIO.b,alpha);
-        fUI.draw(batch, "Selecciona una canción", x, cursorY, w, Align.center, false);
-        fUI.setColor(Color.WHITE);
-        cursorY -= 28f;
-
-        int indiceActual = game.getIndicePistaActual();
-        String[][] pistas = game.getPistasMusica();
-        String nombreActual = (indiceActual >= 0 && indiceActual < pistas.length) ? pistas[indiceActual][0] : "-";
-        fUI.getData().setScale(0.65f);
-        fUI.setColor(UITheme.TEXTO_SECUNDARIO.r,UITheme.TEXTO_SECUNDARIO.g,UITheme.TEXTO_SECUNDARIO.b,alpha);
-        fUI.draw(batch, "REPRODUCIENDO", x, cursorY, w, Align.center, false);
-        fUI.getData().setScale(1f);
-        cursorY -= 20f;
-        fNum.setColor(UITheme.TEXTO_PRINCIPAL.r,UITheme.TEXTO_PRINCIPAL.g,UITheme.TEXTO_PRINCIPAL.b,alpha);
-        fNum.draw(batch, nombreActual, x, cursorY, w, Align.center, false);
-        fUI.setColor(Color.WHITE); fNum.setColor(Color.WHITE);
-        cursorY -= 22f;
-
-        // Barritas ecualizador
-        float barraBaseX = centroX - 24f;
-        float barraY = cursorY - 10f;
-        for (int b = 0; b < 4; b++) {
-            float fase = tiempoDecoracion * 6f + b * 1.4f;
-            float altoBarra = 5f + (float)(Math.abs(Math.sin(fase)) * 11f);
-            batch.setColor(UITheme.DORADO.r, UITheme.DORADO.g, UITheme.DORADO.b, 0.9f * alpha);
-            batch.draw(pixel, barraBaseX + b * 14f, barraY, 8f, altoBarra);
-        }
-        batch.setColor(Color.WHITE);
-
-        // Filas de canciones
-        boolean dentroPanel = x <= mx && mx <= x + w;
-        for (int i = 0; i < filasCanciones.size(); i++) {
-            Rectangle r = filasCanciones.get(i);
-            boolean sel   = (i == indiceActual);
-            boolean hover = dentroPanel && r.contains(mx, my);
-            Color cf = sel ? UITheme.DORADO : (hover ? UITheme.AZUL_HOVER : UITheme.PANEL_SECUNDARIO);
-            Color cb = sel ? UITheme.NARANJA : UITheme.AZUL;
-            Color ct = sel ? new Color(0.08f,0.08f,0.08f,1f) : UITheme.TEXTO_PRINCIPAL;
-            dibujarRect(batch, pixel, r.x-2f,r.y-2f,r.width+4f,r.height+4f, 7f, withAlpha(cb, alpha));
-            dibujarRect(batch, pixel, r.x,r.y,r.width,r.height, 6f, withAlpha(cf, alpha));
-            if (sel) {
-                batch.setColor(ct.r,ct.g,ct.b,alpha);
-                batch.draw(pixel, r.x+14f, r.y+r.height/2f-6f, 3f,12f);
-                batch.draw(pixel, r.x+17f, r.y+r.height/2f-4f, 3f,8f);
-                batch.draw(pixel, r.x+20f, r.y+r.height/2f-2f, 3f,4f);
-                batch.setColor(Color.WHITE);
-            }
-            fUI.setColor(ct.r,ct.g,ct.b,alpha);
-            fUI.draw(batch, pistas[i][0].toUpperCase(), r.x+34f, r.y+r.height/2f+7f, r.width-46f, Align.left, false);
-            fUI.setColor(Color.WHITE);
-            if (i < filasCanciones.size()-1) {
-                batch.setColor(UITheme.BORDE.r,UITheme.BORDE.g,UITheme.BORDE.b,0.5f*alpha);
-                batch.draw(pixel, r.x, r.y-FILA_GAP, r.width, FILA_GAP);
-                batch.setColor(Color.WHITE);
-            }
-        }
-        setAlpha(botonVolverPersonalizar);
-        botonVolverPersonalizar.render(batch);
-    }
-
     // ─── Helpers ─────────────────────────────────────────────────────
     private void setAlpha(Boton b) {
         // Los botones usan alpha internamente – no hay API, así que simplemente los dibujamos normal.
@@ -542,8 +427,8 @@ public class PanelPausa {
     }
 
     private void dibujarRect(SpriteBatch batch, Texture pixel,
-                              float x, float y, float width, float height,
-                              float radio, Color color) {
+                             float x, float y, float width, float height,
+                             float radio, Color color) {
         if (width <= 0f || height <= 0f) return;
         radio = Math.min(radio, Math.min(width, height) / 2f);
         batch.setColor(color);

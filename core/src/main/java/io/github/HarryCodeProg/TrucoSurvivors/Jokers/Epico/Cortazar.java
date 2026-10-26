@@ -17,7 +17,7 @@ public class Cortazar extends Joker {
 
     @Override
     public String getDescripcionRenderizada() {
-        return "Cada vez que agregues una carta al mazo, +1 multiplicador (actual: +" + (int) getAcumulado() + ")";
+        return "Cada vez que agregues una carta al mazo, +1 multiplicador\n (actual: +" + (int) getAcumulado() + ")";
     }
 
     @Override

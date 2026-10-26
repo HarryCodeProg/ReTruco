@@ -1,6 +1,22 @@
 package io.github.HarryCodeProg.TrucoSurvivors.Cartas;
 
 public class Carta {
+    private String idGuardado = java.util.UUID.randomUUID().toString();
+    public String getIdGuardado() { return idGuardado; }
+    public void restaurarIdGuardado(String id) { idGuardado = id; }
+
+    /** Restaura la mano sin disparar eventos ni transformar los bonus temporales en permanentes. */
+    public void restaurarTemporales(int pt, int at, int pe, int ae, double mpt, double mat, double mpe, double mae) {
+        valorTrucoPoderActual = pt;
+        puntosTrucoAporteActual = at;
+        valorEnvidoPoderActual = pe;
+        puntosEnvidoAporteActual = ae;
+        multiplicadorPoderTrucoTemporal = mpt;
+        multiplicadorAporteTrucoTemporal = mat;
+        multiplicadorPoderEnvidoTemporal = mpe;
+        multiplicadorAporteEnvidoTemporal = mae;
+    }
+
     private int numero;
     private Palo palo;
     // --- 1. JERARQUÍA / PODER DE LA CARTA (qué mata a qué) ---

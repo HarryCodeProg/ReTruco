@@ -36,6 +36,6 @@ public class Bestiario extends Joker {
 
     @Override
     public String getDescripcionRenderizada(Juego juego) {
-        return "+5 multiplicador truco por cada joker comprado (actual: +" + (int)getAcumulado() + ")";
+        return "+5 multiplicador truco por cada joker comprado\n (actual: +" + (int)getAcumulado() + ")";
     }
 }

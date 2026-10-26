@@ -46,6 +46,6 @@ public class Parrilla extends Joker {
         if (formattedMult.endsWith(".00")) formattedMult = formattedMult.substring(0, formattedMult.length() - 3);
         else if (formattedMult.endsWith("0")) formattedMult = formattedMult.substring(0, formattedMult.length() - 1);
 
-        return "x0.30 multiplicador por cada carta debajo de 40 en tu mazo (actual: x" + formattedMult + ")";
+        return "x0.30 multiplicador por cada carta debajo de 40 en tu mazo\n (actual: x" + formattedMult + ")";
     }
 }

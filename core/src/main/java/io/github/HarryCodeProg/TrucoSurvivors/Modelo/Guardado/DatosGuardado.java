@@ -1,7 +1,7 @@
 package io.github.HarryCodeProg.TrucoSurvivors.Modelo.Guardado;
 
 public class DatosGuardado {
-    public static final int VERSION_ACTUAL = 2;
+    public static final int VERSION_ACTUAL = 3;
     public int version = VERSION_ACTUAL;
     public String estadoPantalla;
     public int rivalIndice;

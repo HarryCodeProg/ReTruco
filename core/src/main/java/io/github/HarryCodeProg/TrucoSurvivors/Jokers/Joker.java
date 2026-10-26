@@ -80,6 +80,8 @@ public abstract class Joker {
 
     public void desAplicarEfectoInstantaneo(Jugador jugador) {}
 
+    public void setPrecioVenta(int precio) { this.precioVenta = precio; }
+
     public int getPrecioVenta() { return precioVenta; }
 
     public void aumentarPrecioVenta(int cantidad) { this.precioVenta += cantidad; }

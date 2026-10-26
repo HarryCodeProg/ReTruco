@@ -97,6 +97,8 @@ public class Mazo {
 
     public List<Carta> getCartasRestantes() {return new ArrayList<>(this.mazo);}
 
+    public void restaurarTamañoMazo(int cantidad) { tamañoMazo = Math.max(0, cantidad); }
+
     public int getTamañoMazo() {return tamañoMazo;}
 
     public void agregarCartas(List<Carta> nuevasCartas) {

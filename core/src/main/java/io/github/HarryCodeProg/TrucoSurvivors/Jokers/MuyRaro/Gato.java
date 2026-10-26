@@ -1,6 +1,7 @@
 package io.github.HarryCodeProg.TrucoSurvivors.Jokers.MuyRaro;
 
 import io.github.HarryCodeProg.TrucoSurvivors.Activacion.ContextoJuego;
+import io.github.HarryCodeProg.TrucoSurvivors.Estados.ColorMecanica;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.EventoJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
@@ -17,7 +18,7 @@ public class Gato extends Joker {
             124,
             "Gato",
             "Gato",
-            "Al inicio de la ronda consume todos tus consumibles, gana +70 puntos truco y envido por cada uno (actual: +0)",
+            "Al inicio de la ronda consume todos tus consumibles, +70 puntos truco y +70 puntos envido por cada uno (actual: +0)",
             Rareza.muyRaro,
             6,
             Joker.FaseActivacion.INDEPENDIENTE,
@@ -47,8 +48,8 @@ public class Gato extends Joker {
 
     @Override
     public String getDescripcionRenderizada() {
-        return "Al inicio de la ronda consume todos tus consumibles, gana +70 puntos truco y envido por cada uno (actual: +"
-            + (int) getAcumulado() + ")";
+        return "Al inicio de la ronda consume todos tus consumibles,"+ ColorMecanica.PUNTOS.colorHex()+" +70[] puntos por cada uno (actual:"+ColorMecanica.PUNTOS.colorHex()+" +"
+            + (int) getAcumulado() + "[])";
     }
 
     @Override

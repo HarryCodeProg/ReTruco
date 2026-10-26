@@ -1,6 +1,7 @@
 package io.github.HarryCodeProg.TrucoSurvivors.Jokers.MuyRaro;
 
 import io.github.HarryCodeProg.TrucoSurvivors.Activacion.ContextoJuego;
+import io.github.HarryCodeProg.TrucoSurvivors.Estados.ColorMecanica;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.EventoJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
@@ -14,7 +15,7 @@ public class Cancha extends Joker {
 
     public Cancha() {
         super(113, "Cancha", "Cancha",
-            "+1 mano. +50 puntos truco por cada mano ganada de forma consecutiva (Actual: +0)",
+            "+1 mano. +50 puntos truco por cada mano ganada de forma consecutiva\n (Actual: +0)",
             Rareza.muyRaro, 8, Joker.FaseActivacion.INDEPENDIENTE,
             CategoriaJoker.TRUCO, CategoriaJoker.RACHAS, CategoriaJoker.DEPORTE);
     }
@@ -37,7 +38,7 @@ public class Cancha extends Joker {
     @Override
     public String getDescripcionRenderizada(Juego juego) {
         int actual = juego != null ? juego.getManosGanadasConsecutivas() : 0;
-        return "+1 mano. +50 puntos truco por cada mano ganada de forma consecutiva (Actual: +" + (actual * (int) PUNTOS_POR_CONSECUTIVO) + ")";
+        return "+1 mano. +50 puntos truco por cada mano ganada de forma consecutiva\n (Actual:"+ ColorMecanica.PUNTOS.colorHex()+" +" + (actual * (int) PUNTOS_POR_CONSECUTIVO) + "[])";
     }
 
     @Override

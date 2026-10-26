@@ -30,7 +30,11 @@ public class GestorGuardado {
         try {
             datos.version = DatosGuardado.VERSION_ACTUAL;
             FileHandle tmp = Gdx.files.local(ARCHIVO_TMP);
-            tmp.writeString(new Json().toJson(datos), false);
+            byte[] contenido = new Json().toJson(datos).getBytes(java.nio.charset.StandardCharsets.UTF_8);
+            try (java.io.FileOutputStream salida = new java.io.FileOutputStream(tmp.file())) {
+                salida.write(contenido);
+                salida.getFD().sync();
+            }
             // Si lo que escribimos no se puede leer, no pisamos nada
             if (leer(ARCHIVO_TMP) == null) { tmp.delete(); return; }
             FileHandle principal = Gdx.files.local(ARCHIVO);
@@ -38,7 +42,13 @@ public class GestorGuardado {
             if (principal.exists() && leer(ARCHIVO) != null) {
                 principal.copyTo(Gdx.files.local(ARCHIVO_BACKUP));
             }
-            tmp.moveTo(principal);
+            try {
+                java.nio.file.Files.move(tmp.file().toPath(), principal.file().toPath(),
+                    java.nio.file.StandardCopyOption.ATOMIC_MOVE, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            } catch (java.nio.file.AtomicMoveNotSupportedException e) {
+                java.nio.file.Files.move(tmp.file().toPath(), principal.file().toPath(),
+                    java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -58,12 +68,35 @@ public class GestorGuardado {
         try {
             Json json = new Json();
             json.setIgnoreUnknownFields(true); // permite quitar/renombrar campos entre versiones
-            DatosGuardado d = json.fromJson(DatosGuardado.class, f.readString());
-            return (d != null && d.jugador != null && d.estadoPantalla != null) ? d : null;
+            DatosGuardado d = json.fromJson(DatosGuardado.class, f.readString("UTF-8"));
+            return esValido(d) ? d : null;
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
+    }
+
+    private static boolean esValido(DatosGuardado d) {
+        if (d == null || d.version < 1 || d.version > DatosGuardado.VERSION_ACTUAL
+            || d.jugador == null || d.jugador.mazo == null || d.estadoPantalla == null
+            || d.rivalIndice < 0 || d.nivelActual < 1) return false;
+        if (!"TIENDA".equals(d.estadoPantalla) && !"SELECCION_RIVAL".equals(d.estadoPantalla)
+            && !"JUGANDO".equals(d.estadoPantalla)) return false;
+        DatosJugador j = d.jugador;
+        if (j.mano == null || j.jokers == null || j.santos == null || j.mazo.mazo == null
+            || j.mazo.cartasTomadas == null || j.mazo.cartasDescartadas == null) return false;
+        // Validar datos usados por la restauración antes de reemplazar un respaldo sano.
+        for (java.util.List<DatosCarta> lista : java.util.Arrays.asList(j.mano, j.mazo.mazo,
+            j.mazo.cartasTomadas, j.mazo.cartasDescartadas)) {
+            for (DatosCarta c : lista) {
+                if (c == null || c.numero < 1 || c.numero > 12 || c.palo == null) return false;
+                try { io.github.HarryCodeProg.TrucoSurvivors.Cartas.Palo.valueOf(c.palo); }
+                catch (IllegalArgumentException e) { return false; }
+            }
+        }
+        if ("JUGANDO".equals(d.estadoPantalla) && (d.juego == null || d.juego.manoRival == null
+            || d.juego.mesaJugador == null || d.juego.mesaRival == null || d.juego.resultados == null)) return false;
+        return true;
     }
 
     /** Arma el snapshot completo a partir del estado actual de GameScreen. */

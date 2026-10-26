@@ -17,7 +17,7 @@ public class Roca extends Joker {
             149,
             "Roca",
             "Roca",
-            "x0.1 por cada peso que tengas (Actual: x1)",
+            "x0.1 multiplicador por cada peso que tengas (Actual: x1)",
             Rareza.legendario,
             15,
             Joker.FaseActivacion.INDEPENDIENTE,
@@ -29,14 +29,14 @@ public class Roca extends Joker {
 
     @Override
     public String getDescripcionRenderizada() {
-        return "x0.1 por cada peso que tengas \n(Actual: x" + String.format("%.1f", 1 + getAcumulado()) + ")";
+        return "x0.1 multiplicador por cada peso que tengas \n(Actual: x" + String.format("%.1f", 1 + getAcumulado()) + ")";
     }
 
     @Override
     public String getDescripcionRenderizada(Juego juego) {
         if (juego != null && juego.getJugador() != null) {
             double mult = 1 + juego.getJugador().getPesos() * MULT_POR_PESO;
-            return "x0.1 por cada peso que tengas \n(Actual: x" + String.format("%.1f", mult) + ")";
+            return "x0.1 multiplicador por cada peso que tengas \n(Actual: x" + String.format("%.1f", mult) + ")";
         }
 
         return getDescripcionRenderizada();

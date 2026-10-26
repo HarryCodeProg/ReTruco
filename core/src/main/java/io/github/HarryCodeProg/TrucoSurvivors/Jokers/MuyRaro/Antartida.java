@@ -1,6 +1,7 @@
 package io.github.HarryCodeProg.TrucoSurvivors.Jokers.MuyRaro;
 
 import io.github.HarryCodeProg.TrucoSurvivors.Activacion.ContextoJuego;
+import io.github.HarryCodeProg.TrucoSurvivors.Estados.ColorMecanica;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.EventoJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
@@ -39,7 +40,7 @@ public class Antartida extends Joker {
 
     @Override
     public String getDescripcionRenderizada() {
-        return "X4 multiplicador cada 20 activaciones de cartas (restante: " + restante + ")";
+        return "X4 multiplicador cada 20 activaciones de cartas (restante:"+ ColorMecanica.NUMERO.colorHex()+ restante + "[])";
     }
 
     @Override

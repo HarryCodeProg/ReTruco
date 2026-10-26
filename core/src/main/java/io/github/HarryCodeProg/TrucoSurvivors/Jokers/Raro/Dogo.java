@@ -52,6 +52,6 @@ public class Dogo extends Joker {
         for (Carta carta : juego.getJugador().getMano()) {
             if (carta.getNumero() % 2 == 0) cantidadPares++;
         }
-        return getDescripcion() + "\n(Actual: [+#CAFE]+" + (cantidadPares * 25) + "[] puntos)";
+        return getDescripcion() + "\n(Actual: +" + (cantidadPares * 25) + "[] puntos)";
     }
 }

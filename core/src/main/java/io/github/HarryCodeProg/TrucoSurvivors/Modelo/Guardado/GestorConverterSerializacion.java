@@ -16,6 +16,16 @@ public class GestorConverterSerializacion {
 
     public static DatosCarta aDatos(Carta c) {
         DatosCarta d = new DatosCarta();
+        d.id = c.getIdGuardado();
+        d.tieneEstadoTemporal = true;
+        d.poderTrucoActual = c.getValorTrucoActual();
+        d.aporteTrucoActual = c.getPuntosTrucoAporteActual();
+        d.poderEnvidoActual = c.getValorEnvidoActual();
+        d.aporteEnvidoActual = c.getPuntosEnvidoAporteActual();
+        d.multPoderTrucoTemporal = c.getMultiplicadorPoderTruco() - c.getMultiplicadorPoderTrucoBase();
+        d.multAporteTrucoTemporal = c.getMultiplicadorAporteTruco() - c.getMultiplicadorAporteTrucoBase();
+        d.multPoderEnvidoTemporal = c.getMultiplicadorPoderEnvido() - c.getMultiplicadorPoderEnvidoBase();
+        d.multAporteEnvidoTemporal = c.getMultiplicadorAporteEnvido() - c.getMultiplicadorAporteEnvidoBase();
         d.numero = c.getNumero();
         d.palo = c.getPalo().name();
         d.bonusPoderTrucoPermanente = c.getBonusPoderTrucoPermanente();
@@ -37,6 +47,10 @@ public class GestorConverterSerializacion {
             d.multiplicadorPoderTrucoBase, d.multiplicadorAporteTrucoBase,
             d.multiplicadorPoderEnvidoBase, d.multiplicadorAporteEnvidoBase
         );
+        c.restaurarIdGuardado(d.id);
+        if (d.tieneEstadoTemporal) c.restaurarTemporales(d.poderTrucoActual, d.aporteTrucoActual,
+            d.poderEnvidoActual, d.aporteEnvidoActual, d.multPoderTrucoTemporal,
+            d.multAporteTrucoTemporal, d.multPoderEnvidoTemporal, d.multAporteEnvidoTemporal);
         return c;
     }
 
@@ -54,6 +68,8 @@ public class GestorConverterSerializacion {
         for (DatosCarta dc : d.mazo) m.agregarCarta(desdeDatos(dc));
         for (DatosCarta dc : d.cartasTomadas) m.getCartasTomadas().add(desdeDatos(dc));
         for (DatosCarta dc : d.cartasDescartadas) m.getCartasDescartadas().add(desdeDatos(dc));
+        vincularTomadas(m.getCartasTomadas(), m.getCartasDescartadas());
+        m.restaurarTamañoMazo(d.tamañoMazo >= 0 ? d.tamañoMazo : d.mazo.size() + d.cartasTomadas.size());
         return m;
     }
 
@@ -71,6 +87,7 @@ public class GestorConverterSerializacion {
         if (j == null) return null;
         j.setAcumulado(d.acumulado);
         j.setEstadoExtra(d.estadoExtra);
+        if (d.precioVenta >= 0) j.setPrecioVenta(d.precioVenta);
         return j;
     }
 
@@ -124,6 +141,7 @@ public class GestorConverterSerializacion {
         }
         if (d.mazo != null) j.setMazo(desdeDatos(d.mazo));
         for (DatosCarta dc : d.mano) j.agregarCarta(desdeDatos(dc));
+        vincularTomadas(j.getMazo().getCartasTomadas(), j.getMano());
         j.aplicarExtrasGuardados(d);
         j.setUltimoSantoUsado(d.ultimoSantoUsadoId >= 0 ? poolSantos.crearPorId(d.ultimoSantoUsadoId) : null);
         j.sumarPesos(d.pesos - j.getPesos());
@@ -147,6 +165,9 @@ public class GestorConverterSerializacion {
     }
 
     private static boolean mismaCarta(Carta a, Carta b) {
+        if (a.getIdGuardado() != null && b.getIdGuardado() != null)
+            return a.getIdGuardado().equals(b.getIdGuardado());
+        // Guardados anteriores a v3: emparejamiento uno a uno por valores.
         DatosCarta x = aDatos(a), y = aDatos(b);
         return x.numero == y.numero && x.palo.equals(y.palo)
             && x.bonusPoderTrucoPermanente == y.bonusPoderTrucoPermanente

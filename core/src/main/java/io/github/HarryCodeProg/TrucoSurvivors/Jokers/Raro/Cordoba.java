@@ -14,7 +14,7 @@ import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 public class Cordoba extends Joker {
 
     public Cordoba() {
-        super(87, "Cordoba", "Cordoba", "+5 multiplicador envido por cada $5 que tengas (actual: 0)",
+        super(87, "Cordoba", "Cordoba", "+5 multiplicador envido por cada $5 que tengas\n (actual: 0)",
                 Rareza.raro, 6, Joker.FaseActivacion.INDEPENDIENTE,
                 CategoriaJoker.ENVIDO, CategoriaJoker.ECONOMIA, CategoriaJoker.TERRITORIO);
     }
@@ -51,7 +51,7 @@ public class Cordoba extends Joker {
         if (juego != null && juego.getTurnoActual() != null) {
             int dinero = juego.getTurnoActual().getPesos();
             int bonusActual = (dinero / 5) * 5;
-            return getDescripcion().replace("(actual: 0)", "(actual: " + bonusActual + ")");
+            return getDescripcion().replace("(actual: 0)", "\n(actual: " + bonusActual + ")");
         }
         return getDescripcion();
     }

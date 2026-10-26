@@ -1,6 +1,7 @@
 package io.github.HarryCodeProg.TrucoSurvivors.Jokers.Comun;
 
 import io.github.HarryCodeProg.TrucoSurvivors.Activacion.ContextoJuego;
+import io.github.HarryCodeProg.TrucoSurvivors.Estados.ColorMecanica;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.EventoJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
@@ -59,6 +60,6 @@ public class Soda extends Joker {
     public String getDescripcionRenderizada(Juego juego) {
         // Mostramos dinámicamente cuánta Soda le queda usando el color AZUL para los puntos
         int actual = (int) getAcumulado();
-        return "+125 puntos truco, -5 puntos truco cada mano jugada.\n(Actual: +" + actual + ")";
+        return "+125 puntos truco, -5 puntos truco cada mano jugada.\n(Actual: +"+ ColorMecanica.PUNTOS_TRUCO.colorHex() + actual + "[])";
     }
 }

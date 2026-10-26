@@ -74,7 +74,7 @@ public class Perro extends Joker {
         if (gastado >= META_GASTO) {
             return "X3 multiplicador. +1 tamaño jokers (gastado $" + META_GASTO + ")";
         }
-        return getDescripcion() + " ($" + gastado + "/" + META_GASTO + ")";
+        return getDescripcion() + " ($" + gastado + "/$" + META_GASTO + ")";
     }
 
     @Override

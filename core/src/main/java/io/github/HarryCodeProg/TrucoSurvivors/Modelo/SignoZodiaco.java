@@ -6,17 +6,17 @@ import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Rareza;
 import io.github.HarryCodeProg.TrucoSurvivors.Jugador;
 
 public enum SignoZodiaco {
-    ARIES("01_aries", "Aries", "+1 lugar para ofertas de jokers en las tiendas."),
-    TAURO("02_tauro", "Tauro", "+1 descarte disponible por ronda."),
-    GEMINIS("03_geminis", "Géminis", "Duplica los pesos que tenés al consumirlo."),
-    CANCER("04_cancer", "Cáncer", "+1 lugar para ofertas de cartas en las tiendas."),
-    LEO("05_leo", "Leo", "+1 carta al tamaño de tu mano."),
-    VIRGO("06_virgo", "Virgo", "+1 espacio para llevar santos."),
+    ARIES("01_aries", "Aries", "+1 espacio jokers en tienda."),
+    TAURO("02_tauro", "Tauro", "+1 descarte."),
+    GEMINIS("03_geminis", "Géminis", "Duplica los pesos."),
+    CANCER("04_cancer", "Cáncer", "+1 espacio cartas en tienda."),
+    LEO("05_leo", "Leo", "+1 tamaño mano."),
+    VIRGO("06_virgo", "Virgo", "+1 espacio consumibles."),
     LIBRA("07_libra", "Libra", "El próximo signo que no sea Libra aplica su efecto dos veces. No se acumula."),
-    ESCORPIO("08_escorpio", "Escorpio", "+1 lugar para ofertas de santos en las tiendas."),
-    SAGITARIO("09_sagitario", "Sagitario", "+1 espacio para llevar jokers."),
-    CAPRICORNIO("10_capricornio", "Capricornio", "Reduce a la mitad los precios de los artículos de esta tienda y las siguientes (redondeo hacia arriba)."),
-    ACUARIO("11_acuario", "Acuario", "+10 rerolls gratis. Los que sobren se guardan para las próximas tiendas."),
+    ESCORPIO("08_escorpio", "Escorpio", "+1 espacio santos en tienda."),
+    SAGITARIO("09_sagitario", "Sagitario", "+1 espacio jokers en mano."),
+    CAPRICORNIO("10_capricornio", "Capricornio", "Reduce 25% los precio de la tienda."),
+    ACUARIO("11_acuario", "Acuario", "+10 rerolls gratis."),
     PISCIS("12_piscis", "Piscis", "Recibís un joker legendario aleatorio, si hay uno disponible y tenés espacio libre.");
 
     private final String nombreRegion;
@@ -59,8 +59,8 @@ public enum SignoZodiaco {
                 break;
             case SAGITARIO: jugador.setTamañoJokers(jugador.getTamañoJokers() + 1); break;
             case CAPRICORNIO:
-                jugador.aplicarDescuentoTiendaPersistente(0.5);
-                if (tienda != null) tienda.aplicarDescuento50();
+                jugador.aplicarDescuentoTiendaPersistente(0.75);
+                if (tienda != null) tienda.aplicarDescuento();
                 break;
             case ACUARIO:
                 jugador.sumarRerollsGratisTienda(10);

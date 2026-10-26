@@ -28,7 +28,7 @@ public class Misiones extends Joker {
 
     @Override
     public Joker copiar() {
-        Cerveza copia = new Cerveza();
+        Misiones copia = new Misiones();
         copiarEstado(copia);
         return copia;
     }

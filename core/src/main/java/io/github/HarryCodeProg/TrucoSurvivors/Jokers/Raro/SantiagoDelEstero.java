@@ -16,7 +16,7 @@ public class SantiagoDelEstero extends Joker {
             82,
             "Santiago del Estero",
             "SantiagoDelEstero",
-            "X1 Multiplicador Truco y Envido por cada espacio de consumible (Santo) vacío.",
+            "X1 Multiplicador por cada espacio de consumible vacío.",
             Rareza.raro,
             5,
             INDEPENDIENTE,

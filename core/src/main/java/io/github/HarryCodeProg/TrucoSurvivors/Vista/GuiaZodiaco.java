@@ -31,7 +31,7 @@ public class GuiaZodiaco {
     public boolean estaAbierta() { return abierta; }
 
     public boolean update(float x, float y, boolean click) {
-        hover = x >= 1080 && x <= 1270 && y >= 38 && y <= 78;
+        hover = x >= 1080 && x <= 1270 && y >= 160 && y <= 200;
         if (abierta) {
             // Detectar hover del botón VOLVER
             hoverVolver = x >= BTN_X && x <= BTN_X + BTN_W && y >= BTN_Y && y <= BTN_Y + BTN_H;
@@ -48,16 +48,16 @@ public class GuiaZodiaco {
     }
 
     public void renderResumen(SpriteBatch batch, Main game, RuedaZodiaco.Estado estado, SignoZodiaco resultado) {
-        texto(batch, game, "ZODÍACO", 1080, 236, 190, 0.75f, 1, true);
+        texto(batch, game, "", 1080, 356, 190, 0.75f, 1, true);
         String mensaje = estado == RuedaZodiaco.Estado.SIN_GIRAR ? "Tocá la rueda para girar"
             : estado == RuedaZodiaco.Estado.GIRANDO ? "Tu destino está girando..."
             : estado == RuedaZodiaco.Estado.CONSUMIENDO ? "Signo consumido" : "Tocá la rueda para consumir";
-        if (resultado != null) {
-            texto(batch, game, resultado.getNombre(), 1080, 210, 190, 0.85f, 1, true);
-            texto(batch, game, resultado.getDescripcion(), 1080, 182, 190, 0.7f, 1, false);
-        }
-        texto(batch, game, mensaje, 1080, 100, 190, 0.54f, 1, false);
-        texto(batch, game, "Ver los 12 signos", 1080, 64, 190, 0.65f, hover ? 1 : 0.8f, true);
+        /*if (resultado != null) {
+            texto(batch, game, resultado.getNombre(), 1080, 330, 190, 0.85f, 1, true);
+            texto(batch, game, resultado.getDescripcion(), 1080, 302, 190, 0.7f, 1, false);
+        }*/
+        texto(batch, game, mensaje, 1080, 220, 190, 0.54f, 1, false);
+        texto(batch, game, "Ver los 12 signos", 1080, 184, 190, 0.65f, hover ? 1 : 0.8f, true);
     }
 
     public void render(SpriteBatch batch, Main game) {
@@ -167,13 +167,7 @@ public class GuiaZodiaco {
     }
 
     private TextureRegion buscarIconoZodiaco(Main game, SignoZodiaco s) {
-        TextureRegion r = game.getAtlasZodiaco().findRegion(s.getNombreRegion());
-        if (r == null) r = game.getAtlasZodiaco().findRegion(s.name().toLowerCase());
-        if (r == null && s.getNombreRegion().contains("_")) {
-            String sinPrefijo = s.getNombreRegion().substring(s.getNombreRegion().indexOf('_') + 1);
-            r = game.getAtlasZodiaco().findRegion(sinPrefijo);
-        }
-        return r;
+        return OverlayConsumoZodiaco.obtenerRegionZodiaco(s);
     }
 
     static void aro(SpriteBatch batch, Main game, float x, float y, float radio, float giro, float alpha) {

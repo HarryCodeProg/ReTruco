@@ -11,9 +11,10 @@ import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 public class Damajuana extends Joker {
 
     private static final int BEBIDAS_REQUERIDAS = 3;
+    private static final double MULTIPLICADOR = 2.0;
 
     public Damajuana(){
-        super(41, "Damajuana", "Damajuana", "Si tenés 3 jokers 'Bebida', x3 multiplicador truco",
+        super(41, "Damajuana", "Damajuana", "Si tenés 3 jokers 'Bebida', x2 multiplicador truco",
             Rareza.comun, 4, Joker.FaseActivacion.INDEPENDIENTE,
             CategoriaJoker.TRUCO,
             CategoriaJoker.BEBIDA
@@ -31,6 +32,6 @@ public class Damajuana extends Joker {
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego){
         if (evento != EventoJuego.ANTES_DE_SUMAR_TRUCO) return;
         if (ctx.contarJokersConCategoria(CategoriaJoker.BEBIDA, this) < BEBIDAS_REQUERIDAS) return;
-        ctx.getResolucionActual().multiplicarMult(3, getNombre(), this);
+        ctx.getResolucionActual().multiplicarMult(MULTIPLICADOR, getNombre(), this);
     }
 }

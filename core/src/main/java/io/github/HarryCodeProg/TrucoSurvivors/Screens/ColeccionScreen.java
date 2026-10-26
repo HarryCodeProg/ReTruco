@@ -145,7 +145,6 @@ public class ColeccionScreen {
         return false;
     }
 
-    // --- NUEVO MÉTODO RENDER ---
     public void render(SpriteBatch batch, float delta) {
         BitmapFont font = game.getFuenteTitulo();
         /*GlyphLayout titleLayout = new GlyphLayout(font, "COLECCIÓN");

@@ -12,7 +12,7 @@ public class Favaloro extends Joker {
 
     public Favaloro() {
         super(132, "Favaloro", "Favaloro",
-            "Si al acabar las manos no llegas al puntaje meta, pasas igual al rival, este joker se consume y recibes 100 pesos",
+            "Si al acabar las manos no llegas al puntaje meta, pasas igual al rival, este joker se consume y recibes $100",
             Rareza.epico, 8, Joker.FaseActivacion.INDEPENDIENTE,
             CategoriaJoker.ECONOMIA, CategoriaJoker.CONSUMIBLES, CategoriaJoker.PERSONA);
     }

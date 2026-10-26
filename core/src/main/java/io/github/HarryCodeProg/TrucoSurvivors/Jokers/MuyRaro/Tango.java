@@ -15,7 +15,7 @@ public class Tango extends Joker {
             114,
             "Tango",
             "Tango",
-            "+2 descartes.\n+8 y X0.3 multiplicador truco por cada descarte restante al derrotar a un rival.",
+            "+2 descartes.\n+8 multiplicador truco y X0.3 multiplicador truco por cada descarte restante al derrotar a un rival.",
             Rareza.muyRaro,
             8, // placeholder: ajustá el coste real
             Joker.FaseActivacion.INDEPENDIENTE,
@@ -63,7 +63,7 @@ public class Tango extends Joker {
         double ahorrados = getAcumulado();
         int sumaActual = (int) (ahorrados * 8);
         double xActual = Math.round((1.0 + (ahorrados * 0.3)) * 100.0) / 100.0;
-        return getDescripcion() + "\n(Actual: +" + sumaActual + " mult y X" + xActual + " mult)";
+        return getDescripcion() + "\n(Actual: +" + sumaActual + " y X" + xActual + ")";
     }
 
     @Override

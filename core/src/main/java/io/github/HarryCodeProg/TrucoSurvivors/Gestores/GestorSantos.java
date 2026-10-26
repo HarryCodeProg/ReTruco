@@ -30,6 +30,8 @@ public class GestorSantos {
     private final ModoSeleccionSanto modoSeleccion = new ModoSeleccionSanto();
     private java.util.function.Supplier<ArrayList<VistaCarta>> supplierCartasJugador;
     private Juego juegoActual;
+    private boolean cambiosEnCurso;
+    public boolean hayOperacionPendiente() { return cambiosEnCurso || hayOverlayActivo(); }
 
     public GestorSantos(Main game, float areaX, float areaY, float areaAncho, float altoSanto) {
         this.game = game;
@@ -50,6 +52,7 @@ public class GestorSantos {
     }
 
     private void aplicarCambiosDiferidosConFlipYEsperar(Santo santo, Runnable alTerminarTodo) {
+        cambiosEnCurso = true;
         if (!santo.tieneCambiosDiferidos()) {
             terminarSeleccionCuandoCorresponda(alTerminarTodo);
             return;
@@ -154,7 +157,7 @@ public class GestorSantos {
     }
 
     public boolean hayOverlayActivo() {
-        return overlayConsumo.estaActivo() || overlaySeleccion.estaVisible() || modoSeleccion.estaActivo();
+        return cambiosEnCurso || overlayConsumo.estaActivo() || overlaySeleccion.estaVisible() || modoSeleccion.estaActivo();
     }
 
     public ArrayList<VistaSanto> getSantos() { return santos; }
@@ -185,7 +188,7 @@ public class GestorSantos {
     }
 
     public void usarSeleccionado(VistaSanto vista, Jugador jugador, ArrayList<Carta> seleccion) {
-        if (vista == null || jugador == null) return;
+        if (vista == null || jugador == null || cambiosEnCurso || overlayConsumo.estaActivo()) return;
         Santo santo = vista.getSanto();
         TextureRegion region = game.getAtlasSantos().findRegion(santo.getNombreRegion());
         if (region == null) return;
@@ -205,6 +208,7 @@ public class GestorSantos {
                 overlayConsumo.abrir(santo, region, xSanto, ySanto, anchoSanto, altoSanto, () -> {
                     jugador.eliminarSanto(santo);
                     overlayConsumo.confirmarCierre();
+                    cambiosEnCurso = false;
                 });
             });
             return;
@@ -217,12 +221,13 @@ public class GestorSantos {
             overlayConsumo.abrir(santo, region, xSanto, ySanto, anchoSanto, altoSanto, () -> {
                 jugador.eliminarSanto(santo);
                 overlayConsumo.confirmarCierre();
+                cambiosEnCurso = false;
             });
         });
     }
 
     public void comprarYUsar(Santo santo, Jugador jugador) {
-        if (santo == null) return;
+        if (santo == null || hayOperacionPendiente()) return;
         TextureRegion region = game.getAtlasSantos().findRegion(santo.getNombreRegion());
         if (region == null) return;
 
@@ -240,6 +245,7 @@ public class GestorSantos {
             aplicarCambiosDiferidosConFlipYEsperar(santo, () -> {
                 overlayConsumo.abrir(santo, region, xSanto, ySanto, anchoSanto, altoSanto, () -> {
                     overlayConsumo.confirmarCierre();
+                    cambiosEnCurso = false;
                     if (alConsumirSantoCallback != null) alConsumirSantoCallback.run();
                 });
             });
@@ -253,6 +259,7 @@ public class GestorSantos {
             aplicarCambiosDiferidosConFlipYEsperar(santo, () -> {
                 overlayConsumo.abrir(santo, region, xSanto, ySanto, anchoSanto, altoSanto, () -> {
                     overlayConsumo.confirmarCierre();
+                    cambiosEnCurso = false;
                     if (alConsumirSantoCallback != null) alConsumirSantoCallback.run();
                 });
             });

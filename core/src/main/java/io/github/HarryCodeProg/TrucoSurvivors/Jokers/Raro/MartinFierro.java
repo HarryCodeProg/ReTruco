@@ -2,6 +2,7 @@ package io.github.HarryCodeProg.TrucoSurvivors.Jokers.Raro;
 
 import io.github.HarryCodeProg.TrucoSurvivors.Activacion.ContextoJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Carta;
+import io.github.HarryCodeProg.TrucoSurvivors.Estados.ColorMecanica;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.EventoJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
@@ -12,7 +13,7 @@ public class MartinFierro extends Joker {
 
     public MartinFierro() {
         super(75, "Martin Fierro", "MartinFierro",
-            "Al ganar al rival, genera +1 reactivacion de las cartas por cada otro joker 'Nacional' (actual: 0)",
+            "Al ganar al rival, genera +1 reactivacion de las cartas por cada otro joker 'Nacional' (actual:"+ColorMecanica.NUMERO.colorHex()+"0[])",
             Rareza.raro, 6, Joker.FaseActivacion.AL_PUNTUAR_CARTA,
             CategoriaJoker.ACTIVACION, CategoriaJoker.NACIONAL, CategoriaJoker.CULTURA);
     }
@@ -47,12 +48,12 @@ public class MartinFierro extends Joker {
                 }
             }
         }
-        return "Al ganar al rival, genera +1 reactivacion de las cartas por cada otro joker 'Nacional' (actual: " + cantidadNacionales + ")";
+        return "Al ganar al rival, genera +1 reactivacion de las cartas por cada otro joker 'Nacional' (actual: "+ ColorMecanica.NUMERO.colorHex() + cantidadNacionales + "[])";
     }
 
     @Override
     public String getDescripcionRenderizada() {
-        return "Al ganar al rival, genera +1 reactivacion de las cartas por cada otro joker 'Nacional' (actual: 0)";
+        return "Al ganar al rival, genera +1 reactivacion de las cartas por cada otro joker 'Nacional' (actual:"+ColorMecanica.NUMERO.colorHex()+"0[])";
     }
 
     @Override

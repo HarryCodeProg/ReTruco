@@ -87,6 +87,7 @@ public class VistaCarta implements Arrastrable{
     private float progresoQuema = 0f;
     private boolean quemando = false;
     private Runnable alTerminarQuema;
+    private float rotacionBase = 0f;
 
     /** Ahora recibe el TextureAtlas compartido en vez de crear su propia Texture. */
     public VistaCarta(Carta carta, boolean bocaAbajo, TextureAtlas atlas) {
@@ -156,10 +157,10 @@ public class VistaCarta implements Arrastrable{
         float escalaNumerosOriginal = fontNumeros.getScaleX();
         fontNumeros.getData().setScale(escalaNumerosOriginal * 0.75f);
         // --- 2. COLORES Y TEXTOS ---
-        Color colorPTruco = Boton.TipoColor.TURQUESA.base;
-        Color colorTruco = Boton.TipoColor.CIAN.base;
-        Color colorPEnvido = Boton.TipoColor.BRONCE.base;
-        Color colorEnvido = Boton.TipoColor.CAFE.base;
+        Color colorPTruco = Boton.TipoColor.CIAN.base;
+        Color colorTruco = Boton.TipoColor.TURQUESA.base;
+        Color colorPEnvido = Boton.TipoColor.NARANJA.base;
+        Color colorEnvido = Boton.TipoColor.NARANJA_OSCURO.base;
         Color grisOscuro = new Color(0.15f, 0.15f, 0.17f, 1f);
         String lineaNombrePura = carta.getNumero() + " de " + carta.paloToString();
         String lineaNombre = io.github.HarryCodeProg.TrucoSurvivors.Cartas.Palo.colorearTexto(lineaNombrePura);
@@ -246,6 +247,13 @@ public class VistaCarta implements Arrastrable{
         this.quemando = true;
         this.progresoQuema = 0f;
         this.alTerminarQuema = alTerminar;
+    }
+
+    /** Fija la rotación y su target en un solo paso (útil para cartas decorativas). */
+    public void setRotation(float rotacion) {
+        this.rotation = rotacion;
+        this.targetRotation = rotacion;
+        this.rotacionBase = rotacion;
     }
 
     public boolean isQuemando() { return quemando; }
@@ -410,7 +418,8 @@ public class VistaCarta implements Arrastrable{
             huboMovimientoSignificativo = false;
             dragOffsetX = mouseX - x;
             dragOffsetY = mouseY - y;
-            ALGUN_DRAG_ACTIVO = true;
+            // 1. Al empezar el arrastre
+            if (!decorativa) ALGUN_DRAG_ACTIVO = true;
             fisicaTiltArrastre.iniciarArrastre(mouseX);
         }
         if (dragging) {
@@ -421,7 +430,8 @@ public class VistaCarta implements Arrastrable{
             }
         }
         if (!Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
-            if (dragging && !huboMovimientoSignificativo) {
+            // 2. Al hacer un clic simple y soltar (sin arrastrar)
+            if (dragging && !huboMovimientoSignificativo && !decorativa) {
                 seleccionada = !seleccionada;
                 GestorSonidos sonidos = Main.getInstance().getGestorSonidos();
                 if (sonidos != null) {
@@ -429,7 +439,8 @@ public class VistaCarta implements Arrastrable{
                     else sonidos.reproducirConVariacion("deseleccionar");
                 }
             }
-            if (dragging) ALGUN_DRAG_ACTIVO = false;
+            // 3. Al terminar el arrastre
+            if (dragging && !decorativa) ALGUN_DRAG_ACTIVO = false;
             dragging = false;
         }
         if (dragging) {
@@ -478,7 +489,7 @@ public class VistaCarta implements Arrastrable{
             return;
         }
         if (!enModal) {
-            if (!ALGUN_DRAG_ACTIVO) {
+            if (!ALGUN_DRAG_ACTIVO || decorativa) {
                 hover = contiene(mouseX, mouseY);
             } else {
                 hover = false;
@@ -503,7 +514,7 @@ public class VistaCarta implements Arrastrable{
                 targetTiltX = 0f;
                 targetTiltY = 0f;
             } else if (hover && !animando) {
-                targetRotation = 0f;
+                targetRotation = rotacionBase;
                 float cx = x + (width * scale) / 2f;
                 float cy = y + visualOffsetY + (height * scale) / 2f;
                 float mouseDeltaX = (mouseX - cx) / ((width * scale) / 2f);
@@ -513,7 +524,7 @@ public class VistaCarta implements Arrastrable{
                 targetTiltY = mouseDeltaX * MAX_TILT;  // Inclinación 3D
                 targetTiltX = -mouseDeltaY * MAX_TILT; // Inclinación 3D
             } else {
-                targetRotation = 0f;
+                targetRotation = rotacionBase;
                 targetTiltX = 0f;
                 targetTiltY = 0f;
             }
@@ -640,6 +651,14 @@ public class VistaCarta implements Arrastrable{
         }
         s.reproducirConVariacion(clave);
     }
+
+    private boolean decorativa = false;
+
+    /** Las cartas decorativas del menú calculan su hover sin depender del flag global de arrastre. */
+    public void setDecorativa(boolean d) { this.decorativa = d; }
+
+    public static void resetearDragGlobal() { ALGUN_DRAG_ACTIVO = false; }
+    public static boolean isAlgunDragActivo() { return ALGUN_DRAG_ACTIVO; }
 
     public float getCentroX() { return x + (width * scale) / 2f; }
     public float getCentroY() { return y + (height * scale) / 2f; }

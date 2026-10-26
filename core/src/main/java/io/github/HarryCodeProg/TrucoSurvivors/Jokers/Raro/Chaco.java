@@ -16,7 +16,7 @@ public class Chaco extends Joker {
             83,
             "Chaco",
             "Chaco",
-            "Gana X0.4 de multiplicador truco por cada mano jugada.\n(Se reinicia al final de la ronda)",
+            "Gana X0.4 multiplicador truco por cada mano jugada.\n(Se reinicia al final de la ronda)",
             Rareza.raro,
             5,
             INDEPENDIENTE,

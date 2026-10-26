@@ -11,17 +11,17 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Carta;
+import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Palo;
 import io.github.HarryCodeProg.TrucoSurvivors.Main;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.Accion;
-import io.github.HarryCodeProg.TrucoSurvivors.Vista.Boton;
-import io.github.HarryCodeProg.TrucoSurvivors.Vista.FisicaTiltArrastre;
-import io.github.HarryCodeProg.TrucoSurvivors.Vista.PanelPersonalizar;
+import io.github.HarryCodeProg.TrucoSurvivors.Vista.*;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.InputAdapter;
-import io.github.HarryCodeProg.TrucoSurvivors.Vista.ScissorUtil;
 
 public class MainMenuScreen implements Screen {
     private Main game;
@@ -38,18 +38,10 @@ public class MainMenuScreen implements Screen {
     private float tiempoDecoracion = 0f;
     private String subtituloActual;
     private Texture logo1;
-
     private final float espadaXOriginal = 565f;
     private final float espadaYOriginal = 580f;
-    private float espadaX = espadaXOriginal;
-    private float espadaY = espadaYOriginal;
-    private TextureRegion espadaUno;
-    private boolean arrastrandoEspada = false;
-    private float offsetEspadaX;
-    private float offsetEspadaY;
     private final FisicaTiltArrastre fisicaTiltEspada = new FisicaTiltArrastre();
     private float rotacionEspada = 0f;
-
     private enum EstadoMenu {
         PRINCIPAL,
         CONTINUAR_O_NUEVA,
@@ -58,26 +50,26 @@ public class MainMenuScreen implements Screen {
         COLECCION
     }
     private EstadoMenu estadoActual = EstadoMenu.PRINCIPAL;
-
     private Boton botonPersonalizar;
     private Boton botonContinuar;
     private Boton botonPartidaNueva;
     private Boton botonVolverContinuar;
-
     private InputProcessor inputProcessorAnterior;
-
     // Paneles modulares (ya no son Screens, son paneles internos)
     private OpcionesScreen panelOpciones;
     private PanelPersonalizar panelPersonalizar;
     private ColeccionScreen panelColeccion; // Asumo que la adaptaste igual que OpcionesScreen
-
     private final String[] frasesSubtitulo = {
         "EL TRUCO REINVENTADO",
     };
+    private VistaCarta[] cartasDecorativas;
+    private VistaCarta cartaLogo;
 
     public MainMenuScreen(Main game) {
         this.game = game;
         camera = new OrthographicCamera();
+        camera.near = -1000f;
+        camera.far = 1000f;
         viewport = new FitViewport(1280, 720, camera);
         mouseWorld = new Vector3();
         font = game.getFuenteTitulo();
@@ -102,9 +94,22 @@ public class MainMenuScreen implements Screen {
         panelPersonalizar = new PanelPersonalizar(game, fondoPlasma); // Se pasa el fondo
         panelColeccion = new ColeccionScreen(game); // Recordá adaptarla para que no sea Screen
 
-        cartaDecorativa = game.getAtlasCartas().findRegion("back");
+        //cartaDecorativa = game.getAtlasCartas().findRegion("back");
         logo1 = new Texture("ui/logo1.png");
-        espadaUno = game.getAtlasCartas().findRegion("1_espada");
+        cartaLogo = new VistaCarta(new Carta(1, Palo.ESPADA), false, game.getAtlasCartas());
+        cartaLogo.setDecorativa(true);
+        cartaLogo.setTamaño(62f, 88f);
+        cartaLogo.setPosition(espadaXOriginal, espadaYOriginal);
+        cartaLogo.setHandPosition(espadaXOriginal, espadaYOriginal);
+        cartasDecorativas = new VistaCarta[4];
+        for (int i = 0; i < cartasDecorativas.length; i++) {
+            cartasDecorativas[i] = new VistaCarta(new Carta(1, Palo.ESPADA), true, game.getAtlasCartas());
+            cartasDecorativas[i].setDecorativa(true);
+        }
+        cartasDecorativas[0].setTamaño(110f, 165f); cartasDecorativas[0].setRotation(-16f);
+        cartasDecorativas[1].setTamaño(110f, 165f); cartasDecorativas[1].setRotation( 14f);
+        cartasDecorativas[2].setTamaño( 84f, 126f); cartasDecorativas[2].setRotation( 10f);
+        cartasDecorativas[3].setTamaño( 84f, 126f); cartasDecorativas[3].setRotation( -9f);
         int indiceRandom = com.badlogic.gdx.math.MathUtils.random(0, frasesSubtitulo.length - 1);
         subtituloActual = frasesSubtitulo[indiceRandom];
         prepararFondo();
@@ -124,15 +129,11 @@ public class MainMenuScreen implements Screen {
         ScissorUtil.setViewport(viewport);
         camera.update();
         game.batch.setProjectionMatrix(camera.combined);
-
         mouseWorld.set(Gdx.input.getX(), Gdx.input.getY(), 0);
         // El viewport ajusta el mapeo del mouse restando las barras negras
         viewport.unproject(mouseWorld);
-
-        actualizarEspadaDecorativa();
-
+        actualizarCartaLogo(delta);
         boolean click = Gdx.input.justTouched();
-
         // --- LÓGICA DE ACTUALIZACIÓN POR ESTADO ---
         if (estadoActual == EstadoMenu.PRINCIPAL) {
             botonJugar.update(mouseWorld.x, mouseWorld.y);
@@ -140,7 +141,6 @@ public class MainMenuScreen implements Screen {
             botonOpciones.update(mouseWorld.x, mouseWorld.y);
             botonPersonalizar.update(mouseWorld.x, mouseWorld.y);
             botonSalir.update(mouseWorld.x, mouseWorld.y);
-
             if (botonJugar.fueCliqueado(mouseWorld.x, mouseWorld.y)) {
                 if (game.hayGuardadoDisponible()) {
                     estadoActual = EstadoMenu.CONTINUAR_O_NUEVA;
@@ -203,37 +203,31 @@ public class MainMenuScreen implements Screen {
                 estadoActual = EstadoMenu.PRINCIPAL;
             }
         }
-
         // --- RENDERIZADO ---
         Gdx.gl.glClearColor(0f, 0f, 0f, 1f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         tiempoDecoracion += delta;
-
         game.batch.begin();
         fondoPlasma.render(game.batch, delta);
-        dibujarDecoracion(game.batch);
+        // Limpiar cualquier estado que haya dejado el shader del plasma
+        game.batch.setShader(null);
+        game.batch.setProjectionMatrix(camera.combined);
+        game.batch.setColor(Color.WHITE);
+        dibujarDecoracion(game.batch, delta);
         game.batch.end();
-
         game.batch.begin();
         // Logo y espada siempre visibles en el menú principal (o podés condicionarlo)
         float logoAncho = 420f, logoAlto = 140f;
         float logoX = (viewport.getWorldWidth() - logoAncho) / 2f;
         game.batch.setColor(Color.WHITE);
         game.batch.draw(logo1, logoX, 550f, logoAncho, logoAlto);
-
-        if (espadaUno != null) {
-            float espadaAncho = 62f, espadaAlto = 88f;
-            game.batch.setColor(Color.WHITE);
-            game.batch.draw(espadaUno, espadaX, espadaY, espadaAncho / 2f, espadaAlto / 2f, espadaAncho, espadaAlto, 1f, 1f, rotacionEspada);
-        }
-
+        if (cartaLogo != null) cartaLogo.render(game.batch, game);
         BitmapFont fontUI = game.getFuenteUI();
         fontUI.setColor(1f, 1f, 1f, 0.75f);
         GlyphLayout subtituloLayout = new GlyphLayout(fontUI, subtituloActual);
         fontUI.draw(game.batch, subtituloActual, 640f - subtituloLayout.width / 2f, 550f);
         fontUI.setColor(1f, 1f, 1f, 0.55f);
         fontUI.draw(game.batch, "v1.0.10", 1160f, 30f);
-
         // Render de paneles según estado
         if (estadoActual == EstadoMenu.PRINCIPAL) {
             dibujarCajaBotones(game.batch);
@@ -279,32 +273,14 @@ public class MainMenuScreen implements Screen {
         dibujarRectRedondeado(batch, pixel, boxX, boxY, boxW, boxH, 10f, new Color(0.20f, 0.25f, 0.28f, 1f));
     }
 
-    private void actualizarEspadaDecorativa() {
-        if (espadaUno == null) return;
-        float ancho = 62f, alto = 88f;
-        if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
-            boolean encima = mouseWorld.x >= espadaX && mouseWorld.x <= espadaX + ancho && mouseWorld.y >= espadaY && mouseWorld.y <= espadaY + alto;
-            if (encima) {
-                arrastrandoEspada = true;
-                offsetEspadaX = mouseWorld.x - espadaX;
-                offsetEspadaY = mouseWorld.y - espadaY;
-                fisicaTiltEspada.iniciarArrastre(mouseWorld.x);
-            }
+    private void actualizarCartaLogo(float delta) {
+        if (cartaLogo == null) return;
+        cartaLogo.input(mouseWorld.x, mouseWorld.y);
+        if (cartaLogo.soltoCarta()) {
+            // al soltarla vuelve suavemente a su lugar en el logo, con el balanceo de péndulo
+            cartaLogo.setHandPosition(espadaXOriginal, espadaYOriginal);
         }
-        if (arrastrandoEspada) {
-            if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
-                espadaX = mouseWorld.x - offsetEspadaX;
-                espadaY = mouseWorld.y - offsetEspadaY;
-                fisicaTiltEspada.actualizarArrastre(mouseWorld.x, Gdx.graphics.getDeltaTime());
-                rotacionEspada = fisicaTiltEspada.getAngulo();
-            } else {
-                arrastrandoEspada = false;
-                espadaX = espadaXOriginal;
-                espadaY = espadaYOriginal;
-                fisicaTiltEspada.reset();
-                rotacionEspada = 0f;
-            }
-        }
+        cartaLogo.update(mouseWorld.x, mouseWorld.y, delta);
     }
 
     private void dibujarRectRedondeado(SpriteBatch batch, Texture pixel, float x, float y, float width, float height, float radio, Color color) {
@@ -326,22 +302,36 @@ public class MainMenuScreen implements Screen {
         batch.setColor(Color.WHITE);
     }
 
-    private void dibujarDecoracion(SpriteBatch batch) {
-        if (cartaDecorativa == null) return;
-        float movimiento = (float) Math.sin(tiempoDecoracion * 0.8f) * 8f;
+    private void dibujarDecoracion(SpriteBatch batch, float delta) {
+        if (cartasDecorativas == null) return;
+        float movimiento  = (float) Math.sin(tiempoDecoracion * 0.8f) * 8f;
         float movimiento2 = (float) Math.sin(tiempoDecoracion * 0.65f + 2f) * 10f;
-        batch.setColor(1f, 1f, 1f, 0.90f);
-        batch.draw(cartaDecorativa, 85f, 270f + movimiento, 55f, 82.5f, 110f, 165f, 1f, 1f, -16f);
-        batch.draw(cartaDecorativa, 1140f, 330f + movimiento2, 55f, 82.5f, 110f, 165f, 1f, 1f, 14f);
-        batch.draw(cartaDecorativa, 135f, 120f - movimiento2 * 0.5f, 42f, 63f, 84f, 126f, 1f, 1f, 10f);
-        batch.draw(cartaDecorativa, 1100f, 120f + movimiento * 0.5f, 42f, 63f, 84f, 126f, 1f, 1f, -9f);
-        batch.setColor(1f, 1f, 1f, 1f);
+        float[] xs = {  85f, 1140f,  135f, 1100f };
+        float[] ys = {
+            270f + movimiento,
+            330f + movimiento2,
+            120f - movimiento2 * 0.5f,
+            120f + movimiento * 0.5f
+        };
+        // Solo reaccionan al mouse en las pantallas con el menú libre; con un panel abierto vuelven a su pose
+        boolean menuLibre = (estadoActual == EstadoMenu.PRINCIPAL || estadoActual == EstadoMenu.CONTINUAR_O_NUEVA);
+        float mx = menuLibre ? mouseWorld.x : -9999f;
+        float my = menuLibre ? mouseWorld.y : -9999f;
+        for (int i = 0; i < cartasDecorativas.length; i++) {
+            VistaCarta v = cartasDecorativas[i];
+            v.setPosition(xs[i], ys[i]);
+            v.setHandPosition(xs[i], ys[i]);
+            v.update(mx, my, delta);
+            if (v.contiene(mx, my)) System.out.println("carta " + i + " hover=" + v.isHover() + " dragGlobal=" + VistaCarta.isAlgunDragActivo());
+            v.render(batch, game);
+        }
     }
 
     @Override public void resize(int width, int height) { viewport.update(width, height, true); }
 
     @Override
     public void show() {
+        VistaCarta.resetearDragGlobal();
         inputProcessorAnterior = Gdx.input.getInputProcessor();
         Gdx.input.setInputProcessor(new InputAdapter() {
             @Override

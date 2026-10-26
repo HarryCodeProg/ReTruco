@@ -61,7 +61,7 @@ public class PanelTienda {
     private float offsetYObjetivo;
     private boolean cerrando = false;
     private Runnable alCerrarCompletamente;
-    private static final float RUEDA_X = 1250f;
+    private static final float RUEDA_X = 1270f;
     private static final float RUEDA_Y = 420f;
     private static final float RUEDA_RADIO = 170f;
     private RuedaZodiaco ruedaZodiaco;
@@ -207,6 +207,7 @@ public class PanelTienda {
             boolean quedaNeuquen = jugador.getJokers().stream().anyMatch(j -> j.getId() == 95);
             jugador.setProximoZodiacoForzado(quedaNeuquen ? SignoZodiaco.PISCIS : null);
             overlayConsumo.confirmarCierre();
+            cambioPendiente = true;
             reconstruirVistas();
             actualizarTextoReroll();
             return;
@@ -218,7 +219,7 @@ public class PanelTienda {
             || (botonComprarYUsar.isVisible() && botonComprarYUsar.isHovered())
             || botonReroll.isHovered()
             || botonContinuar.isHovered();
-            // 2. DETERMINAR HOVER EXCLUSIVO GLOBAL
+        // 2. DETERMINAR HOVER EXCLUSIVO GLOBAL
         VistaItemTienda ganadorHover = null;
         if (!mouseSobreBotonUI) {
             for (VistaItemTienda v : vistasCartas) { if (v.contiene(mouseWorldX, mouseWorldY)) ganadorHover = v; }
@@ -252,7 +253,7 @@ public class PanelTienda {
                         SignoZodiaco signoFinal = jugador.getProximoZodiacoForzado() != null ? jugador.getProximoZodiacoForzado() : signo;
                         signoObtenido = signoFinal;
                         estadoTienda.registrarSignoRueda(signoFinal);   // NUEVO
-                        overlayConsumo.abrir(signoFinal, game.getAtlasZodiaco(), () -> {});
+                        overlayConsumo.abrir(signoFinal, null, () -> {});
                     });
             }
             if (overlayConsumo.estaActivo()) return;
@@ -277,6 +278,7 @@ public class PanelTienda {
             }
             boolean exito = estadoTienda.rerollearTienda(jugador);
             if (exito) {
+                cambioPendiente = true;
                 GestorSonidos sonidos = Main.getInstance().getGestorSonidos();
                 if (sonidos != null) sonidos.reproducirSonidoGastarPeso();
                 reconstruirVistas();
@@ -365,14 +367,14 @@ public class PanelTienda {
 
     private int precioEfectivo(ItemTienda item) {
         if (item.getTipo() == ItemTienda.Tipo.SANTO && tieneRevolucionDeMayo()) {
-            return 0;
+            return Math.max(1, Math.min(estadoTienda.precioConDescuento(item.getPrecio()), (int) Math.ceil(item.getPrecio() * 0.5)));
         }
         if (item.getTipo() == ItemTienda.Tipo.JOKER && tieneMuseo()) {
             Joker joker = item.getJoker();
             if (joker != null) {
                 Rareza r = joker.getRareza();
                 if (r == Rareza.comun || r == Rareza.raro || r == Rareza.muyRaro) {
-                    return 0;
+                    return Math.max(1, Math.min(estadoTienda.precioConDescuento(item.getPrecio()), (int) Math.ceil(item.getPrecio() * 0.5)));
                 }
             }
         }
@@ -438,6 +440,7 @@ public class PanelTienda {
         estadoTienda.removerItemComprado(item);
         reconstruirVistas();
         alComprarYUsarSanto.accept(santo);
+        cambioPendiente = true;
     }
 
     public void render(SpriteBatch batch) {
@@ -618,7 +621,7 @@ public class PanelTienda {
         }
         if (pendiente != null) {
             signoObtenido = pendiente;
-            overlayConsumo.abrir(pendiente, game.getAtlasZodiaco(), () -> {});
+            overlayConsumo.abrir(pendiente, null, () -> {});
         }
         reconstruirVistas();
         actualizarTextoReroll();

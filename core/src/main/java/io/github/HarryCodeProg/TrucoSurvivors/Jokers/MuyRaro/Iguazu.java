@@ -1,6 +1,7 @@
 package io.github.HarryCodeProg.TrucoSurvivors.Jokers.MuyRaro;
 
 import io.github.HarryCodeProg.TrucoSurvivors.Activacion.ContextoJuego;
+import io.github.HarryCodeProg.TrucoSurvivors.Estados.ColorMecanica;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.EventoJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
@@ -10,7 +11,8 @@ import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 public class Iguazu extends Joker {
 
     public Iguazu() {
-        super(119, "Iguazu", "Iguazu", "+50 puntos por cada vez que\nuna carta cambia de palo",
+        super(119, "Iguazu", "Iguazu",
+            ColorMecanica.PUNTOS.colorHex()+"+50 puntos por cada vez que\nuna carta cambia de palo",
             Rareza.muyRaro,
             8,
             FaseActivacion.INDEPENDIENTE,
@@ -21,7 +23,7 @@ public class Iguazu extends Joker {
 
     @Override
     public String getDescripcionRenderizada(Juego juego) {
-        return getDescripcion() + "\n(actual:+" + (int) getAcumulado() + ")";
+        return getDescripcion() + "\n(actual:"+ColorMecanica.PUNTOS.colorHex()+"+" + (int) getAcumulado() + "[])";
     }
 
     @Override

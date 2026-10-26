@@ -16,7 +16,7 @@ public class DulceDeLeche extends Joker {
             10,
             "Dulce de leche",
             "DulceDeLeche",
-            "+10 puntos truco por cada carta del mazo",
+            "+1 puntos truco por cada carta del mazo",
             Rareza.comun,
             4,
             INDEPENDIENTE,
@@ -38,7 +38,7 @@ public class DulceDeLeche extends Joker {
         if (evento != EventoJuego.ANTES_DE_SUMAR_TRUCO) return;
         double bonus = 0;
         int cantidadMazo = ctx.getJugador().getMazo().getTamañoMazo();
-        bonus = 10 * cantidadMazo;
+        bonus = 1 * cantidadMazo;
         ctx.getResolucionActual().sumarChips(bonus, this.getNombre(),this);
     }
 

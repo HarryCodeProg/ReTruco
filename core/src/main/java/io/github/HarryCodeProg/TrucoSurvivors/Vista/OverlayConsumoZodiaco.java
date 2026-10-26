@@ -1,5 +1,6 @@
 package io.github.HarryCodeProg.TrucoSurvivors.Vista;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -24,29 +25,61 @@ public class OverlayConsumoZodiaco {
     private static final float SALIDA = 0.8f;
     private static final float TOTAL = ENTRADA + LECTURA + SALIDA;
 
-    // ─── CAMBIO 1: Ahora recibe TextureAtlas ───
+    // ─── Hoja de texturas compartida ───
+    private static Texture TEXTURA_ZODIACO;
+    private static TextureRegion[][] REGIONES_ZODIACO;
+    private static boolean texturasInicializadas = false;
+    private static final int COLS = 4;
+    private static final int ROWS = 3;
+
+    /** Ruta del PNG con la hoja 6×2 de los 12 signos. */
+    private static final String RUTA_ZODIACO = "atlas/zodiaco_iconos.png";
+
+    private static void inicializarTexturas() {
+        if (texturasInicializadas) return;
+        TEXTURA_ZODIACO = new Texture(Gdx.files.internal(RUTA_ZODIACO));
+        TEXTURA_ZODIACO.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        int anchoCelda = TEXTURA_ZODIACO.getWidth() / COLS;
+        int altoCelda  = TEXTURA_ZODIACO.getHeight() / ROWS;
+        REGIONES_ZODIACO = TextureRegion.split(TEXTURA_ZODIACO, anchoCelda, altoCelda);
+        texturasInicializadas = true;
+    }
+
+    /** Mapea el signo (por su ordinal) a la celda correspondiente de la hoja. */
+    public static TextureRegion obtenerRegionZodiaco(SignoZodiaco signo) {
+        inicializarTexturas();
+        int idx = signo.ordinal();
+        int fila = idx / COLS;
+        int col  = idx % COLS;
+        if (fila < 0 || fila >= ROWS || col < 0 || col >= COLS) {
+            return REGIONES_ZODIACO[0][0];
+        }
+        return REGIONES_ZODIACO[fila][col];
+    }
+
+    /** Llamar desde el dispose() del screen o del juego. */
+    public static void disposeTexturas() {
+        if (TEXTURA_ZODIACO != null) {
+            TEXTURA_ZODIACO.dispose();
+            TEXTURA_ZODIACO = null;
+        }
+        REGIONES_ZODIACO = null;
+        texturasInicializadas = false;
+    }
+
+    /** Ya no usa el atlas: el parámetro se mantiene por compatibilidad de firma. */
     public void abrir(SignoZodiaco signo, TextureAtlas atlas, Runnable alTerminar) {
         this.signo = signo;
-        // 1. Intento con el nombre que devuelve el enum (ej: "01_aries")
-        this.region = atlas.findRegion(signo.getNombreRegion());
-        // 2. Fallback: si no lo encuentra, probar con el nombre del enum en minúscula (ej: "aries")
-        if (this.region == null) {
-            this.region = atlas.findRegion(signo.name().toLowerCase());
-        }
-        // 3. Fallback extra: probar quitando el prefijo numérico (ej: "01_aries" -> "aries")
-        if (this.region == null && signo.getNombreRegion().contains("_")) {
-            String sinPrefijo = signo.getNombreRegion().substring(signo.getNombreRegion().indexOf('_') + 1);
-            this.region = atlas.findRegion(sinPrefijo);
-        }
-        // 4. Si sigue null, avisar en consola (no rompe el juego, solo no muestra icono)
-        if (this.region == null) {
-            System.err.println("OverlayConsumoZodiaco: no se encontró icono para " + signo.name());
-        }
+        this.region = obtenerRegionZodiaco(signo);
         this.alTerminar = alTerminar;
         estado = Estado.ENTRANDO;
         tiempo = 0;
         GestorSonidos sonidos = Main.getInstance().getGestorSonidos();
         if (sonidos != null) sonidos.reproducirConVariacion("consumir_zodiaco");
+    }
+
+    public void abrir(SignoZodiaco signo, Runnable alTerminar) {
+        abrir(signo, null, alTerminar);
     }
 
     public void update(float delta) {
@@ -100,11 +133,10 @@ public class OverlayConsumoZodiaco {
             batch.draw(pixel, x - 0.7f, y - size / 2, 1.4f, size);
         }
 
-        // ─── CAMBIO 2: Tinte dorado para el icono blanco ───
+        // Icono del signo con tinte dorado
         float escala = Interpolation.swingOut.apply(entrada) * (1 - salida * 0.55f);
         float size = 205 * escala * (1 + 0.025f * MathUtils.sin(tiempo * 3));
         if (region != null) {
-            // Tinte dorado (R=1, G=0.9, B=0.7) para que el blanco brille con la estética del fondo
             batch.setColor(1f, 0.92f, 0.75f, alpha);
             batch.draw(region, 640 - size / 2, 410 - size / 2 + MathUtils.sin(tiempo * 2) * 5, size, size);
         }
