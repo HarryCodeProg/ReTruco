@@ -9,14 +9,14 @@ import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 
 public class Rivadavia extends Joker {
 
-    private static final int UMBRAL_CARTAS = 30;
+    private static final int UMBRAL_CARTAS = 20;
     private static final double FACTOR_POR_UMBRAL = 1.5;
 
     private int cartasRestantes = UMBRAL_CARTAS;
     private double multiplicadorAcumulado = 1.0;
 
     public Rivadavia() {
-        super(146, "Rivadavia", "Rivadavia", "Cada 30 cartas repartidas ganas x1.5 multiplicador truco",
+        super(146, "Rivadavia", "Rivadavia", "Cada 20 cartas repartidas ganas x1.5 multiplicador truco",
             Rareza.legendario, 15, Joker.FaseActivacion.INDEPENDIENTE,
             CategoriaJoker.TRUCO,
             CategoriaJoker.ACTIVACION,

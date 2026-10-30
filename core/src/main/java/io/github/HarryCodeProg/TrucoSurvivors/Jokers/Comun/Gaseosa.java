@@ -1,6 +1,7 @@
 package io.github.HarryCodeProg.TrucoSurvivors.Jokers.Comun;
 
 import io.github.HarryCodeProg.TrucoSurvivors.Activacion.ContextoJuego;
+import io.github.HarryCodeProg.TrucoSurvivors.Estados.ColorMecanica;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.EventoJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
@@ -16,7 +17,7 @@ public class Gaseosa extends Joker {
             3,
             "Gaseosa",
             "Gaseosa",
-            "+20 puntos truco, +20 puntos envido. Si tienes un 'Fernet', obtienes +20 puntos mas de cada uno.",
+            ColorMecanica.PUNTOS.colorHex()+"+20[] puntos. Si tienes un 'Fernet', obtienes"+ColorMecanica.PUNTOS.colorHex()+" +20[] puntos mas de cada uno.",
             Rareza.comun,
             3,
             INDEPENDIENTE,

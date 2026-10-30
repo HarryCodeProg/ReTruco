@@ -51,7 +51,7 @@ public class Cordoba extends Joker {
         if (juego != null && juego.getTurnoActual() != null) {
             int dinero = juego.getTurnoActual().getPesos();
             int bonusActual = (dinero / 5) * 5;
-            return getDescripcion().replace("(actual: 0)", "\n(actual: " + bonusActual + ")");
+            return getDescripcion().replace("(actual: 0)", "(actual: " + bonusActual + ")");
         }
         return getDescripcion();
     }

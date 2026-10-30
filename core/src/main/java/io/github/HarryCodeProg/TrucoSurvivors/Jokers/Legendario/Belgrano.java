@@ -28,7 +28,9 @@ public class Belgrano extends Joker {
 
     @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego) {
-        if (evento != EventoJuego.ANTES_DE_SUMAR_TRUCO && evento != EventoJuego.ANTES_DE_SUMAR_ENVIDO) return;
+        if (evento != EventoJuego.DESPUES_DE_SUMAR_TRUCO &&
+            evento != EventoJuego.DESPUES_DE_SUMAR_ENVIDO) return;
+        if (ctx.getResolucionActual() == null) return;
         ctx.getResolucionActual().igualarChipsYMult(getNombre(), this);
     }
 }

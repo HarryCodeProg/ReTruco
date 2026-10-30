@@ -1,6 +1,7 @@
 package io.github.HarryCodeProg.TrucoSurvivors.Jokers.Epico;
 
 import io.github.HarryCodeProg.TrucoSurvivors.Activacion.ContextoJuego;
+import io.github.HarryCodeProg.TrucoSurvivors.Activacion.GestorJokers;
 import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Carta;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.EventoJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
@@ -21,16 +22,15 @@ public class Cerati extends Joker {
 
     @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego) {
-        if (evento == EventoJuego.ANTES_DE_SUMAR_ENVIDO) {
-            // Obtenemos todas las cartas en la mano del jugador
-            ArrayList<Carta> mano = ctx.getJugador().getMano();
-
-            if (mano != null && !mano.isEmpty()) {
-                // Recorremos una copia para evitar problemas si la lista se modifica
-                for (Carta carta : new ArrayList<>(mano)) {
-                    // Esto reactivará las contribuyentes y activará el resto por primera vez
-                    ctx.reencolarActivacionCarta(carta, EventoJuego.AL_PUNTUAR_CARTA_ENVIDO);
-                }
+        if (evento != EventoJuego.ANTES_DE_SUMAR_ENVIDO) return;
+        ArrayList<Carta> mano = ctx.getJugador().getMano();
+        ArrayList<Carta> contribuyentes = ctx.getCartasContribuyentesEnvido();
+        if (mano == null || mano.isEmpty() || contribuyentes == null) return;
+        for (Carta carta : new ArrayList<>(mano)) {
+            if (contribuyentes.contains(carta)) {
+                ctx.reencolarActivacionCarta(carta, EventoJuego.AL_PUNTUAR_CARTA_ENVIDO);
+            } else {
+                ctx.reencolarActivacionCartaSoloActivar(carta, EventoJuego.AL_PUNTUAR_CARTA_ENVIDO);
             }
         }
     }

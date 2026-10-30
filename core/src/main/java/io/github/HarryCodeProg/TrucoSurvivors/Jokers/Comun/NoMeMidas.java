@@ -9,10 +9,12 @@ import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Rareza;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 
+import java.util.ArrayList;
+
 public class NoMeMidas extends Joker {
 
     public NoMeMidas(){
-        super(48, "No Me Midas", "NoMeMidas", "Cada Espada que mata vuelve a activarse",
+        super(48, "No Me Midas", "NoMeMidas", "Reactiva las cartas Espada",
             Rareza.comun, 4, Joker.FaseActivacion.AL_PUNTUAR_CARTA,
             CategoriaJoker.ACTIVACION, CategoriaJoker.TRUCO, CategoriaJoker.NACIONAL);
     }
@@ -21,17 +23,23 @@ public class NoMeMidas extends Joker {
     public Joker copiar() {
         NoMeMidas copia = new NoMeMidas();
         copiarEstado(copia);
-        copia.setAcumulado(this.getAcumulado());
         return copia;
     }
 
     @Override
-    public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego){
-        if (evento != EventoJuego.AL_PUNTUAR_CARTA) return;
+    public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego) {
+        boolean esTruco  = (evento == EventoJuego.AL_PUNTUAR_CARTA);
+        boolean esEnvido = (evento == EventoJuego.AL_PUNTUAR_CARTA_ENVIDO);
+        if (!esTruco && !esEnvido) return;
         Carta c = ctx.getCartaEnResolucion();
         if (c == null || c.getPalo() != Palo.ESPADA) return;
-        if (!ctx.cartaMato(c)) return;
+        if (esTruco) {
+            if (!ctx.cartaMato(c)) return;
+        } else {
+            ArrayList<Carta> contribuyentes = ctx.getCartasContribuyentesEnvido();
+            if (contribuyentes == null || !contribuyentes.contains(c)) return;
+        }
         if (!ctx.marcarUsado(this, c)) return;
-        ctx.reencolarActivacionCarta(c, EventoJuego.AL_PUNTUAR_CARTA);
+        ctx.reencolarActivacionCarta(c, evento);
     }
 }

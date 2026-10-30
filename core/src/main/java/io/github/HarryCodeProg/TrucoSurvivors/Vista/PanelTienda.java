@@ -301,7 +301,8 @@ public class PanelTienda {
                     seleccionado.setSeleccionado(true);
                     GestorSonidos sonidos = Main.getInstance().getGestorSonidos();
                     if (sonidos != null) sonidos.reproducirConVariacion("seleccionar");
-                    boolean dineroSuficiente = jugador.getPesos() >= precioEfectivo(seleccionado.getItem());
+                    int precio = precioEfectivo(seleccionado.getItem());
+                    boolean dineroSuficiente = (jugador.getPesos() + jugador.getDeudaMaxima()) >= precio;
                     boolean esSanto = seleccionado.getItem().getTipo() == ItemTienda.Tipo.SANTO;
                     boolean espacioDisponible;
                     if (seleccionado.getItem().getTipo() == ItemTienda.Tipo.JOKER) {
@@ -524,11 +525,20 @@ public class PanelTienda {
     }
 
     private void dibujarEtiquetaPrecio(SpriteBatch batch, VistaItemTienda v) {
-        String textoPrecio = "$" + precioEfectivo(v.getItem());
+        int precio = precioEfectivo(v.getItem());
+        boolean pagable  = jugador.getPesos() + jugador.getDeudaMaxima() >= precio;
+        boolean enDeuda  = jugador.getPesos() < precio;
+        String textoPrecio = "$" + precio;
+        Color colorBadge = UITheme.DORADO;
+        if (enDeuda && pagable) {
+            colorBadge = UITheme.ROJO;
+        } else if (!pagable) {
+            colorBadge = UITheme.BOTON_DESHABILITADO;
+        }
         float paddingY = 4f;
         float badgeH = game.getFuenteNumeros().getCapHeight() + (paddingY * 2f) + 6f;
         float yTop = v.getTopeY() + badgeH + 6f;
-        TooltipUI.dibujarBadge(batch, game.getFuenteNumeros(), game.getPixelBlanco(), textoPrecio, UITheme.DORADO, v.getX() + ANCHO_ITEM / 2f, yTop, 8f, paddingY);
+        TooltipUI.dibujarBadge(batch, game.getFuenteNumeros(), game.getPixelBlanco(), textoPrecio, colorBadge, v.getX() + ANCHO_ITEM / 2f, yTop, 8f, paddingY);
     }
 
     public void updateAnimacion(float delta) {

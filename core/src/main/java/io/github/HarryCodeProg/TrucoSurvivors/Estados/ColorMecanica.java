@@ -11,11 +11,11 @@ public enum ColorMecanica {
     VALOR_TRUCO(UITheme.TRUCO),
     PUNTOS_TRUCO(UITheme.TURQUESA),
     VALOR_ENVIDO(UITheme.ENVIDO),
-    PUNTOS_ENVIDO(UITheme.AZUL),
+    PUNTOS_ENVIDO(UITheme.ENVIDO),
     PESOS(UITheme.DORADO),
     NUMERO(UITheme.VIOLETA),
     PARENTESIS(UITheme.ROJO),
-    PUNTOS(UITheme.AZUL);
+    PUNTOS(UITheme.NARANJA);
 
     private final Color color;
 

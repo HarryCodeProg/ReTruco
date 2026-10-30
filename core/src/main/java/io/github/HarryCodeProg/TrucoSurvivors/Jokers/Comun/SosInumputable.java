@@ -19,7 +19,7 @@ public class SosInumputable extends Joker {
             54,
             "Sos Inimputable",
             "SosInimputable",
-            "Genera entre +1 multiplicador truco y +20 multiplicador truco aleatorio al final de la mano",
+            "Genera entre"+ColorMecanica.MULTIPLICADOR.colorHex()+" +1[] y "+ColorMecanica.MULTIPLICADOR.colorHex()+" +20[] multiplicador truco aleatorio",
             Rareza.comun,
             3,
             Joker.FaseActivacion.INDEPENDIENTE,

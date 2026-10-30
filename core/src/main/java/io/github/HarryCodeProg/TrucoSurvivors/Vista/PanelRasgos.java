@@ -104,7 +104,6 @@ public class PanelRasgos {
             int tier     = gestor.getTier(cat);
             int idx = i - inicio;
             float filaY = filaYTopBase - (idx + 1) * ALTO_FILA - idx * GAP_FILAS;
-            // ACÁ ESTÁ EL CAMBIO: Usamos mouseX y mouseY en vez de mx y my
             if (mouseX >= x && mouseX <= x + ANCHO_PANEL && mouseY >= filaY && mouseY <= filaY + ALTO_FILA) {
                 hoverCat = cat; hoverX = x; hoverFilaY = filaY;
             }

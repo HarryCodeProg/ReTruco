@@ -17,6 +17,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Carta;
 import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Palo;
+import io.github.HarryCodeProg.TrucoSurvivors.Dev.DevScreen;
 import io.github.HarryCodeProg.TrucoSurvivors.Main;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.Accion;
 import io.github.HarryCodeProg.TrucoSurvivors.Vista.*;
@@ -134,6 +135,17 @@ public class MainMenuScreen implements Screen {
         viewport.unproject(mouseWorld);
         actualizarCartaLogo(delta);
         boolean click = Gdx.input.justTouched();
+        // Acceso oculto al sandbox de desarrollo (F12)
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F12)) {
+            game.setScreen(new DevSandboxScreen(game));
+            dispose();
+            return;
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F9) && DevScreen.disponible()) {
+            game.setScreen(new DevScreen(game));
+            dispose();
+            return;
+        }
         // --- LÓGICA DE ACTUALIZACIÓN POR ESTADO ---
         if (estadoActual == EstadoMenu.PRINCIPAL) {
             botonJugar.update(mouseWorld.x, mouseWorld.y);

@@ -37,7 +37,7 @@ public class CuentaCorriente extends Joker {
     @Override
     public void desAplicarEfectoInstantaneo(Jugador jugador) {
         if (deudaAplicada) {
-            jugador.sumarDeudaMaxima(-DEUDA_OTORGADA); // si se vende, se retira el permiso de deuda otorgado
+            jugador.sumarDeudaMaxima(-DEUDA_OTORGADA);
             deudaAplicada = false;
         }
     }

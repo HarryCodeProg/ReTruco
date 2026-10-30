@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.utils.I18NBundle;
+import io.github.HarryCodeProg.TrucoSurvivors.Dev.ReporteDev;
 import io.github.HarryCodeProg.TrucoSurvivors.Gestores.GestorSonidos;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.ConfiguracionJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.DatosRival;
@@ -174,6 +175,16 @@ public class Main extends Game {
             listaRivales.get(indiceActual + 1).setDesbloqueado(true);
         } else {
             listaRivales.get(0).setDesbloqueado(true);
+        }
+    }
+
+    @Override
+    public void render() {
+        try {
+            super.render();
+        } catch (RuntimeException | Error e) {
+            ReporteDev.registrarCrash(this, e);
+            throw e;
         }
     }
 

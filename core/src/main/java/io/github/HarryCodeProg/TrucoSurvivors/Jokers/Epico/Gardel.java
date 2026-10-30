@@ -18,16 +18,12 @@ public class Gardel extends Joker {
 
     @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego) {
-        if (evento == EventoJuego.AL_MATAR_CARTA) {
-            if (ctx.getCartaEnResolucion() != null) {
-                sumarAcumulado(15);
-            }
+        if (evento == EventoJuego.AL_ACTIVAR_CARTA && ctx.getCartaEnResolucion() != null) {
+            sumarAcumulado(15);
             return;
         }
-        if (evento == EventoJuego.ANTES_DE_SUMAR_TRUCO) {
-            if (getAcumulado() > 0) {
-                ctx.getResolucionActual().sumarChips(getAcumulado(), getNombre(), this);
-            }
+        if (evento == EventoJuego.ANTES_DE_SUMAR_TRUCO && getAcumulado() > 0) {
+            ctx.getResolucionActual().sumarChips(getAcumulado(), getNombre(), this);
         }
     }
 

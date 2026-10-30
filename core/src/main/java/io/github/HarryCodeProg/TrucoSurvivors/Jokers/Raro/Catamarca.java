@@ -37,16 +37,15 @@ public class Catamarca extends Joker {
 
     @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego) {
-        if (evento == EventoJuego.POST_REPARTO) {
-            this.numeroAleatorio = random.nextInt(12) + 1;
-            return;
-        }
-
-        if (evento == EventoJuego.AL_PUNTUAR_CARTA) {
+        if (evento == EventoJuego.AL_ACTIVAR_CARTA) {
             Carta c = ctx.getCartaEnResolucion();
             if (c != null && c.getNumero() == this.numeroAleatorio) {
                 ctx.getJugador().sumarPesos(2);
             }
+            return;
+        }
+        if (evento == EventoJuego.POST_REPARTO) {
+            this.numeroAleatorio = random.nextInt(12) + 1;
         }
     }
 

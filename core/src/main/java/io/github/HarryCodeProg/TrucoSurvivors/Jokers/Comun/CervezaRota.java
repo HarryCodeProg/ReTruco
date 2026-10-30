@@ -1,6 +1,7 @@
 package io.github.HarryCodeProg.TrucoSurvivors.Jokers.Comun;
 
 import io.github.HarryCodeProg.TrucoSurvivors.Activacion.ContextoJuego;
+import io.github.HarryCodeProg.TrucoSurvivors.Estados.ColorMecanica;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.EventoJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
@@ -16,7 +17,7 @@ public class CervezaRota extends Joker {
             9,
             "Cerveza Rota",
             "CervezaRota",
-            "+20 puntos truco y envido. +15 por cada otro joker con la categoria 'BEBIDA'",
+            ColorMecanica.PUNTOS.colorHex()+"+20[] puntos."+ColorMecanica.PUNTOS.colorHex() +"+15[] por cada otro joker con la categoria 'BEBIDA'",
             Rareza.comun,
             3,
             INDEPENDIENTE,

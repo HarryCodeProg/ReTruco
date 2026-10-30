@@ -218,6 +218,7 @@ public class Juego {
             ctx.setCartasContribuyentesEnvido(cartasEnvido);
             dispararTodo(EventoJuego.AL_GANAR_ENVIDO_CANTO, ctx);
             resolutorSecuencia.resolverEnvido(cartasEnvido, ctx, EventoJuego.AL_PUNTUAR_CARTA_ENVIDO, EventoJuego.ANTES_DE_SUMAR_ENVIDO);
+            dispararTodo(EventoJuego.DESPUES_DE_SUMAR_ENVIDO, ctx);
             this.ultimaResolucionEnvido = resolucion;
         } else {
             ResolucionPuntaje resolucion = new ResolucionPuntaje(0, rival.getMultiplicadorEnvido());
@@ -449,6 +450,7 @@ public class Juego {
             ContextoJuego ctx = crearContexto();
             ctx.setResolucionActual(resolucion);
             resolutorSecuencia.resolver(cartasGanadoras, ctx, EventoJuego.AL_PUNTUAR_CARTA, EventoJuego.ANTES_DE_SUMAR_TRUCO);
+            dispararTodo(EventoJuego.DESPUES_DE_SUMAR_TRUCO, ctx);
             this.ultimaResolucion = resolucion;
             puntosJugador += resolucion.calcularPuntajeFinal();
             dispararTodo(EventoJuego.AL_GANAR_TRUCO);

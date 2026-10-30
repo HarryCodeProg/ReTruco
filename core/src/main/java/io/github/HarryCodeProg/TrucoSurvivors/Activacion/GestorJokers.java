@@ -17,6 +17,10 @@ public class GestorJokers {
     }
 
     public void disparar(EventoJuego evento, ContextoJuego ctx, Juego juego) {
+        // Guardamos la cola activa para no pisar la del llamador (p. ej. la del
+        // ResolutorSecuencia cuando dispara AL_ACTIVAR_CARTA en medio de una resolución).
+        // Así, los jokers que reencolan cartas siguen escribiendo en la cola correcta.
+        ArrayDeque<Activacion> colaAnterior = ctx.getColaActivaciones();
         ArrayDeque<Activacion> cola = new ArrayDeque<>();
         for (Joker.FaseActivacion fase : Joker.FaseActivacion.values()) {
             for (Joker j : jugador.getJokers()) {
@@ -37,5 +41,6 @@ public class GestorJokers {
                 }
             }
         }
+        ctx.setColaActivaciones(colaAnterior);
     }
 }

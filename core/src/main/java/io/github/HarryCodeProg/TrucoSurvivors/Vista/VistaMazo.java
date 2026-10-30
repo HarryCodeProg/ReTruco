@@ -41,7 +41,8 @@ public class VistaMazo {
     private final BitmapFont fontNumeros;
     private final Texture pixelBlanco;
     private boolean isHovered;
-    private final float x, y, width, height;
+    private float x, y;
+    private final float width, height;
     private final Rectangle boundsMazo;
     private boolean modalAbierto = false;
     private final OrthographicCamera camera;
@@ -317,5 +318,20 @@ public class VistaMazo {
 
     public boolean isModalAbierto() {
         return modalAbierto;
+    }
+
+    public void setY(float nuevoY) {
+        this.y = nuevoY;
+        this.boundsMazo.y = nuevoY;
+    }
+
+    public float getY() {
+        return y;
+    }
+
+    public void setPosicion(float nuevoX, float nuevoY) {
+        this.x = nuevoX;
+        this.y = nuevoY;
+        this.boundsMazo.setPosition(nuevoX, nuevoY);
     }
 }

@@ -13,7 +13,7 @@ public class SanMartin extends Joker {
 
     public SanMartin() {
         super(150, "San Martín", "SanMartin",
-            "Reactiva todas las cartas Espada. x3 multiplicador truco cada vez que se active una Espada.",
+            "Reactiva todas las cartas Espada en truco. x3 multiplicador truco cada vez que se active una Espada en truco.",
             Rareza.legendario, 20, Joker.FaseActivacion.AL_PUNTUAR_CARTA,
             CategoriaJoker.TRUCO,
             CategoriaJoker.ACTIVACION,
@@ -22,7 +22,7 @@ public class SanMartin extends Joker {
 
     @Override
     public String getDescripcionRenderizada(Juego juego) {
-        return "Reactiva todas las cartas Espada. x3 multiplicador truco cada vez que se active una Espada.";
+        return "Reactiva todas las cartas Espada en truco. x3 multiplicador truco cada vez que se active una Espada en truco.";
     }
 
     @Override

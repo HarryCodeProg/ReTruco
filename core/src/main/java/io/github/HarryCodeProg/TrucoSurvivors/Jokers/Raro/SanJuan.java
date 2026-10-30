@@ -53,6 +53,6 @@ public class SanJuan extends Joker {
     @Override
     public String getDescripcionRenderizada(Juego juego) {
         int actual = (int) getAcumulado();
-        return getDescripcion() + "\n(Actual: +" + actual + " mult)";
+        return getDescripcion() + "\n(Actual: +" + actual + ")";
     }
 }

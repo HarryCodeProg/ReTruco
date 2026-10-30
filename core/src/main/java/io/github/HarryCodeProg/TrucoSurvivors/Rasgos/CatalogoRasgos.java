@@ -26,13 +26,13 @@ public final class CatalogoRasgos {
         EfectoRasgo[] t;
         switch (cat) {
             case TRUCO:
-                t = new EfectoRasgo[]{ canto(TipoCanto.TRUCO, 0.25, 1), canto(TipoCanto.TRUCO, 1, 1), canto(TipoCanto.TRUCO, 0, 1.5) }; break;
+                t = new EfectoRasgo[]{ canto(TipoCanto.TRUCO, 0.25, 1), canto(TipoCanto.TRUCO, 0.5, 1), canto(TipoCanto.TRUCO, 0, 1.5) }; break;
             case ENVIDO:
-                t = new EfectoRasgo[]{ canto(TipoCanto.ENVIDO, 0.25, 1), canto(TipoCanto.ENVIDO, 1, 1), canto(TipoCanto.ENVIDO, 0, 1.5) }; break;
+                t = new EfectoRasgo[]{ canto(TipoCanto.ENVIDO, 0.25, 1), canto(TipoCanto.ENVIDO, 0.5, 1), canto(TipoCanto.ENVIDO, 0, 1.5) }; break;
             case GASTRONOMIA: // igual a Truco (como lo pasaste)
-                t = new EfectoRasgo[]{ canto(TipoCanto.TRUCO, 0.25, 1), canto(TipoCanto.TRUCO, 1, 1), canto(TipoCanto.TRUCO, 0, 1.5) }; break;
+                t = new EfectoRasgo[]{ canto(TipoCanto.TRUCO, 0.25, 1), canto(TipoCanto.TRUCO, 0.5, 1), canto(TipoCanto.TRUCO, 0, 1.5) }; break;
             case TERRITORIO: // igual a Envido (como lo pasaste)
-                t = new EfectoRasgo[]{ canto(TipoCanto.ENVIDO, 0.25, 1), canto(TipoCanto.ENVIDO, 1, 1), canto(TipoCanto.ENVIDO, 0, 1.5) }; break;
+                t = new EfectoRasgo[]{ canto(TipoCanto.ENVIDO, 0.25, 1), canto(TipoCanto.ENVIDO, 0.5, 1), canto(TipoCanto.ENVIDO, 0, 1.5) }; break;
             case ACTIVACION:
                 t = new EfectoRasgo[]{ new Reactivacion(1), new Reactivacion(2), new Reactivacion(3) }; break;
             case MAZO:

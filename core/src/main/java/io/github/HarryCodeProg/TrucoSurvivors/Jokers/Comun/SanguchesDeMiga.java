@@ -36,10 +36,8 @@ public class SanguchesDeMiga extends Joker {
     @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego) {
         if (evento != EventoJuego.ANTES_DE_SUMAR_TRUCO) return;
-
         int bonus = calcularBonusActual(ctx.getJugador());
         if (bonus <= 0) return;
-
         ctx.getResolucionActual().sumarChips(bonus, getNombre(), this);
     }
 
@@ -53,13 +51,6 @@ public class SanguchesDeMiga extends Joker {
             }
         }
         return cantidad * BONUS_POR_GASTRONOMIA;
-    }
-
-    @Override
-    public String getDescripcionRenderizada(Juego juego) {
-        int bonus = (juego != null) ? calcularBonusActual(juego.getJugador()) : 0;
-        return getDescripcion() + "\n(Actual: "
-            + ColorMecanica.PUNTOS_TRUCO.colorHex() + "+" + bonus + "[])";
     }
 
     @Override

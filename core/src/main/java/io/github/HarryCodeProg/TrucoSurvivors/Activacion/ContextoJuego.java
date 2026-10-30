@@ -3,7 +3,6 @@ package io.github.HarryCodeProg.TrucoSurvivors.Activacion;
 import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Carta;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
-import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Legendario.*;
 import io.github.HarryCodeProg.TrucoSurvivors.Jugador;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Mazo;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Mesa;
@@ -24,7 +23,6 @@ public class ContextoJuego {
     private Carta cartaEnResolucion;
     private ArrayDeque<Activacion> colaActivaciones;
     private ArrayList<Carta> cartasContribuyentesEnvido = new ArrayList<>();
-    // Flags para "primera carta que mata/no mata" durante la resolución actual
     private Carta cartaOponenteEnResolucion;
     private final Set<Joker> jokersPrimerCartaQueMataAplicada = Collections.newSetFromMap(new IdentityHashMap<>());
     private final Set<Joker> jokersPrimerCartaQueNoMataAplicada = Collections.newSetFromMap(new IdentityHashMap<>());
@@ -81,28 +79,38 @@ public class ContextoJuego {
     public ResolucionPuntaje getResolucionActual() { return resolucionActual; }
     public void setResolucionActual(ResolucionPuntaje resolucion) { this.resolucionActual = resolucion; }
 
-    /** La carta que se esta puntuando en este preciso momento de la secuencia (o null si no aplica). */
     public Carta getCartaEnResolucion() { return cartaEnResolucion; }
     public void setCartaEnResolucion(Carta carta) { this.cartaEnResolucion = carta; }
 
-    /** Cola compartida de activaciones pendientes de la secuencia actual. Solo valida durante una resolucion. */
     public void setColaActivaciones(ArrayDeque<Activacion> cola) { this.colaActivaciones = cola; }
 
-    /**
-     * REACTIVAR: encola una nueva activacion para que se resuelva mas adelante en la secuencia
-     * (despues de todo lo que ya estaba encolado antes). Usar para "reactiva este joker/carta".
-     */
+    public ArrayDeque<Activacion> getColaActivaciones() { return colaActivaciones; }
+
+    // ─── Reencolado de activaciones ───────────────────────────────────────
+
+    /** Reactiva un joker (se vuelve a procesar más adelante en la cola). */
     public void reencolarActivacionJoker(Joker joker, EventoJuego evento) {
         if (colaActivaciones == null) return;
         colaActivaciones.addLast(Activacion.deJoker(joker, evento));
     }
 
+    /** Reactiva una carta: vuelve a puntuar Y dispara AL_ACTIVAR_CARTA. */
     public void reencolarActivacionCarta(Carta carta, EventoJuego evento) {
-        if (colaActivaciones == null) return;
-        colaActivaciones.addLast(Activacion.deCarta(carta, evento));
+        reencolarActivacionCarta(carta, evento, true);
     }
 
-    /** Devuelve el joker inmediatamente a la derecha del dado, en el orden actual de la fila, o null si no hay. */
+    /** Solo activa la carta (dispara AL_ACTIVAR_CARTA) sin volver a sumar sus puntos. */
+    public void reencolarActivacionCartaSoloActivar(Carta carta, EventoJuego evento) {
+        reencolarActivacionCarta(carta, evento, false);
+    }
+
+    private void reencolarActivacionCarta(Carta carta, EventoJuego evento, boolean puntua) {
+        if (colaActivaciones == null) return;
+        colaActivaciones.addLast(Activacion.deCarta(carta, evento, puntua));
+    }
+
+    // ─── Consultas de jokers vecinos ──────────────────────────────────────
+
     public Joker obtenerJokerALaDerecha(Joker referencia) {
         ArrayList<Joker> lista = jugador.getJokers();
         int idx = lista.indexOf(referencia);
@@ -110,9 +118,16 @@ public class ContextoJuego {
         return lista.get(idx + 1);
     }
 
-    public ArrayList<Carta> getCartasContribuyentesEnvido() {
-        return cartasContribuyentesEnvido;
+    public Joker obtenerJokerALaIzquierda(Joker referencia) {
+        ArrayList<Joker> lista = jugador.getJokers();
+        int idx = lista.indexOf(referencia);
+        if (idx <= 0) return null;
+        return lista.get(idx - 1);
     }
+
+    // ─── Cartas contribuyentes de envido ──────────────────────────────────
+
+    public ArrayList<Carta> getCartasContribuyentesEnvido() { return cartasContribuyentesEnvido; }
     public void setCartasContribuyentesEnvido(ArrayList<Carta> cartas) {
         this.cartasContribuyentesEnvido = (cartas == null) ? new ArrayList<>() : cartas;
     }
@@ -120,6 +135,8 @@ public class ContextoJuego {
 
     public Carta getCartaOponenteEnResolucion() { return cartaOponenteEnResolucion; }
     public void setCartaOponenteEnResolucion(Carta carta) { this.cartaOponenteEnResolucion = carta; }
+
+    // ─── Flags "primera vez" por joker ────────────────────────────────────
 
     public boolean isPrimerCartaQueMataAplicada(Joker joker) { return jokersPrimerCartaQueMataAplicada.contains(joker); }
     public void marcarPrimerCartaQueMataAplicada(Joker joker) { jokersPrimerCartaQueMataAplicada.add(joker); }
@@ -132,6 +149,8 @@ public class ContextoJuego {
 
     public boolean isPrimerNoFiguraPuntuadaAplicada(Joker joker) { return jokersPrimerNoFiguraPuntuadaAplicada.contains(joker); }
     public void marcarPrimerNoFiguraPuntuadaAplicada(Joker joker) { jokersPrimerNoFiguraPuntuadaAplicada.add(joker); }
+
+    // ─── Utilidades ───────────────────────────────────────────────────────
 
     public boolean cartaMato(Carta carta) {
         if (carta == null) return false;
@@ -150,30 +169,15 @@ public class ContextoJuego {
         return marcas != null && marcas.contains(objetivo);
     }
 
-    /** Devuelve el joker inmediatamente a la izquierda del dado, en el orden actual de la fila, o null si no hay. */
-    public Joker obtenerJokerALaIzquierda(Joker referencia) {
-        ArrayList<Joker> lista = jugador.getJokers();
-        int idx = lista.indexOf(referencia);
-        if (idx <= 0) return null;
-        return lista.get(idx - 1);
-    }
+    // ─── Control de copias / filtro / profundidad ─────────────────────────
 
-    /** true si se pudo "entrar" (no estaba ya en la pila actual). false = ciclo detectado, cortar. */
-    public boolean iniciarCopia(Joker j) {
-        return copiasEnCurso.add(j);
-    }
-
-    public void terminarCopia(Joker j) {
-        copiasEnCurso.remove(j);
-    }
+    public boolean iniciarCopia(Joker j) { return copiasEnCurso.add(j); }
+    public void terminarCopia(Joker j) { copiasEnCurso.remove(j); }
 
     public int getCartasRepartidasEsteEvento() { return cartasRepartidasEsteEvento; }
     public void setCartasRepartidasEsteEvento(int cantidad) { this.cartasRepartidasEsteEvento = cantidad; }
 
-
-    public boolean jokerPermitidoPorFiltro(Joker j) {
-        return true;
-    }
+    public boolean jokerPermitidoPorFiltro(Joker j) { return true; }
 
     public boolean puedeEntrarACopia() {
         if (profundidadCopia >= MAX_PROFUNDIDAD_COPIA) return false;
@@ -181,9 +185,8 @@ public class ContextoJuego {
         return true;
     }
 
-    public void salirDeCopia() {profundidadCopia--;}
+    public void salirDeCopia() { profundidadCopia--; }
 
     public int getCartasDescartadasEsteEvento() { return cartasDescartadasEsteEvento; }
     public void setCartasDescartadasEsteEvento(int cantidad) { this.cartasDescartadasEsteEvento = cantidad; }
-
 }

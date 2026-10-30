@@ -10,7 +10,7 @@ import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 public class Tucuman extends Joker {
 
     public Tucuman() {
-        super(77, "Tucumán", "Tucuman", "Espada y Oro cuentan como el mismo palo para el envido",
+        super(77, "Tucumán", "Tucuman", "Espada y Oro cuentan como el mismo palo",
             Rareza.raro, 6, Joker.FaseActivacion.INDEPENDIENTE,
             CategoriaJoker.ACTIVACION, CategoriaJoker.TERRITORIO);
     }
@@ -24,6 +24,6 @@ public class Tucuman extends Joker {
 
     @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego) {
-        // Efecto pasivo, sin lógica acá.
+        // Efecto pasivo, sin lógica acá: lo consulta en Jugador.paloEfectivo(...):
     }
 }

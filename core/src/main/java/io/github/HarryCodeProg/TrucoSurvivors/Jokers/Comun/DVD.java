@@ -12,7 +12,7 @@ import java.util.ArrayList;
 public class DVD extends Joker {
 
     public DVD(){
-        super(44, "DVD", "DVD", "Activa las cartas que no maten",
+        super(44, "DVD", "DVD", "Activa las cartas que no maten en truco",
             Rareza.comun, 3, Joker.FaseActivacion.INDEPENDIENTE,
             CategoriaJoker.ACTIVACION, CategoriaJoker.OBJETO);
     }

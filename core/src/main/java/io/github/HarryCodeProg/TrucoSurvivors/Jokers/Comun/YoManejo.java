@@ -13,7 +13,7 @@ public class YoManejo extends Joker {
     public YoManejo() {
         super(52, "Yo Manejo",
             "YoManejo",
-            "Reactiva 3 veces la primera carta que mata",
+            "Reactiva 3 veces la primera carta que mata en truco",
             Rareza.comun, 4, Joker.FaseActivacion.AL_PUNTUAR_CARTA,
             CategoriaJoker.ACTIVACION, CategoriaJoker.TRUCO, CategoriaJoker.NACIONAL);
     }
@@ -32,8 +32,9 @@ public class YoManejo extends Joker {
         Carta carta = ctx.getCartaEnResolucion();
         if (carta == null) return;
         if (!ctx.cartaMato(carta)) return;
-        if (ctx.isPrimerCartaQueMataAplicada(this)) return;
-        ctx.marcarPrimerCartaQueMataAplicada(this);
+        Object marca = "yomanejo_primera_mata";
+        if (!ctx.marcarUsado(this, marca)) return;
+
         for (int i = 0; i < 3; i++) {
             ctx.reencolarActivacionCarta(carta, EventoJuego.AL_PUNTUAR_CARTA);
         }

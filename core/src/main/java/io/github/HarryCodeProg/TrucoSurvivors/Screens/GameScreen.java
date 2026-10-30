@@ -12,6 +12,8 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import io.github.HarryCodeProg.TrucoSurvivors.Dev.ExportadorEscenario;
+import io.github.HarryCodeProg.TrucoSurvivors.Dev.ReporteDev;
 import io.github.HarryCodeProg.TrucoSurvivors.Jugador;
 import io.github.HarryCodeProg.TrucoSurvivors.Main;
 import io.github.HarryCodeProg.TrucoSurvivors.Cartas.Carta;
@@ -74,6 +76,8 @@ public class GameScreen implements Screen {
     private float jugableOffsetY = -800f;
     private float jugableOffsetYObjetivo = 0f;
     private static final float VELOCIDAD_SLIDE_GAME = 1800f;
+    private static final float MAZO_POS_Y_DEFAULT = 130f;
+    private static final float MAZO_POS_Y_TIENDA = 45f;
     private final GestorCompraJokerAnimado gestorCompraJoker = new GestorCompraJokerAnimado();
     private GestorSantos gestorSantos;
     private final GestorUsoSanto gestorUsoSanto = new GestorUsoSanto();
@@ -93,6 +97,8 @@ public class GameScreen implements Screen {
     private PanelRasgos panelRasgos;
     private enum EstadoPantalla { JUGANDO, VICTORIA, DERROTA, TIENDA, SELECCION_RIVAL, VICTORIA_FINAL }
     private PanelVictoriaFinal panelVictoriaFinal;
+    String avisoReporte = "";
+    float tiempoAvisoReporte = 0f;
 
     public GameScreen(Main game) {
         this.game = game;
@@ -133,8 +139,9 @@ public class GameScreen implements Screen {
         float anchoMazo = 60f;
         float altoMazo = 88f;
         float posX = 1280f - anchoMazo - 25f;
-        float posY = 50f;
+        float posY = MAZO_POS_Y_DEFAULT;
         this.vistaMazo = new VistaMazo(posX, posY, anchoMazo, altoMazo, game.getAtlasCartas(), game.getFuentePrincipal(), game.getPixelBlanco(), camera);
+        actualizarPosicionVistaMazo();
         DatosGuardado guardado = game.hayGuardadoDisponible() ? game.getGuardadoDetectado() : null;
         boolean cargado = false;
         if (guardado != null) {
@@ -258,9 +265,10 @@ public class GameScreen implements Screen {
         float anchoMazo = 60f;
         float altoMazo = 88f;
         float posX = 1280f - anchoMazo - 25f;
-        float posY = 130f;
+        float posY = MAZO_POS_Y_DEFAULT;
         this.vistaMazo = new VistaMazo(posX, posY, anchoMazo, altoMazo, game.getAtlasCartas(), game.getFuentePrincipal(), game.getPixelBlanco(), camera);
         this.hudController = new HUDController(this.vistaMazo);
+        actualizarPosicionVistaMazo();
         organizarCartas();
     }
 
@@ -277,6 +285,11 @@ public class GameScreen implements Screen {
     @Override
     public void render(float delta) {
         prepararFrame();
+        if (Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.F8)) {
+            String ruta = ReporteDev.guardarReporte(game, "manual (F8)");
+            avisoReporte = (ruta != null) ? "Reporte guardado en: " + ruta : "No se pudo guardar el reporte";
+            tiempoAvisoReporte = 4f;
+        }
         if (hayOperacionDeGuardadoPendiente()) guardadoPendiente = true;
         if (guardadoPendiente && !hayOperacionDeGuardadoPendiente()) {
             guardadoPendiente = false;
@@ -320,6 +333,7 @@ public class GameScreen implements Screen {
         boolean modalBloqueante = (vistaMazo != null && vistaMazo.isModalAbierto()) || gestorSantos.hayOverlayActivo() || pausaVisible;
         boolean puedeInteract = puedeInteractuar() && !modalBloqueante;
         if (vistaMazo != null) {
+            actualizarPosicionVistaMazo();
             vistaMazo.update(mx, my);
             if (!pausaVisible && !modalZodiaco && Gdx.input.justTouched()) {
                 vistaMazo.tocar(mx, my);
@@ -457,6 +471,10 @@ public class GameScreen implements Screen {
         // Pausa (siempre al final, encima de todo)
         if (panelPausa != null) {
             panelPausa.render(game.batch, mouseWorld.x, mouseWorld.y);
+        }
+        if (tiempoAvisoReporte > 0f) {
+            tiempoAvisoReporte -= Gdx.graphics.getDeltaTime();
+            game.getFuenteUI().draw(game.batch, avisoReporte, 200f, 40f);
         }
         game.batch.end();
     }
@@ -1041,7 +1059,16 @@ public class GameScreen implements Screen {
                 break;
         }
         this.estado = newState;
+        actualizarPosicionVistaMazo();
         autoguardarAlEntrar(newState);
+    }
+
+    private void actualizarPosicionVistaMazo() {
+        if (vistaMazo == null) return;
+        float yObjetivo = (estado == EstadoPantalla.TIENDA) ? MAZO_POS_Y_TIENDA : MAZO_POS_Y_DEFAULT;
+        if (vistaMazo.getY() != yObjetivo) {
+            vistaMazo.setY(yObjetivo);
+        }
     }
 
     private void exitState(EstadoPantalla oldState) {
@@ -1142,9 +1169,10 @@ public class GameScreen implements Screen {
         jugador.sumarPesos(pesosVictoria + recompensaManos + pesosInteres);
     }
 
-    public void sumarPesosExtrasVictoria(int cantidad) {
-        gestorVictoria.sumarPesosExtras(cantidad);
-        if (jugador != null) jugador.sumarPesos(cantidad);
+    public String reporteEscenario() {
+        if (jugador == null) return "(sin jugador)";
+        Juego j = (gestorPartida != null) ? gestorPartida.getJuego() : null;
+        return ExportadorEscenario.desdeEstado(jugador, j, datosRival, estado.name());
     }
 
     private void aplicarGuardado(DatosGuardado d) {
@@ -1297,9 +1325,10 @@ public class GameScreen implements Screen {
         organizarCartas();
         organizarMesa();
         float anchoMazo = 60f, altoMazo = 88f;
-        float posX = 1280f - anchoMazo - 25f, posY = 130f;
+        float posX = 1280f - anchoMazo - 25f, posY = MAZO_POS_Y_DEFAULT;
         this.vistaMazo = new VistaMazo(posX, posY, anchoMazo, altoMazo, game.getAtlasCartas(), game.getFuentePrincipal(), game.getPixelBlanco(), camera);
         this.hudController = new HUDController(this.vistaMazo);
+        actualizarPosicionVistaMazo();
         if (gestorPartida.getJuego().isManoFinalizada()) {
             // Se guardó justo al terminar la mano: retomamos la transición a la ronda nueva
             gestorPartida.setEsperandoTransicion(true);

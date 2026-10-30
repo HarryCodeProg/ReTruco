@@ -340,9 +340,9 @@ public class Jugador {
     public int getTamañoJokers()  { return tamañoJokers + bonosRasgos.v(bonosRasgos.espacioJokers); }
     public int getDescartesMaximos() { return descartesBase + descartesExtra + bonosRasgos.v(bonosRasgos.descartes); }
     public int getTamañoSantos()  { return tamañoSantos + espacioSantosExtra + bonosRasgos.v(bonosRasgos.espacioSantos); }
-    public int calcularInteres()  {
-        return Math.min(pesos / INTERVALO_INTERES,
-            TOPE_INTERES + topeInteresExtra + bonosRasgos.v(bonosRasgos.topeInteres));
+    public int calcularInteres() {
+        if (pesos <= 0) return 0;
+        return Math.min(pesos / INTERVALO_INTERES, TOPE_INTERES + topeInteresExtra + bonosRasgos.v(bonosRasgos.topeInteres));
     }
     public int getEspacioJokersTiendaExtra() { return espacioJokersTiendaExtra + bonosRasgos.v(bonosRasgos.tiendaJokers); }
     public int getEspacioCartasTiendaExtra() { return espacioCartasTiendaExtra + bonosRasgos.v(bonosRasgos.tiendaCartas); }

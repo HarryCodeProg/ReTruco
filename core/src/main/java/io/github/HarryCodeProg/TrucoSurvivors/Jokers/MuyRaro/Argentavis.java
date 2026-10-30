@@ -8,6 +8,8 @@ import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Rareza;
 import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 
+import java.util.ArrayList;
+
 public class Argentavis extends Joker {
 
     private static final int PESOS_POR_REACTIVACION = 5;
@@ -29,15 +31,25 @@ public class Argentavis extends Joker {
 
     @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego) {
-        if (evento != EventoJuego.AL_PUNTUAR_CARTA) return;
+        boolean esTruco  = (evento == EventoJuego.AL_PUNTUAR_CARTA);
+        boolean esEnvido = (evento == EventoJuego.AL_PUNTUAR_CARTA_ENVIDO);
+        if (!esTruco && !esEnvido) return;
         Carta carta = ctx.getCartaEnResolucion();
         if (carta == null) return;
-        if (!ctx.cartaMato(carta)) return;
-        if (ctx.isPrimerCartaQueMataAplicada(this)) return;
-        ctx.marcarPrimerCartaQueMataAplicada(this);
+        // 1) Validar que la carta sea relevante (primero, antes de marcar el guard)
+        if (esTruco) {
+            if (!ctx.cartaMato(carta)) return;
+        } else {
+            ArrayList<Carta> contribuyentes = ctx.getCartasContribuyentesEnvido();
+            if (contribuyentes == null || !contribuyentes.contains(carta)) return;
+        }
+        // 2) Guard: solo la primera carta relevante dispara, por resolución
+        String claveGuard = esTruco ? "argentavis_truco" : "argentavis_envido";
+        if (!ctx.marcarUsado(this, claveGuard)) return;
+        // 3) Reactivar N veces según pesos actuales
         int reactivaciones = ctx.getJugador().getPesos() / PESOS_POR_REACTIVACION;
         for (int i = 0; i < reactivaciones; i++) {
-            ctx.reencolarActivacionCarta(carta, EventoJuego.AL_PUNTUAR_CARTA);
+            ctx.reencolarActivacionCarta(carta, evento);  // ← usar el evento recibido
         }
     }
 }

@@ -77,26 +77,19 @@ public class ResolutorSecuencia {
         dispararRasgos(ctx, eventoIndependiente); // los rasgos aplican al final, después de cartas y jokers
     }
 
-    public void resolverSoloJokers(ContextoJuego ctx, EventoJuego eventoIndependiente) {
-        ArrayDeque<Activacion> cola = new ArrayDeque<>();
-        for (Joker j : ctx.getJugador().getJokers()) {
-            if (j.getFase() == Joker.FaseActivacion.INDEPENDIENTE && ctx.jokerPermitidoPorFiltro(j)) { // FIX
-                cola.addLast(Activacion.deJoker(j, eventoIndependiente));
-            }
-        }
-        ctx.setColaActivaciones(cola);
-        procesarCola(cola, ctx, null);
-    }
-
     private void procesarActivacionDeCarta(Activacion act, ContextoJuego ctx, ArrayDeque<Activacion> cola,
                                            Function<Carta, Double> extractorPuntos) {
         Carta carta = act.carta;
         String nombreCarta = carta.getNumero() + " de " + carta.paloToString();
         ctx.setCartaEnResolucion(carta);
-        double puntos = extractorPuntos.apply(carta);
-        ctx.getResolucionActual().sumarChips(puntos, nombreCarta, carta);
+        if (act.puntua) {
+            double puntos = extractorPuntos.apply(carta);
+            ctx.getResolucionActual().sumarChips(puntos, nombreCarta, carta);
+        }
+        gestorJokers.disparar(EventoJuego.AL_ACTIVAR_CARTA, ctx, juego);
+        juego.getGestorRasgos().dispararEvento(EventoJuego.AL_ACTIVAR_CARTA, ctx, juego);
         for (Joker j : ctx.getJugador().getJokers()) {
-            if (!ctx.jokerPermitidoPorFiltro(j)) continue; // FIX
+            if (!ctx.jokerPermitidoPorFiltro(j)) continue;
             boolean esDeEstaFase = j.getFase() == Joker.FaseActivacion.AL_PUNTUAR_CARTA;
             boolean esCopiaDeEstaFase = (j instanceof JokerCopiaVecino)
                 && ((JokerCopiaVecino) j).getVecinoActual(ctx) != null

@@ -24,7 +24,7 @@ public class Antartida extends Joker {
 
     @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego) {
-        if (evento == EventoJuego.AL_PUNTUAR_CARTA || evento == EventoJuego.AL_PUNTUAR_CARTA_ENVIDO) {
+        if (evento == EventoJuego.AL_ACTIVAR_CARTA) {
             restante--;
             if (restante <= 0) {
                 multAcumulado *= MULT;
@@ -32,7 +32,8 @@ public class Antartida extends Joker {
             }
             return;
         }
-        if (evento != EventoJuego.ANTES_DE_SUMAR_TRUCO && evento != EventoJuego.ANTES_DE_SUMAR_ENVIDO) return;
+        if (evento != EventoJuego.ANTES_DE_SUMAR_TRUCO &&
+            evento != EventoJuego.ANTES_DE_SUMAR_ENVIDO) return;
         if (ctx.getResolucionActual() == null) return;
         if (multAcumulado <= 1) return;
         ctx.getResolucionActual().multiplicarMult(multAcumulado, getNombre(), this);
@@ -40,7 +41,7 @@ public class Antartida extends Joker {
 
     @Override
     public String getDescripcionRenderizada() {
-        return "X4 multiplicador cada 20 activaciones de cartas (restante:"+ ColorMecanica.NUMERO.colorHex()+ restante + "[])";
+        return "X4 multiplicador cada 20 activaciones de cartas (restante: "+ ColorMecanica.NUMERO.colorHex()+ restante + "[])";
     }
 
     @Override

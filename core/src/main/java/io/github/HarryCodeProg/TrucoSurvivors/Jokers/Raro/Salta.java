@@ -12,7 +12,7 @@ import io.github.HarryCodeProg.TrucoSurvivors.Modelo.Juego;
 public class Salta extends Joker {
 
     public Salta() {
-        super(76, "Salta", "Salta", "Basto y Copa cuentan como el mismo palo para el envido",
+        super(76, "Salta", "Salta", "Basto y Copa cuentan como el mismo palo",
             Rareza.raro, 6, Joker.FaseActivacion.INDEPENDIENTE,
             CategoriaJoker.ACTIVACION, CategoriaJoker.TERRITORIO);
     }
@@ -26,6 +26,6 @@ public class Salta extends Joker {
 
     @Override
     public void aplicarEfecto(EventoJuego evento, ContextoJuego ctx, Juego juego) {
-        // Efecto pasivo, sin lógica acá: lo consulta Jugador directamente por presencia del joker.
+        // Efecto pasivo, sin lógica acá: lo consulta en Jugador.paloEfectivo(...): directamente por presencia del joker.
     }
 }

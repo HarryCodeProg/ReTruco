@@ -2,6 +2,7 @@ package io.github.HarryCodeProg.TrucoSurvivors.Jokers.Epico;
 
 import com.badlogic.gdx.math.MathUtils;
 import io.github.HarryCodeProg.TrucoSurvivors.Activacion.ContextoJuego;
+import io.github.HarryCodeProg.TrucoSurvivors.Estados.ColorMecanica;
 import io.github.HarryCodeProg.TrucoSurvivors.Estados.EventoJuego;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.CategoriaJoker;
 import io.github.HarryCodeProg.TrucoSurvivors.Jokers.Joker;
@@ -20,7 +21,7 @@ public class SableCorvo extends Joker {
             143,
             "Sable Corvo",
             "SableCorvo",
-            "Obtiene aleatoriamente uno de estos efectos:\n+125 puntos, +35 multiplicador, X4 multiplicador o +$10.\n(Cambia en cada mano)",
+            "Obtiene aleatoriamente uno de estos efectos:\n"+ ColorMecanica.PUNTOS.colorHex()+"+125[] puntos, +35 multiplicador, X4 multiplicador o +$10.\n(Cambia en cada mano)",
             Rareza.epico,
             8,
             INDEPENDIENTE,
@@ -94,6 +95,6 @@ public class SableCorvo extends Joker {
                 textoEfecto = "+$10";
                 break;
         }
-        return "Obtiene aleatoriamente uno de estos efectos:\n+125 puntos, +35 multiplicador, X4 multiplicador o +$10.\n(Cambia en cada mano) ";
+        return "Obtiene aleatoriamente uno de estos efectos:\n"+ ColorMecanica.PUNTOS.colorHex()+"+125[] puntos, +35 multiplicador, X4 multiplicador o +$10.\n(Cambia en cada mano) ";
     }
 }

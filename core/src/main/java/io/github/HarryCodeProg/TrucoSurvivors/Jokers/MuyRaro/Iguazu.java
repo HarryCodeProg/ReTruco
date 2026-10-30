@@ -12,7 +12,7 @@ public class Iguazu extends Joker {
 
     public Iguazu() {
         super(119, "Iguazu", "Iguazu",
-            ColorMecanica.PUNTOS.colorHex()+"+50 puntos por cada vez que\nuna carta cambia de palo",
+            ColorMecanica.PUNTOS.colorHex()+"+50[] puntos por cada vez que\nuna carta cambia de palo",
             Rareza.muyRaro,
             8,
             FaseActivacion.INDEPENDIENTE,
@@ -23,7 +23,7 @@ public class Iguazu extends Joker {
 
     @Override
     public String getDescripcionRenderizada(Juego juego) {
-        return getDescripcion() + "\n(actual:"+ColorMecanica.PUNTOS.colorHex()+"+" + (int) getAcumulado() + "[])";
+        return getDescripcion() + "\n(actual: "+ColorMecanica.PUNTOS.colorHex()+"+" + (int) getAcumulado() + "[])";
     }
 
     @Override
