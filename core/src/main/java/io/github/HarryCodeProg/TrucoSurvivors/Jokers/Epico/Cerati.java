@@ -16,7 +16,7 @@ public class Cerati extends Joker {
     public Cerati() {
         super(134, "Cerati", "Cerati",
             "En envido activa todas las cartas en la mano, las cartas que contribuyen se reactivan",
-            Rareza.epico, 7, Joker.FaseActivacion.INDEPENDIENTE,
+            Rareza.epico, 7, Joker.FaseActivacion.REACTIVACION,
             CategoriaJoker.ACTIVACION, CategoriaJoker.ENVIDO, CategoriaJoker.PERSONA);
     }
 

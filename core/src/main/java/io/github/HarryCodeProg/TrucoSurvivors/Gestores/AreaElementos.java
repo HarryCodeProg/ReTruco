@@ -3,17 +3,12 @@ package io.github.HarryCodeProg.TrucoSurvivors.Gestores;
 import io.github.HarryCodeProg.TrucoSurvivors.Vista.Arrastrable;
 import java.util.ArrayList;
 
-/**
- * Administra automáticamente la distribución de una fila de elementos arrastrables
- * dentro de un área rectangular. Calcula posiciones, espaciado y solapamiento.
- * No conoce reglas de juego, solo layout. El elemento que se está arrastrando
- * no recibe nueva posición objetivo (sigue al cursor libremente).
- */
 public class AreaElementos<T extends Arrastrable> {
     private float x, y, ancho, alto;
     private float anchoElemento, altoElemento;
     private float separacionDeseada;
     private final ArrayList<Float> slots = new ArrayList<>();
+    // private float separacion;   ← ELIMINADO (nunca se leía)
 
     public AreaElementos(float x, float y, float ancho, float alto,
                          float anchoElemento, float altoElemento, float separacionDeseada) {
@@ -22,7 +17,6 @@ public class AreaElementos<T extends Arrastrable> {
         this.separacionDeseada = separacionDeseada;
     }
 
-    /** Recalcula y aplica las posiciones objetivo de todos los elementos, salvo el que se está arrastrando. */
     public void distribuir(ArrayList<T> elementos, T arrastrado) {
         int cantidad = elementos.size();
         slots.clear();
@@ -39,8 +33,10 @@ public class AreaElementos<T extends Arrastrable> {
         }
     }
 
+    /** Cambia la separación deseada en runtime (afecta la próxima distribución). */
+    public void setSeparacion(float s) { this.separacionDeseada = s; }   // ← ahora sí afecta
+
     public float getX() { return x; }
     public float getY() { return y; }
     public float getAncho() { return ancho; }
-
 }

@@ -90,28 +90,18 @@ public class OpcionesScreen {
 
     private void dibujarFondoPanel(SpriteBatch batch) {
         Texture pixel = game.getPixelBlanco();
-        // Por defecto, tamaño para los menús de Video y Audio
         float boxW = 400f;
         float boxH = 380f;
         float boxX = (1280f - boxW) / 2f;
-        float boxY = 130f; // 150f de los botones - 20f de padding
-        // Si estamos en el menú principal, es más angosto
+        float boxY = 130f;
         if (panel == Panel.MENU) {
             boxW = 280f;
             boxH = 320f;
             boxX = (1280f - boxW) / 2f;
-            boxY = 180f; // 200f de los botones - 20f de padding
+            boxY = 180f;
         }
-        // Sombra
-        dibujarRectRedondeado(batch, pixel, boxX + 6f, boxY - 8f, boxW, boxH, 12f, UITheme.SOMBRA);
-        // Borde negro
-        dibujarRectRedondeado(batch, pixel, boxX - 4f, boxY - 4f, boxW + 8f, boxH + 8f, 13f, UITheme.BORDE);
-        // Fondo interior
-        dibujarRectRedondeado(batch, pixel, boxX, boxY, boxW, boxH, 10f, UITheme.PANEL_PRINCIPAL);
-        // Línea dorada decorativa arriba
-        batch.setColor(UITheme.DORADO);
-        batch.draw(pixel, boxX + 18f, boxY + boxH - 6f, boxW - 36f, 3f);
-        batch.setColor(Color.WHITE);
+        dibujarRectRedondeado(batch, pixel, boxX - 4f, boxY - 4f, boxW + 8f, boxH + 8f, 12f, new Color(0.12f, 0.15f, 0.17f, 1f));
+        dibujarRectRedondeado(batch, pixel, boxX, boxY, boxW, boxH, 10f, new Color(0.20f, 0.25f, 0.28f, 1f));
     }
 
     private boolean updateMenu(float mx, float my) {

@@ -1,0 +1,20 @@
+ReTruco - reporte (CRASH)
+fecha: Sat Oct 31 14:38:26 ART 2026
+sistema: Windows 11 / java 21.0.9
+
+java.lang.NullPointerException: Cannot read field "texture" because "region" is null
+	at com.badlogic.gdx.graphics.g2d.SpriteBatch.draw(SpriteBatch.java:660)
+	at io.github.HarryCodeProg.TrucoSurvivors.Vista.VistaJoker.render(VistaJoker.java:113)
+	at io.github.HarryCodeProg.TrucoSurvivors.Screens.ColeccionScreen.dibujarVistasActuales(ColeccionScreen.java:220)
+	at io.github.HarryCodeProg.TrucoSurvivors.Screens.ColeccionScreen.render(ColeccionScreen.java:155)
+	at io.github.HarryCodeProg.TrucoSurvivors.Screens.MainMenuScreen.render(MainMenuScreen.java:261)
+	at com.badlogic.gdx.Game.render(Game.java:48)
+	at io.github.HarryCodeProg.TrucoSurvivors.Main.render(Main.java:184)
+	at com.badlogic.gdx.backends.lwjgl3.Lwjgl3Window.update(Lwjgl3Window.java:435)
+	at com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application.loop(Lwjgl3Application.java:181)
+	at com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application.<init>(Lwjgl3Application.java:153)
+	at io.github.HarryCodeProg.lwjgl3.Lwjgl3Launcher.createApplication(Lwjgl3Launcher.java:28)
+	at io.github.HarryCodeProg.lwjgl3.Lwjgl3Launcher.main(Lwjgl3Launcher.java:24)
+
+--- ESTADO DE LA PARTIDA ---
+(el juego no estaba en una partida: io.github.HarryCodeProg.TrucoSurvivors.Screens.MainMenuScreen@25f4878b)

@@ -240,6 +240,13 @@ public class PanelTienda {
             else v.update(-1000f, -1000f, delta);
         }
         // ACTUALIZAR BOTONES E INTERFAZ
+        // Que el botón siga al joker cuando anima (offset de selección/hover)
+        if (seleccionado != null && botonComprar.isVisible()
+            && seleccionado.getItem().getTipo() == ItemTienda.Tipo.JOKER) {
+            float centerX = seleccionado.getX() + (ANCHO_ITEM - botonComprar.getWidth()) / 2f;
+            float belowY  = seleccionado.getYConOffset() - botonComprar.getHeight() - 8f;
+            botonComprar.setPosition(centerX, belowY);
+        }
         botonComprar.update(mouseWorldX, mouseWorldY);
         botonComprarYUsar.update(mouseWorldX, mouseWorldY);
         botonReroll.update(mouseWorldX, mouseWorldY);
@@ -338,8 +345,13 @@ public class PanelTienda {
                         // Si aparece a la izquierda, el segundo botón podría tener distinto ancho, lo alineamos a la derecha
                         float botYUsarX = estaEnMitadIzquierda ? botX : seleccionado.getX() - botonComprarYUsar.getWidth() - gapLateral;
                         botonComprarYUsar.setPosition(botYUsarX, centerY - botonComprarYUsar.getHeight() - 5f);
+                    } else if (seleccionado.getItem().getTipo() == ItemTienda.Tipo.JOKER) {
+                        // JOKER: botón abajo del ítem, centrado horizontalmente
+                        float centerX = seleccionado.getX() + (ANCHO_ITEM - botonComprar.getWidth()) / 2f;
+                        float belowY  = seleccionado.getY() - botonComprar.getHeight() - 8f;
+                        botonComprar.setPosition(centerX, belowY);
                     } else {
-                        // Si es Carta o Joker, solo hay un botón (Comprar), lo centramos verticalmente
+                        // CARTA: comportamiento original (al costado)
                         botonComprar.setPosition(botX, centerY - (botonComprar.getHeight() / 2f));
                     }
                 }

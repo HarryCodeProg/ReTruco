@@ -25,6 +25,7 @@ public abstract class Joker {
         AL_JUGAR,           // Balatro: "On Played"
         AL_PUNTUAR_CARTA,   // Balatro: "On Scored"
         AL_MANTENER_CARTA,  // Balatro: "On Held" (futuro)
+        REACTIVACION,       // Genera activaciones adicionales antes de los independientes
         INDEPENDIENTE        // Balatro: jokers generales, se activan al final
     }
 

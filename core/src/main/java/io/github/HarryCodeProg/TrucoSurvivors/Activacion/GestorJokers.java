@@ -30,9 +30,15 @@ public class GestorJokers {
             }
         }
         ctx.setColaActivaciones(cola);
-        while (!cola.isEmpty()) {
-            Activacion act = cola.poll();
-            if (act.esJoker()) {
+        try {
+            while (!cola.isEmpty()) {
+                Activacion act = cola.poll();
+                if (act.esCarta()) {
+                    // El resolutor exterior puntúa cartas; este dispatcher solo procesa jokers.
+                    // No perder reactivaciones pedidas durante AL_ACTIVAR_CARTA.
+                    if (colaAnterior != null) colaAnterior.addLast(act);
+                    continue;
+                }
                 act.joker.aplicarEfecto(act.evento, ctx, juego);
                 for (Joker otro : jugador.getJokers()) {
                     if (otro != act.joker) {
@@ -40,7 +46,8 @@ public class GestorJokers {
                     }
                 }
             }
+        } finally {
+            ctx.setColaActivaciones(colaAnterior);
         }
-        ctx.setColaActivaciones(colaAnterior);
     }
 }

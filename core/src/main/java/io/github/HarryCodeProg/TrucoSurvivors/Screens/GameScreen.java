@@ -779,6 +779,9 @@ public class GameScreen implements Screen {
     private void organizarJokers() { organizarJokers(false); }
 
     private void organizarJokers(boolean instant) {
+        float anchoArea = 1280f - 220f * 2;
+        float sepJokers = calcularSeparacionDinamica(jokers.size(), ANCHO_JOKER, anchoArea, SEPARACION_JOKER);
+        areaJokers.setSeparacion(sepJokers);
         areaJokers.distribuir(jokers, gestorJokers.getArrastrado());
         if (instant) {
             for (VistaJoker v : jokers) {
@@ -788,8 +791,14 @@ public class GameScreen implements Screen {
     }
 
     private void organizarCartas() {
+        float anchoArea = 1280f - 220f * 2;
+        // Cartas del jugador
+        float sepCartas = calcularSeparacionDinamica(cartasJugador.size(), anchoCarta, anchoArea, separacion);
+        areaCartas.setSeparacion(sepCartas);
         areaCartas.distribuir(cartasJugador, gestorCartas.getArrastrado());
-        gestorReparto.organizarMano(cartasRival, Y_MANO_RIVAL, ANCHO_CARTA_RIVAL, separacion);
+        // Cartas del rival (boca abajo)
+        float sepRival = calcularSeparacionDinamica(cartasRival.size(), ANCHO_CARTA_RIVAL, anchoArea, separacion);
+        gestorReparto.organizarMano(cartasRival, Y_MANO_RIVAL, ANCHO_CARTA_RIVAL, sepRival);
     }
 
     private boolean mouseSobreBotonContextual() {
@@ -1091,12 +1100,11 @@ public class GameScreen implements Screen {
         }
     }
 
-    private void volverAMenuPrincipalDesdeVictoriaFinal() {
-        game.getPerfilJugador().iniciarNuevaRun();
-        game.reiniciarDesbloqueoRivales();
-        panelVictoriaFinal = null;
-        game.setScreen(new MainMenuScreen(game));
-        dispose();
+    private float calcularSeparacionDinamica(int cantidad, float anchoItem, float anchoArea, float maxSeparacion) {
+        if (cantidad <= 1) return 0f;
+        float natural = (anchoArea - (anchoItem * cantidad)) / (cantidad - 1);
+        float minimo = -anchoItem * 0.85f;
+        return Math.max(minimo, Math.min(maxSeparacion, natural));
     }
 
     /** Cambia las referencias antes del autoguardado de SELECCION_RIVAL. */

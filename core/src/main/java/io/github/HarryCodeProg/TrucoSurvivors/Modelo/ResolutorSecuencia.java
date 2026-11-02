@@ -36,12 +36,12 @@ public class ResolutorSecuencia {
 
     private static final int MAX_ACTIVACIONES_POR_RESOLUCION = 500; // tope de seguridad global
 
-    private void procesarCola(ArrayDeque<Activacion> cola, ContextoJuego ctx, Function<Carta, Double> extractorPuntos) {
-        int procesadas = 0;
+    private void procesarCola(ArrayDeque<Activacion> cola, ContextoJuego ctx, Function<Carta, Double> extractorPuntos, int[] procesadas) {
         while (!cola.isEmpty()) {
-            if (procesadas++ > MAX_ACTIVACIONES_POR_RESOLUCION) {
+            if (procesadas[0]++ >= MAX_ACTIVACIONES_POR_RESOLUCION) {
                 System.err.println("ADVERTENCIA: se cortó la cola de activaciones por exceder el límite de seguridad ("
                     + MAX_ACTIVACIONES_POR_RESOLUCION + "). Revisar combinación de jokers.");
+                cola.clear();
                 break;
             }
             Activacion act = cola.poll();
@@ -67,14 +67,45 @@ public class ResolutorSecuencia {
                 cola.addLast(Activacion.deCarta(cartas.get(0), eventoPorCarta));
             }
         }
+        ArrayDeque<Activacion> colaAnterior = ctx.getColaActivaciones();
+        Carta cartaAnterior = ctx.getCartaEnResolucion();
+        int[] procesadas = {0}; // Un único presupuesto para todas las etapas.
+        ctx.setColaActivaciones(cola);
+        try {
+            // Vaciar también las reactivaciones agregadas por los efectos por carta.
+            procesarCola(cola, ctx, extractorPuntos, procesadas);
+            ctx.setCartaEnResolucion(null);
+            encolarFase(cola, ctx, Joker.FaseActivacion.REACTIVACION, eventoIndependiente);
+            procesarCola(cola, ctx, extractorPuntos, procesadas);
+            // Los independientes recién se agregan cuando no quedan cartas pendientes.
+            ctx.setCartaEnResolucion(null);
+            encolarFase(cola, ctx, Joker.FaseActivacion.INDEPENDIENTE, eventoIndependiente);
+            procesarCola(cola, ctx, extractorPuntos, procesadas);
+            dispararRasgos(ctx, eventoIndependiente);
+        } finally {
+            ctx.setColaActivaciones(colaAnterior);
+            ctx.setCartaEnResolucion(cartaAnterior);
+        }
+    }
+
+    private void encolarFase(ArrayDeque<Activacion> cola, ContextoJuego ctx,
+                             Joker.FaseActivacion fase, EventoJuego evento) {
         for (Joker j : ctx.getJugador().getJokers()) {
-            if (j.getFase() == Joker.FaseActivacion.INDEPENDIENTE && ctx.jokerPermitidoPorFiltro(j)) {
-                cola.addLast(Activacion.deJoker(j, eventoIndependiente));
+            if (faseEfectiva(j, ctx) == fase && ctx.jokerPermitidoPorFiltro(j)) {
+                cola.addLast(Activacion.deJoker(j, evento));
             }
         }
-        ctx.setColaActivaciones(cola);
-        procesarCola(cola, ctx, extractorPuntos);
-        dispararRasgos(ctx, eventoIndependiente); // los rasgos aplican al final, después de cartas y jokers
+    }
+
+    // Una copia participa en la etapa de su destino, incluso en cadenas de copias.
+    private Joker.FaseActivacion faseEfectiva(Joker joker, ContextoJuego ctx) {
+        java.util.Set<Joker> visitados = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
+        while (joker instanceof JokerCopiaVecino) {
+            if (!visitados.add(joker)) return null;
+            joker = ((JokerCopiaVecino) joker).getVecinoActual(ctx);
+            if (joker == null) return null;
+        }
+        return joker.getFase();
     }
 
     private void procesarActivacionDeCarta(Activacion act, ContextoJuego ctx, ArrayDeque<Activacion> cola,
@@ -90,11 +121,7 @@ public class ResolutorSecuencia {
         juego.getGestorRasgos().dispararEvento(EventoJuego.AL_ACTIVAR_CARTA, ctx, juego);
         for (Joker j : ctx.getJugador().getJokers()) {
             if (!ctx.jokerPermitidoPorFiltro(j)) continue;
-            boolean esDeEstaFase = j.getFase() == Joker.FaseActivacion.AL_PUNTUAR_CARTA;
-            boolean esCopiaDeEstaFase = (j instanceof JokerCopiaVecino)
-                && ((JokerCopiaVecino) j).getVecinoActual(ctx) != null
-                && ((JokerCopiaVecino) j).getVecinoActual(ctx).getFase() == Joker.FaseActivacion.AL_PUNTUAR_CARTA;
-            if (esDeEstaFase || esCopiaDeEstaFase) {
+            if (faseEfectiva(j, ctx) == Joker.FaseActivacion.AL_PUNTUAR_CARTA) {
                 j.aplicarEfecto(act.evento, ctx, juego);
             }
         }
