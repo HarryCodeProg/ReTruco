@@ -16,6 +16,7 @@ public class ConfiguracionJuego {
     private float volumenEfectos = 1f;
     private int fondoIndex = 0;
     private int musicaIndex = 0;
+    private int velocidadActivaciones = 1;
 
     public void cargar() {
         Preferences p = Gdx.app.getPreferences(PREFS_NOMBRE);
@@ -27,6 +28,7 @@ public class ConfiguracionJuego {
         volumenEfectos = p.getFloat("volumenEfectos", 1f);
         fondoIndex = p.getInteger("fondoIndex", 0); // ya debería estar, lo agrego por si faltaba
         musicaIndex = p.getInteger("musicaIndex", 0);
+        setVelocidadActivaciones(p.getInteger("velocidadActivaciones", 1));
     }
 
     public void guardar() {
@@ -39,8 +41,12 @@ public class ConfiguracionJuego {
         p.putFloat("volumenEfectos", volumenEfectos);
         p.putInteger("fondoIndex", fondoIndex);
         p.putInteger("musicaIndex", musicaIndex);
+        p.putInteger("velocidadActivaciones", velocidadActivaciones);
         p.flush();
     }
+
+    public int getVelocidadActivaciones() { return velocidadActivaciones; }
+    public void setVelocidadActivaciones(int v) { velocidadActivaciones = (v == 2 || v == 4) ? v : 1; }
 
     public int getMusicaIndex() { return musicaIndex; }
     public void setMusicaIndex(int v) { musicaIndex = v; }

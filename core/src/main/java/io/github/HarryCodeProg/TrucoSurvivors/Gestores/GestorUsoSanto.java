@@ -36,8 +36,7 @@ public class GestorUsoSanto {
         this.supplierCartasJugador = s;
     }
 
-    public void update(float mouseX, float mouseY, ArrayList<VistaSanto> santos,
-                       Jugador jugador, AlUsarSanto alUsar) {
+    public void update(float mouseX, float mouseY, ArrayList<VistaSanto> santos, Jugador jugador, AlUsarSanto alUsar) {
         VistaSanto seleccionado = null;
         for (VistaSanto v : santos) {
             if (v.isSeleccionada()) { seleccionado = v; break; }
@@ -47,23 +46,17 @@ public class GestorUsoSanto {
             botonUsar.update(-1000, -1000);
             return;
         }
-
         Santo santo = seleccionado.getSanto();
         ArrayList<Carta> seleccion = obtenerCartasSeleccionadas();
         boolean puedeUsarse = seleccionValida(santo, seleccion);
-
         botonUsar.setTexto("USAR");
-
-        // Misma fórmula de posición que GestorVentaSanto, pero un poco más arriba
-        float xBoton = seleccionado.getX() + seleccionado.getWidth() + MARGEN_DERECHO;
+        float xBoton  = seleccionado.getX() - botonUsar.getWidth() - MARGEN_DERECHO;
         float yVender = seleccionado.getY() + (seleccionado.getHeight() - GameLayout.ALTO_BOTON) / 2f;
         float yBoton  = yVender + GameLayout.ALTO_BOTON + GAP_ENTRE_BOTONES;
-
         botonUsar.setPosition(xBoton, yBoton);
         botonUsar.setHabilitado(puedeUsarse);
         botonUsar.setVisible(true);
         botonUsar.update(mouseX, mouseY);
-
         if (puedeUsarse && botonUsar.fueCliqueado(mouseX, mouseY)) {
             alUsar.usar(seleccionado, jugador, seleccion);
         }

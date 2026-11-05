@@ -17,11 +17,26 @@ public class GestorAnimacionResolucion {
     private Queue<ResolucionPuntaje.PasoResolucion> cola = new ArrayDeque<>();
     private ResolucionPuntaje.PasoResolucion pasoActual;
     private float cronometro;
+    private int velocidad = 1;
+    private ResolucionPuntaje resolucionVisible;
+
+    public void setVelocidad(int velocidad) {
+        this.velocidad = (velocidad == 2 || velocidad == 4) ? velocidad : 1;
+    }
+    public double getPuntosJugadorVisibles(double reales) {
+        return activa && resolucionVisible != null && resolucionVisible.getPuntosJugadorPrevios() != null
+            ? resolucionVisible.getPuntosJugadorPrevios() : reales;
+    }
+    public double getPuntosRivalVisibles(double reales) {
+        return activa && resolucionVisible != null && resolucionVisible.getPuntosRivalPrevios() != null
+            ? resolucionVisible.getPuntosRivalPrevios() : reales;
+    }
     private boolean activa;
     private Runnable callbackAlTerminar;
     private java.util.function.Consumer<ResolucionPuntaje.PasoResolucion> callbackPorPaso;
 
     public void iniciar(ResolucionPuntaje resolucion, java.util.function.Consumer<ResolucionPuntaje.PasoResolucion> callbackPorPaso, Runnable callbackAlTerminar) {
+        resolucionVisible = resolucion;
         cola.clear();
         cola.addAll(resolucion.getLog());
         this.callbackPorPaso = callbackPorPaso;
@@ -34,9 +49,10 @@ public class GestorAnimacionResolucion {
 
     public void update(float delta) {
         if (!activa) return;
-        cronometro += delta;
-        if (cronometro >= DELAY_ENTRE_PASOS) {
-            cronometro = 0f;
+        cronometro += Math.max(0f, delta) * velocidad;
+        // Conservar el tiempo sobrante evita ralentizar la cola con FPS bajos.
+        while (activa && cronometro >= DELAY_ENTRE_PASOS) {
+            cronometro -= DELAY_ENTRE_PASOS;
             avanzarPaso();
         }
     }

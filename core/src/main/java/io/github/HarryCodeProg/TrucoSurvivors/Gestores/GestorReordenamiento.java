@@ -49,11 +49,9 @@ public class GestorReordenamiento {
     public static float calcularPaso(int cantidad, float anchoCarta, float separacionDeseada, float anchoMaximo) {
         if (cantidad <= 1) return anchoCarta + separacionDeseada;
         float pasoIdeal = anchoCarta + separacionDeseada;
-        float anchoTotalIdeal = anchoCarta + (cantidad - 1) * pasoIdeal;
-        if (anchoTotalIdeal <= anchoMaximo) {
-            return pasoIdeal;
-        }
-        float pasoAjustado = (anchoMaximo - anchoCarta) / (cantidad - 1);
-        return Math.max(pasoAjustado, anchoCarta * 0.25f);
+        // Igual que la tienda: conservar tamaño y comprimir la distancia entre
+        // elementos cuanto sea necesario, sin un mínimo que desborde la fila.
+        float pasoAjustado = Math.max(0f, anchoMaximo - anchoCarta) / (cantidad - 1);
+        return Math.min(pasoIdeal, pasoAjustado);
     }
 }

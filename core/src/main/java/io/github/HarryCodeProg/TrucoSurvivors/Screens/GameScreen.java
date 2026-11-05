@@ -389,7 +389,8 @@ public class GameScreen implements Screen {
             return;
         }
         if (gestorAnimaciones != null) gestorAnimaciones.update(delta);
-        gestorAnimacionResolucion.update(delta);
+        gestorAnimacionResolucion.setVelocidad(game.getConfiguracionJuego().getVelocidadActivaciones());
+        if (!pausaVisible) gestorAnimacionResolucion.update(delta);
         gestorPartida.update(delta, puedeInteract, modalBloqueante);
         hudController.update(mouseEfectivo, puedeInteract, gestorPartida.getGestorAccion());
         if (gestorPartida.getControladorIARival() != null && !modalBloqueante) {
@@ -1102,9 +1103,7 @@ public class GameScreen implements Screen {
 
     private float calcularSeparacionDinamica(int cantidad, float anchoItem, float anchoArea, float maxSeparacion) {
         if (cantidad <= 1) return 0f;
-        float natural = (anchoArea - (anchoItem * cantidad)) / (cantidad - 1);
-        float minimo = -anchoItem * 0.85f;
-        return Math.max(minimo, Math.min(maxSeparacion, natural));
+        return GestorReordenamiento.calcularPaso(cantidad, anchoItem, maxSeparacion, anchoArea) - anchoItem;
     }
 
     /** Cambia las referencias antes del autoguardado de SELECCION_RIVAL. */

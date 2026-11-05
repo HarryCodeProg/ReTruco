@@ -213,6 +213,7 @@ public class Juego {
             ArrayList<Carta> cartasEnvido = jugador.getCartasEnvidoGanador();
             double chipsBase = (cartasEnvido.size() == 2) ? 20 : 0;
             ResolucionPuntaje resolucion = new ResolucionPuntaje(chipsBase, jugador.getMultiplicadorEnvido());
+            resolucion.registrarPuntajesPrevios(puntosJugador, puntosRival);
             ContextoJuego ctx = crearContexto();
             ctx.setResolucionActual(resolucion);
             ctx.setCartasContribuyentesEnvido(cartasEnvido);
@@ -222,6 +223,7 @@ public class Juego {
             this.ultimaResolucionEnvido = resolucion;
         } else {
             ResolucionPuntaje resolucion = new ResolucionPuntaje(0, rival.getMultiplicadorEnvido());
+            resolucion.registrarPuntajesPrevios(puntosJugador, puntosRival);
             resolucion.sumarChips(puntosER, "Cartas Rival", null);
             this.ultimaResolucionEnvido = resolucion;
             dispararTodo(EventoJuego.AL_PERDER_ENVIDO);
@@ -447,6 +449,7 @@ public class Juego {
                 }
             }
             ResolucionPuntaje resolucion = new ResolucionPuntaje(0, jugador.getMultiplicadorTruco());
+            resolucion.registrarPuntajesPrevios(puntosJugador, puntosRival);
             ContextoJuego ctx = crearContexto();
             ctx.setResolucionActual(resolucion);
             resolutorSecuencia.resolver(cartasGanadoras, ctx, EventoJuego.AL_PUNTUAR_CARTA, EventoJuego.ANTES_DE_SUMAR_TRUCO);
@@ -662,6 +665,7 @@ public class Juego {
         this.ultimoGanadorEnvidoFueJugador = canter.equals(jugador);
 
         ResolucionPuntaje resolucion = new ResolucionPuntaje(0, 1); // sin mult real, chips=otorgado directo
+        resolucion.registrarPuntajesPrevios(puntosJugador, puntosRival);
         resolucion.sumarChips(otorgado, "No Quiero", null);
         this.ultimaResolucionEnvido = resolucion;
     }

@@ -57,6 +57,7 @@ public class PanelPausa {
     private final Boton botonOpAudio;
     private final Boton botonOpFondo;
     private final Boton botonOpVolver;
+    private final Boton botonOpVelocidad;
 
     // --- Botones opciones video ---
     private final Boton botonModoVentana, botonResolucion, botonVsync;
@@ -96,10 +97,11 @@ public class PanelPausa {
 
         // Opciones menú
         float ox = PANEL_X + (PANEL_W - 260f) / 2f;
-        botonOpVideo  = new Boton(ox, cy,         260f, BTN_H, "VIDEO",  Boton.TipoColor.CELESTE, Accion.OPCIONES);
-        botonOpAudio  = new Boton(ox, cy - gap,   260f, BTN_H, "AUDIO",  Boton.TipoColor.CELESTE, Accion.OPCIONES);
-        botonOpFondo  = new Boton(ox, cy - gap*2f,260f, BTN_H, "FONDO",  Boton.TipoColor.CELESTE, Accion.OPCIONES);
-        botonOpVolver = new Boton(ox, cy - gap*3f,260f, BTN_H, "VOLVER", Boton.TipoColor.BORDO,   Accion.OPCIONES);
+        botonOpVideo = new Boton(ox, cy, 260f, 44f, "VIDEO", Boton.TipoColor.CELESTE, Accion.OPCIONES);
+        botonOpAudio = new Boton(ox, cy - 54f, 260f, 44f, "AUDIO", Boton.TipoColor.CELESTE, Accion.OPCIONES);
+        botonOpFondo = new Boton(ox, cy - 108f, 260f, 44f, "FONDO", Boton.TipoColor.CELESTE, Accion.OPCIONES);
+        botonOpVelocidad = new Boton(ox, cy - 162f, 260f, 44f, "ACTIVACIONES: x" + config.getVelocidadActivaciones(), Boton.TipoColor.DORADO, Accion.OPCIONES);
+        botonOpVolver = new Boton(ox, cy - 216f, 260f, 44f, "VOLVER", Boton.TipoColor.BORDO, Accion.OPCIONES);
 
         // Video
         float vx = PANEL_X + 20f;
@@ -212,6 +214,14 @@ public class PanelPausa {
     }
 
     private void updateOpcionesMenu(float mx, float my) {
+        botonOpVelocidad.setTexto("ACTIVACIONES: x" + config.getVelocidadActivaciones());
+        botonOpVelocidad.update(mx, my);
+        if (botonOpVelocidad.fueCliqueado(mx, my)) {
+            int actual = config.getVelocidadActivaciones();
+            config.setVelocidadActivaciones(actual == 1 ? 2 : actual == 2 ? 4 : 1);
+            config.guardar();
+            botonOpVelocidad.setTexto("ACTIVACIONES: x" + config.getVelocidadActivaciones());
+        }
         botonOpVideo.update(mx, my);
         botonOpAudio.update(mx, my);
         botonOpFondo.update(mx, my);
@@ -378,6 +388,7 @@ public class PanelPausa {
         setAlpha(botonOpVideo);  botonOpVideo.render(batch);
         setAlpha(botonOpAudio);  botonOpAudio.render(batch);
         setAlpha(botonOpFondo);  botonOpFondo.render(batch);
+        setAlpha(botonOpVelocidad); botonOpVelocidad.render(batch);
         setAlpha(botonOpVolver); botonOpVolver.render(batch);
     }
 

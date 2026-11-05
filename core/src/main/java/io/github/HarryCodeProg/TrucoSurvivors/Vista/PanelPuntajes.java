@@ -143,6 +143,10 @@ public class PanelPuntajes {
         double puntosRival = (juego != null) ? juego.getPuntosRival() : 0;
         double puntajeMeta = (juego != null) ? juego.getPuntajeMeta() : 0;
         double puntosJugador = (juego != null) ? juego.getPuntosJugador() : 0;
+        if (gestorAnimacion != null) {
+            puntosJugador = gestorAnimacion.getPuntosJugadorVisibles(puntosJugador);
+            puntosRival = gestorAnimacion.getPuntosRivalVisibles(puntosRival);
+        }
         float currentY = y + 70f;
         float xSeparador = x + ANCHO_CAJA_BASE;
         float anchoCajaSimple = anchoCajaDoble;

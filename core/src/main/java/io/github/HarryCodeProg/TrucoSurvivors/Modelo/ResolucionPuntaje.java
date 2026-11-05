@@ -5,6 +5,15 @@ import java.util.ArrayList;
 public class ResolucionPuntaje {
     private double chips;
     private double mult;
+    private Double puntosJugadorPrevios, puntosRivalPrevios;
+
+    /** Snapshot del marcador antes de resolver; solo se usa para la presentación. */
+    public void registrarPuntajesPrevios(double jugador, double rival) {
+        puntosJugadorPrevios = jugador;
+        puntosRivalPrevios = rival;
+    }
+    public Double getPuntosJugadorPrevios() { return puntosJugadorPrevios; }
+    public Double getPuntosRivalPrevios() { return puntosRivalPrevios; }
     private final ArrayList<PasoResolucion> log = new ArrayList<>();
     public enum TipoPaso { BASE, SUMA_CHIPS, SUMA_MULT, MULT_MULT, BALANCE }
 

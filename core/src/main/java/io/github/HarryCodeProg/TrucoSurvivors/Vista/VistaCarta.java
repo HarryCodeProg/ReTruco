@@ -464,7 +464,7 @@ public class VistaCarta implements Arrastrable{
             return;
         }
         if (resaltado) {
-            pulso = Math.min(pulso + delta * 6f, (float) Math.PI);
+            pulso = Math.min(pulso + delta * 6f * (Main.getInstance() != null ? Main.getInstance().getConfiguracionJuego().getVelocidadActivaciones() : 1), (float) Math.PI);
         }
         if (animando) {
             hover = false;
